@@ -1,0 +1,28 @@
+{
+  "specsDir": ".specops",
+  "vertical": "backend",
+  "templates": {
+    "feature": "default",
+    "bugfix": "default",
+    "refactor": "default"
+  },
+  "team": {
+    "conventions": [
+      "Use TypeScript for all new code",
+      "Write unit tests for business logic with minimum 80% coverage",
+      "Follow existing code style and patterns",
+      "Use async/await instead of promises",
+      "Document public APIs with JSDoc",
+      "Keep functions small and focused (max 50 lines)",
+      "Use meaningful variable and function names",
+      "Handle errors explicitly, never silently fail"
+    ],
+    "reviewRequired": true,
+    "taskTracking": "github"
+  },
+  "implementation": {
+    "autoCommit": false,
+    "createPR": true,
+    "testing": "auto"
+  }
+}

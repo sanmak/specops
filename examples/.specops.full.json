@@ -1,0 +1,72 @@
+{
+  "$schema": "../schema.json",
+  "specsDir": ".specops",
+  "vertical": "fullstack",
+  "templates": {
+    "feature": "default",
+    "bugfix": "default",
+    "refactor": "default",
+    "design": "default",
+    "tasks": "default"
+  },
+  "team": {
+    "conventions": [
+      "Use TypeScript strict mode",
+      "Follow Clean Architecture principles",
+      "Write tests first (TDD)",
+      "Use dependency injection",
+      "Keep business logic pure (no side effects)",
+      "Use functional programming patterns where appropriate",
+      "Follow SOLID principles",
+      "Document architectural decisions in ADRs",
+      "Keep components small and composable",
+      "Use semantic versioning",
+      "Write meaningful commit messages following conventional commits"
+    ],
+    "reviewRequired": true,
+    "taskTracking": "linear",
+    "codeReview": {
+      "required": true,
+      "minApprovals": 2,
+      "requireTests": true,
+      "requireDocs": true
+    }
+  },
+  "implementation": {
+    "autoCommit": false,
+    "createPR": true,
+    "testing": "auto",
+    "testFramework": "jest",
+    "linting": {
+      "enabled": true,
+      "fixOnSave": true
+    },
+    "formatting": {
+      "enabled": true,
+      "tool": "prettier"
+    }
+  },
+  "modules": {
+    "backend": {
+      "specsDir": "backend/specs",
+      "conventions": [
+        "Use NestJS framework patterns",
+        "Follow RESTful API design",
+        "Use DTOs for API payloads"
+      ]
+    },
+    "frontend": {
+      "specsDir": "frontend/specs",
+      "conventions": [
+        "Use React hooks",
+        "Follow component composition patterns",
+        "Use CSS modules for styling"
+      ]
+    }
+  },
+  "integrations": {
+    "ci": "github-actions",
+    "deployment": "vercel",
+    "monitoring": "sentry"
+  }
+}

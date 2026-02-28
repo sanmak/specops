@@ -1,0 +1,361 @@
+# SpecOps Quick Reference
+
+A one-page reference for daily use of SpecOps.
+
+## Invocation
+
+**Claude Code:**
+```
+/specops [description]
+```
+
+**Cursor / Codex:**
+```
+Use specops to [description]
+```
+
+## Common Usage Patterns
+
+```
+# Feature development
+Add user authentication with OAuth
+
+# Bug fix
+Fix: Users seeing 500 errors on checkout
+
+# Refactoring
+Refactor payment service to use repository pattern
+
+# Implement existing spec
+implement auth-feature
+```
+
+## Configuration File (.specops.json)
+
+```json
+{
+  "specsDir": ".specops",
+  "team": {
+    "conventions": ["Your team conventions"],
+    "reviewRequired": true,
+    "taskTracking": "github"
+  },
+  "implementation": {
+    "autoCommit": false,
+    "createPR": true,
+    "testing": "auto"
+  }
+}
+```
+
+## Spec Structure
+
+```
+.specops/
+  feature-name/
+    requirements.md    # What (user stories, acceptance criteria)
+    design.md          # How (architecture, decisions, diagrams)
+    tasks.md           # Steps (implementation tasks)
+    implementation.md  # (optional) Decisions, deviations, blockers
+```
+
+## Workflow Phases
+
+1. **Understand** - Agent analyzes request and codebase
+2. **Spec** - Creates structured specification
+3. **Implement** - Executes tasks following spec
+4. **Complete** - Verifies, commits, creates PR
+
+## Configuration Options
+
+| Option | Values | Default | Constraints | Description |
+|--------|--------|---------|-------------|-------------|
+| `specsDir` | string | `.specops` | max 200 chars, no `../` or absolute paths | Where to store specs |
+| `vertical` | `backend`/`frontend`/`fullstack`/`infrastructure`/`data`/`library` | (auto-detect) | enum | Project vertical for template adaptation |
+| `templates.design` | string | `default` | max 100 chars | Custom template for design.md |
+| `templates.tasks` | string | `default` | max 100 chars | Custom template for tasks.md |
+| `team.conventions` | string[] | `[]` | max 30 items, each max 500 chars | Team-specific development conventions |
+| `team.reviewRequired` | boolean | `false` | | Require approval before implementing |
+| `team.taskTracking` | `github`/`jira`/`linear`/`none` | `none` | enum | Task tracking integration |
+| `team.taskPrefix` | string | | max 20 chars | Task/ticket prefix (e.g., `PROJ-`) |
+| `implementation.autoCommit` | boolean | `false` | | Auto-commit after tasks |
+| `implementation.createPR` | boolean | `false` | | Auto-create PR when done |
+| `implementation.testing` | `auto`/`manual`/`skip` | `auto` | enum | Testing strategy |
+| `implementation.testFramework` | string | (auto-detect) | max 50 chars | Test framework (jest, pytest, etc.) |
+| `implementation.linting.enabled` | boolean | `true` | | Run linter after tasks |
+| `implementation.formatting.enabled` | boolean | `true` | | Run formatter before commits |
+| `implementation.formatting.tool` | `prettier`/`black`/`rustfmt`/`gofmt` | (auto-detect) | enum | Formatting tool |
+| `team.codeReview.required` | boolean | `false` | | Require code review |
+| `team.codeReview.minApprovals` | integer | `1` | min 1 | Minimum approvals needed |
+| `team.codeReview.requireTests` | boolean | `true` | | Require tests in implementation |
+| `team.codeReview.requireDocs` | boolean | `false` | | Require docs for public APIs |
+
+> **Note:** All configuration objects enforce `additionalProperties: false` — unknown keys will be rejected during schema validation.
+
+## Spec Templates
+
+> **Vertical adaptation:** When a vertical is configured or detected, default template sections are adapted. For example, with `"vertical": "infrastructure"`, "User Stories" becomes "Infrastructure Requirements" and "Component Design" becomes "Infrastructure Topology".
+
+### requirements.md
+```markdown
+# Feature: [Title]
+
+## User Stories
+**As a** [role]
+**I want** [capability]
+**So that** [benefit]
+
+**Acceptance Criteria:**
+- [ ] Criterion 1
+- [ ] Criterion 2
+```
+
+### design.md
+```markdown
+# Design: [Title]
+
+## Technical Decisions
+**Decision:** [Choice made]
+**Rationale:** [Why]
+
+## Component Design
+**Component:** [Name]
+**Responsibility:** [What it does]
+**Interface:** [API]
+
+## Sequence Diagram
+```
+User -> Frontend: Action
+Frontend -> API: Request
+```
+```
+
+### tasks.md
+```markdown
+# Tasks: [Title]
+
+## Task 1: [Title]
+**Status:** Pending
+**Dependencies:** None
+**Priority:** High
+
+**Steps:**
+1. Step 1
+2. Step 2
+
+**Acceptance Criteria:**
+- [ ] Done when X
+```
+
+## Team Conventions Template
+
+```json
+{
+  "team": {
+    "conventions": [
+      "Use TypeScript for all new code",
+      "Write unit tests with 80% coverage",
+      "Follow existing patterns",
+      "Document public APIs",
+      "Keep functions under 50 lines",
+      "Handle errors explicitly"
+    ]
+  }
+}
+```
+
+## Integration with Git
+
+### Manual Workflow
+```bash
+# After spec creation
+git add .specops/
+git commit -m "Add spec for feature X"
+
+# After implementation
+git add .
+git commit -m "Implement feature X"
+git push
+```
+
+### Automatic Workflow
+```json
+{
+  "implementation": {
+    "autoCommit": true,
+    "createPR": true
+  }
+}
+```
+
+## Task Tracking Integration
+
+### GitHub
+```json
+{
+  "team": {
+    "taskTracking": "github"
+  }
+}
+```
+- Creates GitHub issues for tasks
+- Links commits to issues
+- Updates issue status
+
+### Jira
+```json
+{
+  "team": {
+    "taskTracking": "jira",
+    "taskPrefix": "PROJ-"
+  }
+}
+```
+- References Jira tickets
+- Updates ticket status
+- Links in commits
+
+## Module-Specific Configuration
+
+```json
+{
+  "modules": {
+    "backend": {
+      "specsDir": "backend/specs",
+      "conventions": ["Backend conventions"]
+    },
+    "frontend": {
+      "specsDir": "frontend/specs",
+      "conventions": ["Frontend conventions"]
+    }
+  }
+}
+```
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Skill not found | Verify installation path, restart Claude Code |
+| Config not loading | Check JSON validity, verify file location |
+| Can't create specs | Check directory permissions |
+| Tests failing | Review test output, check dependencies |
+
+## Best Practices
+
+✅ **DO:**
+- Review specs before implementing
+- Commit specs to git
+- Use team conventions
+- Keep specs updated
+- Start small and iterate
+- Keep specs proportional to the task
+
+❌ **DON'T:**
+- Skip spec review
+- Ignore test failures
+- Mix unrelated changes
+- Skip documentation
+- Rush to implementation
+- Over-engineer specs or implementations
+- Add speculative features not in requirements
+
+## File Locations
+
+```
+# Claude Code
+~/.claude/skills/specops/           # User installation
+<project>/.claude/skills/specops/   # Project installation
+
+# Cursor
+<project>/.cursor/rules/specops.mdc # Project rules
+
+# Codex
+<project>/AGENTS.md                 # Agent instructions
+
+# All platforms
+<project>/.specops.json             # Project configuration
+<project>/.specops/                 # Specs directory
+```
+
+## Getting Help
+
+1. **Quick Start**: `QUICKSTART.md`
+2. **Full Docs**: `README.md`
+3. **Team Setup**: `TEAM_GUIDE.md`
+4. **Examples**: `examples/` directory
+5. **Structure**: `STRUCTURE.md`
+6. **Security**: `SECURITY.md`
+7. **Contributing**: `CONTRIBUTING.md`
+
+## Keyboard Shortcuts (in Claude Code)
+
+```
+/specops          # Launch SpecOps agent
+Ctrl+C         # Cancel current operation
+```
+
+## Example Session Flow
+
+```
+You: /specops Add payment processing
+
+Agent:
+🎯 SpecOps Agent Activated
+📋 Creating spec...
+✅ Spec created in .specops/payment-processing/
+📊 3 user stories, 8 components, 12 tasks
+🔍 Ready for review
+
+You: Looks good, proceed
+
+Agent:
+✅ Task 1/12: Create PaymentService
+✅ Task 2/12: Add Stripe integration
+...
+✅ Task 12/12: Update documentation
+🎉 Implementation complete!
+🔗 PR created: #456
+```
+
+## Quick Configuration Examples
+
+### Minimal
+```json
+{
+  "specsDir": ".specops"
+}
+```
+
+### Solo Developer
+```json
+{
+  "specsDir": ".specops",
+  "implementation": {
+    "autoCommit": true,
+    "testing": "auto"
+  }
+}
+```
+
+### Team Project
+```json
+{
+  "specsDir": ".specops",
+  "team": {
+    "conventions": ["Team standards"],
+    "reviewRequired": true,
+    "taskTracking": "github"
+  },
+  "implementation": {
+    "autoCommit": false,
+    "createPR": true,
+    "testing": "auto"
+  }
+}
+```
+
+---
+
+**Version**: 2.0.0
+**Keep this reference handy for daily development!**

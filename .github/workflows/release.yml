@@ -1,0 +1,77 @@
+name: Release Version Bump
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: version-bump
+  cancel-in-progress: false
+
+jobs:
+  bump-version:
+    name: Bump Version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          # Strip 'v' prefix if present
+          VERSION="${TAG#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Extracted version: $VERSION"
+
+      - name: Validate semver
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Error: '$VERSION' is not valid semver (expected MAJOR.MINOR.PATCH)"
+            exit 1
+          fi
+
+      - name: Bump version in JSON files
+        run: bash scripts/bump-version.sh "${{ steps.version.outputs.version }}"
+
+      - name: Regenerate checksums
+        run: |
+          shasum -a 256 \
+            skills/specops/skill.json \
+            skills/specops/prompt.md \
+            schema.json \
+            platforms/claude/skill.json \
+            platforms/claude/prompt.md \
+            platforms/claude/platform.json \
+            platforms/cursor/specops.mdc \
+            platforms/cursor/platform.json \
+            platforms/codex/AGENTS.md \
+            platforms/codex/platform.json \
+            platforms/copilot/copilot-instructions.md \
+            platforms/copilot/platform.json \
+            core/workflow.md \
+            core/safety.md \
+            > CHECKSUMS.sha256
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            skills/specops/skill.json \
+            platforms/claude/skill.json \
+            platforms/claude/platform.json \
+            platforms/cursor/platform.json \
+            platforms/codex/platform.json \
+            platforms/copilot/platform.json \
+            CHECKSUMS.sha256
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
+          git push origin main

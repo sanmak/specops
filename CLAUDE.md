@@ -1,0 +1,144 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+SpecOps is a multi-platform spec-driven development workflow system inspired by [Kiro](https://kiro.dev). It provides a `/specops` slash command (and equivalents for other AI coding assistants) that transforms ideas into structured specifications (requirements, design, tasks) before implementation begins.
+
+**Repository**: https://github.com/sanmak/specops.git
+
+## Key Commands
+
+```bash
+# Regenerate all platform outputs after changing core/ or generator/
+python3 generator/generate.py --all
+
+# Regenerate for a single platform
+python3 generator/generate.py --platform claude
+
+# Validate generated outputs (safety rules, templates, no raw abstract ops)
+python3 generator/validate.py
+
+# Lint shell scripts
+shellcheck setup.sh verify.sh scripts/bump-version.sh platforms/*/install.sh
+
+# Run the full test suite (each script is standalone, no test runner)
+python3 tests/test_schema_validation.py      # example configs vs schema.json
+python3 tests/test_schema_constraints.py     # schema rejects invalid inputs
+python3 tests/check_schema_sync.py           # schema parity across platforms
+python3 tests/test_platform_consistency.py   # all platform outputs are consistent
+python3 tests/test_build.py                  # generator system produces valid outputs
+
+# Run all tests at once
+for f in tests/*.py; do python3 "$f"; done
+
+# Run installation verification
+bash verify.sh
+
+# Bump version
+bash scripts/bump-version.sh 1.2.0
+bash scripts/bump-version.sh 1.2.0 --checksums  # also regenerate checksums
+```
+
+Tests require `pip install jsonschema`. The generator requires `pip install jinja2`. There is no unified test runner — each test file is executed directly with `python3`.
+
+## Simplicity Principle
+
+SpecOps embeds a simplicity principle throughout: prefer the simplest solution that meets requirements. Specs scale to the task (small features don't get full rollout plans), empty sections are skipped rather than filled with boilerplate, and implementations avoid premature abstractions. Red flags: abstractions used once, error handling for impossible scenarios, configuration for unchanging values, designing for hypothetical futures.
+
+## Architecture
+
+### Three-Layer Design
+
+```
+core/           Platform-agnostic source of truth (workflow, safety, templates)
+platforms/      Platform-specific adapters + generated output files
+generator/      Generates platform outputs from core + platform adapters
+```
+
+The `core/` directory defines the workflow, safety rules, templates, and vertical adaptations once. The `generator/generate.py` script assembles platform-specific instruction files by:
+1. Loading all `core/*.md` modules (workflow, safety, config-handling, verticals, simplicity, data-handling, error-handling, custom-templates, and six spec templates from `core/templates/`)
+2. Loading `platforms/{name}/platform.json` for tool mappings and capabilities
+3. Rendering through `generator/templates/{name}.j2` Jinja2-style templates
+4. Substituting abstract tool operations (e.g., `READ_FILE`) with platform-specific language from each platform's `toolMapping`
+5. Writing output to `platforms/{name}/`
+
+**Generated files are checked into git** so end users never need to run the build.
+
+### Tool Abstraction
+
+`core/` files use abstract operations (`READ_FILE`, `WRITE_FILE`, `EDIT_FILE`, `LIST_DIR`, `FILE_EXISTS`, `RUN_COMMAND`, `ASK_USER`, `NOTIFY_USER`, `UPDATE_PROGRESS`) defined in `core/tool-abstraction.md`. Each platform's `platform.json` provides a `toolMapping` that translates these into platform-specific language (e.g., `READ_FILE` → "Use the Read tool" for Claude, "Read the file at" for Cursor). The generator performs this substitution during build.
+
+### Platform Capabilities
+
+Each `platform.json` declares capability flags (`canExecuteCode`, `canEditFiles`, `canCreateFiles`, `canAskInteractive`, `canTrackProgress`, `canAccessGit`). These affect generated behavior — e.g., platforms with `canAskInteractive: false` (Codex) note assumptions instead of asking, platforms with `canTrackProgress: false` (Cursor, Codex, Copilot) track progress in `tasks.md` instead of a built-in todo system.
+
+### Platform Outputs (generated — do NOT edit directly)
+
+| Platform | Generated File | Entry Point |
+|----------|---------------|-------------|
+| Claude Code | `platforms/claude/prompt.md` | `/specops` slash command |
+| Cursor | `platforms/cursor/specops.mdc` | `Use specops to ...` keyword |
+| OpenAI Codex | `platforms/codex/AGENTS.md` | `Use specops to ...` keyword |
+| GitHub Copilot | `platforms/copilot/copilot-instructions.md` | `Use specops to ...` keyword |
+
+### Legacy Directory
+
+`skills/specops/` is the original Claude Code skill directory kept for backward compatibility. The canonical Claude Code files are now in `platforms/claude/`.
+
+## Editing Guidelines
+
+- **Never edit generated platform output files directly** (`prompt.md`, `specops.mdc`, `AGENTS.md`, `copilot-instructions.md`). Edit `core/` modules or `generator/templates/*.j2` instead, then regenerate with `python3 generator/generate.py --all`.
+- **`core/` must remain platform-agnostic** — use abstract operations from `core/tool-abstraction.md` (e.g., `READ_FILE`, `WRITE_FILE`), never platform-specific tool names.
+- **Preserve the 4-phase workflow structure** in `core/workflow.md`: Understand → Spec → Implement → Complete.
+- **Preserve the Simplicity Principle** in `core/simplicity.md` and all safety mechanisms in `core/safety.md`.
+- **`schema.json` and `platforms/claude/skill.json`** define the same configuration shape and must stay in sync. Run `python3 tests/check_schema_sync.py` to verify.
+- **All JSON schema objects** must use `"additionalProperties": false`, strings must have `maxLength`, arrays must have `maxItems`.
+- **Shell scripts** must pass ShellCheck without warnings, use `set -e`, and quote all variable expansions.
+
+### Security-Sensitive Files
+
+These files require extra scrutiny when modified — they can alter agent behavior, security guardrails, or configuration validation: `core/workflow.md`, `core/safety.md`, `schema.json`, `platforms/claude/skill.json`, `setup.sh`, `generator/generate.py`.
+
+## Validation
+
+`python3 generator/validate.py` checks all generated platform outputs for:
+- **No raw abstract operations** — ensures `READ_FILE(`, `WRITE_FILE(` etc. were properly substituted
+- **Safety markers present** — convention sanitization, template safety, path containment rules
+- **Template markers present** — all six spec templates (feature-requirements, bugfix, refactor, design, tasks, implementation)
+- **Workflow markers present** — all four phases documented
+- **Vertical markers present** — all vertical adaptation rules included
+- **Format-specific rules** — e.g., Cursor `.mdc` files must have YAML frontmatter with `description`
+
+## Configuration
+
+The SpecOps agent reads `.specops.json` from the target project (not this repo). Configuration is validated against `schema.json`. Example configs live in `examples/` (`.specops.json`, `.specops.minimal.json`, `.specops.full.json`).
+
+## Adding a New Platform
+
+1. Create `platforms/{name}/platform.json` with capabilities and tool mapping
+2. Create `generator/templates/{name}.j2` with the platform's instruction format
+3. Add the platform to `SUPPORTED_PLATFORMS` in `generator/generate.py`
+4. Create `platforms/{name}/install.sh`
+5. Run `python3 generator/generate.py --platform {name}`
+6. Add to `generator/validate.py` and `tests/test_platform_consistency.py`
+
+## What to Do After Changes
+
+| What you changed | Required follow-up |
+|---|---|
+| `core/*.md` or `core/templates/*.md` | `python3 generator/generate.py --all` then `python3 generator/validate.py` |
+| `generator/templates/*.j2` | `python3 generator/generate.py --all` then `python3 generator/validate.py` |
+| `platforms/{name}/platform.json` | `python3 generator/generate.py --platform {name}` then `python3 generator/validate.py` |
+| `schema.json` | Run `python3 tests/check_schema_sync.py` to verify parity with `skill.json` |
+| `platforms/claude/skill.json` | Run `python3 tests/check_schema_sync.py` to verify parity with `schema.json` |
+| Shell scripts | Run `shellcheck` on modified scripts |
+
+## Checksums
+
+`CHECKSUMS.sha256` contains SHA-256 hashes of critical files (skill.json, prompt.md, platform.json, workflow.md, safety.md). These are verified in CI. Regenerate with `bash scripts/bump-version.sh <version> --checksums`.
+
+## Release Process
+
+Releases are automated via GitHub Actions (`release.yml`). Create a tag (e.g., `v1.1.0`) through GitHub's Releases UI — the workflow extracts the version, updates all JSON files, regenerates checksums, and pushes to `main`. For manual version bumps during development, use `bash scripts/bump-version.sh`.

@@ -1,0 +1,230 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SpecOps Configuration",
+  "description": "Configuration schema for SpecOps spec-driven development workflow",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON schema reference"
+    },
+    "specsDir": {
+      "type": "string",
+      "default": ".specops",
+      "description": "Directory where specification files are stored. Must be a relative path within the project.",
+      "pattern": "^(?!.*\\.\\./)[a-zA-Z0-9._][a-zA-Z0-9._/-]*$",
+      "maxLength": 200
+    },
+    "vertical": {
+      "type": "string",
+      "enum": ["backend", "frontend", "fullstack", "infrastructure", "data", "library"],
+      "description": "Project vertical that influences spec template adaptation. Auto-detected when not set."
+    },
+    "templates": {
+      "type": "object",
+      "description": "Template configuration for different spec types",
+      "properties": {
+        "feature": {
+          "type": "string",
+          "default": "default",
+          "maxLength": 100,
+          "description": "Template name for feature specifications"
+        },
+        "bugfix": {
+          "type": "string",
+          "default": "default",
+          "maxLength": 100,
+          "description": "Template name for bug fix specifications"
+        },
+        "refactor": {
+          "type": "string",
+          "default": "default",
+          "maxLength": 100,
+          "description": "Template name for refactoring specifications"
+        },
+        "design": {
+          "type": "string",
+          "default": "default",
+          "maxLength": 100,
+          "description": "Template name for design specifications"
+        },
+        "tasks": {
+          "type": "string",
+          "default": "default",
+          "maxLength": 100,
+          "description": "Template name for task breakdown specifications"
+        }
+      },
+      "additionalProperties": false
+    },
+    "team": {
+      "type": "object",
+      "description": "Team collaboration settings",
+      "properties": {
+        "conventions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "maxItems": 30,
+          "description": "List of team-specific development conventions to follow"
+        },
+        "reviewRequired": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether spec review is required before implementation"
+        },
+        "taskTracking": {
+          "type": "string",
+          "enum": ["github", "jira", "linear", "none"],
+          "default": "none",
+          "description": "Task tracking system integration"
+        },
+        "taskPrefix": {
+          "type": "string",
+          "maxLength": 20,
+          "description": "Optional task/ticket prefix (for example, PROJ-) used when referencing external trackers"
+        },
+        "codeReview": {
+          "type": "object",
+          "description": "Code review requirements",
+          "properties": {
+            "required": {
+              "type": "boolean",
+              "default": false
+            },
+            "minApprovals": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "requireTests": {
+              "type": "boolean",
+              "default": true
+            },
+            "requireDocs": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "implementation": {
+      "type": "object",
+      "description": "Implementation behavior settings",
+      "properties": {
+        "autoCommit": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically commit changes after completing tasks"
+        },
+        "createPR": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically create pull request when implementation is complete"
+        },
+        "testing": {
+          "type": "string",
+          "enum": ["auto", "manual", "skip"],
+          "default": "auto",
+          "description": "Testing strategy (auto: run tests automatically, manual: prompt for testing, skip: no testing)"
+        },
+        "testFramework": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Preferred test framework (jest, mocha, pytest, etc.)"
+        },
+        "linting": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "fixOnSave": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "formatting": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "tool": {
+              "type": "string",
+              "enum": ["prettier", "black", "rustfmt", "gofmt"],
+              "description": "Formatting tool to use"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "modules": {
+      "type": "object",
+      "description": "Module-specific configuration for monorepo/multi-module projects",
+      "patternProperties": {
+        "^[a-zA-Z0-9_-]+$": {
+          "type": "object",
+          "properties": {
+            "specsDir": {
+              "type": "string",
+              "maxLength": 200,
+              "pattern": "^(?!.*\\.\\./)[a-zA-Z0-9._][a-zA-Z0-9._/-]*$",
+              "description": "Specs directory for this module"
+            },
+            "conventions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "maxItems": 30,
+              "description": "Module-specific conventions"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "integrations": {
+      "type": "object",
+      "description": "External tool integrations",
+      "properties": {
+        "ci": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "CI system (github-actions, gitlab-ci, jenkins, etc.)"
+        },
+        "deployment": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Deployment platform (vercel, netlify, aws, etc.)"
+        },
+        "monitoring": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Monitoring service (sentry, datadog, newrelic, etc.)"
+        },
+        "analytics": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Analytics service (mixpanel, amplitude, etc.)"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

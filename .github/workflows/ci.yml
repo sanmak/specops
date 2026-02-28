@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-json:
+    name: Validate JSON
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate all JSON files
+        run: |
+          python3 -c "import json; json.load(open('schema.json')); print('schema.json: valid')"
+          python3 -c "import json; json.load(open('skills/specops/skill.json')); print('skills/specops/skill.json: valid')"
+          python3 -c "import json; json.load(open('platforms/claude/skill.json')); print('platforms/claude/skill.json: valid')"
+          python3 -c "import json; json.load(open('platforms/claude/platform.json')); print('platforms/claude/platform.json: valid')"
+          python3 -c "import json; json.load(open('platforms/cursor/platform.json')); print('platforms/cursor/platform.json: valid')"
+          python3 -c "import json; json.load(open('platforms/codex/platform.json')); print('platforms/codex/platform.json: valid')"
+          python3 -c "import json; json.load(open('platforms/copilot/platform.json')); print('platforms/copilot/platform.json: valid')"
+          python3 -c "import json; json.load(open('examples/.specops.json')); print('examples/.specops.json: valid')"
+          python3 -c "import json; json.load(open('examples/.specops.minimal.json')); print('examples/.specops.minimal.json: valid')"
+          python3 -c "import json; json.load(open('examples/.specops.full.json')); print('examples/.specops.full.json: valid')"
+
+  schema-validation:
+    name: Schema Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: pip install jsonschema
+      - name: Validate example configs against schema
+        run: python3 tests/test_schema_validation.py
+      - name: Test schema constraints
+        run: python3 tests/test_schema_constraints.py
+
+  schema-sync:
+    name: Schema Sync Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check schema sync across all platforms
+        run: python3 tests/check_schema_sync.py
+
+  build-platforms:
+    name: Build & Validate Platforms
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate all platform outputs
+        run: python3 generator/generate.py --all
+      - name: Validate generated outputs
+        run: python3 generator/validate.py
+      - name: Check generated files are not stale
+        run: |
+          git diff --exit-code platforms/ skills/specops/prompt.md || {
+            echo "ERROR: Generated platform files are stale."
+            echo "Run 'python3 generator/generate.py --all' and commit the result."
+            exit 1
+          }
+      - name: Check platform consistency
+        run: python3 tests/test_platform_consistency.py
+      - name: Run build tests
+        run: python3 tests/test_build.py
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ShellCheck
+        run: sudo apt-get install -y shellcheck
+      - name: Lint shell scripts
+        run: shellcheck setup.sh verify.sh scripts/bump-version.sh scripts/run-tests.sh platforms/claude/install.sh platforms/cursor/install.sh platforms/codex/install.sh platforms/copilot/install.sh
+
+  verify-checksums:
+    name: Verify File Checksums
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify SHA256 checksums of critical files
+        run: shasum -a 256 -c CHECKSUMS.sha256
+
+  verify:
+    name: Run Verification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Make scripts executable
+        run: chmod +x setup.sh verify.sh scripts/*.sh platforms/*/install.sh
+      - name: Run verify.sh
+        run: bash verify.sh

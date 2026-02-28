@@ -1,0 +1,34 @@
+{
+  "name": "cursor",
+  "displayName": "Cursor",
+  "version": "1.0.0",
+  "instructionFormat": "mdc",
+  "outputFiles": {
+    "rules": "specops.mdc"
+  },
+  "installLocation": {
+    "project": ".cursor/rules/specops.mdc"
+  },
+  "capabilities": {
+    "canExecuteCode": true,
+    "canEditFiles": true,
+    "canCreateFiles": true,
+    "canAskInteractive": true,
+    "canTrackProgress": false,
+    "canAccessGit": true
+  },
+  "toolMapping": {
+    "READ_FILE": "Read the file at",
+    "WRITE_FILE": "Create the file at",
+    "EDIT_FILE": "Edit the file at",
+    "LIST_DIR": "List the contents of",
+    "RUN_COMMAND": "Run the terminal command",
+    "ASK_USER": "Ask the user",
+    "NOTIFY_USER": "Tell the user",
+    "UPDATE_PROGRESS": "Note the completed task in your response"
+  },
+  "entryPoint": {
+    "type": "keyword",
+    "trigger": "When the user asks you to run 'specops', mentions 'spec-driven development', or asks you to 'create a spec' for a feature, bugfix, or refactor"
+  }
+}
