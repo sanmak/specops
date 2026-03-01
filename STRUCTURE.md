@@ -17,9 +17,19 @@ specops/
 ├── SBOM.md                               # Software Bill of Materials
 ├── CHECKSUMS.sha256                      # SHA-256 checksums
 ├── .gitignore                            # Git ignore rules
+│
+├── assets/                               # Visual assets (SVG diagrams)
+│   ├── workflow.svg                      # 4-phase workflow diagram
+│   ├── architecture.svg                  # Three-layer architecture diagram
+│   └── spec-structure.svg                # Spec output structure diagram
 ├── schema.json                           # JSON Schema for .specops.json
 ├── setup.sh                              # Universal installer (multi-platform)
 ├── verify.sh                             # Post-installation verification
+│
+├── scripts/
+│   ├── bump-version.sh                   # Version bumping utility
+│   ├── run-tests.sh                      # Test runner
+│   └── remote-install.sh                 # Remote installer (curl-based, no clone needed)
 │
 ├── core/                                 # Platform-agnostic source of truth
 │   ├── workflow.md                       # 4-phase workflow specification

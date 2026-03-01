@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 300" width="820" height="300">
+  <!-- Background -->
+  <rect width="820" height="300" fill="#ffffff" rx="12"/>
+
+  <!-- Core box -->
+  <rect x="30" y="40" width="200" height="220" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="130" y="70" text-anchor="middle" fill="#2563eb" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="16" font-weight="bold">core/</text>
+  <text x="130" y="90" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Source of Truth</text>
+  <line x1="55" y1="102" x2="205" y2="102" stroke="#bfdbfe" stroke-width="1"/>
+  <text x="130" y="122" text-anchor="middle" fill="#4b5563" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">workflow.md</text>
+  <text x="130" y="140" text-anchor="middle" fill="#4b5563" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">safety.md</text>
+  <text x="130" y="158" text-anchor="middle" fill="#4b5563" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">simplicity.md</text>
+  <text x="130" y="176" text-anchor="middle" fill="#4b5563" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">templates/</text>
+  <text x="130" y="194" text-anchor="middle" fill="#4b5563" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">verticals.md</text>
+  <text x="130" y="212" text-anchor="middle" fill="#4b5563" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">config-handling.md</text>
+  <text x="130" y="230" text-anchor="middle" fill="#4b5563" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">tool-abstraction.md</text>
+
+  <!-- Arrow core → generator -->
+  <line x1="230" y1="150" x2="290" y2="150" stroke="#9ca3af" stroke-width="2"/>
+  <polygon points="290,144 302,150 290,156" fill="#9ca3af"/>
+
+  <!-- Generator box -->
+  <rect x="305" y="80" width="190" height="140" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+  <text x="400" y="110" text-anchor="middle" fill="#7c3aed" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="16" font-weight="bold">generator/</text>
+  <text x="400" y="130" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Build System</text>
+  <line x1="330" y1="142" x2="470" y2="142" stroke="#ddd6fe" stroke-width="1"/>
+  <text x="400" y="162" text-anchor="middle" fill="#4b5563" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">generate.py</text>
+  <text x="400" y="180" text-anchor="middle" fill="#4b5563" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">templates/*.j2</text>
+  <text x="400" y="198" text-anchor="middle" fill="#4b5563" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">validate.py</text>
+
+  <!-- Arrow generator → platforms -->
+  <line x1="495" y1="150" x2="555" y2="150" stroke="#9ca3af" stroke-width="2"/>
+  <polygon points="555,144 567,150 555,156" fill="#9ca3af"/>
+
+  <!-- Platform boxes -->
+  <rect x="570" y="28" width="220" height="52" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="620" y="52" fill="#059669" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="bold">Claude Code</text>
+  <text x="620" y="68" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">prompt.md</text>
+
+  <rect x="570" y="90" width="220" height="52" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="620" y="114" fill="#059669" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="bold">Cursor</text>
+  <text x="620" y="130" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">specops.mdc</text>
+
+  <rect x="570" y="152" width="220" height="52" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="620" y="176" fill="#059669" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="bold">OpenAI Codex</text>
+  <text x="620" y="192" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">AGENTS.md</text>
+
+  <rect x="570" y="214" width="220" height="52" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="620" y="238" fill="#059669" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="bold">GitHub Copilot</text>
+  <text x="620" y="254" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">copilot-instructions.md</text>
+
+  <!-- platforms/ label -->
+  <text x="680" y="285" text-anchor="middle" fill="#059669" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="13" font-weight="bold">platforms/</text>
+</svg>

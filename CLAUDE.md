@@ -21,17 +21,17 @@ python3 generator/generate.py --platform claude
 python3 generator/validate.py
 
 # Lint shell scripts
-shellcheck setup.sh verify.sh scripts/bump-version.sh platforms/*/install.sh
+shellcheck setup.sh verify.sh scripts/bump-version.sh scripts/run-tests.sh scripts/remote-install.sh platforms/*/install.sh
 
-# Run the full test suite (each script is standalone, no test runner)
+# Run all tests (unified runner, auto-installs jsonschema if missing)
+bash scripts/run-tests.sh
+
+# Run individual tests
 python3 tests/test_schema_validation.py      # example configs vs schema.json
 python3 tests/test_schema_constraints.py     # schema rejects invalid inputs
 python3 tests/check_schema_sync.py           # schema parity across platforms
 python3 tests/test_platform_consistency.py   # all platform outputs are consistent
 python3 tests/test_build.py                  # generator system produces valid outputs
-
-# Run all tests at once
-for f in tests/*.py; do python3 "$f"; done
 
 # Run installation verification
 bash verify.sh
@@ -41,7 +41,7 @@ bash scripts/bump-version.sh 1.2.0
 bash scripts/bump-version.sh 1.2.0 --checksums  # also regenerate checksums
 ```
 
-Tests require `pip install jsonschema`. The generator requires `pip install jinja2`. There is no unified test runner — each test file is executed directly with `python3`.
+**Dependencies**: `pip install jsonschema` (tests) and `pip install jinja2` (generator). The `scripts/run-tests.sh` runner auto-installs `jsonschema` if missing.
 
 ## Simplicity Principle
 
@@ -99,7 +99,7 @@ Each `platform.json` declares capability flags (`canExecuteCode`, `canEditFiles`
 
 ### Security-Sensitive Files
 
-These files require extra scrutiny when modified — they can alter agent behavior, security guardrails, or configuration validation: `core/workflow.md`, `core/safety.md`, `schema.json`, `platforms/claude/skill.json`, `setup.sh`, `generator/generate.py`.
+These files require extra scrutiny when modified — they can alter agent behavior, security guardrails, or configuration validation: `core/workflow.md`, `core/safety.md`, `schema.json`, `platforms/claude/skill.json`, `setup.sh`, `scripts/remote-install.sh`, `generator/generate.py`.
 
 ## Validation
 
@@ -134,6 +134,14 @@ The SpecOps agent reads `.specops.json` from the target project (not this repo).
 | `schema.json` | Run `python3 tests/check_schema_sync.py` to verify parity with `skill.json` |
 | `platforms/claude/skill.json` | Run `python3 tests/check_schema_sync.py` to verify parity with `schema.json` |
 | Shell scripts | Run `shellcheck` on modified scripts |
+
+## Commit Conventions
+
+Prefix commits: `feat:` (new feature/platform), `fix:` (bug fix), `chore:` (version bumps, CI, deps), `docs:` (documentation only), `test:` (test additions/fixes), `refactor:` (no behavior change).
+
+## CI Notes
+
+CI verifies generated files aren't stale — after regenerating, the diff of `platforms/` and `skills/specops/prompt.md` must be committed. The `build-platforms` job runs `git diff --exit-code` and fails if generated outputs don't match what's checked in.
 
 ## Checksums
 

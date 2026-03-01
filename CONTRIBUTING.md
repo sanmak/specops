@@ -4,7 +4,7 @@ Thank you for your interest in contributing to SpecOps! This document provides g
 
 ## Code of Conduct
 
-By participating in this project, you agree to maintain a respectful and inclusive environment for everyone.
+By participating in this project, you agree to maintain a respectful and inclusive environment for everyone. Report unacceptable behavior via [GitHub Security Advisories](https://github.com/sanmak/specops/security/advisories/new).
 
 ## How to Contribute
 

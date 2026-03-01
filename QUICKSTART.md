@@ -4,7 +4,19 @@ Get up and running with SpecOps in 5 minutes.
 
 ## Installation (1 minute)
 
-### Option 1: Interactive Setup
+### Option 1: One-Line Install (no clone needed)
+
+```bash
+# Interactive — detects your tools and prompts for choices
+bash <(curl -fsSL https://raw.githubusercontent.com/sanmak/specops/main/scripts/remote-install.sh)
+
+# Non-interactive — specify platform directly
+curl -fsSL https://raw.githubusercontent.com/sanmak/specops/main/scripts/remote-install.sh | bash -s -- --platform claude --scope user
+curl -fsSL https://raw.githubusercontent.com/sanmak/specops/main/scripts/remote-install.sh | bash -s -- --platform cursor
+```
+
+### Option 2: Clone and Run Setup
+
 ```bash
 git clone https://github.com/sanmak/specops.git
 cd specops
@@ -13,7 +25,7 @@ bash setup.sh
 
 The setup script detects your installed AI coding tools and installs SpecOps for each.
 
-### Option 2: Platform-Specific Setup
+### Option 3: Platform-Specific Setup
 
 **Claude Code:**
 ```bash

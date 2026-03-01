@@ -2,6 +2,12 @@
 
 ## Installation
 
+### Quick Install (no clone needed)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/sanmak/specops/main/scripts/remote-install.sh | bash -s -- --platform codex
+```
+
 ### Option 1: Using the installer
 
 ```bash

@@ -45,6 +45,7 @@ check_file "schema.json"
 check_file "setup.sh"
 check_file "verify.sh"
 check_file "scripts/bump-version.sh"
+check_file "scripts/remote-install.sh"
 echo ""
 
 # Check core modules
@@ -160,7 +161,7 @@ echo ""
 
 # Check file permissions
 echo "File Permissions:"
-for script in setup.sh verify.sh scripts/bump-version.sh platforms/claude/install.sh platforms/cursor/install.sh platforms/codex/install.sh platforms/copilot/install.sh; do
+for script in setup.sh verify.sh scripts/bump-version.sh scripts/remote-install.sh platforms/claude/install.sh platforms/cursor/install.sh platforms/codex/install.sh platforms/copilot/install.sh; do
   if [ -f "$script" ]; then
     if [ -x "$script" ]; then
       echo "  OK: $script is executable"
