@@ -134,7 +134,7 @@ detect_platforms() {
 
   # GitHub Copilot
   if command -v gh &>/dev/null && gh copilot --help &>/dev/null 2>&1 || \
-     [ -f ".github/copilot-instructions.md" ]; then
+     [ -f ".github/copilot-instructions.md" ] || [ -d ".github/instructions" ]; then
     detected="$detected copilot"
   fi
 
@@ -235,10 +235,9 @@ install_claude() {
 
   echo "Installing to: $install_dir"
   mkdir -p "$install_dir"
-  download_file "${SPECOPS_BASE_URL}/platforms/claude/skill.json" "$install_dir/skill.json"
-  download_file "${SPECOPS_BASE_URL}/platforms/claude/prompt.md" "$install_dir/prompt.md"
+  download_file "${SPECOPS_BASE_URL}/platforms/claude/SKILL.md" "$install_dir/SKILL.md"
 
-  if [ -f "$install_dir/skill.json" ] && [ -f "$install_dir/prompt.md" ]; then
+  if [ -f "$install_dir/SKILL.md" ]; then
     echo "Installed files verified at $install_dir"
   else
     echo "WARNING: Installation may be incomplete — missing files in $install_dir"
@@ -258,82 +257,28 @@ install_cursor() {
   echo ""
 }
 
-install_with_merge() {
-  local platform_name="$1"
-  local source_path="$2"
-  local target="$3"
-  local target_basename
-  target_basename="$(basename "$target")"
-
+install_codex() {
   echo "----------------------------------------"
-  echo "Installing for: $platform_name"
+  echo "Installing for: OpenAI Codex"
   echo "----------------------------------------"
 
-  if [ -f "$target" ]; then
-    if [[ "$FORCE" == true ]]; then
-      download_file "${SPECOPS_BASE_URL}/${source_path}" "$target"
-      echo "Replaced $target with SpecOps instructions"
-    elif is_interactive; then
-      echo "$target_basename already exists at $target"
-      echo ""
-      echo "Options:"
-      echo "1) Append SpecOps instructions to existing $target_basename"
-      echo "2) Replace $target_basename with SpecOps instructions"
-      echo "3) Cancel"
-      read -rp "Select option [1-3]: " choice
-
-      case $choice in
-        1)
-          local tmp_file
-          tmp_file="$(mktemp)"
-          download_file "${SPECOPS_BASE_URL}/${source_path}" "$tmp_file"
-          {
-            echo ""
-            echo "---"
-            echo ""
-            cat "$tmp_file"
-          } >> "$target"
-          rm -f "$tmp_file"
-          echo "Appended SpecOps instructions to $target"
-          ;;
-        2)
-          download_file "${SPECOPS_BASE_URL}/${source_path}" "$target"
-          echo "Replaced $target with SpecOps instructions"
-          ;;
-        3)
-          echo "Cancelled."
-          echo ""
-          return
-          ;;
-        *)
-          echo "Invalid option. Skipping $platform_name."
-          echo ""
-          return
-          ;;
-      esac
-    else
-      echo "WARNING: $target already exists. Use --force to overwrite. Skipping."
-      echo ""
-      return
-    fi
-  else
-    local target_dir
-    target_dir="$(dirname "$target")"
-    mkdir -p "$target_dir"
-    download_file "${SPECOPS_BASE_URL}/${source_path}" "$target"
-    echo "Created $target"
-  fi
-
+  local skill_dir=".codex/skills/specops"
+  echo "Installing to: $skill_dir/SKILL.md"
+  download_file "${SPECOPS_BASE_URL}/platforms/codex/SKILL.md" "$skill_dir/SKILL.md"
   echo "Installed successfully!"
   echo ""
 }
 
-install_codex() {
-  install_with_merge "OpenAI Codex" "platforms/codex/AGENTS.md" "AGENTS.md"
-}
-
 install_copilot() {
-  install_with_merge "GitHub Copilot" "platforms/copilot/copilot-instructions.md" ".github/copilot-instructions.md"
+  echo "----------------------------------------"
+  echo "Installing for: GitHub Copilot"
+  echo "----------------------------------------"
+
+  local instructions_dir=".github/instructions"
+  echo "Installing to: $instructions_dir/specops.instructions.md"
+  download_file "${SPECOPS_BASE_URL}/platforms/copilot/specops.instructions.md" "$instructions_dir/specops.instructions.md"
+  echo "Installed successfully!"
+  echo ""
 }
 
 # --- Install selected platforms ---

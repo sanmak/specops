@@ -33,7 +33,7 @@ detect_platforms() {
 
   # GitHub Copilot
   if command -v gh &>/dev/null && gh copilot --help &>/dev/null 2>&1 || \
-     [ -f ".github/copilot-instructions.md" ]; then
+     [ -f ".github/copilot-instructions.md" ] || [ -d ".github/instructions" ]; then
     DETECTED="$DETECTED copilot"
   fi
 

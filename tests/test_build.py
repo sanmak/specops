@@ -16,10 +16,10 @@ ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PLATFORMS_DIR = os.path.join(ROOT_DIR, "platforms")
 
 EXPECTED_OUTPUTS = {
-    "claude": "prompt.md",
+    "claude": "SKILL.md",
     "cursor": "specops.mdc",
-    "codex": "AGENTS.md",
-    "copilot": "copilot-instructions.md",
+    "codex": "SKILL.md",
+    "copilot": "specops.instructions.md",
 }
 
 # Abstract operations that should NOT appear in generated outputs
@@ -126,6 +126,103 @@ def test_cursor_mdc_format():
     return errors
 
 
+def test_claude_skill_md_format():
+    """Validate Claude SKILL.md format."""
+    filepath = os.path.join(PLATFORMS_DIR, "claude", "SKILL.md")
+    if not os.path.exists(filepath):
+        print("SKIP: Claude SKILL.md not found")
+        return 0
+
+    content = read_file(filepath)
+    errors = 0
+
+    if not content.startswith("---\n"):
+        print("FAIL: Claude SKILL.md must start with YAML frontmatter (---)")
+        errors += 1
+
+    # Find closing frontmatter
+    second_dash = content.find("---\n", 4)
+    if second_dash == -1:
+        print("FAIL: Claude SKILL.md has unclosed YAML frontmatter")
+        errors += 1
+    else:
+        frontmatter = content[4:second_dash]
+        if "name:" not in frontmatter:
+            print("FAIL: Claude SKILL.md frontmatter missing 'name'")
+            errors += 1
+        if "description:" not in frontmatter:
+            print("FAIL: Claude SKILL.md frontmatter missing 'description'")
+            errors += 1
+
+    if errors == 0:
+        print("PASS: Claude SKILL.md format is valid")
+
+    return errors
+
+
+def test_codex_skill_md_format():
+    """Validate Codex SKILL.md format."""
+    filepath = os.path.join(PLATFORMS_DIR, "codex", "SKILL.md")
+    if not os.path.exists(filepath):
+        print("SKIP: Codex SKILL.md not found")
+        return 0
+
+    content = read_file(filepath)
+    errors = 0
+
+    if not content.startswith("---\n"):
+        print("FAIL: Codex SKILL.md must start with YAML frontmatter (---)")
+        errors += 1
+
+    second_dash = content.find("---\n", 4)
+    if second_dash == -1:
+        print("FAIL: Codex SKILL.md has unclosed YAML frontmatter")
+        errors += 1
+    else:
+        frontmatter = content[4:second_dash]
+        if "name:" not in frontmatter:
+            print("FAIL: Codex SKILL.md frontmatter missing 'name'")
+            errors += 1
+        if "description:" not in frontmatter:
+            print("FAIL: Codex SKILL.md frontmatter missing 'description'")
+            errors += 1
+
+    if errors == 0:
+        print("PASS: Codex SKILL.md format is valid")
+
+    return errors
+
+
+def test_copilot_instructions_format():
+    """Validate Copilot specops.instructions.md format."""
+    filepath = os.path.join(PLATFORMS_DIR, "copilot", "specops.instructions.md")
+    if not os.path.exists(filepath):
+        print("SKIP: Copilot specops.instructions.md not found")
+        return 0
+
+    content = read_file(filepath)
+    errors = 0
+
+    if not content.startswith("---\n"):
+        print("FAIL: Copilot specops.instructions.md must start with YAML frontmatter (---)")
+        errors += 1
+
+    second_dash = content.find("---\n", 4)
+    if second_dash == -1:
+        print("FAIL: Copilot specops.instructions.md has unclosed YAML frontmatter")
+        errors += 1
+    else:
+        frontmatter = content[4:second_dash]
+        if "applyTo:" not in frontmatter:
+            print("FAIL: Copilot specops.instructions.md frontmatter missing 'applyTo'")
+            errors += 1
+
+    if errors == 0:
+        print("PASS: Copilot specops.instructions.md format is valid")
+
+    return errors
+
+
 def test_platform_json_valid():
     """Validate all platform.json files are valid JSON."""
     errors = 0
@@ -169,6 +266,15 @@ def main():
 
     print("\n--- Test: Cursor MDC Format ---")
     total_errors += test_cursor_mdc_format()
+
+    print("\n--- Test: Claude SKILL.md Format ---")
+    total_errors += test_claude_skill_md_format()
+
+    print("\n--- Test: Codex SKILL.md Format ---")
+    total_errors += test_codex_skill_md_format()
+
+    print("\n--- Test: Copilot Instructions Format ---")
+    total_errors += test_copilot_instructions_format()
 
     print("\n--- Test: Platform JSON Validity ---")
     total_errors += test_platform_json_valid()

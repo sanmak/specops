@@ -26,8 +26,7 @@ When SpecOps is installed, only these files are copied to the target directory:
 
 | File | Purpose |
 |------|---------|
-| `skill.json` | Skill metadata, command definitions, configuration schema |
-| `prompt.md` | Agent instructions defining the spec-driven workflow |
+| `SKILL.md` | Claude Code skill file with YAML frontmatter and agent instructions |
 
 ## Integrity Verification
 
@@ -36,9 +35,6 @@ After installation, verify file integrity:
 ```bash
 # Run the verification script
 bash verify.sh
-
-# Or manually validate JSON
-python3 -c "import json; json.load(open('skills/specops/skill.json'))"
 
 # Check installed files against checksums
 shasum -a 256 -c CHECKSUMS.sha256 --ignore-missing

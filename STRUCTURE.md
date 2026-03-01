@@ -52,8 +52,7 @@ specops/
 ├── platforms/                            # Platform-specific adapters
 │   ├── claude/                           # Claude Code adapter
 │   │   ├── platform.json                 # Capabilities, tool mapping, entry point
-│   │   ├── skill.json                    # Claude Code skill metadata
-│   │   ├── prompt.md                     # Generated agent instructions
+│   │   ├── SKILL.md                      # Generated Claude Code skill file
 │   │   ├── install.sh                    # Claude-specific installer
 │   │   └── README.md                     # Claude Code quickstart
 │   ├── cursor/                           # Cursor adapter
@@ -63,12 +62,12 @@ specops/
 │   │   └── README.md                     # Cursor quickstart
 │   ├── codex/                            # OpenAI Codex adapter
 │   │   ├── platform.json                 # Capabilities, tool mapping
-│   │   ├── AGENTS.md                     # Generated Codex agent instructions
+│   │   ├── SKILL.md                      # Generated Codex skill file
 │   │   ├── install.sh                    # Codex-specific installer
 │   │   └── README.md                     # Codex quickstart
 │   └── copilot/                          # GitHub Copilot adapter
 │       ├── platform.json                 # Capabilities, tool mapping
-│       ├── copilot-instructions.md       # Generated Copilot instructions
+│       ├── specops.instructions.md       # Generated Copilot scoped instructions
 │       ├── install.sh                    # Copilot-specific installer
 │       └── README.md                     # Copilot quickstart
 │
@@ -83,13 +82,12 @@ specops/
 │
 ├── skills/                               # Legacy skill directory (backward compat)
 │   └── specops/
-│       ├── skill.json                    # Same as platforms/claude/skill.json
-│       └── prompt.md                     # Original Claude Code prompt
+│       └── SKILL.md                      # Copy of platforms/claude/SKILL.md
 │
 ├── tests/                                # Test suite
 │   ├── test_schema_validation.py         # Validates example configs against schema
 │   ├── test_schema_constraints.py        # Tests schema rejects invalid inputs
-│   ├── check_schema_sync.py             # Verifies schema sync across all platforms
+│   ├── check_schema_sync.py             # Validates schema.json is well-formed
 │   ├── test_platform_consistency.py      # Checks all platform outputs are consistent
 │   └── test_build.py                     # Tests build system generates valid outputs
 │

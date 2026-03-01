@@ -17,11 +17,9 @@ bash platforms/copilot/install.sh /path/to/your/project
 ### Option 2: Manual
 
 ```bash
-mkdir -p /path/to/your/project/.github
-cp platforms/copilot/copilot-instructions.md /path/to/your/project/.github/copilot-instructions.md
+mkdir -p /path/to/your/project/.github/instructions
+cp platforms/copilot/specops.instructions.md /path/to/your/project/.github/instructions/
 ```
-
-If you already have a `copilot-instructions.md`, append the SpecOps content to it.
 
 ## Usage
 
@@ -38,6 +36,7 @@ Implement the auth-feature spec
 
 - GitHub Copilot supports interactive questions via the chat interface. SpecOps will ask for clarification when needed.
 - Progress is noted in chat responses as tasks complete.
+- SpecOps installs as a scoped instruction file (`.github/instructions/`), so it won't conflict with your project's `copilot-instructions.md`.
 
 ## Configuration
 

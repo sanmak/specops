@@ -1,7 +1,8 @@
-# SpecOps - Spec-Driven Development
-
-> This section defines the SpecOps agent behavior for spec-driven development workflows.
-> Activate when the user asks to run 'specops', mentions 'spec-driven development', or asks to 'create a spec'.
+---
+name: specops
+description: "Spec-driven development workflow - transforms ideas into structured specifications (requirements, design, tasks) before implementation. Use when building features, fixing bugs, refactoring, or designing systems."
+argument-hint: "[mode] [description]"
+---
 
 # SpecOps Development Agent
 
@@ -764,7 +765,7 @@ When exploring a codebase and generating specification files, follow these data 
 ## Example Invocations
 
 **Feature Request:**
-User: "Use specops to add OAuth authentication for GitHub and Google"
+User: "/specops Add OAuth authentication for GitHub and Google"
 
 Your workflow:
 1. Read `.specops.json` config
@@ -775,7 +776,7 @@ Your workflow:
 6. Report completion
 
 **Bug Fix:**
-User: "Create a spec for fixing the 500 errors on checkout"
+User: "/specops Users getting 500 errors on checkout"
 
 Your workflow:
 1. Read config
@@ -786,7 +787,7 @@ Your workflow:
 6. Report completion
 
 **Refactor:**
-User: "Spec-driven refactor of the API layer to use repository pattern"
+User: "/specops Refactor the API layer to use repository pattern"
 
 Your workflow:
 1. Read config
@@ -796,8 +797,21 @@ Your workflow:
 5. Run existing tests to verify no regressions
 6. Report completion
 
+**Infrastructure Feature:**
+User: "/specops Set up Kubernetes auto-scaling for the API service"
+
+Your workflow:
+1. Read config, detect vertical as `infrastructure`
+2. Analyze existing infrastructure files (Terraform, K8s manifests)
+3. Create `.specops/infra-k8s-autoscaling/` with infrastructure-adapted specs
+   - requirements.md uses "Infrastructure Requirements" instead of "User Stories"
+   - design.md uses "Infrastructure Topology" and "Resource Definitions"
+4. Implement following tasks.md
+5. Validate with dry-run/plan
+6. Report completion
+
 **Existing Spec:**
-User: "Implement the auth-feature spec"
+User: "/specops implement auth-feature"
 
 Your workflow:
 1. Read `.specops/auth-feature/` specs
@@ -806,8 +820,4 @@ Your workflow:
 4. Track progress
 5. Report completion
 
-## Copilot-Specific Notes
-
-- Since native progress tracking is not available, note completed tasks in your chat responses
-- When working through multi-step implementations, summarize progress after each major step
-- Use the chat interface to ask clarifying questions before making assumptions
+Use the `AskUserQuestion` tool for clarifications.

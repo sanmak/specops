@@ -35,7 +35,7 @@
   <!-- Platform boxes -->
   <rect x="570" y="28" width="220" height="52" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
   <text x="620" y="52" fill="#059669" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="bold">Claude Code</text>
-  <text x="620" y="68" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">prompt.md</text>
+  <text x="620" y="68" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">SKILL.md</text>
 
   <rect x="570" y="90" width="220" height="52" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
   <text x="620" y="114" fill="#059669" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="bold">Cursor</text>
@@ -43,11 +43,11 @@
 
   <rect x="570" y="152" width="220" height="52" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
   <text x="620" y="176" fill="#059669" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="bold">OpenAI Codex</text>
-  <text x="620" y="192" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">AGENTS.md</text>
+  <text x="620" y="192" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">SKILL.md</text>
 
   <rect x="570" y="214" width="220" height="52" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
   <text x="620" y="238" fill="#059669" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="bold">GitHub Copilot</text>
-  <text x="620" y="254" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">copilot-instructions.md</text>
+  <text x="620" y="254" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">specops.instructions.md</text>
 
   <!-- platforms/ label -->
   <text x="680" y="285" text-anchor="middle" fill="#059669" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="13" font-weight="bold">platforms/</text>

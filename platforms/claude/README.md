@@ -19,16 +19,14 @@ Or manually:
 
 ```bash
 mkdir -p ~/.claude/skills/specops
-cp platforms/claude/skill.json ~/.claude/skills/specops/
-cp platforms/claude/prompt.md ~/.claude/skills/specops/
+cp platforms/claude/SKILL.md ~/.claude/skills/specops/
 ```
 
 ### Option 2: Project-level (available only in this project)
 
 ```bash
 mkdir -p .claude/skills/specops
-cp platforms/claude/skill.json .claude/skills/specops/
-cp platforms/claude/prompt.md .claude/skills/specops/
+cp platforms/claude/SKILL.md .claude/skills/specops/
 ```
 
 ## Usage

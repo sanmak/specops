@@ -30,8 +30,7 @@ The setup script detects your installed AI coding tools and installs SpecOps for
 **Claude Code:**
 ```bash
 mkdir -p ~/.claude/skills/specops
-cp platforms/claude/skill.json ~/.claude/skills/specops/
-cp platforms/claude/prompt.md ~/.claude/skills/specops/
+cp platforms/claude/SKILL.md ~/.claude/skills/specops/
 ```
 
 **Cursor:**
@@ -42,7 +41,14 @@ cp platforms/cursor/specops.mdc /path/to/your/project/.cursor/rules/
 
 **OpenAI Codex:**
 ```bash
-cp platforms/codex/AGENTS.md /path/to/your/project/AGENTS.md
+mkdir -p /path/to/your/project/.codex/skills/specops
+cp platforms/codex/SKILL.md /path/to/your/project/.codex/skills/specops/
+```
+
+**GitHub Copilot:**
+```bash
+mkdir -p /path/to/your/project/.github/instructions
+cp platforms/copilot/specops.instructions.md /path/to/your/project/.github/instructions/
 ```
 
 ## First Use (2 minutes)

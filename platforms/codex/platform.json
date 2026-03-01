@@ -2,12 +2,12 @@
   "name": "codex",
   "displayName": "OpenAI Codex",
   "version": "1.0.0",
-  "instructionFormat": "agents_md",
+  "instructionFormat": "skill_md",
   "outputFiles": {
-    "agents": "AGENTS.md"
+    "skill": "SKILL.md"
   },
   "installLocation": {
-    "project": "AGENTS.md"
+    "project": ".codex/skills/specops"
   },
   "capabilities": {
     "canExecuteCode": true,

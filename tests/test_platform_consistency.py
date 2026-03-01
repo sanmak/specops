@@ -16,10 +16,10 @@ PLATFORMS_DIR = "platforms"
 
 # Map of platform name -> generated output file
 PLATFORM_FILES = {
-    "claude": "prompt.md",
+    "claude": "SKILL.md",
     "cursor": "specops.mdc",
-    "codex": "AGENTS.md",
-    "copilot": "copilot-instructions.md",
+    "codex": "SKILL.md",
+    "copilot": "specops.instructions.md",
 }
 
 # Markers that MUST be present in every platform output

@@ -271,7 +271,10 @@ git push
 <project>/.cursor/rules/specops.mdc # Project rules
 
 # Codex
-<project>/AGENTS.md                 # Agent instructions
+<project>/.codex/skills/specops/    # Skill installation
+
+# Copilot
+<project>/.github/instructions/     # Scoped instructions
 
 # All platforms
 <project>/.specops.json             # Project configuration

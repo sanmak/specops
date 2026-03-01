@@ -4,8 +4,7 @@
   "version": "1.0.0",
   "instructionFormat": "skill",
   "outputFiles": {
-    "prompt": "prompt.md",
-    "metadata": "skill.json"
+    "skill": "SKILL.md"
   },
   "installLocation": {
     "user": "~/.claude/skills/specops",

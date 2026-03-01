@@ -17,10 +17,9 @@ bash platforms/codex/install.sh /path/to/your/project
 ### Option 2: Manual
 
 ```bash
-cp platforms/codex/AGENTS.md /path/to/your/project/AGENTS.md
+mkdir -p /path/to/your/project/.codex/skills/specops
+cp platforms/codex/SKILL.md /path/to/your/project/.codex/skills/specops/
 ```
-
-If you already have an `AGENTS.md`, append the SpecOps content to it.
 
 ## Usage
 
@@ -37,6 +36,7 @@ Implement the auth-feature spec
 
 - Codex runs autonomously without interactive questions. SpecOps will document any assumptions it makes in the spec files.
 - Progress is printed to stdout as tasks complete.
+- SpecOps installs as a Codex skill (`.codex/skills/specops/`), so it won't conflict with your project's `AGENTS.md`.
 
 ## Configuration
 

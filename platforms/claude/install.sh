@@ -63,13 +63,12 @@ esac
 echo ""
 echo "Installing to: $INSTALL_DIR"
 mkdir -p "$INSTALL_DIR"
-cp "$SCRIPT_DIR/skill.json" "$INSTALL_DIR/"
-cp "$SCRIPT_DIR/prompt.md" "$INSTALL_DIR/"
+cp "$SCRIPT_DIR/SKILL.md" "$INSTALL_DIR/"
 
 echo "Installed successfully!"
 echo ""
 
-if [ -f "$INSTALL_DIR/skill.json" ] && [ -f "$INSTALL_DIR/prompt.md" ]; then
+if [ -f "$INSTALL_DIR/SKILL.md" ]; then
   echo "Installed files verified at $INSTALL_DIR"
 else
   echo "WARNING: Installation may be incomplete - missing files in $INSTALL_DIR"

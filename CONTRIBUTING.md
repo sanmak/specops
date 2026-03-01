@@ -39,10 +39,9 @@ By participating in this project, you agree to maintain a respectful and inclusi
 - Validate all user input before using in file operations
 - Prefer POSIX-compatible constructs where possible
 
-### JSON Files (`schema.json`, `skill.json`, example configs)
+### JSON Files (`schema.json`, example configs)
 
 - Must be valid JSON (validated in CI)
-- `schema.json` and `skill.json` configuration schemas must stay in sync
 - All nested objects must use `"additionalProperties": false`
 - String fields must have `maxLength` constraints
 - Array fields must have `maxItems` constraints
@@ -59,7 +58,7 @@ By participating in this project, you agree to maintain a respectful and inclusi
 ### Platform Adapters (`platforms/`)
 
 - Each platform adapter has a `platform.json` defining capabilities and tool mappings
-- Generated output files (prompt.md, specops.mdc, AGENTS.md) should NOT be edited directly
+- Generated output files (SKILL.md, specops.mdc, specops.instructions.md) should NOT be edited directly
 - Edit `core/` modules or `generator/templates/*.j2` instead, then regenerate
 - When adding a new platform, see STRUCTURE.md for the step-by-step guide
 
@@ -78,7 +77,7 @@ The following files require extra scrutiny during review:
 | `core/workflow.md` | Agent behavior | Could alter what the agent does autonomously |
 | `core/safety.md` | Security guardrails | Must be preserved in all platform outputs |
 | `schema.json` | Configuration validation | Could allow unsafe configuration values |
-| `platforms/claude/skill.json` | Skill metadata + schema | Must stay in sync with `schema.json` |
+| `platforms/claude/SKILL.md` | Generated skill file | Contains YAML frontmatter and agent instructions |
 | `setup.sh` | File system operations | Could introduce path traversal or injection |
 | `generator/generate.py` | Output generation | Could omit safety rules from generated outputs |
 
@@ -99,7 +98,6 @@ bash scripts/run-tests.sh
 
 # Validate all JSON files
 python3 -c "import json; json.load(open('schema.json'))"
-python3 -c "import json; json.load(open('platforms/claude/skill.json'))"
 
 # Regenerate platform outputs (after changing core/ or generator/)
 python3 generator/generate.py --all

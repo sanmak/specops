@@ -78,10 +78,10 @@ Each `platform.json` declares capability flags (`canExecuteCode`, `canEditFiles`
 
 | Platform | Generated File | Entry Point |
 |----------|---------------|-------------|
-| Claude Code | `platforms/claude/prompt.md` | `/specops` slash command |
+| Claude Code | `platforms/claude/SKILL.md` | `/specops` slash command |
 | Cursor | `platforms/cursor/specops.mdc` | `Use specops to ...` keyword |
-| OpenAI Codex | `platforms/codex/AGENTS.md` | `Use specops to ...` keyword |
-| GitHub Copilot | `platforms/copilot/copilot-instructions.md` | `Use specops to ...` keyword |
+| OpenAI Codex | `platforms/codex/SKILL.md` | `Use specops to ...` keyword |
+| GitHub Copilot | `platforms/copilot/specops.instructions.md` | `Use specops to ...` keyword |
 
 ### Legacy Directory
 
@@ -89,17 +89,17 @@ Each `platform.json` declares capability flags (`canExecuteCode`, `canEditFiles`
 
 ## Editing Guidelines
 
-- **Never edit generated platform output files directly** (`prompt.md`, `specops.mdc`, `AGENTS.md`, `copilot-instructions.md`). Edit `core/` modules or `generator/templates/*.j2` instead, then regenerate with `python3 generator/generate.py --all`.
+- **Never edit generated platform output files directly** (`SKILL.md`, `specops.mdc`, `specops.instructions.md`). Edit `core/` modules or `generator/templates/*.j2` instead, then regenerate with `python3 generator/generate.py --all`.
 - **`core/` must remain platform-agnostic** — use abstract operations from `core/tool-abstraction.md` (e.g., `READ_FILE`, `WRITE_FILE`), never platform-specific tool names.
 - **Preserve the 4-phase workflow structure** in `core/workflow.md`: Understand → Spec → Implement → Complete.
 - **Preserve the Simplicity Principle** in `core/simplicity.md` and all safety mechanisms in `core/safety.md`.
-- **`schema.json` and `platforms/claude/skill.json`** define the same configuration shape and must stay in sync. Run `python3 tests/check_schema_sync.py` to verify.
+- **`schema.json`** is the single source of truth for `.specops.json` configuration validation. Run `python3 tests/check_schema_sync.py` to verify it is well-formed.
 - **All JSON schema objects** must use `"additionalProperties": false`, strings must have `maxLength`, arrays must have `maxItems`.
 - **Shell scripts** must pass ShellCheck without warnings, use `set -e`, and quote all variable expansions.
 
 ### Security-Sensitive Files
 
-These files require extra scrutiny when modified — they can alter agent behavior, security guardrails, or configuration validation: `core/workflow.md`, `core/safety.md`, `schema.json`, `platforms/claude/skill.json`, `setup.sh`, `scripts/remote-install.sh`, `generator/generate.py`.
+These files require extra scrutiny when modified — they can alter agent behavior, security guardrails, or configuration validation: `core/workflow.md`, `core/safety.md`, `schema.json`, `platforms/claude/SKILL.md`, `setup.sh`, `scripts/remote-install.sh`, `generator/generate.py`.
 
 ## Validation
 
@@ -109,7 +109,7 @@ These files require extra scrutiny when modified — they can alter agent behavi
 - **Template markers present** — all six spec templates (feature-requirements, bugfix, refactor, design, tasks, implementation)
 - **Workflow markers present** — all four phases documented
 - **Vertical markers present** — all vertical adaptation rules included
-- **Format-specific rules** — e.g., Cursor `.mdc` files must have YAML frontmatter with `description`
+- **Format-specific rules** — e.g., Cursor `.mdc` files must have YAML frontmatter with `description`, Claude/Codex `SKILL.md` must have `name` and `description` in frontmatter, Copilot `specops.instructions.md` must have `applyTo` in frontmatter
 
 ## Configuration
 
@@ -131,8 +131,7 @@ The SpecOps agent reads `.specops.json` from the target project (not this repo).
 | `core/*.md` or `core/templates/*.md` | `python3 generator/generate.py --all` then `python3 generator/validate.py` |
 | `generator/templates/*.j2` | `python3 generator/generate.py --all` then `python3 generator/validate.py` |
 | `platforms/{name}/platform.json` | `python3 generator/generate.py --platform {name}` then `python3 generator/validate.py` |
-| `schema.json` | Run `python3 tests/check_schema_sync.py` to verify parity with `skill.json` |
-| `platforms/claude/skill.json` | Run `python3 tests/check_schema_sync.py` to verify parity with `schema.json` |
+| `schema.json` | Run `python3 tests/check_schema_sync.py` to verify schema is well-formed |
 | Shell scripts | Run `shellcheck` on modified scripts |
 
 ## Commit Conventions
@@ -141,11 +140,11 @@ Prefix commits: `feat:` (new feature/platform), `fix:` (bug fix), `chore:` (vers
 
 ## CI Notes
 
-CI verifies generated files aren't stale — after regenerating, the diff of `platforms/` and `skills/specops/prompt.md` must be committed. The `build-platforms` job runs `git diff --exit-code` and fails if generated outputs don't match what's checked in.
+CI verifies generated files aren't stale — after regenerating, the diff of `platforms/` and `skills/specops/SKILL.md` must be committed. The `build-platforms` job runs `git diff --exit-code` and fails if generated outputs don't match what's checked in.
 
 ## Checksums
 
-`CHECKSUMS.sha256` contains SHA-256 hashes of critical files (skill.json, prompt.md, platform.json, workflow.md, safety.md). These are verified in CI. Regenerate with `bash scripts/bump-version.sh <version> --checksums`.
+`CHECKSUMS.sha256` contains SHA-256 hashes of critical files (SKILL.md, platform.json, workflow.md, safety.md). These are verified in CI. Regenerate with `bash scripts/bump-version.sh <version> --checksums`.
 
 ## Release Process
 

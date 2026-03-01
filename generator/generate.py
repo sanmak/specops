@@ -250,8 +250,19 @@ def generate_claude(core, platform_config):
     output = render_template(template, context)
     output = substitute_tools(output, platform_config["toolMapping"])
 
-    output_path = os.path.join(PLATFORMS_DIR, "claude", "prompt.md")
-    write_file(output_path, output)
+    # Generate SKILL.md (Claude Code skill format: YAML frontmatter + prompt content)
+    frontmatter = (
+        '---\n'
+        'name: specops\n'
+        'description: "Spec-driven development workflow - transforms ideas into'
+        ' structured specifications (requirements, design, tasks) before'
+        ' implementation. Use when building features, fixing bugs, refactoring,'
+        ' or designing systems."\n'
+        'argument-hint: "[mode] [description]"\n'
+        '---\n\n'
+    )
+    skill_md_path = os.path.join(PLATFORMS_DIR, "claude", "SKILL.md")
+    write_file(skill_md_path, frontmatter + output)
 
 
 def generate_cursor(core, platform_config):
@@ -302,8 +313,18 @@ def generate_codex(core, platform_config):
     output = render_template(template, context)
     output = substitute_tools(output, platform_config["toolMapping"])
 
-    output_path = os.path.join(PLATFORMS_DIR, "codex", "AGENTS.md")
-    write_file(output_path, output)
+    # Generate SKILL.md (Codex skill format: YAML frontmatter + prompt content)
+    frontmatter = (
+        '---\n'
+        'name: specops\n'
+        'description: "Spec-driven development workflow - transforms ideas into'
+        ' structured specifications (requirements, design, tasks) before'
+        ' implementation. Use when building features, fixing bugs, refactoring,'
+        ' or designing systems."\n'
+        '---\n\n'
+    )
+    skill_md_path = os.path.join(PLATFORMS_DIR, "codex", "SKILL.md")
+    write_file(skill_md_path, frontmatter + output)
 
 
 def generate_copilot(core, platform_config):
@@ -328,8 +349,14 @@ def generate_copilot(core, platform_config):
     output = render_template(template, context)
     output = substitute_tools(output, platform_config["toolMapping"])
 
-    output_path = os.path.join(PLATFORMS_DIR, "copilot", "copilot-instructions.md")
-    write_file(output_path, output)
+    # Generate specops.instructions.md (Copilot scoped instructions: applyTo frontmatter)
+    frontmatter = (
+        '---\n'
+        'applyTo: "**"\n'
+        '---\n\n'
+    )
+    output_path = os.path.join(PLATFORMS_DIR, "copilot", "specops.instructions.md")
+    write_file(output_path, frontmatter + output)
 
 
 GENERATORS = {

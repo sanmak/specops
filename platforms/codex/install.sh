@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # SpecOps Installer — OpenAI Codex
-# Installs SpecOps agent instructions for OpenAI Codex
+# Installs SpecOps skill for OpenAI Codex
 
 set -e
 
@@ -13,45 +13,22 @@ echo ""
 
 # Default to current directory (project-level install)
 INSTALL_DIR="${1:-.}"
-TARGET="$INSTALL_DIR/AGENTS.md"
+TARGET_DIR="$INSTALL_DIR/.codex/skills/specops"
 
-if [ -f "$TARGET" ]; then
-  echo "AGENTS.md already exists at $TARGET"
-  echo ""
-  echo "Options:"
-  echo "1) Append SpecOps instructions to existing AGENTS.md"
-  echo "2) Replace AGENTS.md with SpecOps instructions"
-  echo "3) Cancel"
-  read -rp "Select option [1-3]: " choice
-
-  case $choice in
-    1)
-      echo "" >> "$TARGET"
-      echo "---" >> "$TARGET"
-      echo "" >> "$TARGET"
-      cat "$SCRIPT_DIR/AGENTS.md" >> "$TARGET"
-      echo "Appended SpecOps instructions to $TARGET"
-      ;;
-    2)
-      cp "$SCRIPT_DIR/AGENTS.md" "$TARGET"
-      echo "Replaced $TARGET with SpecOps instructions"
-      ;;
-    3)
-      echo "Cancelled."
-      exit 0
-      ;;
-    *)
-      echo "Invalid option. Exiting."
-      exit 1
-      ;;
-  esac
-else
-  cp "$SCRIPT_DIR/AGENTS.md" "$TARGET"
-  echo "Created $TARGET"
-fi
+echo "Installing to: $TARGET_DIR/SKILL.md"
+mkdir -p "$TARGET_DIR"
+cp "$SCRIPT_DIR/SKILL.md" "$TARGET_DIR/"
 
 echo ""
 echo "Installed successfully!"
+echo ""
+
+if [ -f "$TARGET_DIR/SKILL.md" ]; then
+  echo "Installed files verified at $TARGET_DIR"
+else
+  echo "WARNING: Installation may be incomplete — missing files in $TARGET_DIR"
+fi
+
 echo ""
 echo "Next steps:"
 echo "1. Run Codex in your project"

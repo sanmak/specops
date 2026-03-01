@@ -89,19 +89,17 @@ for platform in claude cursor codex copilot; do
   check_file "platforms/$platform/install.sh"
   check_file "platforms/$platform/README.md"
 done
-check_file "platforms/claude/skill.json"
-check_file "platforms/claude/prompt.md"
+check_file "platforms/claude/SKILL.md"
 check_file "platforms/cursor/specops.mdc"
-check_file "platforms/codex/AGENTS.md"
-check_file "platforms/copilot/copilot-instructions.md"
+check_file "platforms/codex/SKILL.md"
+check_file "platforms/copilot/specops.instructions.md"
 echo ""
 
 # Check legacy skills directory (backward compat)
 echo "Legacy Skills Directory:"
 check_dir "skills"
 check_dir "skills/specops"
-check_file "skills/specops/skill.json"
-check_file "skills/specops/prompt.md"
+check_file "skills/specops/SKILL.md"
 echo ""
 
 # Check examples directory
@@ -140,8 +138,6 @@ json_files=(
   "examples/.specops.json"
   "examples/.specops.minimal.json"
   "examples/.specops.full.json"
-  skills/specops/skill.json
-  platforms/claude/skill.json
   platforms/claude/platform.json
   platforms/cursor/platform.json
   platforms/codex/platform.json
@@ -175,7 +171,7 @@ echo ""
 
 # Run build validation if generated files exist
 echo "Build Validation:"
-if [ -f "platforms/claude/prompt.md" ] && [ -f "platforms/cursor/specops.mdc" ] && [ -f "platforms/codex/AGENTS.md" ] && [ -f "platforms/copilot/copilot-instructions.md" ]; then
+if [ -f "platforms/claude/SKILL.md" ] && [ -f "platforms/cursor/specops.mdc" ] && [ -f "platforms/codex/SKILL.md" ] && [ -f "platforms/copilot/specops.instructions.md" ]; then
   if python3 generator/validate.py 2>/dev/null; then
     echo "  OK: All platform outputs validated"
   else

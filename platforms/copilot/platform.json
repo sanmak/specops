@@ -2,12 +2,12 @@
   "name": "copilot",
   "displayName": "GitHub Copilot",
   "version": "1.0.0",
-  "instructionFormat": "instructions_md",
+  "instructionFormat": "instructions_scoped",
   "outputFiles": {
-    "instructions": "copilot-instructions.md"
+    "instructions": "specops.instructions.md"
   },
   "installLocation": {
-    "project": ".github/copilot-instructions.md"
+    "project": ".github/instructions/specops.instructions.md"
   },
   "capabilities": {
     "canExecuteCode": true,

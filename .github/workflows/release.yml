@@ -44,17 +44,15 @@ jobs:
       - name: Regenerate checksums
         run: |
           shasum -a 256 \
-            skills/specops/skill.json \
-            skills/specops/prompt.md \
+            skills/specops/SKILL.md \
             schema.json \
-            platforms/claude/skill.json \
-            platforms/claude/prompt.md \
+            platforms/claude/SKILL.md \
             platforms/claude/platform.json \
             platforms/cursor/specops.mdc \
             platforms/cursor/platform.json \
-            platforms/codex/AGENTS.md \
+            platforms/codex/SKILL.md \
             platforms/codex/platform.json \
-            platforms/copilot/copilot-instructions.md \
+            platforms/copilot/specops.instructions.md \
             platforms/copilot/platform.json \
             core/workflow.md \
             core/safety.md \
@@ -65,11 +63,14 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add \
-            skills/specops/skill.json \
-            platforms/claude/skill.json \
+            skills/specops/SKILL.md \
+            platforms/claude/SKILL.md \
             platforms/claude/platform.json \
+            platforms/cursor/specops.mdc \
             platforms/cursor/platform.json \
+            platforms/codex/SKILL.md \
             platforms/codex/platform.json \
+            platforms/copilot/specops.instructions.md \
             platforms/copilot/platform.json \
             CHECKSUMS.sha256
           git diff --cached --quiet && echo "No changes to commit" && exit 0

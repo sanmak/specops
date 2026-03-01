@@ -44,8 +44,6 @@ echo "Bumping version to $VERSION"
 
 # --- List of JSON files to update ---
 FILES=(
-  "skills/specops/skill.json"
-  "platforms/claude/skill.json"
   "platforms/claude/platform.json"
   "platforms/cursor/platform.json"
   "platforms/codex/platform.json"
@@ -81,17 +79,15 @@ if [ "$REGEN_CHECKSUMS" = true ]; then
   echo "Regenerating CHECKSUMS.sha256..."
   cd "$ROOT_DIR"
   shasum -a 256 \
-    skills/specops/skill.json \
-    skills/specops/prompt.md \
+    skills/specops/SKILL.md \
     schema.json \
-    platforms/claude/skill.json \
-    platforms/claude/prompt.md \
+    platforms/claude/SKILL.md \
     platforms/claude/platform.json \
     platforms/cursor/specops.mdc \
     platforms/cursor/platform.json \
-    platforms/codex/AGENTS.md \
+    platforms/codex/SKILL.md \
     platforms/codex/platform.json \
-    platforms/copilot/copilot-instructions.md \
+    platforms/copilot/specops.instructions.md \
     platforms/copilot/platform.json \
     core/workflow.md \
     core/safety.md \

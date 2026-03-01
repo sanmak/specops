@@ -76,10 +76,10 @@ def get_generated_files():
     """Find all generated platform output files."""
     generated = {}
     platform_outputs = {
-        "claude": "prompt.md",
+        "claude": "SKILL.md",
         "cursor": "specops.mdc",
-        "codex": "AGENTS.md",
-        "copilot": "copilot-instructions.md",
+        "codex": "SKILL.md",
+        "copilot": "specops.instructions.md",
     }
 
     for platform, filename in platform_outputs.items():
@@ -129,24 +129,27 @@ def check_markers_present(platform, content, markers, category):
     return errors
 
 
-def validate_mdc_format(content):
-    """Validate Cursor MDC format (frontmatter + body)."""
+def validate_frontmatter_format(content, platform, required_fields):
+    """Validate YAML frontmatter format (--- delimited with required fields)."""
     errors = []
     if not content.startswith("---\n"):
-        errors.append("  Cursor .mdc file must start with YAML frontmatter (---)")
-        return errors
+        errors.append(f"  {platform} file must start with YAML frontmatter (---)")
+        return errors, content
 
     # Find closing frontmatter
     second_dash = content.find("---\n", 4)
     if second_dash == -1:
-        errors.append("  Cursor .mdc file has unclosed YAML frontmatter")
-        return errors
+        errors.append(f"  {platform} file has unclosed YAML frontmatter")
+        return errors, content
 
     frontmatter = content[4:second_dash]
-    if "description:" not in frontmatter:
-        errors.append("  Cursor .mdc frontmatter missing 'description' field")
+    for field in required_fields:
+        if f"{field}:" not in frontmatter:
+            errors.append(f"  {platform} frontmatter missing '{field}' field")
 
-    return errors
+    # Return body content (after frontmatter) for further validation
+    body = content[second_dash + 4:]
+    return errors, body
 
 
 def validate_platform(platform, info):
@@ -171,7 +174,25 @@ def validate_platform(platform, info):
 
     # Platform-specific format validation
     if platform == "cursor":
-        errors.extend(validate_mdc_format(content))
+        fmt_errors, _ = validate_frontmatter_format(
+            content, "Cursor .mdc", ["description"]
+        )
+        errors.extend(fmt_errors)
+    elif platform == "claude":
+        fmt_errors, _ = validate_frontmatter_format(
+            content, "Claude SKILL.md", ["name", "description"]
+        )
+        errors.extend(fmt_errors)
+    elif platform == "codex":
+        fmt_errors, _ = validate_frontmatter_format(
+            content, "Codex SKILL.md", ["name", "description"]
+        )
+        errors.extend(fmt_errors)
+    elif platform == "copilot":
+        fmt_errors, _ = validate_frontmatter_format(
+            content, "Copilot specops.instructions.md", ["applyTo"]
+        )
+        errors.extend(fmt_errors)
 
     return errors
 
