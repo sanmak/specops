@@ -17,6 +17,14 @@ SpecOps transforms how you work with AI coding assistants. Instead of jumping st
 
 One command triggers a 4-phase workflow: understand your codebase, generate a structured spec, implement it, and verify the result.
 
+### Team Review Workflow
+
+<p align="center">
+  <img src="assets/review-workflow.svg" alt="SpecOps collaborative review workflow: draft, review, revise, approve, implement" width="800"/>
+</p>
+
+For teams, SpecOps adds a structured review cycle between spec creation and implementation. Engineers review specs collaboratively, provide section-by-section feedback, and approve before coding begins. See [TEAM_GUIDE.md](TEAM_GUIDE.md) for the full team workflow.
+
 ## Quick Start
 
 ### Install
@@ -55,11 +63,15 @@ git clone https://github.com/sanmak/specops.git && cd specops && bash setup.sh
 **Claude Code:**
 ```
 /specops Add user authentication with OAuth
+/specops view auth-feature
+/specops list
 ```
 
 **Cursor / Codex / Copilot:**
 ```
 Use specops to add user authentication with OAuth
+View the auth-feature spec
+List all specops specs
 ```
 
 ## What Gets Created
@@ -72,10 +84,10 @@ Use specops to add user authentication with OAuth
 
 | Platform | Status | Trigger |
 |----------|--------|---------|
-| **Claude Code** | Supported | `/specops [description]` |
-| **Cursor** | Supported | `Use specops to [description]` |
-| **OpenAI Codex** | Supported | `Use specops to [description]` |
-| **GitHub Copilot** | Supported | `Use specops to [description]` |
+| **Claude Code** | Supported | `/specops [description]`, `/specops view`, `/specops list` |
+| **Cursor** | Supported | `Use specops to [description]`, `View the ... spec`, `List all specops specs` |
+| **OpenAI Codex** | Supported | `Use specops to [description]`, `View the ... spec`, `List all specops specs` |
+| **GitHub Copilot** | Supported | `Use specops to [description]`, `View the ... spec`, `List all specops specs` |
 | Windsurf | Planned | — |
 | Continue.dev | Planned | — |
 
@@ -88,7 +100,8 @@ Create `.specops.json` in your project root. Configuration is optional — SpecO
   "specsDir": ".specops",
   "team": {
     "conventions": ["Use TypeScript", "Write tests for business logic"],
-    "reviewRequired": true
+    "reviewRequired": true,
+    "specReview": { "enabled": true, "minApprovals": 2 }
   },
   "implementation": {
     "autoCommit": false,

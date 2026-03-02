@@ -1,0 +1,31 @@
+{
+  "id": "user-authentication",
+  "type": "feature",
+  "status": "approved",
+  "version": 2,
+  "created": "2026-02-25T09:00:00Z",
+  "updated": "2026-02-27T16:30:00Z",
+  "author": {
+    "name": "Alice Chen",
+    "email": "alice@acme.com"
+  },
+  "reviewers": [
+    {
+      "name": "Bob Martinez",
+      "email": "bob@acme.com",
+      "status": "approved",
+      "reviewedAt": "2026-02-26T14:00:00Z",
+      "round": 2
+    },
+    {
+      "name": "Carol Park",
+      "email": "carol@acme.com",
+      "status": "approved",
+      "reviewedAt": "2026-02-27T11:00:00Z",
+      "round": 2
+    }
+  ],
+  "reviewRounds": 2,
+  "approvals": 2,
+  "requiredApprovals": 2
+}

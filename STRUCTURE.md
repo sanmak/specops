@@ -21,8 +21,11 @@ specops/
 ├── assets/                               # Visual assets (SVG diagrams)
 │   ├── workflow.svg                      # 4-phase workflow diagram
 │   ├── architecture.svg                  # Three-layer architecture diagram
-│   └── spec-structure.svg                # Spec output structure diagram
+│   ├── spec-structure.svg                # Spec output structure diagram
+│   └── review-workflow.svg              # Review workflow diagram
 ├── schema.json                           # JSON Schema for .specops.json
+├── spec-schema.json                      # JSON Schema for spec.json validation
+├── index-schema.json                     # JSON Schema for index.json validation
 ├── setup.sh                              # Universal installer (multi-platform)
 ├── verify.sh                             # Post-installation verification
 │
@@ -40,6 +43,7 @@ specops/
 │   ├── custom-templates.md               # Custom template resolution logic
 │   ├── config-handling.md                # Configuration defaults and handling
 │   ├── error-handling.md                 # Error handling, review process, success criteria
+│   ├── review-workflow.md               # Collaborative spec review workflow
 │   ├── tool-abstraction.md               # Abstract tool operations and capability flags
 │   └── templates/                        # Default spec templates
 │       ├── feature-requirements.md       # Feature requirements template
@@ -47,7 +51,8 @@ specops/
 │       ├── refactor.md                   # Refactor template
 │       ├── design.md                     # Design document template
 │       ├── tasks.md                      # Task breakdown template
-│       └── implementation.md             # Implementation notes template
+│       ├── implementation.md             # Implementation notes template
+│       └── reviews.md                   # Review feedback template
 │
 ├── platforms/                            # Platform-specific adapters
 │   ├── claude/                           # Claude Code adapter
@@ -89,7 +94,8 @@ specops/
 │   ├── test_schema_constraints.py        # Tests schema rejects invalid inputs
 │   ├── check_schema_sync.py             # Validates schema.json is well-formed
 │   ├── test_platform_consistency.py      # Checks all platform outputs are consistent
-│   └── test_build.py                     # Tests build system generates valid outputs
+│   ├── test_build.py                     # Tests build system generates valid outputs
+│   └── test_spec_schema.py              # Validates spec.json against spec-schema.json
 │
 ├── .github/
 │   └── workflows/
@@ -99,6 +105,7 @@ specops/
     ├── .specops.json                     # Standard configuration
     ├── .specops.minimal.json             # Minimal configuration
     ├── .specops.full.json                # Full configuration
+    ├── .specops.review.json              # Review-enabled configuration
     ├── templates/                        # Vertical-specific templates
     │   ├── infra-requirements.md
     │   ├── infra-design.md

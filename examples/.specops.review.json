@@ -1,0 +1,26 @@
+{
+  "$schema": "../schema.json",
+  "specsDir": ".specops",
+  "vertical": "backend",
+  "team": {
+    "conventions": [
+      "Use TypeScript strict mode",
+      "Write tests for all business logic"
+    ],
+    "specReview": {
+      "enabled": true,
+      "minApprovals": 2
+    },
+    "taskTracking": "github",
+    "codeReview": {
+      "required": true,
+      "minApprovals": 2,
+      "requireTests": true
+    }
+  },
+  "implementation": {
+    "autoCommit": false,
+    "createPR": true,
+    "testing": "auto"
+  }
+}

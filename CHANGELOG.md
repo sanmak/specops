@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Spec viewing**: `view <spec-name>` with 5 view modes — summary (default), full, section-specific, walkthrough, and status
+- **Spec listing**: `list` command for overview dashboard of all specs with status, type, author, and progress
+- **View combinations**: view multiple sections together (e.g., `view auth-feature requirements design`)
+- **Interactive walkthrough**: guided section-by-section tour with AI commentary (falls back to annotated full view on non-interactive platforms)
+- **Collaborative spec review workflow**: structured team review with approval gates
+- `team.specReview` configuration (`enabled`, `minApprovals`) for team review workflow
+- `spec.json` per-spec metadata file (always created) tracking lifecycle status, author, reviewers, approvals
+- `index.json` auto-generated global spec index for quick dashboard lookups
+- `reviews.md` structured review feedback organized by review rounds
+- Review mode auto-detection via git email comparison with spec author
+- Revision mode for addressing reviewer feedback and resubmitting
+- Implementation gate blocking Phase 3 until required approvals are met
+- Spec lifecycle: draft → in-review → approved → implementing → completed
+- Status dashboard (`/specops status`) for team visibility into all active specs
+- `spec-schema.json` and `index-schema.json` for validating metadata files
+- `assets/review-workflow.svg` diagram for the review process
+- Platform-specific review behavior documentation in TEAM_GUIDE.md
+- Review safety rules in core/safety.md
+- Example review-enabled config (`examples/.specops.review.json`)
+- Example spec.json and reviews.md in feature-user-authentication example
+
 ## [1.0.0] - 2026-02-28
 
 ### Added

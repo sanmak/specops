@@ -18,6 +18,7 @@ def main():
         "examples/.specops.json",
         "examples/.specops.minimal.json",
         "examples/.specops.full.json",
+        "examples/.specops.review.json",
     ]
 
     errors = 0

@@ -58,12 +58,33 @@ WORKFLOW_MARKERS = [
     "Phase 4: Complete",
 ]
 
+# Review workflow markers that MUST appear
+REVIEW_MARKERS = [
+    "spec.json",
+    "reviews.md",
+    "review mode",
+    "revision mode",
+    "implementation gate",
+    "Status Dashboard",
+]
+
 # Vertical markers that MUST appear
 VERTICAL_MARKERS = [
     "### infrastructure",
     "### data",
     "### library",
     "### frontend",
+]
+
+# View workflow markers that MUST appear
+VIEW_MARKERS = [
+    "Spec Viewing",
+    "View/List Mode Detection",
+    "List Specs",
+    "View: Summary",
+    "View: Full",
+    "View: Walkthrough",
+    "View: Status",
 ]
 
 
@@ -169,8 +190,14 @@ def validate_platform(platform, info):
     # Check workflow present
     errors.extend(check_markers_present(platform, content, WORKFLOW_MARKERS, "workflow"))
 
+    # Check review workflow present
+    errors.extend(check_markers_present(platform, content, REVIEW_MARKERS, "review"))
+
     # Check verticals present
     errors.extend(check_markers_present(platform, content, VERTICAL_MARKERS, "vertical"))
+
+    # Check view workflow present
+    errors.extend(check_markers_present(platform, content, VIEW_MARKERS, "view"))
 
     # Platform-specific format validation
     if platform == "cursor":
@@ -225,7 +252,7 @@ def main():
     print("\nCross-platform consistency:")
     if len(generated) >= 2:
         platforms = list(generated.keys())
-        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS:
+        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + REVIEW_MARKERS + VIEW_MARKERS:
             present_in = [p for p in platforms if marker in generated[p]["content"]]
             if len(present_in) != len(platforms):
                 missing = set(platforms) - set(present_in)

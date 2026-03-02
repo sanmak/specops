@@ -28,6 +28,37 @@ Refactor payment service to use repository pattern
 
 # Implement existing spec
 implement auth-feature
+
+# Review a teammate's spec
+review user-auth
+
+# Revise spec after feedback
+revise user-auth
+
+# Show all specs and their status
+status
+
+# Show only specs needing review
+status in-review
+
+# View a spec (executive summary)
+view auth-feature
+
+# View specific sections
+view auth-feature design
+view auth-feature requirements design
+
+# View full spec content
+view auth-feature full
+
+# Interactive walkthrough
+view auth-feature walkthrough
+
+# Quick status/progress check
+view auth-feature status
+
+# List all specs
+list
 ```
 
 ## Configuration File (.specops.json)
@@ -52,18 +83,22 @@ implement auth-feature
 
 ```
 .specops/
+  index.json             # Auto-generated spec dashboard
   feature-name/
-    requirements.md    # What (user stories, acceptance criteria)
-    design.md          # How (architecture, decisions, diagrams)
-    tasks.md           # Steps (implementation tasks)
-    implementation.md  # (optional) Decisions, deviations, blockers
+    spec.json            # Lifecycle metadata (always created)
+    requirements.md      # What (user stories, acceptance criteria)
+    design.md            # How (architecture, decisions, diagrams)
+    tasks.md             # Steps (implementation tasks)
+    implementation.md    # (optional) Decisions, deviations, blockers
+    reviews.md           # (optional) Review feedback
 ```
 
 ## Workflow Phases
 
 1. **Understand** - Agent analyzes request and codebase
-2. **Spec** - Creates structured specification
-3. **Implement** - Executes tasks following spec
+2. **Spec** - Creates structured specification (always creates spec.json)
+2.5. **Review** - Team reviews spec, provides feedback, approves (if specReview enabled)
+3. **Implement** - Executes tasks following spec (gate checks approvals)
 4. **Complete** - Verifies, commits, creates PR
 
 ## Configuration Options
@@ -76,6 +111,8 @@ implement auth-feature
 | `templates.tasks` | string | `default` | max 100 chars | Custom template for tasks.md |
 | `team.conventions` | string[] | `[]` | max 30 items, each max 500 chars | Team-specific development conventions |
 | `team.reviewRequired` | boolean | `false` | | Require approval before implementing |
+| `team.specReview.enabled` | boolean | `false` | | Enable collaborative spec review workflow |
+| `team.specReview.minApprovals` | integer | `1` | min 1, max 10 | Approvals required before implementation |
 | `team.taskTracking` | `github`/`jira`/`linear`/`none` | `none` | enum | Task tracking integration |
 | `team.taskPrefix` | string | | max 20 chars | Task/ticket prefix (e.g., `PROJ-`) |
 | `implementation.autoCommit` | boolean | `false` | | Auto-commit after tasks |
@@ -294,8 +331,10 @@ git push
 ## Keyboard Shortcuts (in Claude Code)
 
 ```
-/specops          # Launch SpecOps agent
-Ctrl+C         # Cancel current operation
+/specops                        # Launch SpecOps agent
+/specops view <spec-name>       # View a spec
+/specops list                   # List all specs
+Ctrl+C                          # Cancel current operation
 ```
 
 ## Example Session Flow
@@ -309,6 +348,19 @@ Agent:
 ✅ Spec created in .specops/payment-processing/
 📊 3 user stories, 8 components, 12 tasks
 🔍 Ready for review
+
+You: /specops view payment-processing
+
+Agent:
+# payment-processing
+Type: Feature | Status: Draft | Version: v1
+## What
+Add Stripe-based payment processing with checkout flow...
+## Key Decisions
+- Payment provider: Stripe (chosen over Braintree)
+- Checkout flow: Server-side sessions
+## Progress
+Completed: 0/12 tasks (0%)
 
 You: Looks good, proceed
 
@@ -356,6 +408,14 @@ Agent:
     "testing": "auto"
   }
 }
+```
+
+### Team Review
+```json
+{
+  "team": {
+    "specReview": { "enabled": true, "minApprovals": 2 }
+  }
 ```
 
 ---

@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" width="800" height="520">
+  <!-- Background -->
+  <rect width="800" height="520" fill="#ffffff" rx="12"/>
+
+  <!-- Title -->
+  <text x="400" y="32" text-anchor="middle" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="18" font-weight="bold">Collaborative Spec Review Workflow</text>
+
+  <!-- Swim lane headers -->
+  <rect x="30" y="50" width="220" height="30" rx="4" fill="#eff6ff" stroke="#2563eb" stroke-width="1"/>
+  <text x="140" y="70" text-anchor="middle" fill="#2563eb" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="bold">Engineer A (Author)</text>
+
+  <rect x="290" y="50" width="220" height="30" rx="4" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1"/>
+  <text x="400" y="70" text-anchor="middle" fill="#7c3aed" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="bold">Git Repository</text>
+
+  <rect x="550" y="50" width="220" height="30" rx="4" fill="#ecfdf5" stroke="#059669" stroke-width="1"/>
+  <text x="660" y="70" text-anchor="middle" fill="#059669" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="bold">Engineer B (Reviewer)</text>
+
+  <!-- Swim lane divider lines -->
+  <line x1="270" y1="50" x2="270" y2="500" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4"/>
+  <line x1="530" y1="50" x2="530" y2="500" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4"/>
+
+  <!-- Step 1: Create Spec -->
+  <rect x="50" y="100" width="180" height="50" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="140" y="121" text-anchor="middle" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-weight="bold">1. Create Spec</text>
+  <text x="140" y="138" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">requirements + design + tasks</text>
+
+  <!-- Status badge: draft -->
+  <rect x="60" y="155" width="50" height="18" rx="9" fill="#3b82f6"/>
+  <text x="85" y="167" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9" font-weight="bold">draft</text>
+
+  <!-- File icons next to step 1 -->
+  <rect x="175" y="155" width="50" height="18" rx="4" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+  <text x="200" y="167" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9">spec.json</text>
+
+  <!-- Arrow 1→2 -->
+  <line x1="230" y1="125" x2="310" y2="125" stroke="#9ca3af" stroke-width="1.5"/>
+  <polygon points="310,121 318,125 310,129" fill="#9ca3af"/>
+
+  <!-- Step 2: Commit & Push -->
+  <rect x="320" y="100" width="160" height="50" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="400" y="121" text-anchor="middle" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-weight="bold">2. Commit &amp; Push</text>
+  <text x="400" y="138" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">spec branch / PR</text>
+
+  <!-- Status badge: in-review -->
+  <rect x="340" y="155" width="65" height="18" rx="9" fill="#6366f1"/>
+  <text x="372" y="167" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9" font-weight="bold">in-review</text>
+
+  <!-- Arrow 2→3 -->
+  <line x1="480" y1="125" x2="560" y2="195" stroke="#9ca3af" stroke-width="1.5"/>
+  <polygon points="556,199 564,199 560,190" fill="#9ca3af"/>
+
+  <!-- Step 3: Pull & Review -->
+  <rect x="570" y="180" width="180" height="50" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="660" y="201" text-anchor="middle" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-weight="bold">3. Pull &amp; Review</text>
+  <text x="660" y="218" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">read spec, provide feedback</text>
+
+  <!-- Step 4: Submit Feedback -->
+  <rect x="570" y="250" width="180" height="50" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="660" y="271" text-anchor="middle" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-weight="bold">4. Submit Feedback</text>
+  <text x="660" y="288" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">verdict + section comments</text>
+
+  <!-- File icon: reviews.md -->
+  <rect x="695" y="305" width="55" height="18" rx="4" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+  <text x="722" y="317" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9">reviews.md</text>
+
+  <!-- Status badge: changes-requested -->
+  <rect x="570" y="305" width="110" height="18" rx="9" fill="#f59e0b"/>
+  <text x="625" y="317" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9" font-weight="bold">changes-requested</text>
+
+  <!-- Arrow 4→5 (feedback loop going left) -->
+  <path d="M 570,275 Q 520,275 520,340 Q 520,355 230,355" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5"/>
+  <polygon points="234,351 226,355 234,359" fill="#f59e0b"/>
+
+  <!-- Feedback loop label -->
+  <text x="400" y="348" text-anchor="middle" fill="#f59e0b" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10" font-style="italic">revision cycle</text>
+
+  <!-- Step 5: Revise Spec -->
+  <rect x="50" y="335" width="180" height="50" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="140" y="356" text-anchor="middle" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-weight="bold">5. Revise Spec</text>
+  <text x="140" y="373" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">address feedback, bump version</text>
+
+  <!-- Status badge: in-review v2 -->
+  <rect x="60" y="390" width="80" height="18" rx="9" fill="#6366f1"/>
+  <text x="100" y="402" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9" font-weight="bold">in-review v2</text>
+
+  <!-- Arrow 5→6 (back right to reviewer) -->
+  <path d="M 230,360 Q 400,360 400,400 Q 400,420 560,420" fill="none" stroke="#9ca3af" stroke-width="1.5"/>
+  <polygon points="556,416 564,420 556,424" fill="#9ca3af"/>
+
+  <!-- Step 6: Approve -->
+  <rect x="570" y="400" width="180" height="50" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="660" y="421" text-anchor="middle" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-weight="bold">6. Approve</text>
+  <text x="660" y="438" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">meets required approvals</text>
+
+  <!-- Status badge: approved -->
+  <rect x="600" y="455" width="65" height="18" rx="9" fill="#10b981"/>
+  <text x="632" y="467" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9" font-weight="bold">approved</text>
+
+  <!-- Arrow 6→7 -->
+  <path d="M 570,425 Q 400,425 400,470 Q 400,480 230,480" fill="none" stroke="#9ca3af" stroke-width="1.5"/>
+  <polygon points="234,476 226,480 234,484" fill="#9ca3af"/>
+
+  <!-- Step 7: Implement -->
+  <rect x="50" y="460" width="180" height="40" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="140" y="478" text-anchor="middle" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-weight="bold">7. Implement</text>
+  <text x="140" y="492" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">gate passed, build it</text>
+
+  <!-- Final status badges -->
+  <rect x="60" y="503" width="85" height="14" rx="7" fill="#8b5cf6"/>
+  <text x="102" y="513" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="8" font-weight="bold">implementing</text>
+
+  <text x="155" y="513" text-anchor="middle" fill="#9ca3af" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">→</text>
+
+  <rect x="165" y="503" width="70" height="14" rx="7" fill="#10b981"/>
+  <text x="200" y="513" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="8" font-weight="bold">completed</text>
+</svg>

@@ -61,6 +61,23 @@ REQUIRED_MARKERS = {
         "Personal Data (PII)",
         "Data Classification",
     ],
+    "review_workflow": [
+        "spec.json",
+        "reviews.md",
+        "review mode",
+        "revision mode",
+        "implementation gate",
+        "Status Dashboard",
+    ],
+    "view": [
+        "Spec Viewing",
+        "View/List Mode Detection",
+        "List Specs",
+        "View: Summary",
+        "View: Full",
+        "View: Walkthrough",
+        "View: Status",
+    ],
 }
 
 

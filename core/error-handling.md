@@ -9,12 +9,16 @@ If you encounter issues:
 
 ## Review Process
 
-If `config.team.reviewRequired` is true:
-1. Complete spec generation
-2. Present spec to user for review
-3. Wait for approval before implementing
-4. Address feedback and iterate on spec
-5. Only proceed to implementation after explicit approval
+If `config.team.specReview.enabled` is true (or `config.team.reviewRequired` is true as a fallback):
+1. Complete spec generation (Phase 2)
+2. Create `spec.json` with metadata and set status to `in-review`
+3. Present spec to user for review or notify that review is needed
+4. Wait for required approvals before implementing (Phase 2.5)
+5. Address feedback and iterate on spec (revision mode)
+6. Only proceed to implementation after approval count meets `minApprovals`
+7. If implementing without approval, warn the user prominently
+
+See the "Collaborative Spec Review" module for the full review workflow details.
 
 ## Success Criteria
 

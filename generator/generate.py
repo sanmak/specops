@@ -96,6 +96,7 @@ def render_templates_section(templates):
         ("design", "design.md"),
         ("tasks", "tasks.md"),
         ("implementation", "implementation.md (Optional)"),
+        ("reviews", "reviews.md (Review Feedback)"),
     ]
 
     for key, title in template_order:
@@ -180,7 +181,31 @@ Your workflow:
 2. Validate specs are complete
 3. Execute tasks sequentially
 4. Track progress
-5. Report completion"""
+5. Report completion
+
+**View Spec:**
+User: "{command} view auth-feature"
+
+Your workflow:
+1. Read `.specops.json` config for specsDir
+2. Read spec files from `.specops/auth-feature/`
+3. Present a formatted summary view
+
+**View Specific Section:**
+User: "{command} view auth-feature design"
+
+Your workflow:
+1. Read `.specops.json` config for specsDir
+2. Read `.specops/auth-feature/design.md`
+3. Present the design section with metadata header
+
+**List All Specs:**
+User: "{command} list"
+
+Your workflow:
+1. Read `.specops.json` config for specsDir
+2. Read `.specops/index.json` (or scan spec directories)
+3. Present formatted spec overview table"""
     else:
         return """## Example Invocations
 
@@ -225,7 +250,31 @@ Your workflow:
 2. Validate specs are complete
 3. Execute tasks sequentially
 4. Track progress
-5. Report completion"""
+5. Report completion
+
+**View Spec:**
+User: "View the auth-feature spec"
+
+Your workflow:
+1. Read `.specops.json` config for specsDir
+2. Read spec files from `.specops/auth-feature/`
+3. Present a formatted summary view
+
+**View Specific Section:**
+User: "Show me the auth-feature design"
+
+Your workflow:
+1. Read `.specops.json` config for specsDir
+2. Read `.specops/auth-feature/design.md`
+3. Present the design section with metadata header
+
+**List All Specs:**
+User: "List all specops specs"
+
+Your workflow:
+1. Read `.specops.json` config for specsDir
+2. Read `.specops/index.json` (or scan spec directories)
+3. Present formatted spec overview table"""
 
 
 def generate_claude(core, platform_config):
@@ -237,6 +286,8 @@ def generate_claude(core, platform_config):
     context = {
         "workflow": core["workflow"],
         "config_handling": core["config-handling"],
+        "review_workflow": core["review-workflow"],
+        "view": core["view"],
         "safety": core["safety"],
         "simplicity": core["simplicity"],
         "data_handling": core["data-handling"],
@@ -274,6 +325,8 @@ def generate_cursor(core, platform_config):
     context = {
         "workflow": core["workflow"],
         "config_handling": core["config-handling"],
+        "review_workflow": core["review-workflow"],
+        "view": core["view"],
         "safety": core["safety"],
         "simplicity": core["simplicity"],
         "data_handling": core["data-handling"],
@@ -300,6 +353,8 @@ def generate_codex(core, platform_config):
     context = {
         "workflow": core["workflow"],
         "config_handling": core["config-handling"],
+        "review_workflow": core["review-workflow"],
+        "view": core["view"],
         "safety": core["safety"],
         "simplicity": core["simplicity"],
         "data_handling": core["data-handling"],
@@ -336,6 +391,8 @@ def generate_copilot(core, platform_config):
     context = {
         "workflow": core["workflow"],
         "config_handling": core["config-handling"],
+        "review_workflow": core["review-workflow"],
+        "view": core["view"],
         "safety": core["safety"],
         "simplicity": core["simplicity"],
         "data_handling": core["data-handling"],

@@ -46,6 +46,7 @@ run_test "Schema validation (examples)"     "python3 tests/test_schema_validatio
 run_test "Schema constraints"               "python3 tests/test_schema_constraints.py"
 run_test "Schema structure validation"       "python3 tests/check_schema_sync.py"
 run_test "Platform consistency"             "python3 tests/test_platform_consistency.py"
+run_test "Spec schema validation"           "python3 tests/test_spec_schema.py"
 run_test "Build system"                     "python3 tests/test_build.py"
 
 echo ""

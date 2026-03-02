@@ -79,6 +79,29 @@ The agent will:
 - Build `tasks.md` with implementation steps
 - Implement if you approve
 
+### 3. View Your Specs
+
+Once a spec exists, view it directly through the assistant instead of opening raw files:
+
+**Claude Code:**
+```
+/specops view login-page                   # Executive summary
+/specops view login-page design            # Design section only
+/specops view login-page full              # All sections
+/specops view login-page walkthrough       # Interactive guided tour
+/specops list                              # Overview of all specs
+```
+
+**Cursor / Codex:**
+```
+View the login-page spec
+Show me the login-page design
+Walk me through the login-page spec
+List all specops specs
+```
+
+View modes: `summary` (default), `full`, `status`, `walkthrough`, or specific sections (`requirements`, `design`, `tasks`, `implementation`, `reviews`). Combine sections: `view login-page requirements design`.
+
 ## Configuration
 
 ### Minimal
@@ -145,6 +168,18 @@ your-project/
       tasks.md                          (implementation task breakdown)
       implementation.md                 (optional: notes during implementation)
 ```
+
+## Team Review
+
+Enable collaborative spec review so teammates approve specs before implementation:
+
+1. **Enable** — add `"specReview": { "enabled": true, "minApprovals": 2 }` to `team` in `.specops.json`
+2. **Create spec** — spec gets `spec.json` with status `in-review`, commit and push
+3. **Review** — teammates pull and run `review <spec-name>` to provide feedback
+4. **Approve** — once approvals meet threshold, status becomes `approved`
+5. **Implement** — implementation gate passes, coding begins
+
+See [TEAM_GUIDE.md](TEAM_GUIDE.md) for the full team review workflow.
 
 ## Next Steps
 

@@ -32,6 +32,7 @@ python3 tests/test_schema_constraints.py     # schema rejects invalid inputs
 python3 tests/check_schema_sync.py           # schema parity across platforms
 python3 tests/test_platform_consistency.py   # all platform outputs are consistent
 python3 tests/test_build.py                  # generator system produces valid outputs
+python3 tests/test_spec_schema.py            # spec.json/index.json schema validation
 
 # Run installation verification
 bash verify.sh
@@ -58,7 +59,7 @@ generator/      Generates platform outputs from core + platform adapters
 ```
 
 The `core/` directory defines the workflow, safety rules, templates, and vertical adaptations once. The `generator/generate.py` script assembles platform-specific instruction files by:
-1. Loading all `core/*.md` modules (workflow, safety, config-handling, verticals, simplicity, data-handling, error-handling, custom-templates, and six spec templates from `core/templates/`)
+1. Loading all `core/*.md` modules (workflow, safety, config-handling, verticals, simplicity, data-handling, error-handling, custom-templates, view, and six spec templates from `core/templates/`)
 2. Loading `platforms/{name}/platform.json` for tool mappings and capabilities
 3. Rendering through `generator/templates/{name}.j2` Jinja2-style templates
 4. Substituting abstract tool operations (e.g., `READ_FILE`) with platform-specific language from each platform's `toolMapping`
@@ -78,10 +79,10 @@ Each `platform.json` declares capability flags (`canExecuteCode`, `canEditFiles`
 
 | Platform | Generated File | Entry Point |
 |----------|---------------|-------------|
-| Claude Code | `platforms/claude/SKILL.md` | `/specops` slash command |
-| Cursor | `platforms/cursor/specops.mdc` | `Use specops to ...` keyword |
-| OpenAI Codex | `platforms/codex/SKILL.md` | `Use specops to ...` keyword |
-| GitHub Copilot | `platforms/copilot/specops.instructions.md` | `Use specops to ...` keyword |
+| Claude Code | `platforms/claude/SKILL.md` | `/specops`, `/specops view`, `/specops list` |
+| Cursor | `platforms/cursor/specops.mdc` | `Use specops to ...`, `View the ... spec`, `List all specops specs` |
+| OpenAI Codex | `platforms/codex/SKILL.md` | `Use specops to ...`, `View the ... spec`, `List all specops specs` |
+| GitHub Copilot | `platforms/copilot/specops.instructions.md` | `Use specops to ...`, `View the ... spec`, `List all specops specs` |
 
 ### Legacy Directory
 
@@ -99,7 +100,7 @@ Each `platform.json` declares capability flags (`canExecuteCode`, `canEditFiles`
 
 ### Security-Sensitive Files
 
-These files require extra scrutiny when modified — they can alter agent behavior, security guardrails, or configuration validation: `core/workflow.md`, `core/safety.md`, `schema.json`, `platforms/claude/SKILL.md`, `setup.sh`, `scripts/remote-install.sh`, `generator/generate.py`.
+These files require extra scrutiny when modified — they can alter agent behavior, security guardrails, or configuration validation: `core/workflow.md`, `core/safety.md`, `core/review-workflow.md`, `schema.json`, `spec-schema.json`, `platforms/claude/SKILL.md`, `setup.sh`, `scripts/remote-install.sh`, `generator/generate.py`.
 
 ## Validation
 
@@ -108,6 +109,8 @@ These files require extra scrutiny when modified — they can alter agent behavi
 - **Safety markers present** — convention sanitization, template safety, path containment rules
 - **Template markers present** — all six spec templates (feature-requirements, bugfix, refactor, design, tasks, implementation)
 - **Workflow markers present** — all four phases documented
+- **Review markers present** — spec.json, reviews.md, review mode, revision mode, implementation gate, status dashboard
+- **View markers present** — spec viewing, view/list mode detection, list specs, summary/full/walkthrough/status views
 - **Vertical markers present** — all vertical adaptation rules included
 - **Format-specific rules** — e.g., Cursor `.mdc` files must have YAML frontmatter with `description`, Claude/Codex `SKILL.md` must have `name` and `description` in frontmatter, Copilot `specops.instructions.md` must have `applyTo` in frontmatter
 

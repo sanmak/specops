@@ -1,0 +1,106 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SpecOps Spec Metadata",
+  "description": "Per-spec metadata file (spec.json) tracking lifecycle status, authorship, and review state",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "maxLength": 100,
+      "pattern": "^[a-zA-Z0-9._-]+$",
+      "description": "Spec identifier matching the directory name"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["feature", "bugfix", "refactor"],
+      "description": "Type of specification"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "in-review", "approved", "implementing", "completed"],
+      "description": "Current lifecycle status"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Spec version, incremented on each revision round"
+    },
+    "created": {
+      "type": "string",
+      "maxLength": 30,
+      "description": "ISO 8601 timestamp when the spec was first created"
+    },
+    "updated": {
+      "type": "string",
+      "maxLength": 30,
+      "description": "ISO 8601 timestamp when spec.json was last modified"
+    },
+    "author": {
+      "type": "object",
+      "description": "Engineer who created the spec (populated from git config)",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 200
+        }
+      },
+      "required": ["name", "email"],
+      "additionalProperties": false
+    },
+    "reviewers": {
+      "type": "array",
+      "maxItems": 20,
+      "description": "List of reviewers and their review status",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "approved", "changes-requested"]
+          },
+          "reviewedAt": {
+            "type": "string",
+            "maxLength": 30,
+            "description": "ISO 8601 timestamp of the review"
+          },
+          "round": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Which review round this entry belongs to"
+          }
+        },
+        "required": ["name", "email", "status"],
+        "additionalProperties": false
+      }
+    },
+    "reviewRounds": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Current review iteration count"
+    },
+    "approvals": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Count of current-round approvals"
+    },
+    "requiredApprovals": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of approvals needed (copied from config at creation time)"
+    }
+  },
+  "required": ["id", "type", "status", "version", "created", "updated", "author"],
+  "additionalProperties": false
+}

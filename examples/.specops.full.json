@@ -24,6 +24,10 @@
       "Write meaningful commit messages following conventional commits"
     ],
     "reviewRequired": true,
+    "specReview": {
+      "enabled": true,
+      "minApprovals": 2
+    },
     "taskTracking": "linear",
     "codeReview": {
       "required": true,

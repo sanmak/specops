@@ -115,6 +115,23 @@ def main():
         "integrations": {"ci": "github-actions", "unknownField": "value"}
     }, "Rejects unknown property in integrations"))
 
+    # --- specReview constraints ---
+    check(expect_valid(schema, {
+        "team": {"specReview": {"enabled": True, "minApprovals": 2}}
+    }, "Valid specReview config"))
+    check(expect_valid(schema, {
+        "team": {"specReview": {"enabled": False}}
+    }, "specReview with only enabled is valid"))
+    check(expect_invalid(schema, {
+        "team": {"specReview": {"enabled": True, "minApprovals": 0}}
+    }, "Rejects minApprovals < 1"))
+    check(expect_invalid(schema, {
+        "team": {"specReview": {"enabled": True, "minApprovals": 11}}
+    }, "Rejects minApprovals > 10"))
+    check(expect_invalid(schema, {
+        "team": {"specReview": {"enabled": True, "unknownField": "value"}}
+    }, "Rejects unknown property in specReview"))
+
     # --- Module constraints ---
     check(expect_invalid(schema, {
         "modules": {"frontend": {"specsDir": "../../../etc"}}

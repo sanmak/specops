@@ -30,6 +30,13 @@ Use specops to add user authentication with OAuth
 Create a spec for fixing the 500 errors on checkout
 Spec-driven refactor of the API layer to use repository pattern
 Implement the auth-feature spec
+Review the oauth-auth spec
+Approve the oauth-auth spec with suggestion: add load testing
+Show specops status
+View the auth-feature spec
+Show me the auth-feature design
+Walk me through the auth-feature spec
+List all specops specs
 ```
 
 ## Notes

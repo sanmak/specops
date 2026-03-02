@@ -109,6 +109,25 @@
             }
           },
           "additionalProperties": false
+        },
+        "specReview": {
+          "type": "object",
+          "description": "Collaborative spec review workflow configuration. When enabled, specs go through a review cycle (draft → in-review → approved) before implementation.",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Enable collaborative spec review workflow. Falls back to reviewRequired if not set."
+            },
+            "minApprovals": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10,
+              "default": 1,
+              "description": "Number of approvals required before a spec can proceed to implementation"
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false

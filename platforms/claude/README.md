@@ -38,6 +38,15 @@ After installation, restart Claude Code and use the slash command:
 /specops bugfix Users getting 500 errors on checkout
 /specops refactor Extract API layer into repository pattern
 /specops implement auth-feature
+/specops review oauth-auth
+/specops revise oauth-auth
+/specops status
+/specops status in-review
+/specops view auth-feature
+/specops view auth-feature design
+/specops view auth-feature full
+/specops view auth-feature walkthrough
+/specops list
 ```
 
 ## Configuration

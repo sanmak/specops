@@ -111,12 +111,13 @@ new-project/
 ### Feature Development Workflow
 
 1. **Product Manager** creates feature brief
-2. **Developer** runs `/specops` to create spec
-3. **Spec Review** (if `reviewRequired: true`)
-   - PM reviews requirements
-   - Tech lead reviews design
-   - Team discusses in PR/meeting
-4. **Implementation** proceeds after approval
+2. **Developer** runs `/specops` to create spec (creates `spec.json` with status `draft`)
+3. **Spec Review** (if `specReview.enabled` or `reviewRequired: true`)
+   - Developer commits spec and pushes — status becomes `in-review`
+   - Reviewers pull and run `review <spec-name>` to provide structured feedback
+   - Author runs `revise <spec-name>` to address feedback (version increments, approvals reset)
+   - Reviewers approve — once `minApprovals` met, status becomes `approved`
+4. **Implementation** proceeds after approval (implementation gate checks `spec.json`)
 5. **Implementation Notes** tracked in `implementation.md` (decisions, deviations, blockers)
 6. **Code Review** follows normal process
 7. **Spec Update** if implementation deviates
@@ -139,9 +140,205 @@ new-project/
 5. **Continuous Testing** during refactor
 6. **Documentation Update**
 
+## Collaborative Spec Review
+
+<p align="center">
+  <img src="assets/review-workflow.svg" alt="SpecOps review workflow" width="800"/>
+</p>
+
+### Overview
+
+The collaborative review workflow adds structured team review between spec creation and implementation. Specs move through a lifecycle: `draft` → `in-review` → `approved` → `implementing` → `completed`.
+
+### Enable Review
+
+Add `specReview` to your `.specops.json`:
+
+```json
+{
+  "team": {
+    "specReview": { "enabled": true, "minApprovals": 2 }
+  }
+}
+```
+
+### Files Created
+
+- **`spec.json`** — Per-spec lifecycle metadata (always created, even without review enabled). Tracks status, version, author, reviewers, and approvals.
+- **`reviews.md`** — Structured review feedback organized by review rounds. Created during the first review.
+- **`index.json`** — Auto-generated global index at `<specsDir>/index.json`. Rebuilt whenever any `spec.json` changes.
+
+### How Identity Detection Works
+
+The agent runs `git config user.email` to identify the current user:
+- If the current user is **not** the spec author → **Review mode** (provide feedback and verdict)
+- If the current user **is** the author and changes were requested → **Revision mode** (address feedback)
+
+### Implementation Gate
+
+When review is enabled, Phase 3 (Implementation) checks `spec.json` before proceeding:
+- If status is `approved` → proceed to implementation
+- If not approved → warn the user and ask whether to override (interactive) or stop (non-interactive)
+
+### Status Dashboard
+
+View all specs and their review status:
+
+```
+/specops status              # Show all specs
+/specops status in-review    # Filter by status
+```
+
+```
+Spec Status Dashboard
+═══════════════════════════════════════════════════════════
+Spec                   Status         Approvals  Version
+───────────────────────────────────────────────────────────
+user-auth              approved       2/2        v2
+payment-gateway        in-review      1/2        v1
+refactor-api           draft          0/1        v1
+bugfix-checkout        implementing   2/2        v1
+═══════════════════════════════════════════════════════════
+Total: 4 specs | 1 approved | 1 in-review | 1 draft | 1 implementing
+```
+
+## Platform Review Behavior
+
+Review works across all platforms, with behavior adapted to each platform's capabilities.
+
+| Capability | Claude Code | Cursor | Codex | Copilot |
+|---|---|---|---|---|
+| Spec creation + spec.json | Full | Full | Full | Full |
+| Interactive review (ask questions) | Yes | Yes | No | Yes |
+| Review feedback collection | Section-by-section | Section-by-section | All-in-prompt | Section-by-section |
+| Verdict selection | Interactive choice | Interactive choice | Parsed from prompt | Interactive choice |
+| Revision mode | Interactive guidance | Interactive guidance | Prompt-directed | Interactive guidance |
+| Implementation gate override | Ask user | Ask user | Hard stop | Ask user |
+| Progress tracking | TodoWrite tool | Chat responses | stdout | Chat responses |
+
+### Claude Code Examples
+
+```
+/specops Add OAuth authentication          # Create spec
+/specops review oauth-auth                 # Review someone's spec
+/specops revise oauth-auth                 # Revise after feedback
+/specops implement oauth-auth              # Implement approved spec
+/specops status                            # Show all specs dashboard
+/specops status in-review                  # Show only specs needing review
+/specops view oauth-auth                   # View spec summary
+/specops view oauth-auth design            # View design section
+/specops view oauth-auth walkthrough       # Interactive guided tour
+/specops list                              # List all specs with status
+```
+
+### Cursor Examples
+
+```
+"Use specops to add OAuth authentication"
+"Review the oauth-auth spec"
+"Revise the oauth-auth spec based on feedback"
+"Implement the oauth-auth spec"
+"Show specops status"
+"View the oauth-auth spec"
+"Show me the oauth-auth design"
+"Walk me through the oauth-auth spec"
+"List all specops specs"
+```
+
+### Codex Examples
+
+```
+"Use specops to add OAuth authentication"
+"Review the oauth-auth spec — token refresh is missing from Story 3,
+ increase session limit to 50k. Request changes."
+"Revise oauth-auth — add token refresh to Story 3, update session limit to 50k"
+"Implement the oauth-auth spec"
+"View the oauth-auth spec"
+"List all specops specs"
+```
+
+> **Note:** Codex requires all feedback and verdict in the initial prompt since it cannot ask interactive questions.
+
+### Copilot Examples
+
+```
+"Use specops to add OAuth authentication"
+"Review the oauth-auth spec"
+"Approve the oauth-auth spec with suggestion: add load testing"
+"Implement the oauth-auth spec"
+"Show specops status"
+"View the oauth-auth spec"
+"Walk me through the oauth-auth spec"
+"List all specops specs"
+```
+
+### Platform Shortfalls
+
+- **Codex**: No interactive questions — reviewer must provide all feedback and verdict in prompt text. Cannot interactively override implementation gate. No section-by-section walkthrough.
+- **Cursor / Copilot**: No built-in progress tracking — review progress shown in chat responses only.
+- **All platforms**: No push notifications for review requests. Teams rely on git/PR/task-tracker notifications. Review is asynchronous via git commits.
+
+## Practical Team Workflow Example
+
+Three engineers collaborating on `feature-user-authentication`:
+
+```
+Timeline:
+─────────────────────────────────────────────────────────
+
+Day 1 - Alice (Claude Code):
+  /specops Add user authentication with OAuth
+  → Spec created in .specops/user-auth/
+  → spec.json: { status: "in-review", author: "alice@acme.com", version: 1 }
+  → git commit + push to branch spec/user-auth
+  → Creates PR #42: "Spec: User Authentication with OAuth"
+
+Day 1 - Bob (Cursor):
+  "Review the user-auth spec"
+  → Reads spec, provides feedback:
+    - requirements.md: "Missing token refresh in Story 3"
+    - design.md: "Session limit should be 50k not 10k"
+  → Verdict: Changes Requested
+  → reviews.md updated, spec.json: bob → changes-requested
+  → git commit + push
+
+Day 2 - Carol (Copilot):
+  "Review the user-auth spec"
+  → Reads spec, approves with suggestion:
+    - design.md: "Consider adding load testing"
+  → Verdict: Approved with suggestions
+  → reviews.md updated, spec.json: carol → approved, approvals: 1/2
+
+Day 2 - Alice (Claude Code):
+  /specops revise user-auth
+  → Agent shows Bob's feedback summary
+  → Alice revises: adds token refresh, updates session limit
+  → spec.json: { version: 2, reviewRounds: 2, approvals: 0 (reset) }
+  → git commit + push
+
+Day 2 - Bob (Cursor):
+  "Approve the user-auth spec"
+  → Reviews v2, approves
+  → spec.json: { approvals: 1/2 }
+
+Day 3 - Carol (Copilot):
+  "Approve the user-auth spec"
+  → spec.json: { status: "approved", approvals: 2/2 }
+
+Day 3 - Alice (Claude Code):
+  /specops implement user-auth
+  → Gate check passes (2/2 approvals)
+  → Implementation begins...
+  → spec.json: { status: "completed" }
+```
+
 ## Best Practices for Teams
 
-### 1. Commit Specs to Git
+### 1. Review Specs Collaboratively Before Implementing
+
+Enable `specReview` and require approvals from at least 2 team members before implementation begins. This catches design issues early and ensures team alignment.
+
+### 2. Commit Specs to Git
 ```bash
 git add .specops/
 git commit -m "Add spec for user authentication"
@@ -153,7 +350,7 @@ git commit -m "Add spec for user authentication"
 - Review in PRs
 - Documentation
 
-### 2. Review Specs in PRs
+### 3. Review Specs in PRs
 
 Include spec files in PR:
 ```
@@ -172,7 +369,7 @@ Files:
 - [ ] Implementation follows design
 - [ ] Tests cover acceptance criteria
 
-### 3. Use Consistent Naming
+### 4. Use Consistent Naming
 
 **Spec directory naming convention:**
 ```
@@ -186,7 +383,7 @@ Files:
 
 Pattern: `<type>-<brief-description>`
 
-### 4. Maintain Spec Quality
+### 5. Maintain Spec Quality
 
 **Good spec characteristics:**
 - Clear acceptance criteria
@@ -200,7 +397,7 @@ Pattern: `<type>-<brief-description>`
 - Archive completed specs
 - Learn from past specs
 
-### 5. Follow the Simplicity Principle
+### 6. Follow the Simplicity Principle
 
 SpecOps specs and implementations should be proportional to the task:
 - Small features get lean specs — skip irrelevant design.md sections
@@ -209,7 +406,7 @@ SpecOps specs and implementations should be proportional to the task:
 
 When reviewing specs, watch for over-engineering: abstractions used once, error handling for impossible scenarios, configuration for values that won't change.
 
-### 6. Track Metrics
+### 7. Track Metrics
 
 Monitor team usage:
 - Number of specs created per sprint
@@ -286,6 +483,7 @@ jobs:
 - [ ] Read example specs
 - [ ] Walk through demo workflow
 - [ ] Create first spec with mentor
+- [ ] Review team review workflow process
 - [ ] Review spec creation process
 
 ### Demo Workflow
@@ -293,9 +491,10 @@ jobs:
 **For new team members:**
 
 1. **Show existing spec**
-   ```bash
-   cat .specops/existing-feature/requirements.md
-   cat .specops/existing-feature/design.md
+   ```
+   /specops view existing-feature                # Summary overview
+   /specops view existing-feature walkthrough     # Guided tour
+   /specops list                                  # See all specs
    ```
 
 2. **Create sample spec together**
@@ -304,6 +503,10 @@ jobs:
    ```
 
 3. **Review generated spec**
+   ```
+   /specops view simple-feature                  # Quick summary
+   /specops view simple-feature design           # Dive into design
+   ```
    - Discuss requirements clarity
    - Review design decisions
    - Understand task breakdown
@@ -461,6 +664,7 @@ Anyone with write access to a project's `.specops.json` can influence agent beha
 {
   "team": {
     "reviewRequired": true,
+    "specReview": { "enabled": true, "minApprovals": 2 },
     "codeReview": {
       "required": true,
       "requireTests": true

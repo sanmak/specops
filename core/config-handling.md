@@ -40,14 +40,38 @@ Create specs in this structure:
 
 ```
 <specsDir>/
+  index.json             (auto-generated spec index — rebuilt after every spec.json mutation)
   <spec-name>/
-    requirements.md    (or bugfix.md for bugs, refactor.md for refactors)
+    spec.json            (per-spec lifecycle metadata — always created)
+    requirements.md      (or bugfix.md for bugs, refactor.md for refactors)
     design.md
     tasks.md
-    implementation.md  (optional - track implementation notes)
+    implementation.md    (optional - track implementation notes)
+    reviews.md           (optional - created during review cycle)
 ```
 
 Example: `.specops/user-auth-oauth/requirements.md`
+
+## Spec Review Configuration
+
+If `config.team.specReview` is configured:
+- **`enabled: true`**: Activate the collaborative review workflow. Specs pause after generation for team review.
+- **`minApprovals`**: Number of approvals required before a spec can proceed to implementation. Default 1.
+
+If `specReview` is not configured, fall back to `reviewRequired`:
+- `reviewRequired: true` enables review with `minApprovals = 1`.
+- `reviewRequired: false` (default) disables the review workflow.
+
+When both `specReview.enabled` and `reviewRequired` are set, `specReview.enabled` takes precedence.
+
+## Index Regeneration
+
+The agent rebuilds `<specsDir>/index.json` after every `spec.json` creation or update:
+1. Scan all subdirectories of `<specsDir>` for `spec.json` files
+2. Collect summary fields from each: `id`, `type`, `status`, `version`, `author` (name), `updated`
+3. Write the summaries as a JSON array to `<specsDir>/index.json`
+
+The index is a derived file — per-spec `spec.json` files are always the source of truth. If `index.json` is missing or has merge conflicts, regenerate it from per-spec files.
 
 ## Task Tracking Integration
 
