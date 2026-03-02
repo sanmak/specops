@@ -86,6 +86,8 @@ Changes to these files should include:
 - Analysis of security implications
 - Updated tests if applicable
 
+For PRs that touch these files, consider running Claude Code's `/security-review` command before submitting. See [SECURITY-AUDIT.md](SECURITY-AUDIT.md) for the latest audit results and methodology.
+
 ## Testing
 
 Before submitting a PR, verify:

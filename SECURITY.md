@@ -76,3 +76,11 @@ SpecOps operates within the following trust boundaries:
 3. **Use `reviewRequired: true`** to require human review before implementation
 4. **Do not store secrets** in `.specops.json` or specification files
 5. **Add `.specops/` to your project's `.gitignore`** if specs contain sensitive architectural details
+
+## Security Audits
+
+This project undergoes periodic security reviews using Claude Code's `/security-review` command, which performs automated static analysis with false-positive filtering and confidence scoring.
+
+**Latest audit**: 2026-03-02 — No high-confidence vulnerabilities found. See [SECURITY-AUDIT.md](SECURITY-AUDIT.md) for the full report.
+
+Audits are recommended before each release and after changes to [security-sensitive files](CLAUDE.md).

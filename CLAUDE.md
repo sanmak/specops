@@ -152,6 +152,7 @@ The SpecOps agent reads `.specops.json` from the target project (not this repo).
 | `schema.json` | Run `python3 tests/check_schema_sync.py` to verify schema is well-formed |
 | Shell scripts | Run `shellcheck` on modified scripts |
 | `hooks/*` | Run `shellcheck hooks/pre-commit hooks/pre-push` |
+| Security-sensitive files | Consider running `/security-review` before pushing |
 
 ## Commit Conventions
 
@@ -164,6 +165,10 @@ CI verifies generated files aren't stale — after regenerating, the diff of `pl
 ## Checksums
 
 `CHECKSUMS.sha256` contains SHA-256 hashes of critical files (SKILL.md, platform.json, workflow.md, safety.md). These are verified in CI. Regenerate with `bash scripts/bump-version.sh <version> --checksums`.
+
+## Security Review
+
+Run Claude Code's `/security-review` command to perform static security analysis. Recommended before releases and after changes to security-sensitive files listed above. The latest audit results are in [SECURITY-AUDIT.md](SECURITY-AUDIT.md). The `/ship` command will remind you when security-sensitive files are in the commit.
 
 ## Release Process
 

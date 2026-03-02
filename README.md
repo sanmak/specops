@@ -160,6 +160,7 @@ Red flags the agent actively avoids: abstractions used only once, error handling
 - Secrets use placeholders, PII uses synthetic data
 - All schema fields have validation constraints (`maxLength`, `maxItems`, `additionalProperties: false`)
 - Paths are contained — rejects absolute paths and `../` traversal
+- Security audited with no high-confidence vulnerabilities found ([full report](SECURITY-AUDIT.md))
 
 For vulnerability reporting, see [SECURITY.md](SECURITY.md).
 

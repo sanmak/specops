@@ -78,6 +78,20 @@ Do NOT use `--no-verify`. If the pre-commit hook fails:
 
 ---
 
+## Security Review Reminder
+
+After committing, check if any of the following security-sensitive files are in the commit (use `git diff HEAD~1 --name-only`):
+
+`core/workflow.md`, `core/safety.md`, `core/review-workflow.md`, `schema.json`, `spec-schema.json`, `platforms/claude/SKILL.md`, `setup.sh`, `scripts/remote-install.sh`, `generator/generate.py`, `hooks/pre-commit`, `hooks/pre-push`
+
+If any match, display this advisory (do NOT block the push):
+
+> **Tip**: This commit includes security-sensitive files. Consider running `/security-review` before pushing.
+
+If none of the committed files match this list, skip this step silently.
+
+---
+
 ## Part 2: Push
 
 ### Step 8: Check if there is anything to push
