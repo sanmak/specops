@@ -1,29 +1,35 @@
 # SpecOps
 
-**Stop vibe coding. Start spec-driven development.**
+**Spec-driven development that adapts to your stack, your team, and your workflow.**
 
 [![CI](https://github.com/sanmak/specops/actions/workflows/ci.yml/badge.svg)](https://github.com/sanmak/specops/actions/workflows/ci.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/sanmak/specops)](https://github.com/sanmak/specops/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/sanmak/specops?style=social)](https://github.com/sanmak/specops)
 [![License: MIT](https://img.shields.io/github/license/sanmak/specops)](https://github.com/sanmak/specops/blob/main/LICENSE)
 
-SpecOps transforms how you work with AI coding assistants. Instead of jumping straight into code, it creates structured specifications — requirements, design, tasks — then implements them systematically. Works with **Claude Code**, **Cursor**, **OpenAI Codex**, and **GitHub Copilot**.
+SpecOps brings structured spec-driven development to your AI coding assistant — with domain-specific templates for infrastructure, data pipelines, and SDKs, and a built-in team review workflow for shared codebases. Works with **Claude Code**, **Cursor**, **OpenAI Codex**, and **GitHub Copilot**.
 
-## How It Works
+## Why SpecOps
 
-<p align="center">
-  <img src="assets/workflow.svg" alt="SpecOps 4-phase workflow: Understand, Spec, Implement, Complete" width="800"/>
-</p>
+### Specs built for your project type
 
-One command triggers a 4-phase workflow: understand your codebase, generate a structured spec, implement it, and verify the result.
+Infrastructure specs include Rollback Steps and Resource Definitions. Data pipeline specs include Data Contracts and Backfill Strategy. Library specs flag Breaking Changes per task. Backend and fullstack use clean defaults — no unnecessary ceremony.
 
-### Team Review Workflow
+### Spec review before code ships
 
-<p align="center">
-  <img src="assets/review-workflow.svg" alt="SpecOps collaborative review workflow: draft, review, revise, approve, implement" width="800"/>
-</p>
+Draft a spec, get section-by-section feedback from teammates, revise, and only implement once `minApprovals` is met. Git identity detection, configurable approval thresholds, and an implementation gate that blocks unapproved specs from proceeding.
 
-For teams, SpecOps adds a structured review cycle between spec creation and implementation. Engineers review specs collaboratively, provide section-by-section feedback, and approve before coding begins. See [TEAM_GUIDE.md](TEAM_GUIDE.md) for the full team workflow.
+### One command, nothing to install
+
+`curl | bash`. No Python, no uv, no package manager setup. SpecOps installs as a skill file your AI coding assistant reads — there is no runtime to maintain.
+
+### Specs are prompts — treated with security rigor
+
+Convention strings and custom templates are sanitized against prompt injection. Secrets use placeholders, PII uses synthetic data, all config fields enforce strict schema validation, and path traversal is rejected at the boundary.
+
+### Specs that scale to the task
+
+Small features get lean specs. The agent actively avoids premature abstractions, one-use configurations, and speculative future-proofing. Over-engineering patterns are flagged as red flags during spec creation.
 
 ## Quick Start
 
@@ -76,6 +82,22 @@ View the auth-feature spec
 List all specops specs
 ```
 
+## How It Works
+
+<p align="center">
+  <img src="assets/workflow.svg" alt="SpecOps 4-phase workflow: Understand, Spec, Implement, Complete" width="800"/>
+</p>
+
+One command triggers a 4-phase workflow: understand your codebase, generate a structured spec, implement it, and verify the result.
+
+### Team Review Workflow
+
+<p align="center">
+  <img src="assets/review-workflow.svg" alt="SpecOps collaborative review workflow: draft, review, revise, approve, implement" width="800"/>
+</p>
+
+For teams, SpecOps adds a structured review cycle between spec creation and implementation. Engineers review specs collaboratively, provide section-by-section feedback, and approve before coding begins. See [TEAM_GUIDE.md](TEAM_GUIDE.md) for the full team workflow.
+
 ## What Gets Created
 
 <p align="center">
@@ -92,6 +114,31 @@ List all specops specs
 | **GitHub Copilot** | Supported | `Use specops to [description]`, `View the ... spec`, `List all specops specs` |
 | Windsurf           | Planned   | —                                                                             |
 | Continue.dev       | Planned   | —                                                                             |
+
+## How SpecOps Compares
+
+SpecOps and [Spec Kit](https://github.com/github/spec-kit) share the same core philosophy: specs before code. We think Spec Kit is excellent — and we're building on the same principles with a different focus.
+
+**Choose Spec Kit** if you want the broadest agent support (18+) and are exploring SDD as an individual or small team.
+
+**Choose SpecOps** if you're a team shipping to production and need specs that match your project type, structured review before implementation, and security-hardened spec processing.
+
+| Capability | SpecOps | GitHub Spec Kit |
+|---|---|---|
+| **Supported platforms** | Claude Code, Cursor, OpenAI Codex, GitHub Copilot | 18+ agents |
+| **Installation** | Single `curl \| bash`, no dependencies | Python 3.11+ and uv |
+| **Team review workflow** | Built-in (draft → review → revise → approve → gate) | Not available |
+| **Configurable approval thresholds** | Yes — `minApprovals` in config | Not available |
+| **Vertical-aware templates** | 7 project types (infra, data, library, builder, etc.) | Generic templates |
+| **Infrastructure specs** | Rollback steps, topology, resource definitions | Generic |
+| **Data pipeline specs** | Data contracts, backfill strategy, pipeline SLAs | Generic |
+| **Library/SDK specs** | Breaking change flags, public API surface | Generic |
+| **Simplicity guardrails** | Built-in anti-over-engineering checks | Not available |
+| **Security hardening** | Prompt injection defense, schema validation, path containment | Not documented |
+| **Monorepo support** | Per-module config overrides | Not documented |
+| **Platform breadth** | 4 platforms | 18+ platforms |
+| **Research workflow** | Planned | Yes |
+| **EARS-style requirements** | Planned | Yes |
 
 ## Configuration
 
@@ -117,7 +164,7 @@ See [examples/](examples/) for minimal, standard, and full configurations. Full 
 
 ### Vertical adaptation
 
-SpecOps adapts templates to your project type. Set explicitly in `.specops.json` or let SpecOps auto-detect from your codebase.
+SpecOps is the only spec-driven development tool with domain-specific templates. It adapts spec structure, vocabulary, and required sections based on your project type. Set explicitly in `.specops.json` or let SpecOps auto-detect from your codebase.
 
 | Vertical             | Adaptation                                               |
 | -------------------- | -------------------------------------------------------- |
@@ -181,6 +228,8 @@ SpecOps follows a core design principle: **prefer the simplest solution that mee
 Red flags the agent actively avoids: abstractions used only once, error handling for impossible scenarios, configuration for unchanging values, designing for hypothetical futures.
 
 ## Security
+
+Specs are prompts — they can contain user-supplied content that reaches the agent context. SpecOps treats spec inputs with the same security discipline as any prompt surface.
 
 - Convention strings and custom templates are sanitized against prompt injection
 - Secrets use placeholders, PII uses synthetic data

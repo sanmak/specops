@@ -1,6 +1,6 @@
 # Team Collaboration Guide
 
-This guide helps teams adopt and standardize SpecOps across projects and team members.
+SpecOps includes a built-in spec review workflow designed for teams — structured review cycles, configurable approval gates, and section-by-section feedback before implementation begins. This guide covers setup, the review cycle, configuration, and platform-specific behavior.
 
 ## Getting Started as a Team
 
