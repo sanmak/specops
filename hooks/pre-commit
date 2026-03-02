@@ -84,6 +84,7 @@ if [ "$NEEDS_REBUILD" = true ]; then
     "skills/specops/SKILL.md"
   )
 
+  # Check if any generated file is staged (covers the common case)
   ANY_GENERATED_STAGED=false
   for gf in "${GENERATED_FILES[@]}"; do
     if echo "$STAGED_FILES" | grep -q "^${gf}$"; then
@@ -92,11 +93,41 @@ if [ "$NEEDS_REBUILD" = true ]; then
     fi
   done
 
+  # If none staged, verify they are actually up-to-date on disk.
+  # This handles cases like version-only bumps in platform.json where
+  # the generated output is unchanged (version isn't embedded in output).
   if [ "$ANY_GENERATED_STAGED" = false ]; then
-    printf '%b' "${RED}FAIL${RESET} Source files changed but generated platform files are not staged.\n"
-    printf '%b' "  Run: ${BOLD}python3 generator/generate.py --all${RESET}\n"
-    printf "  Then stage the generated files and commit again.\n"
-    ERRORS=$((ERRORS + 1))
+    GENERATED_STALE=false
+    if command -v python3 &>/dev/null; then
+      # Hash current generated files, regenerate in-place, compare hashes
+      BEFORE_HASHES=""
+      for gf in "${GENERATED_FILES[@]}"; do
+        if [ -f "$ROOT_DIR/$gf" ]; then
+          BEFORE_HASHES="${BEFORE_HASHES}$(shasum -a 256 "$ROOT_DIR/$gf")"$'\n'
+        fi
+      done
+
+      python3 "$ROOT_DIR/generator/generate.py" --all >/dev/null 2>&1
+
+      for gf in "${GENERATED_FILES[@]}"; do
+        if [ -f "$ROOT_DIR/$gf" ]; then
+          CURRENT_HASH="$(shasum -a 256 "$ROOT_DIR/$gf")"
+          if ! echo "$BEFORE_HASHES" | grep -qF "$CURRENT_HASH"; then
+            GENERATED_STALE=true
+            break
+          fi
+        fi
+      done
+    else
+      GENERATED_STALE=true
+    fi
+
+    if [ "$GENERATED_STALE" = true ]; then
+      printf '%b' "${RED}FAIL${RESET} Source files changed but generated platform files are not staged.\n"
+      printf '%b' "  Run: ${BOLD}python3 generator/generate.py --all${RESET}\n"
+      printf "  Then stage the generated files and commit again.\n"
+      ERRORS=$((ERRORS + 1))
+    fi
   fi
 fi
 
