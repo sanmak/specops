@@ -9,9 +9,7 @@ Validates that generated platform outputs are complete and correct:
 4. Platform-specific format validation
 """
 
-import json
 import os
-import re
 import sys
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
