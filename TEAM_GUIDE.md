@@ -106,6 +106,20 @@ new-project/
   CLAUDE.md           (reference SpecOps in AI instructions)
 ```
 
+## Developer Setup (Contributors)
+
+After cloning the SpecOps repository, install git hooks to catch CI failures locally:
+
+```bash
+bash scripts/install-hooks.sh
+```
+
+This installs two hooks:
+- **Pre-commit** (~1-2s): JSON syntax validation, ShellCheck on staged `.sh` files, stale generated files detection, stale checksums detection
+- **Pre-push** (~5-8s): Full platform validation, checksum verification, generated file freshness, schema checks, full test suite, ShellCheck on all scripts
+
+Bypass when needed: `git commit --no-verify` / `git push --no-verify`
+
 ## Team Workflows
 
 ### Feature Development Workflow

@@ -76,7 +76,7 @@ jobs:
       - name: Install ShellCheck
         run: sudo apt-get install -y shellcheck
       - name: Lint shell scripts
-        run: shellcheck setup.sh verify.sh scripts/bump-version.sh scripts/run-tests.sh scripts/remote-install.sh platforms/claude/install.sh platforms/cursor/install.sh platforms/codex/install.sh platforms/copilot/install.sh
+        run: shellcheck setup.sh verify.sh scripts/bump-version.sh scripts/run-tests.sh scripts/remote-install.sh scripts/install-hooks.sh platforms/claude/install.sh platforms/cursor/install.sh platforms/codex/install.sh platforms/copilot/install.sh hooks/pre-commit hooks/pre-push
 
   verify-checksums:
     name: Verify File Checksums

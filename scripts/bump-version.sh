@@ -91,6 +91,9 @@ if [ "$REGEN_CHECKSUMS" = true ]; then
     platforms/copilot/platform.json \
     core/workflow.md \
     core/safety.md \
+    hooks/pre-commit \
+    hooks/pre-push \
+    scripts/install-hooks.sh \
     > CHECKSUMS.sha256
   echo "  Updated: CHECKSUMS.sha256"
 fi

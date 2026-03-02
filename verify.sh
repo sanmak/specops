@@ -46,6 +46,14 @@ check_file "setup.sh"
 check_file "verify.sh"
 check_file "scripts/bump-version.sh"
 check_file "scripts/remote-install.sh"
+check_file "scripts/install-hooks.sh"
+echo ""
+
+# Check git hooks
+echo "Git Hooks:"
+check_dir "hooks"
+check_file "hooks/pre-commit"
+check_file "hooks/pre-push"
 echo ""
 
 # Check core modules

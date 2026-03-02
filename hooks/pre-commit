@@ -1,0 +1,157 @@
+#!/bin/bash
+# SpecOps pre-commit hook
+# Runs fast, targeted checks on staged files before committing.
+# Bypass with: git commit --no-verify
+
+set -e
+
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+
+# --- Color helpers (respect NO_COLOR) ---
+if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+  RED='\033[0;31m'
+  GREEN='\033[0;32m'
+  YELLOW='\033[0;33m'
+  BOLD='\033[1m'
+  RESET='\033[0m'
+else
+  RED=''
+  GREEN=''
+  YELLOW=''
+  BOLD=''
+  RESET=''
+fi
+
+ERRORS=0
+
+# Get list of staged files (added, copied, modified — not deleted)
+STAGED_FILES="$(git diff --cached --name-only --diff-filter=ACM)"
+
+if [ -z "$STAGED_FILES" ]; then
+  exit 0
+fi
+
+# --- Check 1: JSON syntax for staged .json files ---
+STAGED_JSON="$(echo "$STAGED_FILES" | grep '\.json$' || true)"
+if [ -n "$STAGED_JSON" ]; then
+  while IFS= read -r json_file; do
+    if [ -f "$ROOT_DIR/$json_file" ]; then
+      if ! python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$ROOT_DIR/$json_file" 2>/dev/null; then
+        printf '%b' "${RED}FAIL${RESET} Invalid JSON: ${json_file}\n"
+        ERRORS=$((ERRORS + 1))
+      fi
+    fi
+  done <<< "$STAGED_JSON"
+fi
+
+# --- Check 2: ShellCheck for staged .sh files ---
+STAGED_SH="$(echo "$STAGED_FILES" | grep '\.sh$' || true)"
+if [ -n "$STAGED_SH" ] && command -v shellcheck &>/dev/null; then
+  while IFS= read -r sh_file; do
+    if [ -f "$ROOT_DIR/$sh_file" ]; then
+      if ! shellcheck "$ROOT_DIR/$sh_file" 2>/dev/null; then
+        printf '%b' "${RED}FAIL${RESET} ShellCheck: ${sh_file}\n"
+        ERRORS=$((ERRORS + 1))
+      fi
+    fi
+  done <<< "$STAGED_SH"
+elif [ -n "$STAGED_SH" ]; then
+  printf '%b' "${YELLOW}SKIP${RESET} ShellCheck not installed (brew install shellcheck)\n"
+fi
+
+# --- Check 3: Stale generated platform files ---
+# If core/, generator/templates/, or platform.json changed, generated outputs must also be staged.
+NEEDS_REBUILD=false
+if echo "$STAGED_FILES" | grep -q "^core/"; then
+  NEEDS_REBUILD=true
+fi
+if echo "$STAGED_FILES" | grep -q "^generator/templates/"; then
+  NEEDS_REBUILD=true
+fi
+if echo "$STAGED_FILES" | grep -q "^generator/generate\.py$"; then
+  NEEDS_REBUILD=true
+fi
+if echo "$STAGED_FILES" | grep -q "^platforms/.*/platform\.json$"; then
+  NEEDS_REBUILD=true
+fi
+
+if [ "$NEEDS_REBUILD" = true ]; then
+  GENERATED_FILES=(
+    "platforms/claude/SKILL.md"
+    "platforms/cursor/specops.mdc"
+    "platforms/codex/SKILL.md"
+    "platforms/copilot/specops.instructions.md"
+    "skills/specops/SKILL.md"
+  )
+
+  ANY_GENERATED_STAGED=false
+  for gf in "${GENERATED_FILES[@]}"; do
+    if echo "$STAGED_FILES" | grep -q "^${gf}$"; then
+      ANY_GENERATED_STAGED=true
+      break
+    fi
+  done
+
+  if [ "$ANY_GENERATED_STAGED" = false ]; then
+    printf '%b' "${RED}FAIL${RESET} Source files changed but generated platform files are not staged.\n"
+    printf '%b' "  Run: ${BOLD}python3 generator/generate.py --all${RESET}\n"
+    printf "  Then stage the generated files and commit again.\n"
+    ERRORS=$((ERRORS + 1))
+  fi
+fi
+
+# --- Check 4: Stale checksums ---
+# If any checksummed file is staged but CHECKSUMS.sha256 is not, block.
+CHECKSUMMED_FILES=(
+  "skills/specops/SKILL.md"
+  "schema.json"
+  "platforms/claude/SKILL.md"
+  "platforms/claude/platform.json"
+  "platforms/cursor/specops.mdc"
+  "platforms/cursor/platform.json"
+  "platforms/codex/SKILL.md"
+  "platforms/codex/platform.json"
+  "platforms/copilot/specops.instructions.md"
+  "platforms/copilot/platform.json"
+  "core/workflow.md"
+  "core/safety.md"
+  "hooks/pre-commit"
+  "hooks/pre-push"
+  "scripts/install-hooks.sh"
+)
+
+CHECKSUMMED_STAGED=false
+for cf in "${CHECKSUMMED_FILES[@]}"; do
+  if echo "$STAGED_FILES" | grep -q "^${cf}$"; then
+    CHECKSUMMED_STAGED=true
+    break
+  fi
+done
+
+CHECKSUMS_FILE_STAGED=false
+if echo "$STAGED_FILES" | grep -q "^CHECKSUMS\.sha256$"; then
+  CHECKSUMS_FILE_STAGED=true
+fi
+
+if [ "$CHECKSUMMED_STAGED" = true ] && [ "$CHECKSUMS_FILE_STAGED" = false ]; then
+  printf '%b' "${RED}FAIL${RESET} Checksummed files changed but CHECKSUMS.sha256 is not staged.\n"
+  printf "  Regenerate checksums:\n"
+  printf '%b' "  ${BOLD}shasum -a 256 skills/specops/SKILL.md schema.json platforms/claude/SKILL.md \\\\${RESET}\n"
+  printf '%b' "  ${BOLD}  platforms/claude/platform.json platforms/cursor/specops.mdc \\\\${RESET}\n"
+  printf '%b' "  ${BOLD}  platforms/cursor/platform.json platforms/codex/SKILL.md \\\\${RESET}\n"
+  printf '%b' "  ${BOLD}  platforms/codex/platform.json platforms/copilot/specops.instructions.md \\\\${RESET}\n"
+  printf '%b' "  ${BOLD}  platforms/copilot/platform.json core/workflow.md core/safety.md \\\\${RESET}\n"
+  printf '%b' "  ${BOLD}  hooks/pre-commit hooks/pre-push scripts/install-hooks.sh > CHECKSUMS.sha256${RESET}\n"
+  printf '%b' "  Then: ${BOLD}git add CHECKSUMS.sha256${RESET}\n"
+  ERRORS=$((ERRORS + 1))
+fi
+
+# --- Summary ---
+if [ "$ERRORS" -gt 0 ]; then
+  printf '%b' "\n${RED}${BOLD}Pre-commit failed with ${ERRORS} error(s).${RESET}\n"
+  printf "Bypass with: git commit --no-verify\n"
+  exit 1
+fi
+
+printf '%b' "${GREEN}Pre-commit checks passed.${RESET}\n"
+exit 0

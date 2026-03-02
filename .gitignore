@@ -38,7 +38,8 @@ __pycache__/
 # Build artifacts
 dist/
 
-# Claude Code local settings
-.claude/
+# Claude Code local settings (allow .claude/commands/ to be tracked)
+.claude/*
+!.claude/commands/
 
 /internal*

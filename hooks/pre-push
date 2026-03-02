@@ -1,0 +1,83 @@
+#!/bin/bash
+# SpecOps pre-push hook
+# Runs comprehensive checks before pushing to remote.
+# Bypass with: git push --no-verify
+
+set -e
+
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+cd "$ROOT_DIR"
+
+# --- Color helpers (respect NO_COLOR) ---
+if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+  RED='\033[0;31m'
+  GREEN='\033[0;32m'
+  YELLOW='\033[0;33m'
+  BOLD='\033[1m'
+  RESET='\033[0m'
+else
+  RED=''
+  GREEN=''
+  YELLOW=''
+  BOLD=''
+  RESET=''
+fi
+
+ERRORS=0
+
+run_check() {
+  local label="$1"
+  local cmd="$2"
+
+  printf "  %-45s " "$label"
+  if eval "$cmd" > /dev/null 2>&1; then
+    printf '%b' "${GREEN}PASS${RESET}\n"
+  else
+    printf '%b' "${RED}FAIL${RESET}\n"
+    ERRORS=$((ERRORS + 1))
+  fi
+}
+
+printf '%b' "${BOLD}SpecOps pre-push checks${RESET}\n"
+printf "=======================\n\n"
+
+# Check 1: Platform validation (safety markers, templates, no raw ops)
+run_check "Platform validation" \
+  "python3 generator/validate.py"
+
+# Check 2: Checksum verification
+run_check "Checksum verification" \
+  "shasum -a 256 -c CHECKSUMS.sha256"
+
+# Check 3: Generated files freshness (regenerate and diff)
+run_check "Generated files freshness" \
+  "python3 generator/generate.py --all && git diff --exit-code platforms/ skills/specops/SKILL.md"
+
+# Check 4: Schema structure
+run_check "Schema structure" \
+  "python3 tests/check_schema_sync.py"
+
+# Check 5: Full test suite
+run_check "Test suite" \
+  "bash scripts/run-tests.sh"
+
+# Check 6: ShellCheck (if available)
+if command -v shellcheck &>/dev/null; then
+  run_check "ShellCheck" \
+    "shellcheck setup.sh verify.sh scripts/bump-version.sh scripts/run-tests.sh scripts/remote-install.sh scripts/install-hooks.sh platforms/claude/install.sh platforms/cursor/install.sh platforms/codex/install.sh platforms/copilot/install.sh hooks/pre-commit hooks/pre-push"
+else
+  printf '%b' "  %-45s ${YELLOW}SKIP${RESET} (not installed)\n" "ShellCheck"
+fi
+
+# --- Summary ---
+printf "\n=======================\n"
+if [ "$ERRORS" -gt 0 ]; then
+  printf '%b' "${RED}${BOLD}Pre-push failed with ${ERRORS} error(s).${RESET}\n"
+  printf "Fix the issues above, commit, and push again.\n"
+  printf "Bypass with: git push --no-verify\n"
+  exit 1
+else
+  printf '%b' "${GREEN}${BOLD}All pre-push checks passed.${RESET}\n"
+fi
+
+exit 0

@@ -34,10 +34,10 @@ For teams, SpecOps adds a structured review cycle between spec creation and impl
 bash <(curl -fsSL https://raw.githubusercontent.com/sanmak/specops/main/scripts/remote-install.sh)
 ```
 
-<details>
-<summary>Platform-specific and manual install options</summary>
+### Platform-specific and manual install options
 
 **Non-interactive install:**
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sanmak/specops/main/scripts/remote-install.sh | bash -s -- --platform claude --scope user
 curl -fsSL https://raw.githubusercontent.com/sanmak/specops/main/scripts/remote-install.sh | bash -s -- --platform cursor
@@ -46,21 +46,22 @@ curl -fsSL https://raw.githubusercontent.com/sanmak/specops/main/scripts/remote-
 ```
 
 **Clone and run locally:**
+
 ```bash
 git clone https://github.com/sanmak/specops.git && cd specops && bash setup.sh
 ```
 
 **Platform-specific guides:**
+
 - [Claude Code](platforms/claude/README.md)
 - [Cursor](platforms/cursor/README.md)
 - [OpenAI Codex](platforms/codex/README.md)
 - [GitHub Copilot](platforms/copilot/README.md)
 
-</details>
-
 ### Use
 
 **Claude Code:**
+
 ```
 /specops Add user authentication with OAuth
 /specops view auth-feature
@@ -68,6 +69,7 @@ git clone https://github.com/sanmak/specops.git && cd specops && bash setup.sh
 ```
 
 **Cursor / Codex / Copilot:**
+
 ```
 Use specops to add user authentication with OAuth
 View the auth-feature spec
@@ -82,14 +84,14 @@ List all specops specs
 
 ## Platforms
 
-| Platform | Status | Trigger |
-|----------|--------|---------|
-| **Claude Code** | Supported | `/specops [description]`, `/specops view`, `/specops list` |
-| **Cursor** | Supported | `Use specops to [description]`, `View the ... spec`, `List all specops specs` |
-| **OpenAI Codex** | Supported | `Use specops to [description]`, `View the ... spec`, `List all specops specs` |
+| Platform           | Status    | Trigger                                                                       |
+| ------------------ | --------- | ----------------------------------------------------------------------------- |
+| **Claude Code**    | Supported | `/specops [description]`, `/specops view`, `/specops list`                    |
+| **Cursor**         | Supported | `Use specops to [description]`, `View the ... spec`, `List all specops specs` |
+| **OpenAI Codex**   | Supported | `Use specops to [description]`, `View the ... spec`, `List all specops specs` |
 | **GitHub Copilot** | Supported | `Use specops to [description]`, `View the ... spec`, `List all specops specs` |
-| Windsurf | Planned | — |
-| Continue.dev | Planned | — |
+| Windsurf           | Planned   | —                                                                             |
+| Continue.dev       | Planned   | —                                                                             |
 
 ## Configuration
 
@@ -113,21 +115,20 @@ Create `.specops.json` in your project root. Configuration is optional — SpecO
 
 See [examples/](examples/) for minimal, standard, and full configurations. Full schema reference in [REFERENCE.md](REFERENCE.md).
 
-<details>
-<summary><strong>Vertical adaptation</strong> — SpecOps adapts templates to your project type</summary>
+### Vertical adaptation
 
-| Vertical | Adaptation |
-|----------|------------|
-| **Backend** | Default templates (API endpoints, services, data models) |
-| **Frontend** | State management, components, UI patterns |
-| **Full Stack** | Handles both frontend and backend layers |
-| **Infrastructure** | Resource definitions, topology, IaC |
-| **Data Engineering** | Pipeline stages, data flow, contracts |
-| **Library/SDK** | Public API surface, developer use cases |
+SpecOps adapts templates to your project type.
+
+| Vertical             | Adaptation                                               |
+| -------------------- | -------------------------------------------------------- |
+| **Backend**          | Default templates (API endpoints, services, data models) |
+| **Frontend**         | State management, components, UI patterns                |
+| **Full Stack**       | Handles both frontend and backend layers                 |
+| **Infrastructure**   | Resource definitions, topology, IaC                      |
+| **Data Engineering** | Pipeline stages, data flow, contracts                    |
+| **Library/SDK**      | Public API surface, developer use cases                  |
 
 Set explicitly in `.specops.json` or let SpecOps auto-detect from your codebase.
-
-</details>
 
 ## Architecture
 
@@ -136,6 +137,7 @@ Set explicitly in `.specops.json` or let SpecOps auto-detect from your codebase.
 </p>
 
 Three layers, strict separation:
+
 - **`core/`** — Platform-agnostic workflow, templates, and safety rules (single source of truth)
 - **`generator/`** — Builds platform-specific outputs from core + platform adapters
 - **`platforms/`** — Generated instruction files per platform (checked into git, no build step for users)

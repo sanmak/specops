@@ -21,7 +21,10 @@ python3 generator/generate.py --platform claude
 python3 generator/validate.py
 
 # Lint shell scripts
-shellcheck setup.sh verify.sh scripts/bump-version.sh scripts/run-tests.sh scripts/remote-install.sh platforms/*/install.sh
+shellcheck setup.sh verify.sh scripts/bump-version.sh scripts/run-tests.sh scripts/remote-install.sh scripts/install-hooks.sh platforms/*/install.sh hooks/pre-commit hooks/pre-push
+
+# Install git hooks (run once after cloning)
+bash scripts/install-hooks.sh
 
 # Run all tests (unified runner, auto-installs jsonschema if missing)
 bash scripts/run-tests.sh
@@ -43,6 +46,18 @@ bash scripts/bump-version.sh 1.2.0 --checksums  # also regenerate checksums
 ```
 
 **Dependencies**: `pip install jsonschema` (tests) and `pip install jinja2` (generator). The `scripts/run-tests.sh` runner auto-installs `jsonschema` if missing.
+
+## Custom Slash Commands
+
+Project-local Claude Code commands in `.claude/commands/` for git workflow automation:
+
+| Command | Description |
+|---------|-------------|
+| `/commit` | Auto-stage all changes, regenerate derived files if needed, commit with conventional message (no Claude attribution) |
+| `/push` | Validate pre-push checks, push to remote |
+| `/ship` | Combined commit + push in one operation |
+
+These commands enforce project conventions automatically: conventional commit prefixes (`feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`), sensitive file exclusion, automatic regeneration of platform outputs and checksums when source files change, and pre-commit/pre-push hook compliance (never bypasses hooks).
 
 ## Simplicity Principle
 
@@ -100,7 +115,7 @@ Each `platform.json` declares capability flags (`canExecuteCode`, `canEditFiles`
 
 ### Security-Sensitive Files
 
-These files require extra scrutiny when modified — they can alter agent behavior, security guardrails, or configuration validation: `core/workflow.md`, `core/safety.md`, `core/review-workflow.md`, `schema.json`, `spec-schema.json`, `platforms/claude/SKILL.md`, `setup.sh`, `scripts/remote-install.sh`, `generator/generate.py`.
+These files require extra scrutiny when modified — they can alter agent behavior, security guardrails, or configuration validation: `core/workflow.md`, `core/safety.md`, `core/review-workflow.md`, `schema.json`, `spec-schema.json`, `platforms/claude/SKILL.md`, `setup.sh`, `scripts/remote-install.sh`, `generator/generate.py`, `hooks/pre-commit`, `hooks/pre-push`.
 
 ## Validation
 
@@ -136,6 +151,7 @@ The SpecOps agent reads `.specops.json` from the target project (not this repo).
 | `platforms/{name}/platform.json` | `python3 generator/generate.py --platform {name}` then `python3 generator/validate.py` |
 | `schema.json` | Run `python3 tests/check_schema_sync.py` to verify schema is well-formed |
 | Shell scripts | Run `shellcheck` on modified scripts |
+| `hooks/*` | Run `shellcheck hooks/pre-commit hooks/pre-push` |
 
 ## Commit Conventions
 
