@@ -7,8 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-03-02
+
 ### Added
 
+- **Builder vertical**: `builder` vertical for end-to-end product development across all domains (frontend, backend, infrastructure, data, DevOps) with Product Requirements, System Flow, Ship Plan templates, domain-tagged tasks, and scope boundary guardrails
+- **Example builder project**: `examples/specs/feature-task-management-saas/` with full requirements, design, tasks, and spec.json for a SaaS task management product
+- **Example builder config**: `examples/.specops.builder.json`
+- **Remote installer**: `scripts/remote-install.sh` for curl-based clone-free installation with interactive and non-interactive modes, platform selection, and scope configuration
+- **Visual assets**: SVG diagrams for workflow (`assets/workflow.svg`), architecture (`assets/architecture.svg`), and spec structure (`assets/spec-structure.svg`)
+- **Git hooks**: `hooks/pre-commit` (JSON validation, ShellCheck, stale generated files, stale checksums) and `hooks/pre-push` (platform validation, checksums, freshness, schema, full test suite)
+- **Hook installer**: `scripts/install-hooks.sh` for symlinking hooks into `.git/hooks/`
+- **Slash commands**: `.claude/commands/commit.md`, `.claude/commands/push.md`, `.claude/commands/ship.md` for git workflow automation with conventional commits, auto-regeneration, and security-sensitive file advisories
+- **Security audit documentation**: `SECURITY-AUDIT.md` with static analysis results
 - **Spec viewing**: `view <spec-name>` with 5 view modes — summary (default), full, section-specific, walkthrough, and status
 - **Spec listing**: `list` command for overview dashboard of all specs with status, type, author, and progress
 - **View combinations**: view multiple sections together (e.g., `view auth-feature requirements design`)
@@ -29,6 +40,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Review safety rules in core/safety.md
 - Example review-enabled config (`examples/.specops.review.json`)
 - Example spec.json and reviews.md in feature-user-authentication example
+
+### Changed
+
+- **Platform output filenames standardized**: Claude (`prompt.md` → `SKILL.md`), Codex (`AGENTS.md` → `SKILL.md`), Copilot (`copilot-instructions.md` → `specops.instructions.md`), legacy skill (`prompt.md` → `SKILL.md`)
+- **Legacy `skill.json` files removed** in favor of SKILL.md frontmatter metadata
+- **README overhauled** with badges, visual diagrams, and streamlined installation instructions
+- **Build system streamlined**: generator and validator updated for new filenames and frontmatter conventions
+- **Installer scripts simplified** for Codex and Copilot platforms
+- **CI workflow updated** for new file paths and ShellCheck coverage of hooks
+- **CHECKSUMS.sha256 expanded** to include `hooks/pre-commit`, `hooks/pre-push`, and `scripts/install-hooks.sh`
+- **Security review integrated** into `/ship` workflow with security-sensitive file advisory
 
 ## [1.0.0] - 2026-02-28
 
