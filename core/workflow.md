@@ -15,6 +15,7 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
      - **library**: SDK, library, package, API surface, module, publish, semver, public API
      - **frontend**: component, UI, UX, page, form, layout, CSS, React, Vue, Angular, responsive, accessibility
      - **backend**: endpoint, API, service, database, migration, REST, GraphQL, middleware, authentication
+     - **builder**: product, MVP, launch, ship end-to-end, full product, SaaS, marketplace, platform build, solo build, build from scratch, greenfield, v1, prototype, side project, startup
      - **fullstack**: request spans both frontend and backend concerns
    - Default to `fullstack` if unclear
    - Display the detected vertical in configuration summary

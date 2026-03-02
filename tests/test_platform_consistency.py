@@ -50,6 +50,7 @@ REQUIRED_MARKERS = {
         "### data",
         "### library",
         "### frontend",
+        "### builder",
     ],
     "simplicity": [
         "Simplicity Principle",

@@ -74,6 +74,7 @@ VERTICAL_MARKERS = [
     "### data",
     "### library",
     "### frontend",
+    "### builder",
 ]
 
 # View workflow markers that MUST appear

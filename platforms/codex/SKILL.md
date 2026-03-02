@@ -20,6 +20,7 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
      - **library**: SDK, library, package, API surface, module, publish, semver, public API
      - **frontend**: component, UI, UX, page, form, layout, CSS, React, Vue, Angular, responsive, accessibility
      - **backend**: endpoint, API, service, database, migration, REST, GraphQL, middleware, authentication
+     - **builder**: product, MVP, launch, ship end-to-end, full product, SaaS, marketplace, platform build, solo build, build from scratch, greenfield, v1, prototype, side project, startup
      - **fullstack**: request spans both frontend and backend concerns
    - Default to `fullstack` if unclear
    - Display the detected vertical in configuration summary
@@ -1208,6 +1209,18 @@ When using the default hardcoded templates (not custom templates), adapt the spe
 **design.md only:** Rename "Data Model Changes" to "State Management" (if using Redux/Zustand/etc.) or skip entirely. Skip "API Changes" if only consuming existing APIs.
 
 No other adaptations — frontend is well-served by default templates.
+
+### builder
+
+**Domain vocabulary:** "Components" → "Product Modules"; "API Endpoints" → "Integration Points"; "User Stories" → "Product Requirements"; "Sequence Diagrams" → "System Flow"; "Data Model" → "Data Architecture"; "Rollout Plan" → "Ship Plan"
+
+**requirements.md:** Replace "User Stories" with "Product Requirements" (As a user/customer, I need... — framed around product outcomes, not implementation layers). Replace "Non-Functional Requirements" with "Product Quality Attributes" (performance, reliability, security, cost — from a product-shipping perspective). Add "Scope Boundary" section (explicitly state what ships in v1 vs. what is deferred — this is mandatory for builders to prevent scope creep).
+
+**design.md:** Replace "Component Design" with "Product Module Design" (each module is a shippable product capability, not a code component). Replace "Sequence Diagrams" with "System Flow" (end-to-end flow from user action to infrastructure, crossing all layers). Replace "API Changes" with "Integration Points" (APIs, webhooks, third-party services, infra interfaces — anything that connects modules). Rename "Rollout Plan" to "Ship Plan" (what goes live first, how to validate with real users, rollback triggers). Skip sections that don't apply — a builder spec should be lean.
+
+**tasks.md:** Add "Domain" tag per task (e.g., `frontend`, `backend`, `infra`, `data`, `devops`) — the builder works all domains, so tasks must be tagged for context-switching clarity. Add "Ship Blocking" flag per task (is this task required for the first shippable version, or can it follow later).
+
+**Builder simplicity guardrail:** The Builder vertical covers the broadest possible scope. To prevent spec bloat: (1) Only include design.md sections for domains the specific request actually touches — do NOT speculatively add infrastructure, data, or frontend sections "because a builder might need them." (2) The Scope Boundary section in requirements.md is mandatory — it forces explicit deferral of non-essential work. (3) Tasks should target the shortest path to a shippable product; optimization, observability, and polish tasks should be flagged as non-ship-blocking unless the request specifically demands them.
 
 ### backend / fullstack
 

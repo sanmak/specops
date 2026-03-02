@@ -106,7 +106,7 @@ list
 | Option | Values | Default | Constraints | Description |
 |--------|--------|---------|-------------|-------------|
 | `specsDir` | string | `.specops` | max 200 chars, no `../` or absolute paths | Where to store specs |
-| `vertical` | `backend`/`frontend`/`fullstack`/`infrastructure`/`data`/`library` | (auto-detect) | enum | Project vertical for template adaptation |
+| `vertical` | `backend`/`frontend`/`fullstack`/`infrastructure`/`data`/`library`/`builder` | (auto-detect) | enum | Project vertical for template adaptation |
 | `templates.design` | string | `default` | max 100 chars | Custom template for design.md |
 | `templates.tasks` | string | `default` | max 100 chars | Custom template for tasks.md |
 | `team.conventions` | string[] | `[]` | max 30 items, each max 500 chars | Team-specific development conventions |

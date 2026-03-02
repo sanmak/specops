@@ -117,7 +117,7 @@ See [examples/](examples/) for minimal, standard, and full configurations. Full 
 
 ### Vertical adaptation
 
-SpecOps adapts templates to your project type.
+SpecOps adapts templates to your project type. Set explicitly in `.specops.json` or let SpecOps auto-detect from your codebase.
 
 | Vertical             | Adaptation                                               |
 | -------------------- | -------------------------------------------------------- |
@@ -127,8 +127,34 @@ SpecOps adapts templates to your project type.
 | **Infrastructure**   | Resource definitions, topology, IaC                      |
 | **Data Engineering** | Pipeline stages, data flow, contracts                    |
 | **Library/SDK**      | Public API surface, developer use cases                  |
+| **Builder**          | Product modules, ship plans, cross-domain tasks          |
 
-Set explicitly in `.specops.json` or let SpecOps auto-detect from your codebase.
+**Backend** / **Full Stack** — Use for API services, microservices, or full-stack web apps. Default templates apply unchanged; specs use standard "User Stories", "Component Design", and "API Changes" vocabulary. See [example: user-authentication](examples/specs/feature-user-authentication/).
+
+**Frontend** — Use when the project is purely client-side (React, Vue, etc.) consuming existing APIs. Adapts design.md: "Data Model Changes" becomes "State Management"; "API Changes" is skipped when only consuming. See [example: dark-mode-toggle](examples/specs/feature-dark-mode-toggle/).
+
+**Infrastructure** — Use for Terraform, Kubernetes, CloudFormation, or other IaC projects. Heavy adaptation: "User Stories" become "Infrastructure Requirements" (As an operator/SRE...), "Components" become "Resources", tasks gain "Validation Steps" and "Rollback Steps". See [example: k8s-autoscaling](examples/specs/feature-k8s-autoscaling/).
+
+**Data Engineering** — Use for ETL pipelines, data warehouses, or streaming systems. Heavy adaptation: "User Stories" become "Data Requirements", "Components" become "Pipeline Stages", adds "Data Quality Requirements" and "Volume & Velocity" sections. See [example: user-activity-pipeline](examples/specs/feature-user-activity-pipeline/).
+
+**Library/SDK** — Use for reusable packages, SDKs, or shared libraries. Medium adaptation: "User Stories" become "Developer Use Cases" (As a developer...), "Components" become "Modules", adds "API Design Principles", "Compatibility Requirements", and "Breaking Change" flags per task. See [example: date-utils-library](examples/specs/feature-date-utils-library/).
+
+**Builder** — Use when you are a solo builder or small team shipping a product end-to-end across multiple domains (frontend, backend, infra, data). Heaviest adaptation: "User Stories" become "Product Requirements" (framed around product outcomes), "Components" become "Product Modules", adds mandatory "Scope Boundary" section, tasks tagged with "Domain" and "Ship Blocking" flags. Includes an explicit simplicity guardrail to keep specs lean despite broad scope. See [example: task-management-saas](examples/specs/feature-task-management-saas/).
+
+#### Full Stack vs Builder — which one should I use?
+
+Both verticals handle work that spans frontend and backend, but they serve different mindsets:
+
+| | **Full Stack** | **Builder** |
+|---|---|---|
+| **Scope** | Frontend + backend code | Frontend + backend + infra + data + DevOps + anything the product needs |
+| **Perspective** | Implementation layers — "what code goes where" | Product outcomes — "what ships and when" |
+| **Templates** | Default, unchanged — standard User Stories, Component Design, API Changes | Product-centric — Product Requirements, Product Modules, Integration Points, Ship Plan |
+| **Task structure** | Standard tasks grouped by implementation order | Tasks tagged by **Domain** (frontend, backend, infra, data) with **Ship Blocking** flags |
+| **Scope control** | Standard spec sections | Mandatory **Scope Boundary** section (v1 vs. deferred) to prevent scope creep |
+| **Best for** | Adding a feature to an existing app where infra and deployment are already handled | Building a new product from scratch where you own everything from UI to deployment |
+
+**Rule of thumb:** If someone else handles your infrastructure, CI/CD, and deployment — use **Full Stack**. If you are the infrastructure, CI/CD, and deployment — use **Builder**.
 
 ## Architecture
 

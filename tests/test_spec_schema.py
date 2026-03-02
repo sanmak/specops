@@ -219,6 +219,13 @@ def main():
     except FileNotFoundError:
         print("SKIP: Example spec.json not yet created")
 
+    try:
+        with open("examples/specs/feature-task-management-saas/spec.json") as f:
+            builder_spec = json.load(f)
+        check(expect_valid(spec_schema, builder_spec, "Builder example spec.json validates against spec-schema.json"))
+    except FileNotFoundError:
+        print("SKIP: Builder example spec.json not yet created")
+
     # --- index-schema.json tests ---
     print("\n--- index.json Validation ---")
     index_schema = load_schema("index-schema.json")

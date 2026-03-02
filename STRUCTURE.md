@@ -118,7 +118,8 @@ specops/
         ├── feature-dark-mode-toggle/
         ├── feature-k8s-autoscaling/
         ├── feature-user-activity-pipeline/
-        └── feature-date-utils-library/
+        ├── feature-date-utils-library/
+        └── feature-task-management-saas/
 ```
 
 ## Architecture
