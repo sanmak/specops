@@ -654,7 +654,7 @@ SpecOps includes security features designed for enterprise adoption:
 
 ### Vulnerability Reporting
 
-See [SECURITY.md](SECURITY.md) for the full security policy, including:
+See [SECURITY.md](../SECURITY.md) for the full security policy, including:
 - How to report vulnerabilities (GitHub Security Advisories)
 - Response timeline (48h acknowledgment, 7-day triage)
 - Scope of security issues

@@ -55,7 +55,7 @@ For vague or exploratory ideas, SpecOps guides you through a structured intervie
   <img src="assets/review-workflow.svg" alt="SpecOps collaborative review workflow: draft, review, revise, approve, implement" width="800"/>
 </p>
 
-For teams, SpecOps adds a structured review cycle between spec creation and implementation. Engineers review specs collaboratively, provide section-by-section feedback, and approve before coding begins. See [TEAM_GUIDE.md](TEAM_GUIDE.md) for the full team workflow.
+For teams, SpecOps adds a structured review cycle between spec creation and implementation. Engineers review specs collaboratively, provide section-by-section feedback, and approve before coding begins. See [TEAM_GUIDE.md](docs/TEAM_GUIDE.md) for the full team workflow.
 
 ## What Gets Created
 
@@ -111,7 +111,7 @@ Create `.specops.json` in your project root. Configuration is optional — SpecO
 }
 ```
 
-See [examples/](examples/) for minimal, standard, and full configurations. Full schema reference in [REFERENCE.md](REFERENCE.md).
+See [examples/](examples/) for minimal, standard, and full configurations. Full schema reference in [REFERENCE.md](docs/REFERENCE.md).
 
 ### Vertical Adaptation
 
@@ -127,7 +127,7 @@ SpecOps adapts spec templates to your project type. Set the `vertical` key in `.
 | **Library/SDK**      | Public API surface, developer use cases                  |
 | **Builder**          | Product modules, ship plans, cross-domain tasks          |
 
-Full per-vertical documentation and decision trees: [REFERENCE.md](REFERENCE.md)
+Full per-vertical documentation and decision trees: [REFERENCE.md](docs/REFERENCE.md)
 
 ## Architecture
 
@@ -141,7 +141,7 @@ Three layers, strict separation:
 - **`generator/`** — Builds platform-specific outputs from core + platform adapters
 - **`platforms/`** — Generated instruction files per platform (checked into git, no build step for users)
 
-See [STRUCTURE.md](STRUCTURE.md) for the full repository layout.
+See [STRUCTURE.md](docs/STRUCTURE.md) for the full repository layout.
 
 ## Contributing
 

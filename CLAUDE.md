@@ -169,7 +169,7 @@ CI verifies generated files aren't stale — after regenerating, the diff of `pl
 
 ## Security Review
 
-Run Claude Code's `/security-review` command to perform static security analysis. Recommended before releases and after changes to security-sensitive files listed above. The latest audit results are in [SECURITY-AUDIT.md](SECURITY-AUDIT.md). The `/ship` command will remind you when security-sensitive files are in the commit.
+Run Claude Code's `/security-review` command to perform static security analysis. Recommended before releases and after changes to security-sensitive files listed above. The latest audit results are in [SECURITY-AUDIT.md](docs/SECURITY-AUDIT.md). The `/ship` command will remind you when security-sensitive files are in the commit.
 
 ## Release Process
 

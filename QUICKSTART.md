@@ -179,12 +179,12 @@ Enable collaborative spec review so teammates approve specs before implementatio
 4. **Approve** — once approvals meet threshold, status becomes `approved`
 5. **Implement** — implementation gate passes, coding begins
 
-See [TEAM_GUIDE.md](TEAM_GUIDE.md) for the full team review workflow.
+See [TEAM_GUIDE.md](docs/TEAM_GUIDE.md) for the full team review workflow.
 
 ## Next Steps
 
 1. **Installed?** Try creating a real feature spec.
 2. **Learn more**: Read [README.md](README.md) for full documentation
-3. **Team setup**: See [TEAM_GUIDE.md](TEAM_GUIDE.md) for team collaboration
+3. **Team setup**: See [TEAM_GUIDE.md](docs/TEAM_GUIDE.md) for team collaboration
 4. **Customize**: Check [examples/](examples/) for configuration options
 5. **Add platforms**: See [platforms/](platforms/) for platform-specific guides

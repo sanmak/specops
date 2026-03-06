@@ -51,4 +51,4 @@ These are not vulnerabilities but optional improvements for defense in depth:
 
 ## Next Audit
 
-Recommended before the next minor or major release, or after significant changes to [security-sensitive files](CLAUDE.md).
+Recommended before the next minor or major release, or after significant changes to [security-sensitive files](../CLAUDE.md).
