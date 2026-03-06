@@ -47,6 +47,7 @@ Create a `.specops.json` in your project root. See [examples/](../../examples/) 
 
 ## More Information
 
+- [Command Reference](../../docs/COMMANDS.md)
 - [Quick Start & Troubleshooting](../../QUICKSTART.md)
 - [Configuration Reference](../../docs/REFERENCE.md)
 - [Team Review Workflow](../../docs/TEAM_GUIDE.md)

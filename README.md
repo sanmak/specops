@@ -30,7 +30,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/sanmak/specops/main/scripts/
 **Claude Code:** `/specops Add user authentication with OAuth` | `View the spec` | `List all specs`
 **Cursor / Codex / Copilot:** `Use specops to add user authentication with OAuth` | `View the spec` | `List all specs`
 
-> Troubleshooting: [QUICKSTART.md#troubleshooting](QUICKSTART.md#troubleshooting)
+> Full command reference: [docs/COMMANDS.md](docs/COMMANDS.md) | Troubleshooting: [QUICKSTART.md#troubleshooting](QUICKSTART.md#troubleshooting)
 
 
 ## How It Works
