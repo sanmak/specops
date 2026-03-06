@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#16213e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e94560"/>
+      <stop offset="100%" stop-color="#ff6b6b"/>
+    </linearGradient>
+    <linearGradient id="doc" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f0f0f0"/>
+      <stop offset="100%" stop-color="#d4d4d4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background plate -->
+  <rect width="512" height="512" rx="80" fill="url(#bg)"/>
+
+  <!-- Spec document (back) -->
+  <rect x="155" y="110" width="180" height="230" rx="12" fill="url(#doc)" opacity="0.3"/>
+
+  <!-- Spec document (middle) -->
+  <rect x="170" y="95" width="180" height="230" rx="12" fill="url(#doc)" opacity="0.5"/>
+
+  <!-- Spec document (front) -->
+  <rect x="185" y="80" width="180" height="230" rx="12" fill="url(#doc)"/>
+
+  <!-- Document lines (spec content) -->
+  <rect x="210" y="115" width="90" height="8" rx="4" fill="#1a1a2e" opacity="0.6"/>
+  <rect x="210" y="138" width="130" height="6" rx="3" fill="#1a1a2e" opacity="0.25"/>
+  <rect x="210" y="155" width="120" height="6" rx="3" fill="#1a1a2e" opacity="0.25"/>
+  <rect x="210" y="172" width="125" height="6" rx="3" fill="#1a1a2e" opacity="0.25"/>
+
+  <!-- Checkboxes (tasks) -->
+  <rect x="210" y="198" width="12" height="12" rx="2" fill="none" stroke="#e94560" stroke-width="2"/>
+  <polyline points="212,204 215,208 222,200" fill="none" stroke="#e94560" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="228" y="200" width="80" height="6" rx="3" fill="#1a1a2e" opacity="0.25"/>
+
+  <rect x="210" y="222" width="12" height="12" rx="2" fill="none" stroke="#e94560" stroke-width="2"/>
+  <polyline points="212,228 215,232 222,224" fill="none" stroke="#e94560" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="228" y="224" width="100" height="6" rx="3" fill="#1a1a2e" opacity="0.25"/>
+
+  <rect x="210" y="246" width="12" height="12" rx="2" fill="none" stroke="#1a1a2e" stroke-width="2" opacity="0.3"/>
+  <rect x="228" y="248" width="70" height="6" rx="3" fill="#1a1a2e" opacity="0.15"/>
+
+  <rect x="210" y="270" width="12" height="12" rx="2" fill="none" stroke="#1a1a2e" stroke-width="2" opacity="0.3"/>
+  <rect x="228" y="272" width="90" height="6" rx="3" fill="#1a1a2e" opacity="0.15"/>
+
+  <!-- Arrow (spec to code / workflow direction) -->
+  <g transform="translate(275, 340)">
+    <line x1="-20" y1="0" x2="20" y2="0" stroke="url(#accent)" stroke-width="6" stroke-linecap="round"/>
+    <polyline points="10,-12 24,0 10,12" fill="none" stroke="url(#accent)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Code brackets (implementation) -->
+  <g transform="translate(275, 395)" fill="none" stroke="url(#accent)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="-40,-25 -60,0 -40,25"/>
+    <polyline points="40,-25 60,0 40,25"/>
+    <line x1="15" y1="-28" x2="-15" y2="28" opacity="0.7"/>
+  </g>
+
+  <!-- "S" badge -->
+  <circle cx="380" cy="105" r="38" fill="url(#accent)"/>
+  <text x="380" y="120" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="48" fill="#ffffff" text-anchor="middle">S</text>
+</svg>
