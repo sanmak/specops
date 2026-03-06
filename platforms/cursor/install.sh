@@ -16,6 +16,35 @@ INSTALL_DIR="${1:-.}"
 
 RULES_DIR="$INSTALL_DIR/.cursor/rules"
 
+# Check for .gitignore conflicts on project-level installs
+if [[ "$INSTALL_DIR" == "." ]] && [[ -f ".gitignore" ]]; then
+  if grep -q -E "^\.cursor/?$|^\.cursor/\*" ".gitignore"; then
+    echo ""
+    echo "⚠️  WARNING: Project .gitignore blocks tracking of .cursor/"
+    echo ""
+    echo "Your .gitignore excludes .cursor/ or .cursor/*, which means the installed"
+    echo "specops.mdc will not be tracked by git. Team members cloning this repo won't"
+    echo "have SpecOps available unless they install it individually."
+    echo ""
+    echo "Two options to fix this:"
+    echo ""
+    echo "Option 1 (Recommended): Use user-level installation instead"
+    echo "  → Installs to ~/.cursor/rules/specops.mdc (not project-specific)"
+    echo "  → Unaffected by .gitignore"
+    echo ""
+    echo "Option 2: Selectively un-ignore .cursor/rules/ in your .gitignore"
+    echo "  → Add this line to .gitignore:  !.cursor/rules/"
+    echo "  → Tracks SpecOps but keeps other .cursor/ config local"
+    echo ""
+    read -rp "Proceed with project-level install anyway? [y/N]: " proceed
+    if [[ ! $proceed =~ ^[Yy]$ ]]; then
+      echo "Aborted. Consider using user-level installation instead."
+      exit 1
+    fi
+  fi
+fi
+
+echo ""
 echo "Installing to: $RULES_DIR/specops.mdc"
 mkdir -p "$RULES_DIR"
 cp "$SCRIPT_DIR/specops.mdc" "$RULES_DIR/specops.mdc"

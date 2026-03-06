@@ -60,6 +60,34 @@ case $choice in
     ;;
 esac
 
+# Check for .gitignore conflicts on project-level installs
+if [[ "$INSTALL_DIR" == "./.claude/skills/specops" ]] && [[ -f ".gitignore" ]]; then
+  if grep -q -E "^\.claude/?$|^\.claude/\*" ".gitignore"; then
+    echo ""
+    echo "⚠️  WARNING: Project .gitignore blocks tracking of .claude/"
+    echo ""
+    echo "Your .gitignore excludes .claude/ or .claude/*, which means the installed"
+    echo "SKILL.md will not be tracked by git. Team members cloning this repo won't"
+    echo "have SpecOps available unless they install it individually."
+    echo ""
+    echo "Two options to fix this:"
+    echo ""
+    echo "Option 1 (Recommended): Use user-level installation instead"
+    echo "  → Installs to ~/.claude/skills/specops (not project-specific)"
+    echo "  → Unaffected by .gitignore"
+    echo ""
+    echo "Option 2: Selectively un-ignore .claude/skills/ in your .gitignore"
+    echo "  → Add this line to .gitignore:  !.claude/skills/"
+    echo "  → Tracks SpecOps but keeps other .claude/ config local"
+    echo ""
+    read -rp "Proceed with project-level install anyway? [y/N]: " proceed
+    if [[ ! $proceed =~ ^[Yy]$ ]]; then
+      echo "Aborted. Consider running: bash setup.sh  (and choose user installation)"
+      exit 1
+    fi
+  fi
+fi
+
 echo ""
 echo "Installing to: $INSTALL_DIR"
 mkdir -p "$INSTALL_DIR"

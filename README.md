@@ -82,6 +82,45 @@ View the auth-feature spec
 List all specops specs
 ```
 
+## Troubleshooting
+
+### SpecOps skill not found / incomplete spec output
+
+**Symptom:** SpecOps runs but skips creating `spec.json` / `index.json`, or the workflow behavior seems improvised rather than following the standard phases.
+
+**Cause:** Your project has `.claude/` in `.gitignore`, so the installed `SKILL.md` is silently ignored by git (and sometimes by your AI editor). Your AI assistant falls back to its own understanding instead of the SpecOps workflow, leading to incomplete or incorrect output.
+
+**Fix — Option 1: Use user-level installation (recommended)**
+
+User-level installation puts SpecOps in `~/.claude/skills/specops/`, which is unaffected by your project's `.gitignore`:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/sanmak/specops/main/scripts/remote-install.sh) --platform claude --scope user
+```
+
+This makes SpecOps available in all your projects globally, and your team members install independently.
+
+**Fix — Option 2: Selectively un-ignore .claude/skills/**
+
+If you want project-level installation (to distribute it with your repo), add this line to your project's `.gitignore`:
+
+```
+!.claude/skills/
+```
+
+This keeps the SpecOps skill tracked in git while ignoring other `.claude/` config:
+
+```gitignore
+# Ignore Claude Code local session state
+.claude/
+# But track the SpecOps skill for the team
+!.claude/skills/
+```
+
+Then reinstall: `bash setup.sh` and choose "project" installation.
+
+---
+
 ## How It Works
 
 <p align="center">
