@@ -81,7 +81,7 @@ Stage these files:
 - `platforms/claude/platform.json`, `platforms/cursor/platform.json`, `platforms/codex/platform.json`, `platforms/copilot/platform.json`
 - `CHECKSUMS.sha256`
 
-Check if any generated files actually changed with `git diff platforms/claude/SKILL.md platforms/cursor/specops.mdc platforms/codex/SKILL.md platforms/copilot/specops.instructions.md skills/specops/SKILL.md`. If any have changes, stage them too.
+Check if any generated files actually changed with `git diff platforms/claude/SKILL.md platforms/cursor/specops.mdc platforms/codex/SKILL.md platforms/copilot/specops.instructions.md skills/ .claude-plugin/`. If any have changes, stage them too.
 
 Run the commit using a heredoc:
 

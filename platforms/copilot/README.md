@@ -2,6 +2,10 @@
 
 ## Installation
 
+### Extensions Marketplace (Recommended)
+
+Search "specops" in the Copilot Extensions marketplace.
+
 ### Quick Install (no clone needed)
 
 ```bash

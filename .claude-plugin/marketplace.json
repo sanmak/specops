@@ -1,0 +1,25 @@
+{
+  "name": "specops-marketplace",
+  "owner": {
+    "name": "Sanket Makhija"
+  },
+  "metadata": {
+    "description": "SpecOps - spec-driven development workflow for AI coding assistants",
+    "version": "1.1.0"
+  },
+  "plugins": [
+    {
+      "name": "specops",
+      "source": ".",
+      "description": "Spec-driven development workflow with /specops and /specops:init commands.",
+      "version": "1.1.0",
+      "category": "development-workflows",
+      "tags": [
+        "spec-driven",
+        "workflow",
+        "planning"
+      ],
+      "homepage": "https://github.com/sanmak/specops"
+    }
+  ]
+}

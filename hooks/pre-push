@@ -51,7 +51,7 @@ run_check "Checksum verification" \
 
 # Check 3: Generated files freshness (regenerate and diff)
 run_check "Generated files freshness" \
-  "python3 generator/generate.py --all && git diff --exit-code platforms/ skills/specops/SKILL.md"
+  "python3 generator/generate.py --all && git diff --exit-code platforms/ skills/ .claude-plugin/"
 
 # Check 4: Schema structure
 run_check "Schema structure" \

@@ -2,6 +2,12 @@
 
 ## Installation
 
+### Plugin Marketplace (Recommended)
+
+```
+/install github:sanmak/specops
+```
+
 ### Quick Install (no clone needed)
 
 ```bash

@@ -58,6 +58,8 @@ specops/
 │   ├── claude/                           # Claude Code adapter
 │   │   ├── platform.json                 # Capabilities, tool mapping, entry point
 │   │   ├── SKILL.md                      # Generated Claude Code skill file
+│   │   ├── init/                         # Generated /specops:init skill
+│   │   │   └── SKILL.md
 │   │   ├── install.sh                    # Claude-specific installer
 │   │   └── README.md                     # Claude Code quickstart
 │   ├── cursor/                           # Cursor adapter
@@ -81,13 +83,20 @@ specops/
 │   ├── validate.py                       # Validates generated outputs
 │   └── templates/                        # Platform-specific templates
 │       ├── claude.j2                     # Claude Code output template
+│       ├── claude-init.j2               # Claude Code init skill template
 │       ├── cursor.j2                     # Cursor output template
 │       ├── codex.j2                      # Codex output template
 │       └── copilot.j2                    # Copilot output template
 │
-├── skills/                               # Legacy skill directory (backward compat)
-│   └── specops/
-│       └── SKILL.md                      # Copy of platforms/claude/SKILL.md
+├── .claude-plugin/                       # Claude Code plugin manifests (generated)
+│   ├── plugin.json                       # Plugin metadata and version
+│   └── marketplace.json                  # Marketplace catalog entry
+│
+├── skills/                               # Plugin skills directory
+│   ├── specops/
+│   │   └── SKILL.md                      # Copy of platforms/claude/SKILL.md
+│   └── init/
+│       └── SKILL.md                      # Generated /specops:init skill
 │
 ├── tests/                                # Test suite
 │   ├── test_schema_validation.py         # Validates example configs against schema

@@ -73,7 +73,7 @@ Apply the appropriate fix based on your diagnosis from Step 5.
 
 After fixing:
 1. Stage only the specific files you changed: `git add <file1> <file2> ...`
-2. If you changed files in `core/`, `generator/templates/`, or `platforms/*/platform.json`, also run `python3 generator/generate.py --all` and stage the regenerated outputs: `git add platforms/ skills/specops/SKILL.md`
+2. If you changed files in `core/`, `generator/templates/`, or `platforms/*/platform.json`, also run `python3 generator/generate.py --all` and stage the regenerated outputs: `git add platforms/ skills/ .claude-plugin/`
 3. If you changed checksummed files, regenerate checksums:
    ```
    shasum -a 256 skills/specops/SKILL.md schema.json platforms/claude/SKILL.md \
@@ -81,7 +81,8 @@ After fixing:
      platforms/cursor/platform.json platforms/codex/SKILL.md \
      platforms/codex/platform.json platforms/copilot/specops.instructions.md \
      platforms/copilot/platform.json core/workflow.md core/safety.md \
-     hooks/pre-commit hooks/pre-push scripts/install-hooks.sh > CHECKSUMS.sha256
+     hooks/pre-commit hooks/pre-push scripts/install-hooks.sh \
+     .claude-plugin/plugin.json .claude-plugin/marketplace.json > CHECKSUMS.sha256
    ```
    Then `git add CHECKSUMS.sha256`
 

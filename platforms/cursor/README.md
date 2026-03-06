@@ -2,6 +2,10 @@
 
 ## Installation
 
+### Marketplace (Recommended)
+
+Search "specops" in Cursor Settings > Extensions, or visit [cursor.com/marketplace](https://cursor.com/marketplace).
+
 ### Quick Install (no clone needed)
 
 ```bash

@@ -2,6 +2,10 @@
 
 ## Installation
 
+### Skills Catalog (Recommended)
+
+Search "specops" in the Codex skills catalog.
+
 ### Quick Install (no clone needed)
 
 ```bash

@@ -17,13 +17,13 @@ SpecOps brings structured spec-driven development to your AI coding assistant �
 
 ## Quick Start
 
-**Install:**
+**Install (Claude Code):**
 
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sanmak/specops/main/scripts/remote-install.sh)
+```
+/install github:sanmak/specops
 ```
 
-> More install options: [QUICKSTART.md](QUICKSTART.md)
+**Other platforms & manual install:** [QUICKSTART.md](QUICKSTART.md)
 
 **Use:**
 
@@ -85,7 +85,7 @@ SpecOps and [Spec Kit](https://github.com/github/spec-kit) share the same core p
 | Capability | SpecOps | GitHub Spec Kit |
 |---|---|---|
 | **Supported platforms** | Claude Code, Cursor, OpenAI Codex, GitHub Copilot | 18+ agents |
-| **Installation** | Single `curl \| bash`, no dependencies | Python 3.11+ and uv |
+| **Installation** | Plugin marketplace or `curl \| bash`, no dependencies | Python 3.11+ and uv |
 | **Team review workflow** | Built-in (draft → review → revise → approve → gate) | Not available |
 | **Vertical-aware templates** | 7 project types (infra, data, library, builder, etc.) | Generic templates |
 | **Security hardening** | Prompt injection defense, schema validation, path containment | Not documented |

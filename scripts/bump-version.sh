@@ -48,6 +48,8 @@ FILES=(
   "platforms/cursor/platform.json"
   "platforms/codex/platform.json"
   "platforms/copilot/platform.json"
+  ".claude-plugin/plugin.json"
+  ".claude-plugin/marketplace.json"
 )
 
 # --- Update each file using Python (preserves JSON structure) ---
@@ -64,7 +66,16 @@ path = sys.argv[1]
 version = sys.argv[2]
 with open(path, 'r') as f:
     data = json.load(f)
-data['version'] = version
+# Update top-level version
+if 'version' in data:
+    data['version'] = version
+# Update nested versions in marketplace.json
+if 'metadata' in data and 'version' in data.get('metadata', {}):
+    data['metadata']['version'] = version
+if 'plugins' in data:
+    for plugin in data['plugins']:
+        if 'version' in plugin:
+            plugin['version'] = version
 with open(path, 'w') as f:
     json.dump(data, f, indent=2)
     f.write('\n')
@@ -94,6 +105,8 @@ if [ "$REGEN_CHECKSUMS" = true ]; then
     hooks/pre-commit \
     hooks/pre-push \
     scripts/install-hooks.sh \
+    .claude-plugin/plugin.json \
+    .claude-plugin/marketplace.json \
     > CHECKSUMS.sha256
   echo "  Updated: CHECKSUMS.sha256"
 fi

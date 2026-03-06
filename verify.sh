@@ -87,6 +87,7 @@ check_file "generator/templates/claude.j2"
 check_file "generator/templates/cursor.j2"
 check_file "generator/templates/codex.j2"
 check_file "generator/templates/copilot.j2"
+check_file "generator/templates/claude-init.j2"
 echo ""
 
 # Check platform adapters
@@ -103,11 +104,20 @@ check_file "platforms/codex/SKILL.md"
 check_file "platforms/copilot/specops.instructions.md"
 echo ""
 
-# Check legacy skills directory (backward compat)
-echo "Legacy Skills Directory:"
+# Check plugin manifests
+echo "Plugin Manifests:"
+check_dir ".claude-plugin"
+check_file ".claude-plugin/plugin.json"
+check_file ".claude-plugin/marketplace.json"
+echo ""
+
+# Check skills directory (plugin + legacy)
+echo "Skills Directory:"
 check_dir "skills"
 check_dir "skills/specops"
 check_file "skills/specops/SKILL.md"
+check_dir "skills/init"
+check_file "skills/init/SKILL.md"
 echo ""
 
 # Check examples directory
@@ -150,6 +160,8 @@ json_files=(
   platforms/cursor/platform.json
   platforms/codex/platform.json
   platforms/copilot/platform.json
+  ".claude-plugin/plugin.json"
+  ".claude-plugin/marketplace.json"
 )
 for json_file in "${json_files[@]}"; do
   if [ -f "$json_file" ]; then

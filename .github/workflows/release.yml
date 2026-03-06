@@ -59,6 +59,8 @@ jobs:
             hooks/pre-commit \
             hooks/pre-push \
             scripts/install-hooks.sh \
+            .claude-plugin/plugin.json \
+            .claude-plugin/marketplace.json \
             > CHECKSUMS.sha256
 
       - name: Commit and push
@@ -66,15 +68,17 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add \
-            skills/specops/SKILL.md \
+            skills/ \
             platforms/claude/SKILL.md \
             platforms/claude/platform.json \
+            platforms/claude/init/ \
             platforms/cursor/specops.mdc \
             platforms/cursor/platform.json \
             platforms/codex/SKILL.md \
             platforms/codex/platform.json \
             platforms/copilot/specops.instructions.md \
             platforms/copilot/platform.json \
+            .claude-plugin/ \
             CHECKSUMS.sha256
           git diff --cached --quiet && echo "No changes to commit" && exit 0
           git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"

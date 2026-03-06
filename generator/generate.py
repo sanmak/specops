@@ -23,6 +23,9 @@ ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CORE_DIR = os.path.join(ROOT_DIR, "core")
 PLATFORMS_DIR = os.path.join(ROOT_DIR, "platforms")
 TEMPLATES_DIR = os.path.join(ROOT_DIR, "generator", "templates")
+EXAMPLES_DIR = os.path.join(ROOT_DIR, "examples")
+SKILLS_DIR = os.path.join(ROOT_DIR, "skills")
+PLUGIN_DIR = os.path.join(ROOT_DIR, ".claude-plugin")
 
 SUPPORTED_PLATFORMS = ["claude", "cursor", "codex", "copilot"]
 
@@ -340,7 +343,102 @@ def generate_claude(core, platform_config):
         '---\n\n'
     )
     skill_md_path = os.path.join(PLATFORMS_DIR, "claude", "SKILL.md")
-    write_file(skill_md_path, frontmatter + output)
+    skill_content = frontmatter + output
+    write_file(skill_md_path, skill_content)
+
+    # Sync legacy skills directory
+    legacy_skill_path = os.path.join(SKILLS_DIR, "specops", "SKILL.md")
+    write_file(legacy_skill_path, skill_content)
+
+
+def generate_init_skill():
+    """Generate the /specops:init skill from template + example configs."""
+    template = read_file(os.path.join(TEMPLATES_DIR, "claude-init.j2"))
+
+    # Load example configs
+    config_files = {
+        "config_minimal": ".specops.minimal.json",
+        "config_standard": ".specops.json",
+        "config_full": ".specops.full.json",
+        "config_review": ".specops.review.json",
+        "config_builder": ".specops.builder.json",
+    }
+
+    context = {}
+    for key, filename in config_files.items():
+        filepath = os.path.join(EXAMPLES_DIR, filename)
+        context[key] = read_file(filepath).strip()
+
+    output = render_template(template, context)
+
+    # Write to platforms/claude/init/
+    init_skill_path = os.path.join(PLATFORMS_DIR, "claude", "init", "SKILL.md")
+    write_file(init_skill_path, output)
+
+    # Write to skills/init/ for plugin discovery
+    plugin_init_path = os.path.join(SKILLS_DIR, "init", "SKILL.md")
+    write_file(plugin_init_path, output)
+
+
+def generate_plugin_manifests():
+    """Generate Claude Code plugin and marketplace manifests."""
+    # Read version from claude platform.json (authoritative source)
+    claude_config = load_platform_config("claude")
+    version = claude_config.get("version", "1.0.0")
+
+    print("\nGenerating: plugin manifests")
+
+    # .claude-plugin/plugin.json
+    plugin_json = {
+        "name": "specops",
+        "description": (
+            "Spec-driven development workflow - transforms ideas into structured"
+            " specifications (requirements, design, tasks) before implementation."
+        ),
+        "version": version,
+        "author": {"name": "Sanket Makhija"},
+        "repository": "https://github.com/sanmak/specops",
+        "homepage": "https://github.com/sanmak/specops",
+        "license": "MIT",
+        "keywords": [
+            "spec-driven",
+            "specifications",
+            "workflow",
+            "requirements",
+            "design",
+            "tasks",
+        ],
+    }
+    plugin_path = os.path.join(PLUGIN_DIR, "plugin.json")
+    write_file(plugin_path, json.dumps(plugin_json, indent=2) + "\n")
+
+    # .claude-plugin/marketplace.json
+    marketplace_json = {
+        "name": "specops-marketplace",
+        "owner": {"name": "Sanket Makhija"},
+        "metadata": {
+            "description": (
+                "SpecOps - spec-driven development workflow for AI coding assistants"
+            ),
+            "version": version,
+        },
+        "plugins": [
+            {
+                "name": "specops",
+                "source": ".",
+                "description": (
+                    "Spec-driven development workflow with /specops and"
+                    " /specops:init commands."
+                ),
+                "version": version,
+                "category": "development-workflows",
+                "tags": ["spec-driven", "workflow", "planning"],
+                "homepage": "https://github.com/sanmak/specops",
+            }
+        ],
+    }
+    marketplace_path = os.path.join(PLUGIN_DIR, "marketplace.json")
+    write_file(marketplace_path, json.dumps(marketplace_json, indent=2) + "\n")
 
 
 def generate_cursor(core, platform_config):
@@ -477,6 +575,12 @@ def main():
         platform_config = load_platform_config(platform_name)
         generator = GENERATORS[platform_name]
         generator(core, platform_config)
+
+    # Generate init skill and plugin manifests (only when generating claude or all)
+    if args.all or args.platform == "claude":
+        print("\nGenerating: init skill")
+        generate_init_skill()
+        generate_plugin_manifests()
 
     print("\nDone!")
     return 0

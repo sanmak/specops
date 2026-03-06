@@ -9,12 +9,15 @@ Validates that generated platform outputs are complete and correct:
 4. Platform-specific format validation
 """
 
+import json
 import os
 import sys
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CORE_DIR = os.path.join(ROOT_DIR, "core")
 PLATFORMS_DIR = os.path.join(ROOT_DIR, "platforms")
+PLUGIN_DIR = os.path.join(ROOT_DIR, ".claude-plugin")
+SKILLS_DIR = os.path.join(ROOT_DIR, "skills")
 
 # Abstract tool operations that should NOT appear in generated outputs
 ABSTRACT_OPERATIONS = [
@@ -234,6 +237,129 @@ def validate_platform(platform, info):
     return errors
 
 
+def validate_plugin_manifests():
+    """Validate plugin.json and marketplace.json manifests."""
+    errors = []
+
+    # Check plugin.json
+    plugin_path = os.path.join(PLUGIN_DIR, "plugin.json")
+    if not os.path.exists(plugin_path):
+        errors.append("  Missing .claude-plugin/plugin.json")
+    else:
+        try:
+            with open(plugin_path, "r", encoding="utf-8") as f:
+                plugin = json.load(f)
+            for field in ["name", "description", "version", "author", "repository"]:
+                if field not in plugin:
+                    errors.append(f"  plugin.json missing required field '{field}'")
+        except json.JSONDecodeError as e:
+            errors.append(f"  plugin.json is not valid JSON: {e}")
+
+    # Check marketplace.json
+    marketplace_path = os.path.join(PLUGIN_DIR, "marketplace.json")
+    if not os.path.exists(marketplace_path):
+        errors.append("  Missing .claude-plugin/marketplace.json")
+    else:
+        try:
+            with open(marketplace_path, "r", encoding="utf-8") as f:
+                marketplace = json.load(f)
+            for field in ["name", "owner", "plugins"]:
+                if field not in marketplace:
+                    errors.append(f"  marketplace.json missing required field '{field}'")
+            if "plugins" in marketplace and len(marketplace["plugins"]) == 0:
+                errors.append("  marketplace.json has empty plugins array")
+        except json.JSONDecodeError as e:
+            errors.append(f"  marketplace.json is not valid JSON: {e}")
+
+    # Check version consistency
+    if not errors:
+        with open(plugin_path, "r", encoding="utf-8") as f:
+            plugin = json.load(f)
+        with open(marketplace_path, "r", encoding="utf-8") as f:
+            marketplace = json.load(f)
+
+        plugin_version = plugin.get("version")
+        marketplace_version = marketplace.get("metadata", {}).get("version")
+        marketplace_plugin_version = (
+            marketplace.get("plugins", [{}])[0].get("version")
+            if marketplace.get("plugins")
+            else None
+        )
+
+        # Check against platform.json version
+        claude_config_path = os.path.join(PLATFORMS_DIR, "claude", "platform.json")
+        if os.path.exists(claude_config_path):
+            with open(claude_config_path, "r", encoding="utf-8") as f:
+                claude_config = json.load(f)
+            platform_version = claude_config.get("version")
+
+            if plugin_version != platform_version:
+                errors.append(
+                    f"  Version mismatch: plugin.json ({plugin_version})"
+                    f" != platform.json ({platform_version})"
+                )
+            if marketplace_version and marketplace_version != platform_version:
+                errors.append(
+                    f"  Version mismatch: marketplace.json metadata ({marketplace_version})"
+                    f" != platform.json ({platform_version})"
+                )
+            if marketplace_plugin_version and marketplace_plugin_version != platform_version:
+                errors.append(
+                    f"  Version mismatch: marketplace.json plugin ({marketplace_plugin_version})"
+                    f" != platform.json ({platform_version})"
+                )
+
+    return errors
+
+
+def validate_init_skill():
+    """Validate the /specops:init skill."""
+    errors = []
+
+    # Check both locations
+    for location in [
+        os.path.join(PLATFORMS_DIR, "claude", "init", "SKILL.md"),
+        os.path.join(SKILLS_DIR, "init", "SKILL.md"),
+    ]:
+        rel_path = os.path.relpath(location, ROOT_DIR)
+        if not os.path.exists(location):
+            errors.append(f"  Missing {rel_path}")
+            continue
+
+        content = read_file(location)
+
+        # Check YAML frontmatter
+        if not content.startswith("---\n"):
+            errors.append(f"  {rel_path} must start with YAML frontmatter (---)")
+        else:
+            second_dash = content.find("---\n", 4)
+            if second_dash == -1:
+                errors.append(f"  {rel_path} has unclosed YAML frontmatter")
+            else:
+                frontmatter = content[4:second_dash]
+                if "name:" not in frontmatter:
+                    errors.append(f"  {rel_path} frontmatter missing 'name' field")
+                if "description:" not in frontmatter:
+                    errors.append(f"  {rel_path} frontmatter missing 'description' field")
+
+        # Check all 5 config templates are present
+        template_names = ["Minimal", "Standard", "Full", "Review", "Builder"]
+        for name in template_names:
+            if f"Template: {name}" not in content:
+                errors.append(f"  {rel_path} missing config template: {name}")
+
+    # Check both files are identical
+    platform_path = os.path.join(PLATFORMS_DIR, "claude", "init", "SKILL.md")
+    skills_path = os.path.join(SKILLS_DIR, "init", "SKILL.md")
+    if os.path.exists(platform_path) and os.path.exists(skills_path):
+        if read_file(platform_path) != read_file(skills_path):
+            errors.append(
+                "  platforms/claude/init/SKILL.md and skills/init/SKILL.md are out of sync"
+            )
+
+    return errors
+
+
 def main():
     print("SpecOps Platform Validator")
     print("=" * 40)
@@ -257,6 +383,26 @@ def main():
             all_errors.extend(errors)
         else:
             print("  PASS: All checks passed")
+
+    # Plugin manifest validation
+    print("\nValidating: plugin manifests")
+    plugin_errors = validate_plugin_manifests()
+    if plugin_errors:
+        for err in plugin_errors:
+            print(f"  FAIL: {err}")
+        all_errors.extend(plugin_errors)
+    else:
+        print("  PASS: All plugin manifest checks passed")
+
+    # Init skill validation
+    print("\nValidating: init skill")
+    init_errors = validate_init_skill()
+    if init_errors:
+        for err in init_errors:
+            print(f"  FAIL: {err}")
+        all_errors.extend(init_errors)
+    else:
+        print("  PASS: Init skill checks passed")
 
     # Cross-platform consistency check
     print("\nCross-platform consistency:")

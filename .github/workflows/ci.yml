@@ -26,6 +26,8 @@ jobs:
           python3 -c "import json; json.load(open('examples/.specops.json')); print('examples/.specops.json: valid')"
           python3 -c "import json; json.load(open('examples/.specops.minimal.json')); print('examples/.specops.minimal.json: valid')"
           python3 -c "import json; json.load(open('examples/.specops.full.json')); print('examples/.specops.full.json: valid')"
+          python3 -c "import json; json.load(open('.claude-plugin/plugin.json')); print('.claude-plugin/plugin.json: valid')"
+          python3 -c "import json; json.load(open('.claude-plugin/marketplace.json')); print('.claude-plugin/marketplace.json: valid')"
 
   schema-validation:
     name: Schema Validation
@@ -58,7 +60,7 @@ jobs:
         run: python3 generator/validate.py
       - name: Check generated files are not stale
         run: |
-          git diff --exit-code platforms/ skills/specops/SKILL.md || {
+          git diff --exit-code platforms/ skills/ .claude-plugin/ || {
             echo "ERROR: Generated platform files are stale."
             echo "Run 'python3 generator/generate.py --all' and commit the result."
             exit 1

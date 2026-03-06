@@ -22,7 +22,7 @@ Before pushing, proactively run the same checks the pre-push hook will run, so w
 
 1. `python3 generator/validate.py` -- platform validation
 2. `shasum -a 256 -c CHECKSUMS.sha256` -- checksum verification
-3. `python3 generator/generate.py --all && git diff --exit-code platforms/ skills/specops/SKILL.md` -- generated files freshness
+3. `python3 generator/generate.py --all && git diff --exit-code platforms/ skills/ .claude-plugin/` -- generated files freshness
 4. `python3 tests/check_schema_sync.py` -- schema structure
 5. `bash scripts/run-tests.sh` -- full test suite
 
