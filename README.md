@@ -124,10 +124,33 @@ Then reinstall: `bash setup.sh` and choose "project" installation.
 ## How It Works
 
 <p align="center">
-  <img src="assets/workflow.svg" alt="SpecOps 4-phase workflow: Understand, Spec, Implement, Complete" width="800"/>
+  <img src="assets/workflow.svg" alt="SpecOps 4-phase workflow with optional interview mode: Understand, Spec, Implement, Complete" width="900"/>
 </p>
 
-One command triggers a 4-phase workflow: understand your codebase, generate a structured spec, implement it, and verify the result.
+One command triggers a 4-phase workflow: understand your codebase, generate a structured spec, implement it, and verify the result. For vague or high-level ideas, an optional interview mode gathers structured requirements before spec generation.
+
+### Interview Mode (Optional)
+
+When your idea is still forming or you want to refine requirements before specs, SpecOps can guide you through a structured interview:
+
+<p align="center">
+  <img src="assets/interview-workflow.svg" alt="SpecOps interview mode: gathering questions → clarifying vague answers → confirming summary → proceeding to Phase 1" width="900"/>
+</p>
+
+**How to use:**
+- **Explicit**: `/specops interview I want to build something for restaurants`
+- **Auto-trigger**: Say something vague like "I have an idea" and SpecOps detects it (≤5 words, no technical keywords)
+
+The interview asks 5 structured questions with smart follow-ups:
+1. **Problem** - What are you solving?
+2. **Users** - Who benefits?
+3. **Features** - What are the 2–3 core capabilities?
+4. **Constraints** - Tech stack, integrations, timelines?
+5. **Done Criteria** - How do you know it's complete?
+
+Once you approve the summary, SpecOps proceeds to Phase 1 with the enriched context, producing better specs for unclear or exploratory work.
+
+*Non-interactive platforms (Codex) skip interview mode and proceed with best-effort spec generation.*
 
 ### Team Review Workflow
 
@@ -140,7 +163,7 @@ For teams, SpecOps adds a structured review cycle between spec creation and impl
 ## What Gets Created
 
 <p align="center">
-  <img src="assets/spec-structure.svg" alt="SpecOps generates requirements.md, design.md, and tasks.md for each feature" width="620"/>
+  <img src="assets/spec-structure.svg" alt="SpecOps generates spec.json, requirements.md, design.md, tasks.md, and optional implementation.md and reviews.md" width="700"/>
 </p>
 
 ## Platforms

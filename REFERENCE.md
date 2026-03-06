@@ -26,6 +26,12 @@ Fix: Users seeing 500 errors on checkout
 # Refactoring
 Refactor payment service to use repository pattern
 
+# Interview mode (explicit)
+interview I want to build a SaaS platform for restaurants
+
+# Interview mode (auto-triggered by vague request)
+I have an idea
+
 # Implement existing spec
 implement auth-feature
 
@@ -95,6 +101,14 @@ list
 
 ## Workflow Phases
 
+**Optional pre-phase:**
+0. **Interview** (optional) - Structured Q&A to gather requirements for vague or exploratory ideas
+   - Triggered by: explicit `/specops interview` or auto-detected vague requests
+   - Asks 5 questions: Problem, Users, Features, Constraints, Done Criteria
+   - Collects answers with smart follow-ups for clarification
+   - Proceeds to Phase 1 with enriched context
+
+**Core workflow:**
 1. **Understand** - Agent analyzes request and codebase
 2. **Spec** - Creates structured specification (always creates spec.json)
 2.5. **Review** - Team reviews spec, provides feedback, approves (if specReview enabled)

@@ -173,6 +173,19 @@ Your workflow:
 5. Validate with dry-run/plan
 6. Report completion
 
+**Interview Mode (Vague Idea):**
+User: "{command} interview I want to build something for restaurants"
+
+Your workflow:
+1. Detect "interview" keyword or vague request
+2. Enter interview mode: gather answers for 5 categories (Problem, Users, Features, Constraints, Done Criteria)
+3. Ask follow-up clarifications when answers are vague
+4. Show summary and confirm captured idea
+5. Proceed to Phase 1 with enriched context
+6. Create `.specops/restaurant-platform/` with full specs
+7. Implement following tasks.md
+8. Report completion
+
 **Existing Spec:**
 User: "{command} implement auth-feature"
 
@@ -242,6 +255,19 @@ Your workflow:
 5. Run existing tests to verify no regressions
 6. Report completion
 
+**Interview Mode (Vague Idea):**
+User: "Use specops interview for this idea I have"
+
+Your workflow:
+1. Detect "interview" keyword or determine request is vague
+2. Enter interview mode: gather answers for 5 categories (Problem, Users, Features, Constraints, Done Criteria)
+3. Ask follow-up clarifications when answers are vague
+4. Show summary and confirm captured idea
+5. Proceed to Phase 1 with enriched context
+6. Create spec directory with full specs
+7. Implement following tasks.md
+8. Report completion
+
 **Existing Spec:**
 User: "Implement the auth-feature spec"
 
@@ -288,6 +314,7 @@ def generate_claude(core, platform_config):
         "config_handling": core["config-handling"],
         "review_workflow": core["review-workflow"],
         "view": core["view"],
+        "interview": core["interview"],
         "safety": core["safety"],
         "simplicity": core["simplicity"],
         "data_handling": core["data-handling"],
@@ -327,6 +354,7 @@ def generate_cursor(core, platform_config):
         "config_handling": core["config-handling"],
         "review_workflow": core["review-workflow"],
         "view": core["view"],
+        "interview": core["interview"],
         "safety": core["safety"],
         "simplicity": core["simplicity"],
         "data_handling": core["data-handling"],
@@ -355,6 +383,7 @@ def generate_codex(core, platform_config):
         "config_handling": core["config-handling"],
         "review_workflow": core["review-workflow"],
         "view": core["view"],
+        "interview": core["interview"],
         "safety": core["safety"],
         "simplicity": core["simplicity"],
         "data_handling": core["data-handling"],
@@ -393,6 +422,7 @@ def generate_copilot(core, platform_config):
         "config_handling": core["config-handling"],
         "review_workflow": core["review-workflow"],
         "view": core["view"],
+        "interview": core["interview"],
         "safety": core["safety"],
         "simplicity": core["simplicity"],
         "data_handling": core["data-handling"],

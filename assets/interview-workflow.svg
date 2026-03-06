@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500" width="1000" height="500">
+  <!-- Background -->
+  <rect width="1000" height="500" fill="#ffffff" rx="12"/>
+
+  <!-- Title -->
+  <text x="500" y="30" text-anchor="middle" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="18" font-weight="bold">Interview Mode State Machine</text>
+
+  <!-- Trigger Detection Box -->
+  <rect x="20" y="60" width="200" height="120" fill="#fef3c7" stroke="#fbbf24" stroke-width="2" rx="8"/>
+  <text x="120" y="85" text-anchor="middle" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="13" font-weight="bold">Trigger Detection</text>
+  <text x="120" y="108" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Explicit: "interview"</text>
+  <text x="120" y="127" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Auto: vague request</text>
+  <text x="120" y="146" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10" font-style="italic">(≤5 words, no tech keywords)</text>
+
+  <!-- Arrow to Gathering -->
+  <line x1="220" y1="120" x2="290" y2="120" stroke="#d1d5db" stroke-width="2"/>
+  <polygon points="290,114 302,120 290,126" fill="#d1d5db"/>
+
+  <!-- Gathering State -->
+  <circle cx="380" cy="120" r="50" fill="#3b82f6"/>
+  <text x="380" y="113" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="14" font-weight="bold">GATHERING</text>
+  <text x="380" y="132" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Ask 5 questions</text>
+
+  <!-- Detailed gathering questions below -->
+  <g font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10" fill="#1f2937">
+    <rect x="30" y="210" width="910" height="130" fill="#f0f9ff" stroke="#7dd3fc" stroke-width="1" rx="6"/>
+    <text x="40" y="230" font-weight="bold">Q1: Problem</text>
+    <text x="50" y="245" fill="#6b7280">What problem are you solving? → Follow-up if &lt;15 words: Who specifically encounters this?</text>
+
+    <text x="40" y="265" font-weight="bold">Q2: Users</text>
+    <text x="50" y="280" fill="#6b7280">Who are the primary users? → Follow-up if too generic: What's their main workflow context?</text>
+
+    <text x="40" y="300" font-weight="bold">Q3: Core Features</text>
+    <text x="50" y="315" fill="#6b7280">What are 2–3 core things this needs to do? → Follow-up if &lt;2 features: What happens after primary feature?</text>
+
+    <text x="40" y="335" font-weight="bold">Q4: Constraints</text>
+    <text x="50" y="350" fill="#6b7280">Any hard constraints? (tech stack, integrations, deadlines) → Follow-up if none: Any existing systems to integrate with?</text>
+  </g>
+
+  <!-- Arrow Gathering → Clarifying -->
+  <path d="M 430 170 Q 500 200 550 250" stroke="#d1d5db" stroke-width="2" fill="none"/>
+  <polygon points="550,260 543,253 556,248" fill="#d1d5db"/>
+  <text x="480" y="210" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" fill="#6b7280">answer vague?</text>
+
+  <!-- Clarifying State -->
+  <circle cx="620" cy="330" r="50" fill="#f59e0b"/>
+  <text x="620" y="323" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="14" font-weight="bold">CLARIFYING</text>
+  <text x="620" y="342" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Follow-up Q</text>
+
+  <!-- Arrow back Clarifying → Gathering (loop) -->
+  <path d="M 570 280 Q 450 280 430 170" stroke="#d1d5db" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+  <polygon points="428,160 436,169 420,174" fill="#d1d5db"/>
+  <text x="400" y="225" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" fill="#6b7280">next question</text>
+
+  <!-- Arrow Gathering → Confirming (when all 5 complete) -->
+  <path d="M 430 170 Q 500 400 620 430" stroke="#d1d5db" stroke-width="2" fill="none"/>
+  <polygon points="628,438 614,437 622,425" fill="#d1d5db"/>
+  <text x="460" y="300" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" fill="#6b7280">all 5 answered</text>
+
+  <!-- Confirming State -->
+  <circle cx="620" cy="460" r="50" fill="#8b5cf6"/>
+  <text x="620" y="453" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="14" font-weight="bold">CONFIRMING</text>
+  <text x="620" y="472" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Show summary</text>
+
+  <!-- Arrow Confirming → Complete -->
+  <line x1="670" y1="460" x2="750" y2="460" stroke="#d1d5db" stroke-width="2"/>
+  <polygon points="750,454 762,460 750,466" fill="#d1d5db"/>
+  <text x="705" y="450" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" fill="#6b7280">approved</text>
+
+  <!-- Complete State -->
+  <circle cx="840" cy="460" r="50" fill="#10b981"/>
+  <text x="840" y="453" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="14" font-weight="bold">COMPLETE</text>
+  <text x="840" y="472" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">→ Phase 1</text>
+
+  <!-- Loop arrow for corrections in Confirming -->
+  <path d="M 570 450 Q 500 420 500 330 Q 500 280 570 280" stroke="#d1d5db" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+  <polygon points="576,273 575,285 564,279" fill="#d1d5db"/>
+  <text x="450" y="360" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10" fill="#6b7280" font-style="italic">user requests corrections</text>
+
+  <!-- Q5 at bottom right -->
+  <g font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10" fill="#1f2937">
+    <rect x="750" y="210" width="220" height="50" fill="#f0fdf4" stroke="#86efac" stroke-width="1" rx="6"/>
+    <text x="760" y="230" font-weight="bold">Q5: Done Criteria</text>
+    <text x="770" y="245" fill="#6b7280">How will you know this is complete?</text>
+    <text x="770" y="257" fill="#6b7280">→ Follow-up if vague: What's the minimum shippable version?</text>
+  </g>
+</svg>

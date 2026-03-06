@@ -1,48 +1,62 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 220" width="840" height="220">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 260" width="1080" height="260">
   <!-- Background -->
-  <rect width="840" height="220" fill="#ffffff" rx="12"/>
+  <rect width="1080" height="260" fill="#ffffff" rx="12"/>
+
+  <!-- Interview Mode (Optional) -->
+  <rect x="10" y="130" width="120" height="100" fill="#f3f4f6" stroke="#d1d5db" stroke-width="2" rx="8" stroke-dasharray="5,5"/>
+  <circle cx="70" cy="160" r="24" fill="#ec4899"/>
+  <text x="70" y="166" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="16" font-weight="bold">?</text>
+  <text x="70" y="200" text-anchor="middle" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="bold">Interview</text>
+  <text x="70" y="218" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">(optional)</text>
+
+  <!-- Arrow Interview → 1 -->
+  <line x1="130" y1="180" x2="160" y2="100" stroke="#d1d5db" stroke-width="2"/>
+  <polygon points="160,88 166,102 152,106" fill="#d1d5db"/>
 
   <!-- Phase 1: Understand -->
-  <circle cx="105" cy="60" r="32" fill="#3b82f6"/>
-  <text x="105" y="66" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="20" font-weight="bold">1</text>
-  <text x="105" y="112" text-anchor="middle" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="14" font-weight="bold">Understand</text>
-  <text x="105" y="134" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Read config</text>
-  <text x="105" y="150" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Analyze request</text>
-  <text x="105" y="166" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Explore codebase</text>
+  <circle cx="220" cy="60" r="32" fill="#3b82f6"/>
+  <text x="220" y="66" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="20" font-weight="bold">1</text>
+  <text x="220" y="112" text-anchor="middle" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="14" font-weight="bold">Understand</text>
+  <text x="220" y="134" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Read config</text>
+  <text x="220" y="150" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Analyze request</text>
+  <text x="220" y="166" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Explore codebase</text>
 
   <!-- Arrow 1→2 -->
-  <line x1="155" y1="60" x2="215" y2="60" stroke="#d1d5db" stroke-width="2"/>
-  <polygon points="215,54 227,60 215,66" fill="#d1d5db"/>
+  <line x1="270" y1="60" x2="330" y2="60" stroke="#d1d5db" stroke-width="2"/>
+  <polygon points="330,54 342,60 330,66" fill="#d1d5db"/>
 
   <!-- Phase 2: Spec -->
-  <circle cx="315" cy="60" r="32" fill="#6366f1"/>
-  <text x="315" y="66" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="20" font-weight="bold">2</text>
-  <text x="315" y="112" text-anchor="middle" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="14" font-weight="bold">Spec</text>
-  <text x="315" y="134" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">requirements.md</text>
-  <text x="315" y="150" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">design.md</text>
-  <text x="315" y="166" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">tasks.md</text>
+  <circle cx="430" cy="60" r="32" fill="#6366f1"/>
+  <text x="430" y="66" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="20" font-weight="bold">2</text>
+  <text x="430" y="112" text-anchor="middle" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="14" font-weight="bold">Spec</text>
+  <text x="430" y="134" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">requirements.md</text>
+  <text x="430" y="150" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">design.md</text>
+  <text x="430" y="166" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">tasks.md</text>
 
   <!-- Arrow 2→3 -->
-  <line x1="365" y1="60" x2="425" y2="60" stroke="#d1d5db" stroke-width="2"/>
-  <polygon points="425,54 437,60 425,66" fill="#d1d5db"/>
+  <line x1="480" y1="60" x2="540" y2="60" stroke="#d1d5db" stroke-width="2"/>
+  <polygon points="540,54 552,60 540,66" fill="#d1d5db"/>
 
   <!-- Phase 3: Implement -->
-  <circle cx="525" cy="60" r="32" fill="#8b5cf6"/>
-  <text x="525" y="66" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="20" font-weight="bold">3</text>
-  <text x="525" y="112" text-anchor="middle" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="14" font-weight="bold">Implement</text>
-  <text x="525" y="134" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Execute tasks</text>
-  <text x="525" y="150" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Run tests</text>
-  <text x="525" y="166" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Track progress</text>
+  <circle cx="640" cy="60" r="32" fill="#8b5cf6"/>
+  <text x="640" y="66" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="20" font-weight="bold">3</text>
+  <text x="640" y="112" text-anchor="middle" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="14" font-weight="bold">Implement</text>
+  <text x="640" y="134" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Execute tasks</text>
+  <text x="640" y="150" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Run tests</text>
+  <text x="640" y="166" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Track progress</text>
 
   <!-- Arrow 3→4 -->
-  <line x1="575" y1="60" x2="635" y2="60" stroke="#d1d5db" stroke-width="2"/>
-  <polygon points="635,54 647,60 635,66" fill="#d1d5db"/>
+  <line x1="690" y1="60" x2="750" y2="60" stroke="#d1d5db" stroke-width="2"/>
+  <polygon points="750,54 762,60 750,66" fill="#d1d5db"/>
 
   <!-- Phase 4: Complete -->
-  <circle cx="735" cy="60" r="32" fill="#10b981"/>
-  <text x="735" y="66" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="20" font-weight="bold">4</text>
-  <text x="735" y="112" text-anchor="middle" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="14" font-weight="bold">Complete</text>
-  <text x="735" y="134" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Verify criteria</text>
-  <text x="735" y="150" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Commit changes</text>
-  <text x="735" y="166" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Create PR</text>
+  <circle cx="850" cy="60" r="32" fill="#10b981"/>
+  <text x="850" y="66" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="20" font-weight="bold">4</text>
+  <text x="850" y="112" text-anchor="middle" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="14" font-weight="bold">Complete</text>
+  <text x="850" y="134" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Verify criteria</text>
+  <text x="850" y="150" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Commit changes</text>
+  <text x="850" y="166" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Create PR</text>
+
+  <!-- Legend -->
+  <text x="20" y="245" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Optional interview mode (dashed box) triggers when request is vague or user explicitly requests /specops interview</text>
 </svg>

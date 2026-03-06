@@ -88,11 +88,15 @@ Even in high autonomy mode, ask for clarification when:
 When invoked:
 1. Greet the user briefly
 2. Check if the request is a **view** or **list** command (see "Spec Viewing" module). If so, follow the view/list workflow instead of the standard phases below.
-3. Confirm the request type (feature/bugfix/implement/other)
-4. Show the configuration you'll use (including detected vertical)
-5. Begin the workflow immediately (high autonomy)
-6. Provide progress updates as you work
-7. Summarize completion clearly
+3. Check if interview mode is triggered (see "Interview Mode" module):
+   - Explicit: request contains "interview" keyword
+   - Auto (interactive platforms only): request is vague (≤5 words, no technical keywords, no action verb)
+   - If triggered: follow the Interview Mode workflow, then continue with the enriched context
+4. Confirm the request type (feature/bugfix/implement/other)
+5. Show the configuration you'll use (including detected vertical)
+6. Begin the workflow immediately (high autonomy)
+7. Provide progress updates as you work
+8. Summarize completion clearly
 
 ---
 

@@ -1,42 +1,64 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 240" width="620" height="240">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" width="700" height="420">
   <!-- Background -->
-  <rect width="620" height="240" fill="#f9fafb" rx="10" stroke="#e5e7eb" stroke-width="1"/>
+  <rect width="700" height="420" fill="#f9fafb" rx="10" stroke="#e5e7eb" stroke-width="1"/>
 
   <!-- Title -->
   <text x="30" y="32" fill="#1f2937" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="13" font-weight="bold">What SpecOps creates in your project:</text>
 
-  <!-- Folder icon helper: small polygon -->
   <!-- your-project/ -->
-  <text x="30" y="68" fill="#eab308" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="14">&#128193;</text>
+  <text x="30" y="68" fill="#eab308" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="14">📁</text>
   <text x="52" y="68" fill="#1f2937" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="13" font-weight="bold">your-project/</text>
 
-  <!-- .specops.json -->
-  <text x="60" y="96" fill="#9ca3af" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12">&#9500;&#9472;&#9472;</text>
+  <!-- .specops.json (optional config) -->
+  <text x="60" y="96" fill="#9ca3af" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12">├──</text>
   <text x="96" y="96" fill="#6b7280" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="13">.specops.json</text>
-  <text x="280" y="96" fill="#9ca3af" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-style="italic">Configuration (optional)</text>
+  <text x="390" y="96" fill="#9ca3af" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-style="italic">Configuration (optional)</text>
 
-  <!-- .specops/ -->
-  <text x="60" y="124" fill="#9ca3af" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12">&#9492;&#9472;&#9472;</text>
-  <text x="96" y="124" fill="#eab308" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12">&#128193;</text>
+  <!-- .specops/ folder -->
+  <text x="60" y="124" fill="#9ca3af" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12">└──</text>
+  <text x="96" y="124" fill="#eab308" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="14">📁</text>
   <text x="118" y="124" fill="#1f2937" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="13" font-weight="bold">.specops/</text>
 
-  <!-- feature-user-auth/ -->
-  <text x="110" y="152" fill="#9ca3af" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12">&#9492;&#9472;&#9472;</text>
-  <text x="146" y="152" fill="#eab308" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12">&#128193;</text>
-  <text x="168" y="152" fill="#1f2937" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="13">feature-user-auth/</text>
+  <!-- index.json at .specops level -->
+  <text x="110" y="152" fill="#9ca3af" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12">├──</text>
+  <text x="146" y="152" fill="#10b981" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="13">index.json</text>
+  <text x="390" y="152" fill="#9ca3af" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-style="italic">Auto-generated dashboard</text>
+
+  <!-- feature-user-auth/ folder -->
+  <text x="110" y="180" fill="#9ca3af" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12">└──</text>
+  <text x="146" y="180" fill="#eab308" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="14">📁</text>
+  <text x="168" y="180" fill="#1f2937" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="13">feature-user-auth/</text>
+
+  <!-- spec.json -->
+  <text x="170" y="208" fill="#9ca3af" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12">├──</text>
+  <text x="206" y="208" fill="#10b981" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="13">spec.json</text>
+  <text x="390" y="208" fill="#9ca3af" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-style="italic">Lifecycle metadata</text>
 
   <!-- requirements.md -->
-  <text x="170" y="178" fill="#9ca3af" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12">&#9500;&#9472;&#9472;</text>
-  <text x="206" y="178" fill="#3b82f6" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="13">requirements.md</text>
-  <text x="380" y="178" fill="#9ca3af" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-style="italic">What to build</text>
+  <text x="170" y="236" fill="#9ca3af" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12">├──</text>
+  <text x="206" y="236" fill="#3b82f6" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="13">requirements.md</text>
+  <text x="390" y="236" fill="#9ca3af" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-style="italic">What to build</text>
 
   <!-- design.md -->
-  <text x="170" y="200" fill="#9ca3af" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12">&#9500;&#9472;&#9472;</text>
-  <text x="206" y="200" fill="#6366f1" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="13">design.md</text>
-  <text x="380" y="200" fill="#9ca3af" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-style="italic">How to build it</text>
+  <text x="170" y="264" fill="#9ca3af" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12">├──</text>
+  <text x="206" y="264" fill="#6366f1" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="13">design.md</text>
+  <text x="390" y="264" fill="#9ca3af" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-style="italic">How to build it</text>
 
   <!-- tasks.md -->
-  <text x="170" y="222" fill="#9ca3af" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12">&#9492;&#9472;&#9472;</text>
-  <text x="206" y="222" fill="#8b5cf6" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="13">tasks.md</text>
-  <text x="380" y="222" fill="#9ca3af" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-style="italic">Steps to build it</text>
+  <text x="170" y="292" fill="#9ca3af" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12">├──</text>
+  <text x="206" y="292" fill="#8b5cf6" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="13">tasks.md</text>
+  <text x="390" y="292" fill="#9ca3af" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-style="italic">Steps to build it</text>
+
+  <!-- implementation.md (optional) -->
+  <text x="170" y="320" fill="#9ca3af" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12">├──</text>
+  <text x="206" y="320" fill="#a78bfa" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="13" opacity="0.7">implementation.md</text>
+  <text x="390" y="320" fill="#9ca3af" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-style="italic">(optional) Decisions, blockers</text>
+
+  <!-- reviews.md (optional) -->
+  <text x="170" y="348" fill="#9ca3af" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12">└──</text>
+  <text x="206" y="348" fill="#f472b6" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="13" opacity="0.7">reviews.md</text>
+  <text x="390" y="348" fill="#9ca3af" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-style="italic">(optional) Review feedback</text>
+
+  <!-- Legend -->
+  <text x="30" y="385" fill="#6b7280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">Files in regular weight + color: always created. Lighter opacity + (optional): created only if relevant.</text>
 </svg>

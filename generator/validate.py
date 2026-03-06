@@ -86,6 +86,14 @@ VIEW_MARKERS = [
     "View: Status",
 ]
 
+# Interview workflow markers that MUST appear
+INTERVIEW_MARKERS = [
+    "Interview Mode",
+    "gathering",
+    "clarifying",
+    "confirming",
+]
+
 
 def read_file(path):
     with open(path, "r", encoding="utf-8") as f:
@@ -197,6 +205,9 @@ def validate_platform(platform, info):
 
     # Check view workflow present
     errors.extend(check_markers_present(platform, content, VIEW_MARKERS, "view"))
+
+    # Check interview workflow present
+    errors.extend(check_markers_present(platform, content, INTERVIEW_MARKERS, "interview"))
 
     # Platform-specific format validation
     if platform == "cursor":
