@@ -40,7 +40,20 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
    - `tasks.md` - Discrete, trackable implementation tasks with dependencies
 3. Create `spec.json` with metadata (author from git config, type, status, version, created date). Set status to `draft`.
 4. Regenerate `<specsDir>/index.json` from all `*/spec.json` files.
-5. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow.
+5. **First-spec README prompt**: If `index.json` contains exactly one spec entry (this is the project's first spec):
+   - If FILE_EXISTS(`README.md`) is false, skip this step
+   - Read the file at `README.md`. If content already contains "specops" or "SpecOps" (case-insensitive), skip this step
+   - On non-interactive platforms (`canAskInteractive = false`), skip this step entirely
+   - If uncertain, note assumptions in the spec and proceed. List any ambiguities for the user to review "This is your first SpecOps spec! Would you like me to add a brief Development Process section to your README.md?"
+   - If yes, Edit the file at `README.md` to append:
+     ```
+     ## Development Process
+
+     This project uses [SpecOps](https://github.com/sanmak/specops) for spec-driven development. Feature requirements, designs, and task breakdowns live in `<specsDir>/`.
+     ```
+     Use the actual configured `specsDir` value.
+   - If no, proceed without changes
+6. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow.
 
 **Phase 2.5: Review Cycle** (if spec review enabled)
 See "Collaborative Spec Review" module for the full review workflow including review mode, revision mode, and approval tracking.
