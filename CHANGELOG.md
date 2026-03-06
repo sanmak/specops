@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-03-06
+
+### Added
+
+- **Plugin marketplace distribution**: `.claude-plugin/plugin.json` and `marketplace.json` manifests for distributing SpecOps via Claude Code, Cursor, Codex, and Copilot plugin marketplaces. Install with `/install github:sanmak/specops`
+- **`/specops:init` skill**: Interactive config initialization that presents 5 template options (minimal, standard, full, review, builder) and writes `.specops.json` to the user's project
+- **Interview mode**: Optional structured interview for vague or exploratory ideas — gathers requirements before spec generation. Trigger with `/specops interview ...` or auto-triggered for ambiguous inputs
+- **Development Process prompt**: On first spec creation, prompts to add a Development Process section to the project's README
+- **`/monitor` slash command**: Monitor GitHub Actions CI status, diagnose failures, auto-fix and re-push (up to 3 cycles)
+- **`/release` slash command**: Automated release workflow — CHANGELOG generation, version bump, validation, commit, push, and GitHub Release creation
+- **Command reference guide**: Comprehensive `docs/COMMANDS.md` with all commands, triggers, and platform differences
+- **Marketplace submission content**: `docs/MARKETPLACE_SUBMISSIONS.md` with copy-paste-ready content for all 4 platform marketplaces
+
+### Changed
+
+- **Documentation reorganized**: Moved TEAM_GUIDE.md, REFERENCE.md, STRUCTURE.md into `docs/` folder
+- **README streamlined**: Simplified for first-time visitors with competitive differentiation against Spec Kit, marketplace install as primary method
+- **CI dependencies bumped**: `actions/checkout` v4→v6, `github/codeql-action` v3→v4
+
+### Fixed
+
+- **verify.sh file paths**: Updated after docs/ folder reorganization
+- **Gitignore warning**: Warns when `.claude` or platform dirs are gitignored (prevents silent install failures)
+- **Validator cleanup**: Removed unused imports in `generator/validate.py`
+
 ## [1.1.0] - 2026-03-02
 
 ### Added
