@@ -428,6 +428,7 @@ When the user invokes SpecOps referencing an existing spec, detect the interacti
 1. Read the file at(`<specsDir>/<spec-name>/spec.json`)
 2. **Validate spec.json**: If the file does not exist, or contains invalid JSON, or is missing required fields (`id`, `type`, `status`, `author`), or `status` is not a valid enum value (`draft`, `in-review`, `approved`, `self-approved`, `implementing`, `completed`) → treat as **legacy spec**, proceed with implementation. If the file existed but was invalid, Print to stdout: "spec.json is invalid — proceeding without review tracking. Re-run `/specops` on this spec to regenerate it."
 3. Execute the command(`git config user.name`) to get the current user's name
+   **Limitation**: `user.name` is less unique than email — two users with the same git display name will be treated as the same identity. This trade-off was made to avoid storing PII (email addresses) in spec metadata. For teams where name collisions are a concern, use distinct display names in git config.
 4. Determine mode:
    - If current user name ≠ `author.name` AND status is `"draft"` or `"in-review"` → **Review mode**
    - If current user name = `author.name` AND status is `"in-review"` AND any reviewer has `"changes-requested"` → **Revision mode**

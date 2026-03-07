@@ -186,6 +186,9 @@ fi
 # Prevent personal emails in spec metadata and absolute paths in committed files.
 
 # 5a: Real email addresses in .specops/**/*.json
+# Note: spec-schema.json uses additionalProperties:false without an "email" property,
+# so valid specs won't contain email fields. This check is a safety net for legacy or
+# manually-crafted specs that bypass schema validation.
 STAGED_SPEC_JSON="$(echo "$STAGED_FILES" | grep '^\.specops/.*\.json$' || true)"
 if [ -n "$STAGED_SPEC_JSON" ]; then
   while IFS= read -r spec_file; do
@@ -216,20 +219,19 @@ while IFS= read -r staged_file; do
 done <<< "$STAGED_FILES"
 
 # 5c: Symlinks with absolute targets
-STAGED_SYMLINKS="$(git diff --cached --diff-filter=ACM --raw | awk '$2 ~ /^120/ {print $NF}' || true)"
-if [ -n "$STAGED_SYMLINKS" ]; then
-  while IFS= read -r sym_file; do
-    if [ -L "$ROOT_DIR/$sym_file" ]; then
-      SYM_TARGET="$(readlink "$ROOT_DIR/$sym_file")"
-      if [[ "$SYM_TARGET" == /* ]]; then
-        printf '%b' "${RED}FAIL${RESET} Absolute symlink target in: ${sym_file}\n"
-        printf "  Target: %s\n" "$SYM_TARGET"
-        printf "  Use a relative symlink instead.\n"
-        ERRORS=$((ERRORS + 1))
-      fi
+# Check all staged files for symlinks rather than parsing raw diff mode fields,
+# which is more portable across git versions.
+while IFS= read -r staged_file; do
+  if [ -L "$ROOT_DIR/$staged_file" ]; then
+    SYM_TARGET="$(readlink "$ROOT_DIR/$staged_file")"
+    if [[ "$SYM_TARGET" == /* ]]; then
+      printf '%b' "${RED}FAIL${RESET} Absolute symlink target in: ${staged_file}\n"
+      printf "  Target: %s\n" "$SYM_TARGET"
+      printf "  Use a relative symlink instead.\n"
+      ERRORS=$((ERRORS + 1))
     fi
-  done <<< "$STAGED_SYMLINKS"
-fi
+  fi
+done <<< "$STAGED_FILES"
 
 # --- Summary ---
 if [ "$ERRORS" -gt 0 ]; then

@@ -8,6 +8,10 @@
   "author": {
     "name": "sanmak"
   },
+  "reviewers": [],
+  "reviewRounds": 0,
+  "approvals": 0,
+  "requiredApprovals": 1,
   "specopsCreatedWith": "1.2.0",
   "specopsUpdatedWith": "1.2.0"
 }
