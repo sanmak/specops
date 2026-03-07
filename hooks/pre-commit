@@ -224,12 +224,12 @@ done <<< "$STAGED_FILES"
 while IFS= read -r staged_file; do
   if [ -L "$ROOT_DIR/$staged_file" ]; then
     SYM_TARGET="$(readlink "$ROOT_DIR/$staged_file")"
-    if [[ "$SYM_TARGET" == /* ]]; then
+    case "$SYM_TARGET" in /*)
       printf '%b' "${RED}FAIL${RESET} Absolute symlink target in: ${staged_file}\n"
       printf "  Target: %s\n" "$SYM_TARGET"
       printf "  Use a relative symlink instead.\n"
       ERRORS=$((ERRORS + 1))
-    fi
+      ;; esac
   fi
 done <<< "$STAGED_FILES"
 
