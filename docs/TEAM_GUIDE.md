@@ -162,7 +162,7 @@ Bypass when needed: `git commit --no-verify` / `git push --no-verify`
 
 ### Overview
 
-The collaborative review workflow adds structured team review between spec creation and implementation. Specs move through a lifecycle: `draft` → `in-review` → `approved` → `implementing` → `completed`.
+The collaborative review workflow adds structured team review between spec creation and implementation. Specs move through a lifecycle: `draft` → `in-review` → `approved` (or `self-approved`) → `implementing` → `completed`.
 
 ### Enable Review
 
@@ -176,6 +176,18 @@ Add `specReview` to your `.specops.json`:
 }
 ```
 
+**Solo developers** can enable the review workflow for self-review by adding `allowSelfApproval`:
+
+```json
+{
+  "team": {
+    "specReview": { "enabled": true, "minApprovals": 1, "allowSelfApproval": true }
+  }
+}
+```
+
+Self-approvals produce a distinct `self-approved` status (vs peer `approved`) for audit trail.
+
 ### Files Created
 
 - **`spec.json`** — Per-spec lifecycle metadata (always created, even without review enabled). Tracks status, version, author, reviewers, and approvals.
@@ -187,11 +199,13 @@ Add `specReview` to your `.specops.json`:
 The agent runs `git config user.email` to identify the current user:
 - If the current user is **not** the spec author → **Review mode** (provide feedback and verdict)
 - If the current user **is** the author and changes were requested → **Revision mode** (address feedback)
+- If the current user **is** the author and `allowSelfApproval: true` → **Self-review mode** (review and self-approve own spec)
+- If the current user **is** the author and no self-approval → **Author waiting** (informed to wait for peer review)
 
 ### Implementation Gate
 
 When review is enabled, Phase 3 (Implementation) checks `spec.json` before proceeding:
-- If status is `approved` → proceed to implementation
+- If status is `approved` or `self-approved` → proceed to implementation (self-approved specs show a note about no peer review)
 - If not approved → warn the user and ask whether to override (interactive) or stop (non-interactive)
 
 ### Status Dashboard

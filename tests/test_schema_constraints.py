@@ -132,6 +132,17 @@ def main():
         "team": {"specReview": {"enabled": True, "unknownField": "value"}}
     }, "Rejects unknown property in specReview"))
 
+    # --- allowSelfApproval constraints ---
+    check(expect_valid(schema, {
+        "team": {"specReview": {"enabled": True, "allowSelfApproval": True}}
+    }, "Valid specReview with allowSelfApproval true"))
+    check(expect_valid(schema, {
+        "team": {"specReview": {"enabled": True, "allowSelfApproval": False}}
+    }, "Valid specReview with allowSelfApproval false"))
+    check(expect_invalid(schema, {
+        "team": {"specReview": {"enabled": True, "allowSelfApproval": "yes"}}
+    }, "Rejects non-boolean allowSelfApproval"))
+
     # --- Module constraints ---
     check(expect_invalid(schema, {
         "modules": {"frontend": {"specsDir": "../../../etc"}}

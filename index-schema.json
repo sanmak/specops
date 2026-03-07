@@ -19,7 +19,7 @@
       },
       "status": {
         "type": "string",
-        "enum": ["draft", "in-review", "approved", "implementing", "completed"],
+        "enum": ["draft", "in-review", "approved", "self-approved", "implementing", "completed"],
         "description": "Current lifecycle status"
       },
       "version": {

@@ -66,6 +66,7 @@ REVIEW_MARKERS = [
     "reviews.md",
     "review mode",
     "revision mode",
+    "Self-review mode",
     "implementation gate",
     "Status Dashboard",
 ]

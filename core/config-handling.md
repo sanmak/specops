@@ -57,6 +57,7 @@ Example: `.specops/user-auth-oauth/requirements.md`
 If `config.team.specReview` is configured:
 - **`enabled: true`**: Activate the collaborative review workflow. Specs pause after generation for team review.
 - **`minApprovals`**: Number of approvals required before a spec can proceed to implementation. Default 1.
+- **`allowSelfApproval: true`**: Allow the spec author to self-review and self-approve their own specs. When enabled, solo developers can go through the full review ritual (read spec, provide feedback, approve). Self-approvals are recorded with `selfApproval: true` on the reviewer entry and result in a `"self-approved"` status (distinct from peer `"approved"`). Default false.
 
 If `specReview` is not configured, fall back to `reviewRequired`:
 - `reviewRequired: true` enables review with `minApprovals = 1`.

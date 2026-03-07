@@ -111,7 +111,7 @@ list
 **Core workflow:**
 1. **Understand** - Agent analyzes request and codebase
 2. **Spec** - Creates structured specification (always creates spec.json)
-2.5. **Review** - Team reviews spec, provides feedback, approves (if specReview enabled)
+2.5. **Review** - Team reviews spec, provides feedback, approves (if specReview enabled). Solo developers can self-review (if allowSelfApproval enabled)
 3. **Implement** - Executes tasks following spec (gate checks approvals)
 4. **Complete** - Verifies, commits, creates PR
 
@@ -127,6 +127,7 @@ list
 | `team.reviewRequired` | boolean | `false` | | Require approval before implementing |
 | `team.specReview.enabled` | boolean | `false` | | Enable collaborative spec review workflow |
 | `team.specReview.minApprovals` | integer | `1` | min 1, max 10 | Approvals required before implementation |
+| `team.specReview.allowSelfApproval` | boolean | `false` | | Allow authors to self-review and self-approve (produces `self-approved` status) |
 | `team.taskTracking` | `github`/`jira`/`linear`/`none` | `none` | enum | Task tracking integration |
 | `team.taskPrefix` | string | | max 20 chars | Task/ticket prefix (e.g., `PROJ-`) |
 | `implementation.autoCommit` | boolean | `false` | | Auto-commit after tasks |

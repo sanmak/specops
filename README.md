@@ -13,7 +13,7 @@ SpecOps brings structured spec-driven development to your AI coding assistant �
 ## Why SpecOps
 
 - **Domain-specific templates** — Infrastructure specs include Rollback Steps and Resource Definitions. Data pipeline specs include Data Contracts and Backfill Strategy. Library specs flag Breaking Changes per task. Backend and fullstack use clean defaults — no unnecessary ceremony.
-- **Built-in team review cycle** — Draft a spec, get section-by-section feedback from teammates, revise, and only implement once `minApprovals` is met. Git identity detection, configurable approval thresholds, and an implementation gate that blocks unapproved specs from proceeding.
+- **Built-in team review cycle** — Draft a spec, get section-by-section feedback from teammates, revise, and only implement once `minApprovals` is met. Git identity detection, configurable approval thresholds, and an implementation gate that blocks unapproved specs from proceeding. Solo developers can enable `allowSelfApproval` for a self-review workflow with distinct audit trail.
 - **Security-hardened spec processing** — Convention strings and custom templates are sanitized against prompt injection. Secrets use placeholders, PII uses synthetic data, all config fields enforce strict schema validation, and path traversal is rejected at the boundary.
 
 ## Quick Start

@@ -1,0 +1,25 @@
+{
+  "id": "self-approved-example",
+  "type": "feature",
+  "status": "self-approved",
+  "version": 1,
+  "created": "2026-03-05T10:00:00Z",
+  "updated": "2026-03-05T11:30:00Z",
+  "author": {
+    "name": "Solo Dev",
+    "email": "solo@dev.com"
+  },
+  "reviewers": [
+    {
+      "name": "Solo Dev",
+      "email": "solo@dev.com",
+      "status": "approved",
+      "selfApproval": true,
+      "reviewedAt": "2026-03-05T11:30:00Z",
+      "round": 1
+    }
+  ],
+  "reviewRounds": 1,
+  "approvals": 1,
+  "requiredApprovals": 1
+}

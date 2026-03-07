@@ -43,6 +43,15 @@ Based on the user's selection, WRITE_FILE(`.specops.json`) with the correspondin
 
 {{ init_templates }}
 
+#### Step 3.5: Solo or Team (Conditional)
+
+If the selected template has `specReview.enabled: true` (Standard, Full, or Review templates):
+
+ASK_USER: "Are you working solo or with a team?"
+
+- **Solo**: EDIT_FILE(`.specops.json`) to set `team.specReview.allowSelfApproval` to `true` and `team.specReview.minApprovals` to `1`. This enables the self-review workflow so solo developers can review and approve their own specs.
+- **Team**: Keep the template defaults (`allowSelfApproval: false`). No changes needed.
+
 #### Step 4: Customize (Optional)
 
 After writing the config, ASK_USER: "Would you like to customize any fields? Common customizations: `specsDir` path, `vertical` (backend/frontend/fullstack/infrastructure/data/library/builder), or team `conventions`."

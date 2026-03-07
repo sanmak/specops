@@ -26,7 +26,8 @@
     "reviewRequired": true,
     "specReview": {
       "enabled": true,
-      "minApprovals": 2
+      "minApprovals": 2,
+      "allowSelfApproval": false
     },
     "taskTracking": "linear",
     "codeReview": {

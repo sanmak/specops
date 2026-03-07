@@ -196,6 +196,8 @@ Enable collaborative spec review so teammates approve specs before implementatio
 4. **Approve** — once approvals meet threshold, status becomes `approved`
 5. **Implement** — implementation gate passes, coding begins
 
+**Solo developer?** Add `"allowSelfApproval": true` to `specReview` to enable self-review. You'll go through the same review ritual but can approve your own specs (recorded as `self-approved` for audit trail).
+
 See [TEAM_GUIDE.md](docs/TEAM_GUIDE.md) for the full team review workflow.
 
 ## Next Steps

@@ -7,10 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Self-review workflow for solo developers**: New `allowSelfApproval` config option in `team.specReview` enables solo developers to review and approve their own specs. Authors go through the full review ritual (read spec, provide feedback, self-approve) with results recorded in `reviews.md` as a self-review
+- **`self-approved` spec status**: Distinct from peer `approved` — both allow implementation, but `self-approved` provides audit trail showing no peer review was performed. Reviewer entries include `selfApproval: true` flag
+- **Init-time solo/team detection**: `/specops init` now asks "Are you working solo or with a team?" when a review-enabled template is selected, and pre-configures `allowSelfApproval` accordingly
+- **Deterministic mode detection**: Review workflow mode detection is now a fully exhaustive decision tree — every combination of inputs maps to exactly one mode with no gaps
+- **spec.json validation on read**: Invalid or corrupt `spec.json` files now fall back to legacy mode with a warning instead of undefined behavior
+- **Solo review example config**: `examples/.specops.solo-review.json` for solo developers who want the review workflow
+- **Self-approved example spec**: `examples/specs/feature-self-approved-example/spec.json`
+
 ### Changed
 
 - **Init merged into main skill**: `/specops:init` is now `/specops init` — a subcommand of the main skill rather than a separate skill. No behavior change for users.
 - **Fixed install commands**: Documentation now uses the correct `/plugin marketplace add` + `/plugin install` + `/reload-plugins` flow instead of the non-existent `/install github:` command.
+- **Author waiting message improved**: Now suggests `allowSelfApproval: true` for solo developers instead of leaving them at a dead end
+- **Implementation gate updated**: Accepts both `approved` and `self-approved` statuses. Self-approved specs show a note: "This spec was self-approved without peer review."
 
 ## [1.2.0] - 2026-03-06
 

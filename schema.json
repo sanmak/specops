@@ -125,6 +125,11 @@
               "maximum": 10,
               "default": 1,
               "description": "Number of approvals required before a spec can proceed to implementation"
+            },
+            "allowSelfApproval": {
+              "type": "boolean",
+              "default": false,
+              "description": "Allow spec authors to self-review and self-approve. Enables solo developers to use the review workflow. Self-approvals produce a distinct 'self-approved' status."
             }
           },
           "additionalProperties": false

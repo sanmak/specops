@@ -17,7 +17,7 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "in-review", "approved", "implementing", "completed"],
+      "enum": ["draft", "in-review", "approved", "self-approved", "implementing", "completed"],
       "description": "Current lifecycle status"
     },
     "version": {
@@ -79,6 +79,10 @@
             "type": "integer",
             "minimum": 1,
             "description": "Which review round this entry belongs to"
+          },
+          "selfApproval": {
+            "type": "boolean",
+            "description": "True when the reviewer is also the spec author (self-review)"
           }
         },
         "required": ["name", "email", "status"],

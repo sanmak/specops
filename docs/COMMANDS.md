@@ -165,7 +165,7 @@ show specops status in-review
 | None | `/specops status` | Shows all specs grouped by status |
 | Status filter | `/specops status in-review` | Shows only specs with that status |
 
-Valid status values: `draft`, `in-review`, `approved`, `implementing`, `completed`
+Valid status values: `draft`, `in-review`, `approved`, `self-approved`, `implementing`, `completed`
 
 ---
 
@@ -236,7 +236,7 @@ review login-page
 
 **Verdicts:** `Approve`, `Approve with suggestions`, `Request changes`
 
-**Output:** Updates `reviews.md` and `spec.json`. Once approvals meet configured `minApprovals`, status becomes `approved`.
+**Output:** Updates `reviews.md` and `spec.json`. Once approvals meet configured `minApprovals`, status becomes `approved`. If `allowSelfApproval: true` and the author self-reviews, status becomes `self-approved`.
 
 ---
 
@@ -265,8 +265,8 @@ implement login-page
 ```
 
 **Implementation gate:**
-- If spec review is **enabled** and status is `approved`: Proceeds, sets status to `implementing`
-- If spec review is **enabled** and status is NOT `approved`:
+- If spec review is **enabled** and status is `approved` or `self-approved`: Proceeds, sets status to `implementing`
+- If spec review is **enabled** and status is NOT `approved`/`self-approved`:
   - Interactive platforms (Claude Code, Cursor, Copilot): Warns and asks for confirmation
   - Non-interactive platform (Codex): Prints error and stops
 - If spec review is **disabled**: Always proceeds
@@ -305,7 +305,8 @@ These are the valid states a spec can be in, usable as filters with the status c
 |--------|---------|
 | `draft` | Spec created, not yet submitted for review (or review not enabled) |
 | `in-review` | Submitted for team review, awaiting approvals |
-| `approved` | Required approvals met, ready for implementation |
+| `approved` | Required approvals met (at least one peer approval), ready for implementation |
+| `self-approved` | Author self-approved (via `allowSelfApproval: true`), no peer review |
 | `implementing` | Implementation in progress |
 | `completed` | All tasks done, acceptance criteria verified |
 

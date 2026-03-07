@@ -210,6 +210,53 @@ def main():
         "requiredApprovals": 1
     }, "Rejects additional properties in reviewer"))
 
+    # Valid: self-approved status with selfApproval reviewer flag
+    check(expect_valid(spec_schema, {
+        "id": "solo-feature",
+        "type": "feature",
+        "status": "self-approved",
+        "version": 1,
+        "created": "2026-03-05T10:00:00Z",
+        "updated": "2026-03-05T11:30:00Z",
+        "author": {"name": "Solo Dev", "email": "solo@dev.com"},
+        "reviewers": [
+            {
+                "name": "Solo Dev",
+                "email": "solo@dev.com",
+                "status": "approved",
+                "selfApproval": True,
+                "reviewedAt": "2026-03-05T11:30:00Z",
+                "round": 1
+            }
+        ],
+        "reviewRounds": 1,
+        "approvals": 1,
+        "requiredApprovals": 1
+    }, "Valid self-approved spec with selfApproval reviewer flag"))
+
+    # Valid: peer-approved spec without selfApproval flag (backward compat)
+    check(expect_valid(spec_schema, {
+        "id": "team-feature",
+        "type": "feature",
+        "status": "approved",
+        "version": 1,
+        "created": "2026-03-05T10:00:00Z",
+        "updated": "2026-03-05T11:30:00Z",
+        "author": {"name": "Alice", "email": "alice@acme.com"},
+        "reviewers": [
+            {
+                "name": "Bob",
+                "email": "bob@acme.com",
+                "status": "approved",
+                "reviewedAt": "2026-03-05T11:30:00Z",
+                "round": 1
+            }
+        ],
+        "reviewRounds": 1,
+        "approvals": 1,
+        "requiredApprovals": 1
+    }, "Valid peer-approved spec without selfApproval flag (backward compat)"))
+
     # --- Validate example spec.json ---
     print("\n--- Example spec.json Validation ---")
     try:
@@ -225,6 +272,13 @@ def main():
         check(expect_valid(spec_schema, builder_spec, "Builder example spec.json validates against spec-schema.json"))
     except FileNotFoundError:
         print("SKIP: Builder example spec.json not yet created")
+
+    try:
+        with open("examples/specs/feature-self-approved-example/spec.json") as f:
+            self_approved_spec = json.load(f)
+        check(expect_valid(spec_schema, self_approved_spec, "Self-approved example spec.json validates against spec-schema.json"))
+    except FileNotFoundError:
+        print("SKIP: Self-approved example spec.json not yet created")
 
     # --- index-schema.json tests ---
     print("\n--- index.json Validation ---")
@@ -249,6 +303,18 @@ def main():
             "updated": "2026-03-01T10:00:00Z"
         }
     ], "Valid index.json array"))
+
+    # Valid: self-approved status in index
+    check(expect_valid(index_schema, [
+        {
+            "id": "solo-feature",
+            "type": "feature",
+            "status": "self-approved",
+            "version": 1,
+            "author": "Solo Dev",
+            "updated": "2026-03-05T11:30:00Z"
+        }
+    ], "Valid index with self-approved status"))
 
     # Valid empty index
     check(expect_valid(index_schema, [], "Empty index.json is valid"))

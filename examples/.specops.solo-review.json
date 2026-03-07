@@ -1,0 +1,15 @@
+{
+  "$schema": "../schema.json",
+  "specsDir": ".specops",
+  "team": {
+    "specReview": {
+      "enabled": true,
+      "minApprovals": 1,
+      "allowSelfApproval": true
+    }
+  },
+  "implementation": {
+    "autoCommit": false,
+    "testing": "auto"
+  }
+}
