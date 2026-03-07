@@ -65,7 +65,7 @@ The change touches three layers:
 
 ## System Flow
 
-```
+```text
 User Request
   → Phase 1: Understand (no EARS impact)
   → Phase 2: Create Spec
