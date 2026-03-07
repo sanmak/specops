@@ -79,7 +79,7 @@ generator/      Generates platform outputs from core + platform adapters
 ```
 
 The `core/` directory defines the workflow, safety rules, templates, and vertical adaptations once. The `generator/generate.py` script assembles platform-specific instruction files by:
-1. Loading all `core/*.md` modules (workflow, safety, config-handling, verticals, simplicity, data-handling, error-handling, custom-templates, view, and spec templates from `core/templates/`)
+1. Loading all `core/*.md` modules (workflow, safety, config-handling, verticals, simplicity, data-handling, error-handling, custom-templates, view, interview, init, update, review-workflow, task-tracking, and spec templates from `core/templates/`)
 2. Loading `platforms/{name}/platform.json` for tool mappings and capabilities
 3. Rendering through `generator/templates/{name}.j2` Jinja2-style templates
 4. Substituting abstract tool operations (e.g., `READ_FILE`) with platform-specific language from each platform's `toolMapping`
@@ -172,6 +172,9 @@ CI verifies generated files aren't stale — after regenerating, the diff of `pl
 - **Format-specific rules** — e.g., Cursor `.mdc` files must have YAML frontmatter with `description`, Claude/Codex `SKILL.md` must have `name` and `description` in frontmatter, Copilot `specops.instructions.md` must have `applyTo` in frontmatter
 - **Plugin manifests** — `.claude-plugin/plugin.json` and `marketplace.json` exist, valid JSON, required fields present, version consistency with `platform.json`
 - **Init mode** — init config templates and workflow markers present within Claude `SKILL.md`
+- **Update markers present** — update mode detection, version detection, update workflow
+- **Interview markers present** — interview mode, trigger conditions, question flow
+- **Task tracking markers present** — task state machine, write ordering protocol
 
 ## Configuration
 
@@ -188,4 +191,4 @@ The SpecOps agent reads `.specops.json` from the target project (not this repo).
 
 ## Release Process
 
-Releases are automated via GitHub Actions (`release.yml`). Create a tag (e.g., `v1.1.0`) through GitHub's Releases UI — the workflow extracts the version, updates all JSON files, regenerates checksums, and pushes to `main`. For manual version bumps during development, use `bash scripts/bump-version.sh`.
+Releases are automated via GitHub Actions (`release.yml`). Create a tag (e.g., `v1.1.0`) through GitHub's Releases UI — the workflow extracts the version, updates all JSON files, regenerates platform outputs, regenerates checksums, and pushes to `main`. For manual version bumps during development, use `bash scripts/bump-version.sh`.

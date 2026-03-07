@@ -29,6 +29,29 @@
   },
   "entryPoint": {
     "type": "keyword",
-    "trigger": "When the user asks you to run 'specops', mentions 'spec-driven development', or asks you to 'create a spec' for a feature, bugfix, or refactor"
+    "trigger": "When the user asks you to run 'specops', mentions 'spec-driven development', or asks you to 'create a spec' for a feature, bugfix, or refactor",
+    "examples": [
+      "Use specops to add user authentication",
+      "Use specops version to check the installed version",
+      "Use specops init to set up the project config",
+      "Use specops interview to explore an idea for a dashboard",
+      "Create a spec for adding user authentication",
+      "Create a specops refactor spec for simplifying auth middleware",
+      "Create a spec for fixing the 500 errors on checkout",
+      "Implement the auth-feature spec",
+      "Review the oauth-auth spec",
+      "Revise the oauth-auth spec",
+      "Show specops status",
+      "Show specops status for draft specs",
+      "Show specops status for in-review specs",
+      "View the auth-feature spec",
+      "View the auth-feature design section",
+      "View the full auth-feature spec",
+      "View the auth-feature spec status",
+      "Walk me through the auth-feature spec",
+      "View auth-feature requirements and design sections",
+      "List all specops specs",
+      "Use specops update to check for updates"
+    ]
   }
 }

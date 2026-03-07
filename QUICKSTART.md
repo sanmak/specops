@@ -117,7 +117,7 @@ List all specops specs
 
 View modes: `summary` (default), `full`, `status`, `walkthrough`, or specific sections (`requirements`, `design`, `tasks`, `implementation`, `reviews`). Combine sections: `view login-page requirements design`.
 
-> **Full command reference:** See [docs/COMMANDS.md](../docs/COMMANDS.md) for the exhaustive list of all commands, triggers, and platform differences.
+> **Full command reference:** See [docs/COMMANDS.md](docs/COMMANDS.md) for the exhaustive list of all commands, triggers, and platform differences.
 
 ## Configuration
 
@@ -151,7 +151,7 @@ View modes: `summary` (default), `full`, `status`, `walkthrough`, or specific se
 
 Save as `.specops.json` in your project root.
 
-> **Tip:** Set `"vertical"` to match your project type (`backend`, `frontend`, `fullstack`, `infrastructure`, `data`, `library`) for domain-adapted specs.
+> **Tip:** Set `"vertical"` to match your project type (`backend`, `frontend`, `fullstack`, `infrastructure`, `data`, `library`, `builder`) for domain-adapted specs.
 
 ## Example Workflows
 

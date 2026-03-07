@@ -115,9 +115,9 @@ Even in high autonomy mode, ask for clarification when:
 
 When invoked:
 1. Greet the user briefly
-2. Check if the request is an **init** command (see "Init Mode" module). Patterns: "init", "initialize", "setup", "configure", "create config". If so, follow the init workflow instead of the standard phases below.
+2. Check if the request is an **init** command (see "Init Mode" module). Patterns: "init", "initialize", "setup specops", "configure specops", "create config". These must refer to setting up SpecOps itself (creating `.specops.json`), NOT to a product feature. If the request describes a product capability (e.g., "set up autoscaling", "configure logging"), skip init and continue to step 7.
 3. Check if the request is a **version** command. Patterns: "version", "--version", "-v". If so, follow the "Version Display" section below and stop.
-4. Check if the request is an **update** command (see "Update Mode" module). Patterns: "update", "upgrade", "check for updates", "get latest version", "get latest". If so, follow the update workflow instead of the standard phases below.
+4. Check if the request is an **update** command (see "Update Mode" module). Patterns: "update specops", "upgrade specops", "check for updates", "get latest version", "get latest". These must refer to updating SpecOps itself, NOT to a product feature. If the request describes a product change (e.g., "update login flow", "upgrade the database"), skip update and continue to step 5.
 5. Check if the request is a **view** or **list** command (see "Spec Viewing" module). If so, follow the view/list workflow instead of the standard phases below.
 6. Check if interview mode is triggered (see "Interview Mode" module):
    - Explicit: request contains "interview" keyword
@@ -1077,7 +1077,7 @@ Init mode creates a `.specops.json` configuration file in the user's project. It
 
 When the user invokes SpecOps, check for init intent **before** checking for view/list commands:
 
-- **Init mode**: The user's request matches patterns like "init", "initialize", "setup", "configure", or "create config". Proceed to the **Init Workflow** below.
+- **Init mode**: The user's request is specifically about setting up SpecOps itself — patterns like "init", "initialize", "setup specops", "configure specops", or "create config". Bare "setup" or "configure" alone only match if there is no product feature described (e.g., "set up autoscaling" is NOT init mode). Proceed to the **Init Workflow** below.
 - If init intent is not detected, continue to the view/list check and then the standard workflow.
 
 ### Init Workflow
@@ -1317,7 +1317,7 @@ Update mode checks for newer SpecOps versions and guides the user through upgrad
 
 When the user invokes SpecOps, check for update intent **before** entering the standard workflow:
 
-- **Update mode**: The user's request matches patterns like "update", "upgrade", "check for updates", "get latest version", "get latest". Proceed to the **Update Workflow** below.
+- **Update mode**: The user's request is specifically about updating SpecOps itself — patterns like "update specops", "upgrade specops", "check for updates", "get latest version", "get latest". Bare "update" or "upgrade" alone only match if there is no product feature described (e.g., "update login flow" is NOT update mode). Proceed to the **Update Workflow** below.
 
 If update intent is not detected, continue to the next check in the routing chain.
 

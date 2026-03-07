@@ -6,7 +6,7 @@ Update mode checks for newer SpecOps versions and guides the user through upgrad
 
 When the user invokes SpecOps, check for update intent **before** entering the standard workflow:
 
-- **Update mode**: The user's request matches patterns like "update", "upgrade", "check for updates", "get latest version", "get latest". Proceed to the **Update Workflow** below.
+- **Update mode**: The user's request is specifically about updating SpecOps itself — patterns like "update specops", "upgrade specops", "check for updates", "get latest version", "get latest". Bare "update" or "upgrade" alone only match if there is no product feature described (e.g., "update login flow" is NOT update mode). Proceed to the **Update Workflow** below.
 
 If update intent is not detected, continue to the next check in the routing chain.
 

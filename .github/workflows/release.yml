@@ -74,7 +74,6 @@ jobs:
             skills/ \
             platforms/claude/SKILL.md \
             platforms/claude/platform.json \
-            platforms/claude/init/ \
             platforms/cursor/specops.mdc \
             platforms/cursor/platform.json \
             platforms/codex/SKILL.md \

@@ -435,5 +435,5 @@ Agent:
 
 ---
 
-**Version**: 2.0.0
+**Version**: 1.2.0
 **Keep this reference handy for daily development!**

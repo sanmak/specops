@@ -16,6 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **spec.json validation on read**: Invalid or corrupt `spec.json` files now fall back to legacy mode with a warning instead of undefined behavior
 - **Solo review example config**: `examples/.specops.solo-review.json` for solo developers who want the review workflow
 - **Self-approved example spec**: `examples/specs/feature-self-approved-example/spec.json`
+- **Version tracking in specs**: `specopsCreatedWith` and `specopsUpdatedWith` fields in `spec.json` record which SpecOps version created and last modified each spec
+- **`/specops version` subcommand**: Display the installed SpecOps version
+- **`/specops update` subcommand**: Check for newer SpecOps versions and guide through upgrading
+- **`/ship-pr` slash command**: Commit changes to a new branch, push, and open a PR for review
+- **`/docs-sync` slash command**: Detect stale documentation after code changes and propose targeted updates
+- **Task state machine**: Formal task state tracking (`core/task-tracking.md`) with Write Ordering Protocol and single-active-task rule
+- **`implementation.md` promoted to decision journal**: Always created during implementation, structured as a Decision Log with deviations and blockers
 
 ### Changed
 
@@ -23,6 +30,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Fixed install commands**: Documentation now uses the correct `/plugin marketplace add` + `/plugin install` + `/reload-plugins` flow instead of the non-existent `/install github:` command.
 - **Author waiting message improved**: Now suggests `allowSelfApproval: true` for solo developers instead of leaving them at a dead end
 - **Implementation gate updated**: Accepts both `approved` and `self-approved` statuses. Self-approved specs show a note: "This spec was self-approved without peer review."
+- **Command routing tightened**: Init and update mode patterns now require SpecOps context — bare "setup" or "update" no longer misclassify product feature requests
+
+### Fixed
+
+- **PR review feedback**: Indentation, resilience, schema, and clarity improvements across core modules
+- **Stale verify.sh reference**: Removed deleted `claude-init.j2` from verify.sh checks
+- **Marketplace plugin source path**: Fixed to use valid relative path format
+- **Remote installer**: Include init sub-skill in Claude Code remote installer
 
 ## [1.2.0] - 2026-03-06
 

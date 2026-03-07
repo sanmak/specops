@@ -6,23 +6,30 @@
 specops/
 ├── README.md                             # Main documentation
 ├── QUICKSTART.md                         # Getting started guide
-├── TEAM_GUIDE.md                         # Team collaboration guide
-├── REFERENCE.md                          # Quick reference card
 ├── CHANGELOG.md                          # Version history
-├── STRUCTURE.md                          # This file
 ├── CLAUDE.md                             # Claude Code AI assistant instructions
 ├── LICENSE                               # MIT License
 ├── SECURITY.md                           # Security policy
 ├── CONTRIBUTING.md                       # Contributor guidelines
-├── SBOM.md                               # Software Bill of Materials
 ├── CHECKSUMS.sha256                      # SHA-256 checksums
 ├── .gitignore                            # Git ignore rules
+│
+├── docs/                                 # Documentation
+│   ├── COMMANDS.md                       # Command reference
+│   ├── REFERENCE.md                      # Quick reference card
+│   ├── STRUCTURE.md                      # This file
+│   ├── TEAM_GUIDE.md                     # Team collaboration guide
+│   ├── SBOM.md                           # Software Bill of Materials
+│   ├── SECURITY-AUDIT.md                 # Security audit results
+│   └── MARKETPLACE_SUBMISSIONS.md        # Marketplace submission content
 │
 ├── assets/                               # Visual assets (SVG diagrams)
 │   ├── workflow.svg                      # 4-phase workflow diagram
 │   ├── architecture.svg                  # Three-layer architecture diagram
 │   ├── spec-structure.svg                # Spec output structure diagram
-│   └── review-workflow.svg              # Review workflow diagram
+│   ├── review-workflow.svg               # Review workflow diagram
+│   └── interview-workflow.svg            # Interview workflow diagram
+│
 ├── schema.json                           # JSON Schema for .specops.json
 ├── spec-schema.json                      # JSON Schema for spec.json validation
 ├── index-schema.json                     # JSON Schema for index.json validation
@@ -32,18 +39,39 @@ specops/
 ├── scripts/
 │   ├── bump-version.sh                   # Version bumping utility
 │   ├── run-tests.sh                      # Test runner
-│   └── remote-install.sh                 # Remote installer (curl-based, no clone needed)
+│   ├── remote-install.sh                 # Remote installer (curl-based, no clone needed)
+│   └── install-hooks.sh                  # Git hooks installer
+│
+├── hooks/                                # Git hooks
+│   ├── pre-commit                        # JSON validation, ShellCheck, stale file checks
+│   └── pre-push                          # Platform validation, checksums, full test suite
+│
+├── .claude/                              # Claude Code project commands
+│   └── commands/
+│       ├── commit.md                     # /commit command
+│       ├── push.md                       # /push command
+│       ├── ship.md                       # /ship command
+│       ├── ship-pr.md                    # /ship-pr command
+│       ├── pr-fix.md                     # /pr-fix command
+│       ├── release.md                    # /release command
+│       ├── monitor.md                    # /monitor command
+│       └── docs-sync.md                  # /docs-sync command
 │
 ├── core/                                 # Platform-agnostic source of truth
 │   ├── workflow.md                       # 4-phase workflow specification
 │   ├── safety.md                         # Security guardrails (injected into all platforms)
 │   ├── simplicity.md                     # Simplicity Principle
+│   ├── config-handling.md                # Configuration defaults and handling
 │   ├── data-handling.md                  # Secrets, PII, data classification rules
+│   ├── error-handling.md                 # Error handling, success criteria
 │   ├── verticals.md                      # Vertical adaptation rules
 │   ├── custom-templates.md               # Custom template resolution logic
-│   ├── config-handling.md                # Configuration defaults and handling
-│   ├── error-handling.md                 # Error handling, review process, success criteria
-│   ├── review-workflow.md               # Collaborative spec review workflow
+│   ├── view.md                           # Spec viewing and listing
+│   ├── interview.md                      # Interview mode for vague requests
+│   ├── init.md                           # Init mode (config creation)
+│   ├── update.md                         # Update mode (version checking)
+│   ├── review-workflow.md                # Collaborative spec review workflow
+│   ├── task-tracking.md                  # Task state machine and ordering
 │   ├── tool-abstraction.md               # Abstract tool operations and capability flags
 │   └── templates/                        # Default spec templates
 │       ├── feature-requirements.md       # Feature requirements template
@@ -52,12 +80,12 @@ specops/
 │       ├── design.md                     # Design document template
 │       ├── tasks.md                      # Task breakdown template
 │       ├── implementation.md             # Implementation notes template
-│       └── reviews.md                   # Review feedback template
+│       └── reviews.md                    # Review feedback template
 │
 ├── platforms/                            # Platform-specific adapters
 │   ├── claude/                           # Claude Code adapter
 │   │   ├── platform.json                 # Capabilities, tool mapping, entry point
-│   │   ├── SKILL.md                      # Generated Claude Code skill file (includes init mode)
+│   │   ├── SKILL.md                      # Generated Claude Code skill file
 │   │   ├── install.sh                    # Claude-specific installer
 │   │   └── README.md                     # Claude Code quickstart
 │   ├── cursor/                           # Cursor adapter
@@ -76,7 +104,7 @@ specops/
 │       ├── install.sh                    # Copilot-specific installer
 │       └── README.md                     # Copilot quickstart
 │
-├── generator/                                # Build system
+├── generator/                            # Build system
 │   ├── generate.py                       # Assembles platform outputs from core/
 │   ├── validate.py                       # Validates generated outputs
 │   └── templates/                        # Platform-specific templates
@@ -103,13 +131,17 @@ specops/
 │
 ├── .github/
 │   └── workflows/
-│       └── ci.yml                        # CI pipeline
+│       ├── ci.yml                        # CI pipeline
+│       ├── codeql.yml                    # CodeQL security analysis
+│       └── release.yml                   # Release version bump automation
 │
 └── examples/                             # Example configurations and specs
     ├── .specops.json                     # Standard configuration
     ├── .specops.minimal.json             # Minimal configuration
     ├── .specops.full.json                # Full configuration
     ├── .specops.review.json              # Review-enabled configuration
+    ├── .specops.builder.json             # Builder vertical configuration
+    ├── .specops.solo-review.json         # Solo developer review configuration
     ├── templates/                        # Vertical-specific templates
     │   ├── infra-requirements.md
     │   ├── infra-design.md
@@ -123,7 +155,8 @@ specops/
         ├── feature-k8s-autoscaling/
         ├── feature-user-activity-pipeline/
         ├── feature-date-utils-library/
-        └── feature-task-management-saas/
+        ├── feature-task-management-saas/
+        └── feature-self-approved-example/
 ```
 
 ## Architecture
@@ -169,5 +202,5 @@ Generated files are checked into git so end users never need to run the build.
 
 ## Version
 
-**Version**: 2.0.0
-**Last Updated**: 2026-02-28
+**Version**: 1.2.0
+**Last Updated**: 2026-03-07

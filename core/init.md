@@ -6,7 +6,7 @@ Init mode creates a `.specops.json` configuration file in the user's project. It
 
 When the user invokes SpecOps, check for init intent **before** checking for view/list commands:
 
-- **Init mode**: The user's request matches patterns like "init", "initialize", "setup", "configure", or "create config". Proceed to the **Init Workflow** below.
+- **Init mode**: The user's request is specifically about setting up SpecOps itself — patterns like "init", "initialize", "setup specops", "configure specops", or "create config". Bare "setup" or "configure" alone only match if there is no product feature described (e.g., "set up autoscaling" is NOT init mode). Proceed to the **Init Workflow** below.
 - If init intent is not detected, continue to the view/list check and then the standard workflow.
 
 ### Init Workflow

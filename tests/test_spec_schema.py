@@ -328,6 +328,39 @@ def main():
         "requiredApprovals": 1
     }, "Rejects specopsCreatedWith with 'v' prefix"))
 
+    # Invalid: malformed timestamp in created
+    check(expect_invalid(spec_schema, {
+        "id": "bad-ts",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "not-a-date",
+        "updated": "2026-03-01T10:00:00Z",
+        "author": {"name": "Alice", "email": "alice@acme.com"}
+    }, "Rejects malformed timestamp in created"))
+
+    # Invalid: date-only (missing time component)
+    check(expect_invalid(spec_schema, {
+        "id": "bad-ts2",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-01",
+        "updated": "2026-03-01T10:00:00Z",
+        "author": {"name": "Alice", "email": "alice@acme.com"}
+    }, "Rejects date-only timestamp (missing time component)"))
+
+    # Valid: timestamp with timezone offset
+    check(expect_valid(spec_schema, {
+        "id": "tz-offset",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-01T10:00:00+05:30",
+        "updated": "2026-03-01T10:00:00-04:00",
+        "author": {"name": "Alice", "email": "alice@acme.com"}
+    }, "Valid timestamps with timezone offsets"))
+
     # --- index-schema.json tests ---
     print("\n--- index.json Validation ---")
     index_schema = load_schema("index-schema.json")
@@ -366,6 +399,18 @@ def main():
 
     # Valid empty index
     check(expect_valid(index_schema, [], "Empty index.json is valid"))
+
+    # Invalid: malformed timestamp in index entry
+    check(expect_invalid(index_schema, [
+        {
+            "id": "user-auth",
+            "type": "feature",
+            "status": "draft",
+            "version": 1,
+            "author": "Alice",
+            "updated": "not-a-date"
+        }
+    ], "Rejects malformed timestamp in index entry"))
 
     # Invalid: bad status in index entry
     check(expect_invalid(index_schema, [

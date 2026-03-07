@@ -455,15 +455,17 @@ def main():
     print("\nCross-platform consistency:")
     if len(generated) >= 2:
         platforms = list(generated.keys())
+        consistency_errors = []
         for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS:
             present_in = [p for p in platforms if marker in generated[p]["content"]]
             if len(present_in) != len(platforms):
                 missing = set(platforms) - set(present_in)
                 err = f"  '{marker}' missing from: {', '.join(missing)}"
                 print(f"  FAIL: {err}")
-                all_errors.append(err)
+                consistency_errors.append(err)
 
-        if not any("FAIL" in str(e) for e in all_errors if "Cross" in str(e)):
+        all_errors.extend(consistency_errors)
+        if not consistency_errors:
             print("  PASS: All platforms have consistent content")
     else:
         print("  SKIP: Need at least 2 platforms for consistency check")

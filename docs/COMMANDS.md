@@ -21,6 +21,9 @@ All supported commands across Claude Code, Cursor, OpenAI Codex, and GitHub Copi
 | Status dashboard | `/specops status` | `show specops status` |
 | Status dashboard (filtered) | `/specops status in-review` | `show specops status in-review` |
 | Interview (explicit) | `/specops interview <idea>` | `Use specops interview <idea>` |
+| Init config | `/specops init` | `Use specops init` |
+| Check version | `/specops version` | `Use specops version` |
+| Update SpecOps | `/specops update` | `Use specops update` |
 | Review a spec | `review <spec-name>` | `review <spec-name>` |
 | Revise a spec | `revise <spec-name>` | `revise <spec-name>` |
 | Implement a spec | `implement <spec-name>` | `implement <spec-name>` |
@@ -82,6 +85,60 @@ Use specops to refactor the database layer
 ```
 
 **Output:** `refactor.md` (instead of requirements.md), `design.md`, `tasks.md`, `spec.json`
+
+---
+
+## Init Config
+
+Creates a `.specops.json` configuration file in the project. Presents template options (minimal, standard, full, review, builder) and writes the selected config.
+
+**Claude Code:**
+```
+/specops init
+```
+
+**Other platforms:**
+```
+Use specops init
+```
+
+**Notes:** Only triggers when the request is specifically about setting up SpecOps itself — not for product features like "set up autoscaling".
+
+---
+
+## Check Version
+
+Displays the installed SpecOps version.
+
+**Claude Code:**
+```
+/specops version
+/specops --version
+/specops -v
+```
+
+**Other platforms:**
+```
+Use specops version
+```
+
+---
+
+## Update SpecOps
+
+Checks for newer SpecOps versions and guides through upgrading.
+
+**Claude Code:**
+```
+/specops update
+```
+
+**Other platforms:**
+```
+Use specops update
+```
+
+**Notes:** Only triggers when the request is about updating SpecOps itself — not for product changes like "update login flow".
 
 ---
 
@@ -360,3 +417,6 @@ These are the valid states a spec can be in, usable as filters with the status c
 | I'm reviewing a teammate's spec | `review <name>` |
 | I'm updating my spec after feedback | `revise <name>` |
 | I'm ready to code | `implement <name>` |
+| I want to set up SpecOps in my project | `/specops init` |
+| I want to check my SpecOps version | `/specops version` |
+| I want to update SpecOps | `/specops update` |

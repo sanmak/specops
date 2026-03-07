@@ -44,10 +44,10 @@ usage() {
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --platform) PLATFORM="$2"; shift 2 ;;
-    --scope)    SCOPE="$2"; shift 2 ;;
-    --version)  SPECOPS_VERSION="$2"; shift 2 ;;
-    --config)   CONFIG="$2"; shift 2 ;;
+    --platform) [[ $# -ge 2 ]] || { echo "Error: $1 requires a value"; usage; exit 1; }; PLATFORM="$2"; shift 2 ;;
+    --scope)    [[ $# -ge 2 ]] || { echo "Error: $1 requires a value"; usage; exit 1; }; SCOPE="$2"; shift 2 ;;
+    --version)  [[ $# -ge 2 ]] || { echo "Error: $1 requires a value"; usage; exit 1; }; SPECOPS_VERSION="$2"; shift 2 ;;
+    --config)   [[ $# -ge 2 ]] || { echo "Error: $1 requires a value"; usage; exit 1; }; CONFIG="$2"; shift 2 ;;
     --force)    FORCE=true; shift ;;
     --help)     usage; exit 0 ;;
     *)          echo "Unknown argument: $1"; usage; exit 1 ;;

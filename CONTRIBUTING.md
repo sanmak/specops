@@ -76,17 +76,21 @@ The following files require extra scrutiny during review:
 |------|------|--------------|
 | `core/workflow.md` | Agent behavior | Could alter what the agent does autonomously |
 | `core/safety.md` | Security guardrails | Must be preserved in all platform outputs |
+| `core/review-workflow.md` | Review integrity | Could bypass approval gates |
 | `schema.json` | Configuration validation | Could allow unsafe configuration values |
 | `platforms/claude/SKILL.md` | Generated skill file | Contains YAML frontmatter and agent instructions |
+| `.claude-plugin/plugin.json` | Plugin metadata | Could alter plugin behavior or distribution |
 | `setup.sh` | File system operations | Could introduce path traversal or injection |
+| `scripts/remote-install.sh` | Remote execution | Runs via curl pipe, extra scrutiny needed |
 | `generator/generate.py` | Output generation | Could omit safety rules from generated outputs |
+| `hooks/pre-commit`, `hooks/pre-push` | Git hooks | Could skip validation or introduce injection |
 
 Changes to these files should include:
 - An explanation of why the change is needed
 - Analysis of security implications
 - Updated tests if applicable
 
-For PRs that touch these files, consider running Claude Code's `/security-review` command before submitting. See [SECURITY-AUDIT.md](SECURITY-AUDIT.md) for the latest audit results and methodology.
+For PRs that touch these files, consider running Claude Code's `/security-review` command before submitting. See [SECURITY-AUDIT.md](docs/SECURITY-AUDIT.md) for the latest audit results and methodology.
 
 ## Testing
 
@@ -108,7 +112,7 @@ python3 generator/generate.py --all
 python3 generator/validate.py
 
 # Lint shell scripts (requires shellcheck)
-shellcheck setup.sh verify.sh scripts/bump-version.sh scripts/run-tests.sh platforms/*/install.sh
+shellcheck setup.sh verify.sh scripts/bump-version.sh scripts/run-tests.sh scripts/remote-install.sh scripts/install-hooks.sh platforms/*/install.sh hooks/pre-commit hooks/pre-push
 
 # Run verification
 bash verify.sh
