@@ -89,6 +89,18 @@
         "additionalProperties": false
       }
     },
+    "specopsCreatedWith": {
+      "type": "string",
+      "maxLength": 20,
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "SpecOps version that created this spec. Set once at creation, never updated."
+    },
+    "specopsUpdatedWith": {
+      "type": "string",
+      "maxLength": 20,
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "SpecOps version that last modified this spec. Updated on every spec.json write."
+    },
     "reviewRounds": {
       "type": "integer",
       "minimum": 0,

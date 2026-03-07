@@ -41,6 +41,9 @@ jobs:
       - name: Bump version in JSON files
         run: bash scripts/bump-version.sh "${{ steps.version.outputs.version }}"
 
+      - name: Regenerate platform outputs
+        run: python3 generator/generate.py --all
+
       - name: Regenerate checksums
         run: |
           shasum -a 256 \

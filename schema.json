@@ -222,6 +222,17 @@
       },
       "additionalProperties": false
     },
+    "_installedVersion": {
+      "type": "string",
+      "maxLength": 20,
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "SpecOps version that was installed. Written by installers, do not edit manually."
+    },
+    "_installedAt": {
+      "type": "string",
+      "maxLength": 30,
+      "description": "ISO 8601 timestamp of when SpecOps was installed. Written by installers, do not edit manually."
+    },
     "integrations": {
       "type": "object",
       "description": "External tool integrations",

@@ -56,6 +56,7 @@ Project-local Claude Code commands in `.claude/commands/` for git workflow autom
 | `/commit` | Auto-stage all changes, regenerate derived files if needed, commit with conventional message (no Claude attribution) |
 | `/push` | Validate pre-push checks, push to remote |
 | `/ship` | Combined commit + push in one operation |
+| `/ship-pr` | Commit changes to a new branch, push, and open a PR for review |
 | `/release` | Full release workflow: auto-generate CHANGELOG, bump version, validate, commit, push, and create GitHub Release |
 | `/monitor` | Monitor GitHub Actions CI status, diagnose failures, auto-fix and re-push (up to 3 cycles) |
 | `/docs-sync` | Detect stale documentation after code changes, propose targeted updates for approval |
@@ -111,7 +112,7 @@ SpecOps is distributed as a Claude Code plugin via `.claude-plugin/` at the repo
 ```
 
 The plugin provides one skill:
-- `/specops` — spec-driven development workflow with subcommands: `init`, `view`, `list`, `interview` (from `skills/specops/SKILL.md`)
+- `/specops` — spec-driven development workflow with subcommands: `init`, `view`, `list`, `interview`, `update` (from `skills/specops/SKILL.md`)
 
 Plugin manifests (`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`) are **generated** by `generator/generate.py` — do not edit directly. Version is synced from `platforms/claude/platform.json`.
 

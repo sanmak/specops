@@ -280,6 +280,54 @@ def main():
     except FileNotFoundError:
         print("SKIP: Self-approved example spec.json not yet created")
 
+    # Valid: spec with specopsCreatedWith and specopsUpdatedWith
+    check(expect_valid(spec_schema, {
+        "id": "versioned-feature",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-07T10:00:00Z",
+        "updated": "2026-03-07T10:00:00Z",
+        "specopsCreatedWith": "1.2.0",
+        "specopsUpdatedWith": "1.2.0",
+        "author": {"name": "Alice", "email": "alice@acme.com"},
+        "reviewers": [],
+        "reviewRounds": 0,
+        "approvals": 0,
+        "requiredApprovals": 1
+    }, "Valid spec.json with specopsCreatedWith and specopsUpdatedWith"))
+
+    # Valid: spec without specopsCreatedWith (backward compat)
+    check(expect_valid(spec_schema, {
+        "id": "legacy-feature",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-01T10:00:00Z",
+        "updated": "2026-03-01T10:00:00Z",
+        "author": {"name": "Alice", "email": "alice@acme.com"},
+        "reviewers": [],
+        "reviewRounds": 0,
+        "approvals": 0,
+        "requiredApprovals": 1
+    }, "Valid spec.json without specops version fields (backward compat)"))
+
+    # Invalid: bad semver format for specopsCreatedWith
+    check(expect_invalid(spec_schema, {
+        "id": "bad-version",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-07T10:00:00Z",
+        "updated": "2026-03-07T10:00:00Z",
+        "specopsCreatedWith": "v1.2.0",
+        "author": {"name": "Alice", "email": "alice@acme.com"},
+        "reviewers": [],
+        "reviewRounds": 0,
+        "approvals": 0,
+        "requiredApprovals": 1
+    }, "Rejects specopsCreatedWith with 'v' prefix"))
+
     # --- index-schema.json tests ---
     print("\n--- index.json Validation ---")
     index_schema = load_schema("index-schema.json")

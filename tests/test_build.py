@@ -223,6 +223,51 @@ def test_copilot_instructions_format():
     return errors
 
 
+def test_version_in_frontmatter():
+    """Check all generated outputs have version in their frontmatter."""
+    errors = 0
+
+    for platform, filename in EXPECTED_OUTPUTS.items():
+        filepath = os.path.join(PLATFORMS_DIR, platform, filename)
+        if not os.path.exists(filepath):
+            continue
+
+        content = read_file(filepath)
+        if not content.startswith("---\n"):
+            continue
+
+        second_dash = content.find("---\n", 4)
+        if second_dash == -1:
+            continue
+
+        frontmatter = content[4:second_dash]
+        if "version:" not in frontmatter:
+            print(f"FAIL: {platform}/{filename} frontmatter missing 'version' field")
+            errors += 1
+        else:
+            # Verify version matches platform.json
+            config_path = os.path.join(PLATFORMS_DIR, platform, "platform.json")
+            if os.path.exists(config_path):
+                with open(config_path) as f:
+                    config = json.load(f)
+                expected = config.get("version", "")
+                for line in frontmatter.splitlines():
+                    if line.startswith("version:"):
+                        actual = line.split(":", 1)[1].strip().strip('"')
+                        if actual != expected:
+                            print(
+                                f"FAIL: {platform}/{filename} frontmatter version"
+                                f" ({actual}) != platform.json ({expected})"
+                            )
+                            errors += 1
+                        break
+
+    if errors == 0:
+        print("PASS: All generated outputs have correct version in frontmatter")
+
+    return errors
+
+
 def test_platform_json_valid():
     """Validate all platform.json files are valid JSON."""
     errors = 0
@@ -275,6 +320,9 @@ def main():
 
     print("\n--- Test: Copilot Instructions Format ---")
     total_errors += test_copilot_instructions_format()
+
+    print("\n--- Test: Version in Frontmatter ---")
+    total_errors += test_version_in_frontmatter()
 
     print("\n--- Test: Platform JSON Validity ---")
     total_errors += test_platform_json_valid()

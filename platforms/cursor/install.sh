@@ -51,6 +51,25 @@ cp "$SCRIPT_DIR/specops.mdc" "$RULES_DIR/specops.mdc"
 
 echo "Installed successfully!"
 echo ""
+
+# Update .specops.json with version metadata if it exists
+if [ -f ".specops.json" ]; then
+  SPECOPS_VER="$(grep '^version:' "$SCRIPT_DIR/specops.mdc" | head -1 | sed 's/version: *"//;s/"//')"
+  INSTALL_TS="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  if [ -n "$SPECOPS_VER" ]; then
+    python3 -c "
+import json
+with open('.specops.json', 'r') as f:
+    d = json.load(f)
+d['_installedVersion'] = '${SPECOPS_VER}'
+d['_installedAt'] = '${INSTALL_TS}'
+with open('.specops.json', 'w') as f:
+    json.dump(d, f, indent=2)
+    f.write('\n')
+" && echo "Updated .specops.json with version metadata"
+  fi
+fi
+
 echo "Next steps:"
 echo "1. Open the project in Cursor"
 echo "2. The SpecOps rules will activate when you mention 'specops' or 'spec-driven development'"

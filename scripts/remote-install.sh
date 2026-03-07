@@ -242,6 +242,24 @@ install_claude() {
   else
     echo "WARNING: Installation may be incomplete — missing files in $install_dir"
   fi
+
+  # Update .specops.json with version metadata if it exists
+  if [ -f ".specops.json" ]; then
+    SPECOPS_VER="$(grep '^version:' "$install_dir/SKILL.md" | head -1 | sed 's/version: *"//;s/"//')"
+    INSTALL_TS="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    if [ -n "$SPECOPS_VER" ]; then
+      python3 -c "
+import json
+with open('.specops.json', 'r') as f:
+    d = json.load(f)
+d['_installedVersion'] = '${SPECOPS_VER}'
+d['_installedAt'] = '${INSTALL_TS}'
+with open('.specops.json', 'w') as f:
+    json.dump(d, f, indent=2)
+    f.write('\n')
+" && echo "Updated .specops.json with version metadata"
+    fi
+  fi
   echo ""
 }
 
@@ -254,6 +272,24 @@ install_cursor() {
   echo "Installing to: $rules_dir/specops.mdc"
   download_file "${SPECOPS_BASE_URL}/platforms/cursor/specops.mdc" "$rules_dir/specops.mdc"
   echo "Installed successfully!"
+
+  # Update .specops.json with version metadata if it exists
+  if [ -f ".specops.json" ]; then
+    SPECOPS_VER="$(grep '^version:' "$rules_dir/specops.mdc" | head -1 | sed 's/version: *"//;s/"//')"
+    INSTALL_TS="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    if [ -n "$SPECOPS_VER" ]; then
+      python3 -c "
+import json
+with open('.specops.json', 'r') as f:
+    d = json.load(f)
+d['_installedVersion'] = '${SPECOPS_VER}'
+d['_installedAt'] = '${INSTALL_TS}'
+with open('.specops.json', 'w') as f:
+    json.dump(d, f, indent=2)
+    f.write('\n')
+" && echo "Updated .specops.json with version metadata"
+    fi
+  fi
   echo ""
 }
 
@@ -266,6 +302,24 @@ install_codex() {
   echo "Installing to: $skill_dir/SKILL.md"
   download_file "${SPECOPS_BASE_URL}/platforms/codex/SKILL.md" "$skill_dir/SKILL.md"
   echo "Installed successfully!"
+
+  # Update .specops.json with version metadata if it exists
+  if [ -f ".specops.json" ]; then
+    SPECOPS_VER="$(grep '^version:' "$skill_dir/SKILL.md" | head -1 | sed 's/version: *"//;s/"//')"
+    INSTALL_TS="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    if [ -n "$SPECOPS_VER" ]; then
+      python3 -c "
+import json
+with open('.specops.json', 'r') as f:
+    d = json.load(f)
+d['_installedVersion'] = '${SPECOPS_VER}'
+d['_installedAt'] = '${INSTALL_TS}'
+with open('.specops.json', 'w') as f:
+    json.dump(d, f, indent=2)
+    f.write('\n')
+" && echo "Updated .specops.json with version metadata"
+    fi
+  fi
   echo ""
 }
 
@@ -278,6 +332,24 @@ install_copilot() {
   echo "Installing to: $instructions_dir/specops.instructions.md"
   download_file "${SPECOPS_BASE_URL}/platforms/copilot/specops.instructions.md" "$instructions_dir/specops.instructions.md"
   echo "Installed successfully!"
+
+  # Update .specops.json with version metadata if it exists
+  if [ -f ".specops.json" ]; then
+    SPECOPS_VER="$(grep '^version:' "$instructions_dir/specops.instructions.md" | head -1 | sed 's/version: *"//;s/"//')"
+    INSTALL_TS="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    if [ -n "$SPECOPS_VER" ]; then
+      python3 -c "
+import json
+with open('.specops.json', 'r') as f:
+    d = json.load(f)
+d['_installedVersion'] = '${SPECOPS_VER}'
+d['_installedAt'] = '${INSTALL_TS}'
+with open('.specops.json', 'w') as f:
+    json.dump(d, f, indent=2)
+    f.write('\n')
+" && echo "Updated .specops.json with version metadata"
+    fi
+  fi
   echo ""
 }
 

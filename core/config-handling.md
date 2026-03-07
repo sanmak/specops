@@ -146,3 +146,12 @@ If `config.integrations` is configured, use these as **contextual information**:
 - **`analytics`**: Include analytics tracking in acceptance criteria when relevant
 
 These are informational — the agent uses them to generate more accurate specs, not to directly invoke the tools.
+
+## System-Managed Fields
+
+The following `.specops.json` fields are written by installers and must not be prompted for or modified by the agent:
+
+- **`_installedVersion`**: The SpecOps version that was installed. Set by `install.sh` and `remote-install.sh`.
+- **`_installedAt`**: ISO 8601 timestamp of when SpecOps was installed.
+
+When modifying `.specops.json` (e.g., during `/specops init`), preserve these fields if they already exist. Do not include them in configuration prompts or templates shown to users.

@@ -334,6 +334,7 @@ def generate_claude(core, platform_config):
         "{{ init_templates }}", build_init_templates_section()
     )
 
+    version = platform_config.get("version", "1.0.0")
     context = {
         "workflow": core["workflow"],
         "config_handling": core["config-handling"],
@@ -341,6 +342,7 @@ def generate_claude(core, platform_config):
         "view": core["view"],
         "interview": core["interview"],
         "init": init_content,
+        "update": core["update"],
         "safety": core["safety"],
         "simplicity": core["simplicity"],
         "data_handling": core["data-handling"],
@@ -350,6 +352,7 @@ def generate_claude(core, platform_config):
         "task_tracking": core["task-tracking"],
         "templates_section": templates_section,
         "examples": examples,
+        "version": version,
     }
 
     output = render_template(template, context)
@@ -359,6 +362,7 @@ def generate_claude(core, platform_config):
     frontmatter = (
         '---\n'
         'name: specops\n'
+        f'version: "{version}"\n'
         'description: "Spec-driven development workflow - transforms ideas into'
         ' structured specifications (requirements, design, tasks) before'
         ' implementation. Use when building features, fixing bugs, refactoring,'
@@ -424,7 +428,7 @@ def generate_plugin_manifests():
                 "source": "./",
                 "description": (
                     "Spec-driven development workflow with /specops command"
-                    " (includes init, view, list, interview subcommands)."
+                    " (includes init, view, list, interview, update subcommands)."
                 ),
                 "version": version,
                 "category": "development-workflows",
@@ -443,12 +447,14 @@ def generate_cursor(core, platform_config):
     templates_section = render_templates_section(core["_templates"])
     examples = build_example_invocations(platform_config)
 
+    version = platform_config.get("version", "1.0.0")
     context = {
         "workflow": core["workflow"],
         "config_handling": core["config-handling"],
         "review_workflow": core["review-workflow"],
         "view": core["view"],
         "interview": core["interview"],
+        "update": core["update"],
         "safety": core["safety"],
         "simplicity": core["simplicity"],
         "data_handling": core["data-handling"],
@@ -458,6 +464,7 @@ def generate_cursor(core, platform_config):
         "task_tracking": core["task-tracking"],
         "templates_section": templates_section,
         "examples": examples,
+        "version": version,
     }
 
     output = render_template(template, context)
@@ -473,12 +480,14 @@ def generate_codex(core, platform_config):
     templates_section = render_templates_section(core["_templates"])
     examples = build_example_invocations(platform_config)
 
+    version = platform_config.get("version", "1.0.0")
     context = {
         "workflow": core["workflow"],
         "config_handling": core["config-handling"],
         "review_workflow": core["review-workflow"],
         "view": core["view"],
         "interview": core["interview"],
+        "update": core["update"],
         "safety": core["safety"],
         "simplicity": core["simplicity"],
         "data_handling": core["data-handling"],
@@ -488,6 +497,7 @@ def generate_codex(core, platform_config):
         "task_tracking": core["task-tracking"],
         "templates_section": templates_section,
         "examples": examples,
+        "version": version,
     }
 
     output = render_template(template, context)
@@ -497,6 +507,7 @@ def generate_codex(core, platform_config):
     frontmatter = (
         '---\n'
         'name: specops\n'
+        f'version: "{version}"\n'
         'description: "Spec-driven development workflow - transforms ideas into'
         ' structured specifications (requirements, design, tasks) before'
         ' implementation. Use when building features, fixing bugs, refactoring,'
@@ -513,12 +524,14 @@ def generate_copilot(core, platform_config):
     templates_section = render_templates_section(core["_templates"])
     examples = build_example_invocations(platform_config)
 
+    version = platform_config.get("version", "1.0.0")
     context = {
         "workflow": core["workflow"],
         "config_handling": core["config-handling"],
         "review_workflow": core["review-workflow"],
         "view": core["view"],
         "interview": core["interview"],
+        "update": core["update"],
         "safety": core["safety"],
         "simplicity": core["simplicity"],
         "data_handling": core["data-handling"],
@@ -528,6 +541,7 @@ def generate_copilot(core, platform_config):
         "task_tracking": core["task-tracking"],
         "templates_section": templates_section,
         "examples": examples,
+        "version": version,
     }
 
     output = render_template(template, context)
@@ -537,6 +551,7 @@ def generate_copilot(core, platform_config):
     frontmatter = (
         '---\n'
         'applyTo: "**"\n'
+        f'version: "{version}"\n'
         '---\n\n'
     )
     output_path = os.path.join(PLATFORMS_DIR, "copilot", "specops.instructions.md")
