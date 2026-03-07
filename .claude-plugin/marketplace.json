@@ -10,7 +10,7 @@
   "plugins": [
     {
       "name": "specops",
-      "source": ".",
+      "source": "./",
       "description": "Spec-driven development workflow with /specops and /specops:init commands.",
       "version": "1.2.0",
       "category": "development-workflows",

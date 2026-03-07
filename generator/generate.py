@@ -426,7 +426,7 @@ def generate_plugin_manifests():
         "plugins": [
             {
                 "name": "specops",
-                "source": ".",
+                "source": "./",
                 "description": (
                     "Spec-driven development workflow with /specops and"
                     " /specops:init commands."
