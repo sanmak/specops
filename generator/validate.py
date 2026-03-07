@@ -97,6 +97,16 @@ INTERVIEW_MARKERS = [
     "confirming",
 ]
 
+# Task tracking markers that MUST appear in every output
+TASK_TRACKING_MARKERS = [
+    "Task State Machine",
+    "Write Ordering Protocol",
+    "Single Active Task",
+    "Blocker Handling",
+    "protocol breach",
+    "Blocked",
+]
+
 
 def read_file(path):
     with open(path, "r", encoding="utf-8") as f:
@@ -211,6 +221,9 @@ def validate_platform(platform, info):
 
     # Check interview workflow present
     errors.extend(check_markers_present(platform, content, INTERVIEW_MARKERS, "interview"))
+
+    # Check task tracking present
+    errors.extend(check_markers_present(platform, content, TASK_TRACKING_MARKERS, "task-tracking"))
 
     # Platform-specific format validation
     if platform == "cursor":
@@ -408,7 +421,7 @@ def main():
     print("\nCross-platform consistency:")
     if len(generated) >= 2:
         platforms = list(generated.keys())
-        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + REVIEW_MARKERS + VIEW_MARKERS:
+        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + TASK_TRACKING_MARKERS:
             present_in = [p for p in platforms if marker in generated[p]["content"]]
             if len(present_in) != len(platforms):
                 missing = set(platforms) - set(present_in)

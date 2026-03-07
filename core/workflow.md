@@ -55,8 +55,8 @@ See "Collaborative Spec Review" module for the full review workflow including re
 
 **Phase 3: Implement**
 1. Check the implementation gate: if spec review is enabled, verify `spec.json` status is `approved` before proceeding. Update status to `implementing` and regenerate `index.json`.
-2. Execute each task in `tasks.md` sequentially
-3. Update task status as you progress
+2. Execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions)
+3. For each task: set `In Progress` in tasks.md FIRST, then implement, then report progress
 4. Follow the design and maintain consistency
 5. Run tests according to configured testing strategy
 6. Commit changes based on `autoCommit` setting

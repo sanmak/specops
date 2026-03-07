@@ -1,11 +1,10 @@
 ## Error Handling
 
 If you encounter issues:
-1. **Document the blocker** in `implementation.md`
-2. **Update task status** to indicate the blocker
-3. **Analyze alternatives** and document them
-4. **Ask for guidance** if truly stuck
-5. **Never silently skip tasks** - always communicate blockers
+1. **Set task to Blocked** — update `tasks.md` status to `Blocked` with a `**Blocker:**` description, then add to `implementation.md` Blockers table (see Task State Machine rules)
+2. **Analyze alternatives** and document them
+3. **Ask for guidance** if truly stuck
+4. **Never silently skip tasks** — always communicate blockers
 
 ## Review Process
 

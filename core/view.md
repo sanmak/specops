@@ -353,8 +353,9 @@ To calculate task progress from tasks.md:
 1. Count lines matching `**Status:** Completed` or `**Status:** completed` as completed tasks
 2. Count lines matching `**Status:** In Progress` or `**Status:** in progress` as in-progress tasks
 3. Count lines matching `**Status:** Pending` or `**Status:** pending` as pending tasks
-4. Total = completed + in_progress + pending
-5. Percentage = (completed / total) * 100, rounded to nearest integer
+4. Count lines matching `**Status:** Blocked` or `**Status:** blocked` as blocked tasks
+5. Total = completed + in_progress + pending + blocked
+6. Percentage = (completed / total) * 100, rounded to nearest integer
 
 The progress bar format uses 40 characters width:
 - Filled portion: `=`

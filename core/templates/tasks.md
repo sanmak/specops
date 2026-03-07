@@ -3,10 +3,11 @@
 ## Task Breakdown
 
 ### Task 1: [Title]
-**Status:** Pending | In Progress | Completed
+**Status:** Pending | In Progress | Completed | Blocked
 **Estimated Effort:** [S/M/L or hours]
 **Dependencies:** None | Task [IDs]
 **Priority:** High | Medium | Low
+**Blocker:** None
 
 **Description:**
 Detailed description of what needs to be done.
@@ -43,4 +44,5 @@ Detailed description of what needs to be done.
 - Total Tasks: [N]
 - Completed: [M]
 - In Progress: [P]
-- Remaining: [R]
+- Blocked: [B]
+- Pending: [R]

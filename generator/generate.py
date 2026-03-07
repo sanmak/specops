@@ -324,6 +324,7 @@ def generate_claude(core, platform_config):
         "verticals": core["verticals"],
         "custom_templates": core["custom-templates"],
         "error_handling": core["error-handling"],
+        "task_tracking": core["task-tracking"],
         "templates_section": templates_section,
         "examples": examples,
     }
@@ -459,6 +460,7 @@ def generate_cursor(core, platform_config):
         "verticals": core["verticals"],
         "custom_templates": core["custom-templates"],
         "error_handling": core["error-handling"],
+        "task_tracking": core["task-tracking"],
         "templates_section": templates_section,
         "examples": examples,
     }
@@ -488,6 +490,7 @@ def generate_codex(core, platform_config):
         "verticals": core["verticals"],
         "custom_templates": core["custom-templates"],
         "error_handling": core["error-handling"],
+        "task_tracking": core["task-tracking"],
         "templates_section": templates_section,
         "examples": examples,
     }
@@ -527,6 +530,7 @@ def generate_copilot(core, platform_config):
         "verticals": core["verticals"],
         "custom_templates": core["custom-templates"],
         "error_handling": core["error-handling"],
+        "task_tracking": core["task-tracking"],
         "templates_section": templates_section,
         "examples": examples,
     }

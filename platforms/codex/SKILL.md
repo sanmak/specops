@@ -60,8 +60,8 @@ See "Collaborative Spec Review" module for the full review workflow including re
 
 **Phase 3: Implement**
 1. Check the implementation gate: if spec review is enabled, verify `spec.json` status is `approved` before proceeding. Update status to `implementing` and regenerate `index.json`.
-2. Execute each task in `tasks.md` sequentially
-3. Update task status as you progress
+2. Execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions)
+3. For each task: set `In Progress` in tasks.md FIRST, then implement, then report progress
 4. Follow the design and maintain consistency
 5. Run tests according to configured testing strategy
 6. Commit changes based on `autoCommit` setting
@@ -785,8 +785,9 @@ To calculate task progress from tasks.md:
 1. Count lines matching `**Status:** Completed` or `**Status:** completed` as completed tasks
 2. Count lines matching `**Status:** In Progress` or `**Status:** in progress` as in-progress tasks
 3. Count lines matching `**Status:** Pending` or `**Status:** pending` as pending tasks
-4. Total = completed + in_progress + pending
-5. Percentage = (completed / total) * 100, rounded to nearest integer
+4. Count lines matching `**Status:** Blocked` or `**Status:** blocked` as blocked tasks
+5. Total = completed + in_progress + pending + blocked
+6. Percentage = (completed / total) * 100, rounded to nearest integer
 
 The progress bar format uses 40 characters width:
 - Filled portion: `=`
@@ -1229,10 +1230,11 @@ TableName:
 ## Task Breakdown
 
 ### Task 1: [Title]
-**Status:** Pending | In Progress | Completed
+**Status:** Pending | In Progress | Completed | Blocked
 **Estimated Effort:** [S/M/L or hours]
 **Dependencies:** None | Task [IDs]
 **Priority:** High | Medium | Low
+**Blocker:** None
 
 **Description:**
 Detailed description of what needs to be done.
@@ -1269,7 +1271,8 @@ Detailed description of what needs to be done.
 - Total Tasks: [N]
 - Completed: [M]
 - In Progress: [P]
-- Remaining: [R]
+- Blocked: [B]
+- Pending: [R]
 ```
 
 ### implementation.md (Optional)
@@ -1477,11 +1480,10 @@ Watch for these patterns and actively avoid them:
 ## Error Handling
 
 If you encounter issues:
-1. **Document the blocker** in `implementation.md`
-2. **Update task status** to indicate the blocker
-3. **Analyze alternatives** and document them
-4. **Ask for guidance** if truly stuck
-5. **Never silently skip tasks** - always communicate blockers
+1. **Set task to Blocked** — update `tasks.md` status to `Blocked` with a `**Blocker:**` description, then add to `implementation.md` Blockers table (see Task State Machine rules)
+2. **Analyze alternatives** and document them
+3. **Ask for guidance** if truly stuck
+4. **Never silently skip tasks** — always communicate blockers
 
 ## Review Process
 
@@ -1524,6 +1526,76 @@ A successful SpecOps workflow completion means:
 6. **Maintain context**: Reference file:line_number for specific code locations
 7. **Security first**: Never introduce vulnerabilities
 8. **Keep it simple**: Follow the Simplicity Principle — implement the minimum needed to meet the spec
+
+
+## Task State Machine
+
+### States
+
+Every task in `tasks.md` has exactly one status:
+
+| Status | Meaning |
+|--------|---------|
+| Pending | Not started |
+| In Progress | Currently being worked on |
+| Completed | Finished and verified |
+| Blocked | Cannot proceed — requires resolution |
+
+### Valid Transitions
+
+```
+Pending ──────► In Progress
+In Progress ──► Completed
+In Progress ──► Blocked
+Blocked ──────► In Progress
+```
+
+**Prohibited transitions** (protocol breach if attempted):
+- Pending → Completed (must pass through In Progress)
+- Pending → Blocked (must start work to discover blockers)
+- Completed → any state (completed is terminal)
+- Blocked → Completed (must unblock first)
+- Blocked → Pending (cannot regress)
+
+### Write Ordering Protocol
+
+When changing task status, follow this strict sequence:
+
+1. Edit the file at `tasks.md` to update the task's `**Status:**` line
+2. Then perform the work (implement, test, etc.)
+3. Then report progress in chat
+
+This means:
+- Before starting a task: write `In Progress` to `tasks.md` first
+- Before reporting completion: write `Completed` to `tasks.md` first
+- Before reporting a blocker: write `Blocked` to `tasks.md` first
+
+Violation of write ordering is a protocol breach. Chat status must never lead persisted file status.
+
+### Single Active Task
+
+Only **one** task may be `In Progress` at any time. Before setting a new task to `In Progress`:
+1. Read the file at `tasks.md`
+2. Verify no other task has `**Status:** In Progress`
+3. If one does, complete it or set it to `Blocked` first
+
+### Blocker Handling
+
+When a task is blocked:
+
+1. Edit the file at `tasks.md` — set `**Status:** Blocked` on the task
+2. Add a `**Blocker:**` line with: the error or dependency, and what is needed to unblock
+3. Edit the file at `implementation.md` — add an entry to the "Blockers Encountered" section
+
+When unblocking:
+1. Update or clear the `**Blocker:**` line
+2. Set status back to `In Progress` (following write ordering)
+
+### Conformance Rules
+
+- **File-chat consistency**: reported status in chat must match what is persisted in `tasks.md`
+- **Dependency enforcement**: if Task B depends on Task A, and Task A is `Blocked`, Task B cannot be set to `In Progress`
+- **Progress summary accuracy**: the Progress Tracking counts at the bottom of `tasks.md` must reflect actual statuses
 
 
 ## Data Handling and Sensitive Information
