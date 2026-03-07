@@ -82,8 +82,6 @@ if [ "$NEEDS_REBUILD" = true ]; then
     "platforms/codex/SKILL.md"
     "platforms/copilot/specops.instructions.md"
     "skills/specops/SKILL.md"
-    "skills/init/SKILL.md"
-    "platforms/claude/init/SKILL.md"
     ".claude-plugin/plugin.json"
     ".claude-plugin/marketplace.json"
   )

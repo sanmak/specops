@@ -31,9 +31,14 @@ Copy-paste-ready content for submitting SpecOps to each platform's marketplace.
 > - Optional interview mode for vague or exploratory ideas
 > - Spec viewing, listing, and status tracking
 >
-> Commands: `/specops`, `/specops:init`
+> Commands: `/specops` (subcommands: `init`, `view`, `list`, `interview`)
 
-**Install command**: `/install github:sanmak/specops`
+**Install commands**:
+```
+/plugin marketplace add sanmak/specops
+/plugin install specops@specops-marketplace
+/reload-plugins
+```
 
 ---
 

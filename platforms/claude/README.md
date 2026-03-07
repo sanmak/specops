@@ -5,7 +5,9 @@
 ### Plugin Marketplace (Recommended)
 
 ```
-/install github:sanmak/specops
+/plugin marketplace add sanmak/specops
+/plugin install specops@specops-marketplace
+/reload-plugins
 ```
 
 ### Quick Install (no clone needed)

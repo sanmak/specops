@@ -21,7 +21,9 @@ SpecOps brings structured spec-driven development to your AI coding assistant â€
 **Install (Claude Code):**
 
 ```
-/install github:sanmak/specops
+/plugin marketplace add sanmak/specops
+/plugin install specops@specops-marketplace
+/reload-plugins
 ```
 
 **Other platforms & manual install:** [QUICKSTART.md](QUICKSTART.md)

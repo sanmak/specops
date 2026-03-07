@@ -7,11 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Init merged into main skill**: `/specops:init` is now `/specops init` — a subcommand of the main skill rather than a separate skill. No behavior change for users.
+- **Fixed install commands**: Documentation now uses the correct `/plugin marketplace add` + `/plugin install` + `/reload-plugins` flow instead of the non-existent `/install github:` command.
+
 ## [1.2.0] - 2026-03-06
 
 ### Added
 
-- **Plugin marketplace distribution**: `.claude-plugin/plugin.json` and `marketplace.json` manifests for distributing SpecOps via Claude Code, Cursor, Codex, and Copilot plugin marketplaces. Install with `/install github:sanmak/specops`
+- **Plugin marketplace distribution**: `.claude-plugin/plugin.json` and `marketplace.json` manifests for distributing SpecOps via Claude Code, Cursor, Codex, and Copilot plugin marketplaces. Install with `/plugin marketplace add sanmak/specops` then `/plugin install specops@specops-marketplace`
 - **`/specops:init` skill**: Interactive config initialization that presents 5 template options (minimal, standard, full, review, builder) and writes `.specops.json` to the user's project
 - **Interview mode**: Optional structured interview for vague or exploratory ideas — gathers requirements before spec generation. Trigger with `/specops interview ...` or auto-triggered for ambiguous inputs
 - **Development Process prompt**: On first spec creation, prompts to add a Development Process section to the project's README

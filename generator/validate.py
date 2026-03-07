@@ -326,49 +326,27 @@ def validate_plugin_manifests():
 
 
 def validate_init_skill():
-    """Validate the /specops:init skill."""
+    """Validate init mode content is present in Claude SKILL.md."""
     errors = []
 
-    # Check both locations
-    for location in [
-        os.path.join(PLATFORMS_DIR, "claude", "init", "SKILL.md"),
-        os.path.join(SKILLS_DIR, "init", "SKILL.md"),
-    ]:
-        rel_path = os.path.relpath(location, ROOT_DIR)
-        if not os.path.exists(location):
-            errors.append(f"  Missing {rel_path}")
-            continue
+    claude_skill_path = os.path.join(PLATFORMS_DIR, "claude", "SKILL.md")
+    if not os.path.exists(claude_skill_path):
+        errors.append("  Missing platforms/claude/SKILL.md (needed for init validation)")
+        return errors
 
-        content = read_file(location)
+    content = read_file(claude_skill_path)
 
-        # Check YAML frontmatter
-        if not content.startswith("---\n"):
-            errors.append(f"  {rel_path} must start with YAML frontmatter (---)")
-        else:
-            second_dash = content.find("---\n", 4)
-            if second_dash == -1:
-                errors.append(f"  {rel_path} has unclosed YAML frontmatter")
-            else:
-                frontmatter = content[4:second_dash]
-                if "name:" not in frontmatter:
-                    errors.append(f"  {rel_path} frontmatter missing 'name' field")
-                if "description:" not in frontmatter:
-                    errors.append(f"  {rel_path} frontmatter missing 'description' field")
+    # Check init mode markers
+    init_markers = ["Init Mode", "Init Workflow", "Init Mode Detection"]
+    for marker in init_markers:
+        if marker not in content:
+            errors.append(f"  Claude SKILL.md missing init marker: '{marker}'")
 
-        # Check all 5 config templates are present
-        template_names = ["Minimal", "Standard", "Full", "Review", "Builder"]
-        for name in template_names:
-            if f"Template: {name}" not in content:
-                errors.append(f"  {rel_path} missing config template: {name}")
-
-    # Check both files are identical
-    platform_path = os.path.join(PLATFORMS_DIR, "claude", "init", "SKILL.md")
-    skills_path = os.path.join(SKILLS_DIR, "init", "SKILL.md")
-    if os.path.exists(platform_path) and os.path.exists(skills_path):
-        if read_file(platform_path) != read_file(skills_path):
-            errors.append(
-                "  platforms/claude/init/SKILL.md and skills/init/SKILL.md are out of sync"
-            )
+    # Check all 5 config templates are present
+    template_names = ["Minimal", "Standard", "Full", "Review", "Builder"]
+    for name in template_names:
+        if f"Template: {name}" not in content:
+            errors.append(f"  Claude SKILL.md missing init config template: {name}")
 
     return errors
 
@@ -407,15 +385,15 @@ def main():
     else:
         print("  PASS: All plugin manifest checks passed")
 
-    # Init skill validation
-    print("\nValidating: init skill")
+    # Init mode validation
+    print("\nValidating: init mode")
     init_errors = validate_init_skill()
     if init_errors:
         for err in init_errors:
             print(f"  FAIL: {err}")
         all_errors.extend(init_errors)
     else:
-        print("  PASS: Init skill checks passed")
+        print("  PASS: Init mode checks passed")
 
     # Cross-platform consistency check
     print("\nCross-platform consistency:")

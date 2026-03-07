@@ -306,11 +306,33 @@ Your workflow:
 3. Present formatted spec overview table"""
 
 
+def build_init_templates_section():
+    """Build the init config templates section from example configs."""
+    config_files = [
+        (".specops.minimal.json", "Minimal"),
+        (".specops.json", "Standard"),
+        (".specops.full.json", "Full"),
+        (".specops.review.json", "Review"),
+        (".specops.builder.json", "Builder"),
+    ]
+    sections = []
+    for filename, name in config_files:
+        filepath = os.path.join(EXAMPLES_DIR, filename)
+        content = read_file(filepath).strip()
+        sections.append(f"#### Template: {name}\n\n```json\n{content}\n```")
+    return "\n\n".join(sections)
+
+
 def generate_claude(core, platform_config):
     """Generate Claude Code platform files."""
     template = load_template("claude")
     templates_section = render_templates_section(core["_templates"])
     examples = build_example_invocations(platform_config)
+
+    # Build init content with injected config templates (Claude-only feature)
+    init_content = core["init"].replace(
+        "{{ init_templates }}", build_init_templates_section()
+    )
 
     context = {
         "workflow": core["workflow"],
@@ -318,6 +340,7 @@ def generate_claude(core, platform_config):
         "review_workflow": core["review-workflow"],
         "view": core["view"],
         "interview": core["interview"],
+        "init": init_content,
         "safety": core["safety"],
         "simplicity": core["simplicity"],
         "data_handling": core["data-handling"],
@@ -351,34 +374,6 @@ def generate_claude(core, platform_config):
     legacy_skill_path = os.path.join(SKILLS_DIR, "specops", "SKILL.md")
     write_file(legacy_skill_path, skill_content)
 
-
-def generate_init_skill():
-    """Generate the /specops:init skill from template + example configs."""
-    template = read_file(os.path.join(TEMPLATES_DIR, "claude-init.j2"))
-
-    # Load example configs
-    config_files = {
-        "config_minimal": ".specops.minimal.json",
-        "config_standard": ".specops.json",
-        "config_full": ".specops.full.json",
-        "config_review": ".specops.review.json",
-        "config_builder": ".specops.builder.json",
-    }
-
-    context = {}
-    for key, filename in config_files.items():
-        filepath = os.path.join(EXAMPLES_DIR, filename)
-        context[key] = read_file(filepath).strip()
-
-    output = render_template(template, context)
-
-    # Write to platforms/claude/init/
-    init_skill_path = os.path.join(PLATFORMS_DIR, "claude", "init", "SKILL.md")
-    write_file(init_skill_path, output)
-
-    # Write to skills/init/ for plugin discovery
-    plugin_init_path = os.path.join(SKILLS_DIR, "init", "SKILL.md")
-    write_file(plugin_init_path, output)
 
 
 def generate_plugin_manifests():
@@ -428,8 +423,8 @@ def generate_plugin_manifests():
                 "name": "specops",
                 "source": "./",
                 "description": (
-                    "Spec-driven development workflow with /specops and"
-                    " /specops:init commands."
+                    "Spec-driven development workflow with /specops command"
+                    " (includes init, view, list, interview subcommands)."
                 ),
                 "version": version,
                 "category": "development-workflows",
@@ -580,10 +575,8 @@ def main():
         generator = GENERATORS[platform_name]
         generator(core, platform_config)
 
-    # Generate init skill and plugin manifests (only when generating claude or all)
+    # Generate plugin manifests (only when generating claude or all)
     if args.all or args.platform == "claude":
-        print("\nGenerating: init skill")
-        generate_init_skill()
         generate_plugin_manifests()
 
     print("\nDone!")

@@ -8,7 +8,9 @@ Get up and running with SpecOps in 5 minutes.
 
 **Claude Code:**
 ```
-/install github:sanmak/specops
+/plugin marketplace add sanmak/specops
+/plugin install specops@specops-marketplace
+/reload-plugins
 ```
 
 **Cursor:** Search "specops" in Cursor Settings > Extensions, or visit [cursor.com/marketplace](https://cursor.com/marketplace)

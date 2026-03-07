@@ -237,11 +237,7 @@ install_claude() {
   mkdir -p "$install_dir"
   download_file "${SPECOPS_BASE_URL}/platforms/claude/SKILL.md" "$install_dir/SKILL.md"
 
-  # Install init sub-skill (/specops:init)
-  mkdir -p "$install_dir/init"
-  download_file "${SPECOPS_BASE_URL}/platforms/claude/init/SKILL.md" "$install_dir/init/SKILL.md"
-
-  if [ -f "$install_dir/SKILL.md" ] && [ -f "$install_dir/init/SKILL.md" ]; then
+  if [ -f "$install_dir/SKILL.md" ]; then
     echo "Installed files verified at $install_dir"
   else
     echo "WARNING: Installation may be incomplete — missing files in $install_dir"
@@ -350,7 +346,7 @@ echo ""
 echo "Next steps:"
 echo "1. Create or edit .specops.json to customize for your project"
 echo "2. Use SpecOps with your AI coding assistant:"
-echo "   - Claude Code: /specops <your feature> (also: /specops:init)"
+echo "   - Claude Code: /specops <your feature> (also: /specops init)"
 echo "   - Cursor/Codex/Copilot: 'Use specops to <your feature>'"
 echo "3. Full docs: https://github.com/${SPECOPS_REPO}"
 echo ""

@@ -116,8 +116,6 @@ echo "Skills Directory:"
 check_dir "skills"
 check_dir "skills/specops"
 check_file "skills/specops/SKILL.md"
-check_dir "skills/init"
-check_file "skills/init/SKILL.md"
 echo ""
 
 # Check examples directory

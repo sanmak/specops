@@ -106,16 +106,17 @@ Even in high autonomy mode, ask for clarification when:
 
 When invoked:
 1. Greet the user briefly
-2. Check if the request is a **view** or **list** command (see "Spec Viewing" module). If so, follow the view/list workflow instead of the standard phases below.
-3. Check if interview mode is triggered (see "Interview Mode" module):
+2. Check if the request is an **init** command (see "Init Mode" module). Patterns: "init", "initialize", "setup", "configure", "create config". If so, follow the init workflow instead of the standard phases below.
+3. Check if the request is a **view** or **list** command (see "Spec Viewing" module). If so, follow the view/list workflow instead of the standard phases below.
+4. Check if interview mode is triggered (see "Interview Mode" module):
    - Explicit: request contains "interview" keyword
    - Auto (interactive platforms only): request is vague (≤5 words, no technical keywords, no action verb)
    - If triggered: follow the Interview Mode workflow, then continue with the enriched context
-4. Confirm the request type (feature/bugfix/implement/other)
-5. Show the configuration you'll use (including detected vertical)
-6. Begin the workflow immediately (high autonomy)
-7. Provide progress updates as you work
-8. Summarize completion clearly
+5. Confirm the request type (feature/bugfix/implement/other)
+6. Show the configuration you'll use (including detected vertical)
+7. Begin the workflow immediately (high autonomy)
+8. Provide progress updates as you work
+9. Summarize completion clearly
 
 ---
 
@@ -958,6 +959,236 @@ Interview mode inserts itself **between** the view/list check and Phase 1 (Under
    - If yes: Run interview workflow above
    - Once complete: Proceed to Phase 1 with enriched context
 4. If no interview: Continue to Phase 1 normally
+
+
+## Init Mode
+
+Init mode creates a `.specops.json` configuration file in the user's project. It is triggered when the user's request matches init-related patterns.
+
+### Init Mode Detection
+
+When the user invokes SpecOps, check for init intent **before** checking for view/list commands:
+
+- **Init mode**: The user's request matches patterns like "init", "initialize", "setup", "configure", or "create config". Proceed to the **Init Workflow** below.
+- If init intent is not detected, continue to the view/list check and then the standard workflow.
+
+### Init Workflow
+
+#### Step 1: Check for Existing Config
+
+Use the Read tool to read(`.specops.json`) in the current working directory.
+
+- If the file exists, display its contents and Use the AskUserQuestion tool: "A `.specops.json` already exists. Would you like to replace it or keep the current one?"
+- If the user wants to keep it, stop here with a message: "Keeping existing config. Run `/specops <description>` to start spec-driven development."
+- If the file does not exist, continue to Step 2.
+
+#### Step 2: Present Template Options
+
+Use the AskUserQuestion tool with these template options:
+
+**Question:** "Which SpecOps configuration template would you like to use?"
+
+**Options:**
+
+1. **Minimal** — Just sets the specs directory. Best for trying SpecOps quickly or solo projects with no special requirements.
+
+2. **Standard** — Team conventions, review required, GitHub task tracking, auto-create PRs. Good default for most backend/fullstack teams.
+
+3. **Full** — Everything configured: spec reviews with 2 approvals, code review, linting, formatting, monorepo modules, CI/deployment/monitoring integrations. For mature teams with established processes.
+
+4. **Review** — Focused on collaborative spec review with 2 approvals, code review with tests required, GitHub task tracking. For teams where review quality is the priority.
+
+5. **Builder** — Minimal config for the builder vertical (full-product shipping). Auto-create PRs, auto testing. For solo builders or small teams focused on shipping fast.
+
+#### Step 3: Write the Config
+
+Based on the user's selection, Use the Write tool to create(`.specops.json`) with the corresponding template content below.
+
+#### Template: Minimal
+
+```json
+{
+  "specsDir": "specs"
+}
+```
+
+#### Template: Standard
+
+```json
+{
+  "specsDir": ".specops",
+  "vertical": "backend",
+  "templates": {
+    "feature": "default",
+    "bugfix": "default",
+    "refactor": "default"
+  },
+  "team": {
+    "conventions": [
+      "Use TypeScript for all new code",
+      "Write unit tests for business logic with minimum 80% coverage",
+      "Follow existing code style and patterns",
+      "Use async/await instead of promises",
+      "Document public APIs with JSDoc",
+      "Keep functions small and focused (max 50 lines)",
+      "Use meaningful variable and function names",
+      "Handle errors explicitly, never silently fail"
+    ],
+    "reviewRequired": true,
+    "taskTracking": "github"
+  },
+  "implementation": {
+    "autoCommit": false,
+    "createPR": true,
+    "testing": "auto"
+  }
+}
+```
+
+#### Template: Full
+
+```json
+{
+  "$schema": "../schema.json",
+  "specsDir": ".specops",
+  "vertical": "fullstack",
+  "templates": {
+    "feature": "default",
+    "bugfix": "default",
+    "refactor": "default",
+    "design": "default",
+    "tasks": "default"
+  },
+  "team": {
+    "conventions": [
+      "Use TypeScript strict mode",
+      "Follow Clean Architecture principles",
+      "Write tests first (TDD)",
+      "Use dependency injection",
+      "Keep business logic pure (no side effects)",
+      "Use functional programming patterns where appropriate",
+      "Follow SOLID principles",
+      "Document architectural decisions in ADRs",
+      "Keep components small and composable",
+      "Use semantic versioning",
+      "Write meaningful commit messages following conventional commits"
+    ],
+    "reviewRequired": true,
+    "specReview": {
+      "enabled": true,
+      "minApprovals": 2
+    },
+    "taskTracking": "linear",
+    "codeReview": {
+      "required": true,
+      "minApprovals": 2,
+      "requireTests": true,
+      "requireDocs": true
+    }
+  },
+  "implementation": {
+    "autoCommit": false,
+    "createPR": true,
+    "testing": "auto",
+    "testFramework": "jest",
+    "linting": {
+      "enabled": true,
+      "fixOnSave": true
+    },
+    "formatting": {
+      "enabled": true,
+      "tool": "prettier"
+    }
+  },
+  "modules": {
+    "backend": {
+      "specsDir": "backend/specs",
+      "conventions": [
+        "Use NestJS framework patterns",
+        "Follow RESTful API design",
+        "Use DTOs for API payloads"
+      ]
+    },
+    "frontend": {
+      "specsDir": "frontend/specs",
+      "conventions": [
+        "Use React hooks",
+        "Follow component composition patterns",
+        "Use CSS modules for styling"
+      ]
+    }
+  },
+  "integrations": {
+    "ci": "github-actions",
+    "deployment": "vercel",
+    "monitoring": "sentry"
+  }
+}
+```
+
+#### Template: Review
+
+```json
+{
+  "$schema": "../schema.json",
+  "specsDir": ".specops",
+  "vertical": "backend",
+  "team": {
+    "conventions": [
+      "Use TypeScript strict mode",
+      "Write tests for all business logic"
+    ],
+    "specReview": {
+      "enabled": true,
+      "minApprovals": 2
+    },
+    "taskTracking": "github",
+    "codeReview": {
+      "required": true,
+      "minApprovals": 2,
+      "requireTests": true
+    }
+  },
+  "implementation": {
+    "autoCommit": false,
+    "createPR": true,
+    "testing": "auto"
+  }
+}
+```
+
+#### Template: Builder
+
+```json
+{
+  "specsDir": ".specops",
+  "vertical": "builder",
+  "implementation": {
+    "autoCommit": false,
+    "createPR": true,
+    "testing": "auto"
+  }
+}
+```
+
+#### Step 4: Customize (Optional)
+
+After writing the config, Use the AskUserQuestion tool: "Would you like to customize any fields? Common customizations: `specsDir` path, `vertical` (backend/frontend/fullstack/infrastructure/data/library/builder), or team `conventions`."
+
+If the user wants to customize, Use the Edit tool to modify(`.specops.json`) to modify the specific fields they request.
+
+#### Step 5: Next Steps
+
+Display a message to the user with:
+
+```
+SpecOps initialized! Your config:
+- Specs directory: <specsDir value>
+- Vertical: <vertical value or "auto-detect">
+
+Next: Run `/specops <description>` to create your first spec.
+Example: /specops Add user authentication with OAuth
+```
 
 
 ## Configuration Safety

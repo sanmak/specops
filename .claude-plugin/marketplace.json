@@ -11,7 +11,7 @@
     {
       "name": "specops",
       "source": "./",
-      "description": "Spec-driven development workflow with /specops and /specops:init commands.",
+      "description": "Spec-driven development workflow with /specops command (includes init, view, list, interview subcommands).",
       "version": "1.2.0",
       "category": "development-workflows",
       "tags": [
