@@ -3,6 +3,7 @@
 **Spec-driven development that adapts to your stack, your team, and your workflow.**
 
 [![CI](https://github.com/sanmak/specops/actions/workflows/ci.yml/badge.svg)](https://github.com/sanmak/specops/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/sanmak/specops/actions/workflows/codeql.yml/badge.svg)](https://github.com/sanmak/specops/actions/workflows/codeql.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/sanmak/specops)](https://github.com/sanmak/specops/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/sanmak/specops?style=social)](https://github.com/sanmak/specops)
 [![License: MIT](https://img.shields.io/github/license/sanmak/specops)](https://github.com/sanmak/specops/blob/main/LICENSE)
