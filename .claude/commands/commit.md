@@ -40,6 +40,27 @@ Examine the staged files list with `git diff --cached --name-only`.
 
 Run `git diff --cached --stat` to get a summary of what will be committed. Also run `git diff --cached` to read the full diff. Analyze the changes to understand their purpose and scope.
 
+### Step 5.5: Documentation staleness check
+
+After reviewing the diff, quickly check if the staged changes might affect documentation. Get the staged file list from the `git diff --cached --name-only` output you already have.
+
+Flag potential staleness if ANY of these patterns match staged files:
+- `core/` or `generator/` files → `CLAUDE.md`, `README.md`, `docs/STRUCTURE.md` may need updates
+- `schema.json` → `docs/REFERENCE.md`, example configs may need updates
+- `.claude/commands/` files → `CLAUDE.md` commands table may need updates
+- `platforms/*/platform.json` → `README.md` platforms table may need updates
+- `scripts/*.sh` → `CLAUDE.md` key commands may need updates
+- `hooks/*` → `CLAUDE.md` security-sensitive files list may need updates
+- `.github/workflows/` → `CLAUDE.md` CI notes, `CONTRIBUTING.md` may need updates
+
+If ANY of the above patterns match AND the commit does NOT already include the affected docs, display this advisory:
+
+> **Tip**: This commit touches files that may affect documentation. Run `/docs-sync` after committing to check for stale docs.
+
+Do NOT block the commit. This is informational only. Proceed to Step 6 regardless.
+
+If none of the patterns match, or if the commit already includes the affected doc files, skip this step silently.
+
 ### Step 6: Generate commit message
 
 Based on the actual diff content, generate a conventional commit message following these rules:

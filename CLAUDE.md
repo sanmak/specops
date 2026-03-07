@@ -58,6 +58,7 @@ Project-local Claude Code commands in `.claude/commands/` for git workflow autom
 | `/ship` | Combined commit + push in one operation |
 | `/release` | Full release workflow: auto-generate CHANGELOG, bump version, validate, commit, push, and create GitHub Release |
 | `/monitor` | Monitor GitHub Actions CI status, diagnose failures, auto-fix and re-push (up to 3 cycles) |
+| `/docs-sync` | Detect stale documentation after code changes, propose targeted updates for approval |
 
 These commands enforce project conventions automatically: conventional commit prefixes (`feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`), sensitive file exclusion, automatic regeneration of platform outputs and checksums when source files change, and pre-commit/pre-push hook compliance (never bypasses hooks).
 
