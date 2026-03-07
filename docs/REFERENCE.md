@@ -167,7 +167,7 @@ list
 - [ ] [derived from EARS criterion 2]
 ```
 
-> **EARS Notation:** Acceptance criteria use [EARS (Easy Approach to Requirements Syntax)](https://en.wikipedia.org/wiki/EARS_(software_engineering)) for precision and testability. Five patterns: **Ubiquitous** (`THE SYSTEM SHALL`), **Event-Driven** (`WHEN ... THE SYSTEM SHALL`), **State-Driven** (`WHILE ... THE SYSTEM SHALL`), **Optional** (`WHERE ... THE SYSTEM SHALL`), **Unwanted** (`IF ... THEN THE SYSTEM SHALL`). Checkboxes are an optional progress checklist derived from EARS statements.
+> **EARS Notation:** Acceptance criteria use [EARS (Easy Approach to Requirements Syntax)](https://alistairmavin.com/ears/) for precision and testability. Five patterns: **Ubiquitous** (`THE SYSTEM SHALL`), **Event-Driven** (`WHEN ... THE SYSTEM SHALL`), **State-Driven** (`WHILE ... THE SYSTEM SHALL`), **Optional** (`WHERE ... THE SYSTEM SHALL`), **Unwanted** (`IF ... THEN THE SYSTEM SHALL`). Checkboxes are an optional progress checklist derived from EARS statements.
 
 ### design.md
 ```markdown

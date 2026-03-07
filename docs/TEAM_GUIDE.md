@@ -621,7 +621,7 @@ SpecOps has first-class vertical support. Configure `"vertical"` in `.specops.js
 }
 ```
 
-Or let the agent auto-detect from the request. Available verticals: `backend`, `frontend`, `fullstack`, `infrastructure`, `data`, `library`.
+Or let the agent auto-detect from the request. Available verticals: `backend`, `frontend`, `fullstack`, `infrastructure`, `data`, `library`, `builder`.
 
 For maximum customization, combine `vertical` with custom templates:
 

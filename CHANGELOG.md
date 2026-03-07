@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`/docs-sync` slash command**: Detect stale documentation after code changes and propose targeted updates
 - **Task state machine**: Formal task state tracking (`core/task-tracking.md`) with Write Ordering Protocol and single-active-task rule
 - **`implementation.md` promoted to decision journal**: Always created during implementation, structured as a Decision Log with deviations and blockers
+- **EARS notation for acceptance criteria**: Requirements templates use [EARS (Easy Approach to Requirements Syntax)](https://alistairmavin.com/ears/) with five patterns (Ubiquitous, Event-Driven, State-Driven, Optional, Unwanted) for precise, testable criteria. HTML comment annotations guide agents without affecting rendered markdown
+- **PII prevention in data handling**: Specs use synthetic data instead of real PII, with classification-aware handling rules
+- **Dogfood infrastructure**: `.specops/` directory and `.specops.json` config for building SpecOps using SpecOps itself
 
 ### Changed
 
@@ -31,10 +34,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Author waiting message improved**: Now suggests `allowSelfApproval: true` for solo developers instead of leaving them at a dead end
 - **Implementation gate updated**: Accepts both `approved` and `self-approved` statuses. Self-approved specs show a note: "This spec was self-approved without peer review."
 - **Command routing tightened**: Init and update mode patterns now require SpecOps context — bare "setup" or "update" no longer misclassify product feature requests
+- **Bugfix and refactor templates include acceptance criteria checklists**: Phase 4 checkbox verification is now uniformly executable across all spec types
+- **Deferred criteria pattern**: Task-tracking and workflow support moving deferred items to a "Deferred Criteria" subsection
+- **`spec.json` requiredApprovals defaults to 0**: When review is disabled, `requiredApprovals` defaults to 0 instead of requiring a minimum of 1
 
 ### Fixed
 
 - **PR review feedback**: Indentation, resilience, schema, and clarity improvements across core modules
+- **Pre-commit hook portability**: Use POSIX case statement for symlink path check instead of bash-specific syntax
 - **Stale verify.sh reference**: Removed deleted `claude-init.j2` from verify.sh checks
 - **Marketplace plugin source path**: Fixed to use valid relative path format
 - **Remote installer**: Include init sub-skill in Claude Code remote installer
