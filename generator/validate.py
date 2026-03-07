@@ -49,6 +49,7 @@ TEMPLATE_MARKERS = [
     "Refactor: [Title]",
     "Design: [Title]",
     "Implementation Tasks: [Title]",
+    "Implementation Journal: [Title]",
 ]
 
 # Key workflow markers that MUST appear in every output

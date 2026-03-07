@@ -35,10 +35,11 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
 
 **Phase 2: Create Specification**
 1. Generate a structured spec directory in the configured `specsDir`
-2. Create three core files:
+2. Create four core files:
    - `requirements.md` (or `bugfix.md` for bugs, `refactor.md` for refactors) - User stories, acceptance criteria, bug analysis, or refactoring rationale
    - `design.md` - Technical architecture, sequence diagrams, implementation approach
    - `tasks.md` - Discrete, trackable implementation tasks with dependencies
+   - `implementation.md` - Living decision journal, updated during Phase 3. Created empty (template headers only) — populated incrementally as implementation decisions arise.
 3. Create `spec.json` with metadata (author from git config, type, status, version, created date). Set status to `draft`.
 4. Regenerate `<specsDir>/index.json` from all `*/spec.json` files.
 5. **First-spec README prompt**: If `index.json` contains exactly one spec entry (this is the project's first spec):
@@ -63,13 +64,20 @@ See "Collaborative Spec Review" module for the full review workflow including re
 1. Check the implementation gate: if spec review is enabled, verify `spec.json` status is `approved` before proceeding. Update status to `implementing` and regenerate `index.json`.
 2. Execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions)
 3. For each task: set `In Progress` in tasks.md FIRST, then implement, then report progress
-4. Follow the design and maintain consistency
-5. Run tests according to configured testing strategy
-6. Commit changes based on `autoCommit` setting
+4. After completing each code-modifying task, update `implementation.md`:
+   - Design decision made (library choice, algorithm, approach) → append to Decision Log
+   - Deviated from `design.md` → append to Deviations table
+   - Blocker hit → already handled by Task State Machine blocker rules
+   - No notable decisions (mechanical/trivial task) → skip the update
+5. Follow the design and maintain consistency
+6. Run tests according to configured testing strategy
+7. Commit changes based on `autoCommit` setting
 
 **Phase 4: Complete**
 1. Verify all acceptance criteria are met
-2. Update spec with any deviations or learnings
+2. Finalize `implementation.md`:
+   - Populate the Summary section with a brief synthesis: total tasks completed, key decisions made, any deviations from design, and overall implementation health
+   - Remove any empty sections (tables with no rows) to keep it clean
 3. Set `spec.json` status to `completed` and regenerate `index.json`
 4. Create PR if `createPR` is true
 5. Summarize completed work
@@ -171,7 +179,7 @@ Create specs in this structure:
     requirements.md      (or bugfix.md for bugs, refactor.md for refactors)
     design.md
     tasks.md
-    implementation.md    (optional - track implementation notes)
+    implementation.md    (decision journal — always created)
     reviews.md           (optional - created during review cycle)
 ```
 
@@ -531,7 +539,8 @@ The default view. Provides an executive overview — answering "What is this spe
 2. Determine which requirement file exists: Use the Read tool to read for `requirements.md`, `bugfix.md`, or `refactor.md`
 3. Use the Read tool to read(`<specsDir>/<spec-name>/design.md`)
 4. Use the Read tool to read(`<specsDir>/<spec-name>/tasks.md`)
-5. Optionally Use the Read tool to read `implementation.md` and `reviews.md` if they exist
+5. Use the Read tool to read(`<specsDir>/<spec-name>/implementation.md`) for decision journal entries
+6. Optionally Use the Read tool to read `reviews.md` if it exists
 
 Present using this format:
 
@@ -549,11 +558,15 @@ Present using this format:
 
 ## Key Decisions
 
-[Bullet list of the Technical Decisions from design.md — just the decision titles and selected options, not the full rationale]
+[Bullet list of Technical Decisions from design.md — just the decision titles and selected options, not the full rationale. If implementation.md has Decision Log entries, append them after the design decisions under a "During Implementation" sub-heading.]
 
 - **Authentication approach**: OAuth 2.0 with PKCE flow
 - **Session storage**: Redis with 24h TTL
 - **API design**: RESTful with versioned endpoints
+
+**During Implementation:**
+- Used `express-rate-limit` instead of custom rate limiter (Task 7)
+- Chose `zod` for input validation over `express-validator` (Task 12)
 
 ## Progress
 
@@ -1507,28 +1520,28 @@ Detailed description of what needs to be done.
 - Pending: [R]
 ```
 
-### implementation.md (Optional)
+### implementation.md (Decision Journal)
 
 ```markdown
-# Implementation Notes: [Title]
+# Implementation Journal: [Title]
 
-## Decisions Made During Implementation
-| Decision | Rationale | Task |
-|----------|-----------|------|
-| [Decision 1] | [Why] | Task N |
+## Summary
+<!-- Populated at completion (Phase 4). Leave blank during implementation. -->
+
+## Decision Log
+| # | Decision | Rationale | Task | Timestamp |
+|---|----------|-----------|------|-----------|
 
 ## Deviations from Design
-| Planned | Actual | Reason |
-|---------|--------|--------|
-| [Original approach] | [What was done instead] | [Why] |
+| Planned | Actual | Reason | Task |
+|---------|--------|--------|------|
 
 ## Blockers Encountered
-| Blocker | Resolution | Impact |
-|---------|------------|--------|
-| [Blocker 1] | [How resolved] | [Tasks affected] |
+| Blocker | Resolution | Impact | Task |
+|---------|------------|--------|------|
 
-## Notes
-- [Any additional observations or learnings]
+## Session Log
+<!-- Each implementation session appends a brief entry here. -->
 ```
 
 ### reviews.md (Review Feedback)
@@ -1754,10 +1767,11 @@ A successful SpecOps workflow completion means:
 2. **Incremental changes**: Implement one task at a time
 3. **Test as you go**: Run tests after each significant change
 4. **Update tasks**: Mark tasks as completed in `tasks.md` as you finish them
-5. **Document deviations**: If implementation differs from design, note it
+5. **Document deviations**: If implementation differs from design, update the Deviations table in `implementation.md`
 6. **Maintain context**: Reference file:line_number for specific code locations
 7. **Security first**: Never introduce vulnerabilities
 8. **Keep it simple**: Follow the Simplicity Principle — implement the minimum needed to meet the spec
+9. **Maintain the decision journal**: After each code-modifying task, update `implementation.md` with any decisions or deviations (see Task State Machine: Implementation Journal Updates)
 
 
 ## Task State Machine
@@ -1822,6 +1836,20 @@ When a task is blocked:
 When unblocking:
 1. Update or clear the `**Blocker:**` line
 2. Set status back to `In Progress` (following write ordering)
+
+### Implementation Journal Updates
+
+After completing each code-modifying task (not documentation-only or config-only tasks), check whether any of these conditions apply:
+
+1. **Decision made**: A non-trivial choice was made during implementation (library selection, algorithm choice, approach when multiple options existed). Use the Edit tool to modify `implementation.md` — append a row to the "Decision Log" table with: sequential number, the decision, rationale, task number, and current date.
+
+2. **Deviation from design**: The implementation differs from what `design.md` specified. Use the Edit tool to modify `implementation.md` — append a row to the "Deviations from Design" table with: what was planned, what was actually done, the reason, and task number.
+
+3. **Blocker encountered**: Already handled by Blocker Handling above.
+
+If none of these conditions apply (the task was implemented exactly as designed with no notable choices), skip the journal update for that task. Do not add trivial entries.
+
+When resuming implementation in a new session, Use the Read tool to read `implementation.md` before starting work to recover context from previous sessions. The Session Log section records session boundaries — append a brief entry noting which task you are resuming from.
 
 ### Conformance Rules
 

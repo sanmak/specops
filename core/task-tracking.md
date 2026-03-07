@@ -61,6 +61,20 @@ When unblocking:
 1. Update or clear the `**Blocker:**` line
 2. Set status back to `In Progress` (following write ordering)
 
+### Implementation Journal Updates
+
+After completing each code-modifying task (not documentation-only or config-only tasks), check whether any of these conditions apply:
+
+1. **Decision made**: A non-trivial choice was made during implementation (library selection, algorithm choice, approach when multiple options existed). EDIT_FILE `implementation.md` — append a row to the "Decision Log" table with: sequential number, the decision, rationale, task number, and current date.
+
+2. **Deviation from design**: The implementation differs from what `design.md` specified. EDIT_FILE `implementation.md` — append a row to the "Deviations from Design" table with: what was planned, what was actually done, the reason, and task number.
+
+3. **Blocker encountered**: Already handled by Blocker Handling above.
+
+If none of these conditions apply (the task was implemented exactly as designed with no notable choices), skip the journal update for that task. Do not add trivial entries.
+
+When resuming implementation in a new session, READ_FILE `implementation.md` before starting work to recover context from previous sessions. The Session Log section records session boundaries — append a brief entry noting which task you are resuming from.
+
 ### Conformance Rules
 
 - **File-chat consistency**: reported status in chat must match what is persisted in `tasks.md`

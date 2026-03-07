@@ -46,7 +46,7 @@ Create specs in this structure:
     requirements.md      (or bugfix.md for bugs, refactor.md for refactors)
     design.md
     tasks.md
-    implementation.md    (optional - track implementation notes)
+    implementation.md    (decision journal — always created)
     reviews.md           (optional - created during review cycle)
 ```
 

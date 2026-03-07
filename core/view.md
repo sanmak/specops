@@ -97,7 +97,8 @@ The default view. Provides an executive overview — answering "What is this spe
 2. Determine which requirement file exists: READ_FILE for `requirements.md`, `bugfix.md`, or `refactor.md`
 3. READ_FILE(`<specsDir>/<spec-name>/design.md`)
 4. READ_FILE(`<specsDir>/<spec-name>/tasks.md`)
-5. Optionally READ_FILE `implementation.md` and `reviews.md` if they exist
+5. READ_FILE(`<specsDir>/<spec-name>/implementation.md`) for decision journal entries
+6. Optionally READ_FILE `reviews.md` if it exists
 
 Present using this format:
 
@@ -115,11 +116,15 @@ Present using this format:
 
 ## Key Decisions
 
-[Bullet list of the Technical Decisions from design.md — just the decision titles and selected options, not the full rationale]
+[Bullet list of Technical Decisions from design.md — just the decision titles and selected options, not the full rationale. If implementation.md has Decision Log entries, append them after the design decisions under a "During Implementation" sub-heading.]
 
 - **Authentication approach**: OAuth 2.0 with PKCE flow
 - **Session storage**: Redis with 24h TTL
 - **API design**: RESTful with versioned endpoints
+
+**During Implementation:**
+- Used `express-rate-limit` instead of custom rate limiter (Task 7)
+- Chose `zod` for input validation over `express-validator` (Task 12)
 
 ## Progress
 

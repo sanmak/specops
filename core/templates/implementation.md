@@ -1,19 +1,19 @@
-# Implementation Notes: [Title]
+# Implementation Journal: [Title]
 
-## Decisions Made During Implementation
-| Decision | Rationale | Task |
-|----------|-----------|------|
-| [Decision 1] | [Why] | Task N |
+## Summary
+<!-- Populated at completion (Phase 4). Leave blank during implementation. -->
+
+## Decision Log
+| # | Decision | Rationale | Task | Timestamp |
+|---|----------|-----------|------|-----------|
 
 ## Deviations from Design
-| Planned | Actual | Reason |
-|---------|--------|--------|
-| [Original approach] | [What was done instead] | [Why] |
+| Planned | Actual | Reason | Task |
+|---------|--------|--------|------|
 
 ## Blockers Encountered
-| Blocker | Resolution | Impact |
-|---------|------------|--------|
-| [Blocker 1] | [How resolved] | [Tasks affected] |
+| Blocker | Resolution | Impact | Task |
+|---------|------------|--------|------|
 
-## Notes
-- [Any additional observations or learnings]
+## Session Log
+<!-- Each implementation session appends a brief entry here. -->

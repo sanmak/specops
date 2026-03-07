@@ -43,7 +43,8 @@ A successful SpecOps workflow completion means:
 2. **Incremental changes**: Implement one task at a time
 3. **Test as you go**: Run tests after each significant change
 4. **Update tasks**: Mark tasks as completed in `tasks.md` as you finish them
-5. **Document deviations**: If implementation differs from design, note it
+5. **Document deviations**: If implementation differs from design, update the Deviations table in `implementation.md`
 6. **Maintain context**: Reference file:line_number for specific code locations
 7. **Security first**: Never introduce vulnerabilities
 8. **Keep it simple**: Follow the Simplicity Principle — implement the minimum needed to meet the spec
+9. **Maintain the decision journal**: After each code-modifying task, update `implementation.md` with any decisions or deviations (see Task State Machine: Implementation Journal Updates)

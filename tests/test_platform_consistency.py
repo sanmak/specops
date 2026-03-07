@@ -44,6 +44,7 @@ REQUIRED_MARKERS = {
         "Refactor: [Title]",
         "Design: [Title]",
         "Implementation Tasks: [Title]",
+        "Implementation Journal: [Title]",
     ],
     "verticals": [
         "### infrastructure",

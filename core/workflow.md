@@ -29,10 +29,11 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
 
 **Phase 2: Create Specification**
 1. Generate a structured spec directory in the configured `specsDir`
-2. Create three core files:
+2. Create four core files:
    - `requirements.md` (or `bugfix.md` for bugs, `refactor.md` for refactors) - User stories, acceptance criteria, bug analysis, or refactoring rationale
    - `design.md` - Technical architecture, sequence diagrams, implementation approach
    - `tasks.md` - Discrete, trackable implementation tasks with dependencies
+   - `implementation.md` - Living decision journal, updated during Phase 3. Created empty (template headers only) — populated incrementally as implementation decisions arise.
 3. Create `spec.json` with metadata (author from git config, type, status, version, created date). Set status to `draft`.
 4. Regenerate `<specsDir>/index.json` from all `*/spec.json` files.
 5. **First-spec README prompt**: If `index.json` contains exactly one spec entry (this is the project's first spec):
@@ -57,13 +58,20 @@ See "Collaborative Spec Review" module for the full review workflow including re
 1. Check the implementation gate: if spec review is enabled, verify `spec.json` status is `approved` before proceeding. Update status to `implementing` and regenerate `index.json`.
 2. Execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions)
 3. For each task: set `In Progress` in tasks.md FIRST, then implement, then report progress
-4. Follow the design and maintain consistency
-5. Run tests according to configured testing strategy
-6. Commit changes based on `autoCommit` setting
+4. After completing each code-modifying task, update `implementation.md`:
+   - Design decision made (library choice, algorithm, approach) → append to Decision Log
+   - Deviated from `design.md` → append to Deviations table
+   - Blocker hit → already handled by Task State Machine blocker rules
+   - No notable decisions (mechanical/trivial task) → skip the update
+5. Follow the design and maintain consistency
+6. Run tests according to configured testing strategy
+7. Commit changes based on `autoCommit` setting
 
 **Phase 4: Complete**
 1. Verify all acceptance criteria are met
-2. Update spec with any deviations or learnings
+2. Finalize `implementation.md`:
+   - Populate the Summary section with a brief synthesis: total tasks completed, key decisions made, any deviations from design, and overall implementation health
+   - Remove any empty sections (tables with no rows) to keep it clean
 3. Set `spec.json` status to `completed` and regenerate `index.json`
 4. Create PR if `createPR` is true
 5. Summarize completed work

@@ -98,7 +98,7 @@ def render_templates_section(templates):
         ("refactor", "refactor.md (Refactor)"),
         ("design", "design.md"),
         ("tasks", "tasks.md"),
-        ("implementation", "implementation.md (Optional)"),
+        ("implementation", "implementation.md (Decision Journal)"),
         ("reviews", "reviews.md (Review Feedback)"),
     ]
 
