@@ -64,6 +64,10 @@ Project-local Claude Code commands in `.claude/commands/` for git workflow autom
 
 These commands enforce project conventions automatically: conventional commit prefixes (`feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`), sensitive file exclusion, automatic regeneration of platform outputs and checksums when source files change, and pre-commit/pre-push hook compliance (never bypasses hooks).
 
+## Dogfooding
+
+This project uses SpecOps to build itself. Specs live in `.specops/` and are committed publicly. The dogfood plan is in `internal/dogfood-playbook.md` with friction observations in `internal/dogfood-friction.md`. Project config is in `.specops.json` (builder vertical).
+
 ## Simplicity Principle
 
 SpecOps embeds a simplicity principle throughout: prefer the simplest solution that meets requirements. Specs scale to the task (small features don't get full rollout plans), empty sections are skipped rather than filled with boilerplate, and implementations avoid premature abstractions. Red flags: abstractions used once, error handling for impossible scenarios, configuration for unchanging values, designing for hypothetical futures.
@@ -125,7 +129,7 @@ Plugin manifests (`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json
 
 - **Never edit generated platform output files directly** (`SKILL.md`, `specops.mdc`, `specops.instructions.md`). Edit `core/` modules or `generator/templates/*.j2` instead, then regenerate with `python3 generator/generate.py --all`.
 - **`core/` must remain platform-agnostic** — use abstract operations from `core/tool-abstraction.md` (e.g., `READ_FILE`, `WRITE_FILE`), never platform-specific tool names.
-- **Preserve the 4-phase workflow structure** in `core/workflow.md`: Understand → Spec → Implement → Complete.
+- **Preserve the 4-phase workflow structure** in `core/workflow.md`: Understand → Spec → Implement → Complete. Phase 1 includes context recovery (resume incomplete specs). Phase 2 uses EARS notation for acceptance criteria. Phase 4 includes docs check and checkbox verification.
 - **Preserve the Simplicity Principle** in `core/simplicity.md` and all safety mechanisms in `core/safety.md`.
 - **`schema.json`** is the single source of truth for `.specops.json` configuration validation. Run `python3 tests/check_schema_sync.py` to verify it is well-formed.
 - **All JSON schema objects** must use `"additionalProperties": false`, strings must have `maxLength`, arrays must have `maxItems`.
@@ -174,11 +178,11 @@ CI verifies generated files aren't stale — after regenerating, the diff of `pl
 - **Init mode** — init config templates and workflow markers present within Claude `SKILL.md`
 - **Update markers present** — update mode detection, version detection, update workflow
 - **Interview markers present** — interview mode, trigger conditions, question flow
-- **Task tracking markers present** — task state machine, write ordering protocol
+- **Task tracking markers present** — task state machine, write ordering protocol, acceptance criteria verification
 
 ## Configuration
 
-The SpecOps agent reads `.specops.json` from the target project (not this repo). Configuration is validated against `schema.json`. Example configs live in `examples/` (`.specops.json`, `.specops.minimal.json`, `.specops.full.json`).
+The SpecOps agent reads `.specops.json` from the target project. This repo also has its own `.specops.json` (builder vertical, for dogfooding). Configuration is validated against `schema.json`. Example configs live in `examples/` (`.specops.json`, `.specops.minimal.json`, `.specops.full.json`).
 
 ## Adding a New Platform
 

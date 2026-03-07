@@ -10,10 +10,20 @@ Brief description of the feature and its purpose.
 **I want** [capability]
 **So that** [benefit]
 
-**Acceptance Criteria:**
-- [ ] Criterion 1
-- [ ] Criterion 2
-- [ ] Criterion 3
+**Acceptance Criteria (EARS):**
+<!-- Use the EARS pattern that best fits each criterion:
+  Ubiquitous:     THE SYSTEM SHALL [behavior]
+  Event-Driven:   WHEN [event] THE SYSTEM SHALL [behavior]
+  State-Driven:   WHILE [state] THE SYSTEM SHALL [behavior]
+  Optional:       WHERE [feature is enabled] THE SYSTEM SHALL [behavior]
+  Unwanted:       IF [unwanted condition] THEN THE SYSTEM SHALL [response]
+-->
+- WHEN [condition/event] THE SYSTEM SHALL [expected behavior]
+- WHEN [condition/event] THE SYSTEM SHALL [expected behavior]
+
+**Progress Checklist:**
+- [ ] [derived from EARS criterion 1]
+- [ ] [derived from EARS criterion 2]
 
 ### Story 2: [Title]
 ...

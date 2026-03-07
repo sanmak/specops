@@ -44,13 +44,9 @@
         "name": {
           "type": "string",
           "maxLength": 100
-        },
-        "email": {
-          "type": "string",
-          "maxLength": 200
         }
       },
-      "required": ["name", "email"],
+      "required": ["name"],
       "additionalProperties": false
     },
     "reviewers": {
@@ -63,10 +59,6 @@
           "name": {
             "type": "string",
             "maxLength": 100
-          },
-          "email": {
-            "type": "string",
-            "maxLength": 200
           },
           "status": {
             "type": "string",
@@ -88,7 +80,7 @@
             "description": "True when the reviewer is also the spec author (self-review)"
           }
         },
-        "required": ["name", "email", "status"],
+        "required": ["name", "status"],
         "additionalProperties": false
       }
     },
@@ -116,8 +108,8 @@
     },
     "requiredApprovals": {
       "type": "integer",
-      "minimum": 1,
-      "description": "Number of approvals needed (copied from config at creation time)"
+      "minimum": 0,
+      "description": "Number of approvals needed. Set to 0 when review is disabled, otherwise copied from config at creation time."
     }
   },
   "required": ["id", "type", "status", "version", "created", "updated", "author"],

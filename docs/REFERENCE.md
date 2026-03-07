@@ -157,10 +157,17 @@ list
 **I want** [capability]
 **So that** [benefit]
 
-**Acceptance Criteria:**
-- [ ] Criterion 1
-- [ ] Criterion 2
+**Acceptance Criteria (EARS):**
+<!-- EARS patterns: Ubiquitous, Event-Driven, State-Driven, Optional, Unwanted -->
+- WHEN [condition/event] THE SYSTEM SHALL [expected behavior]
+- WHEN [condition/event] THE SYSTEM SHALL [expected behavior]
+
+**Progress Checklist:**
+- [ ] [derived from EARS criterion 1]
+- [ ] [derived from EARS criterion 2]
 ```
+
+> **EARS Notation:** Acceptance criteria use [EARS (Easy Approach to Requirements Syntax)](https://en.wikipedia.org/wiki/EARS_(software_engineering)) for precision and testability. Five patterns: **Ubiquitous** (`THE SYSTEM SHALL`), **Event-Driven** (`WHEN ... THE SYSTEM SHALL`), **State-Driven** (`WHILE ... THE SYSTEM SHALL`), **Optional** (`WHERE ... THE SYSTEM SHALL`), **Unwanted** (`IF ... THEN THE SYSTEM SHALL`). Checkboxes are an optional progress checklist derived from EARS statements.
 
 ### design.md
 ```markdown

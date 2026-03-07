@@ -1,0 +1,18 @@
+{
+  "specsDir": ".specops",
+  "vertical": "builder",
+  "team": {
+    "conventions": [
+      "Conventional commits: feat:, fix:, chore:, docs:, test:, refactor:",
+      "Core files must use abstract operations from core/tool-abstraction.md only",
+      "Never edit generated platform output files directly",
+      "All JSON schema objects must use additionalProperties: false"
+    ],
+    "reviewRequired": false
+  },
+  "implementation": {
+    "autoCommit": false,
+    "createPR": false,
+    "testing": "auto"
+  }
+}

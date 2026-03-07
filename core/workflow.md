@@ -6,13 +6,18 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
 
 **Phase 1: Understand Context**
 1. Read `.specops.json` config if it exists, use defaults otherwise
-2. **Pre-flight check**: Verify SpecOps skill availability for team collaboration:
+2. **Context recovery**: Check for prior work that may inform this session:
+   - If FILE_EXISTS(`<specsDir>/index.json`), READ_FILE it
+   - If any specs have status `implementing` or `in-review`, NOTIFY_USER: "Found incomplete spec: <name> (status: <status>). Continue working on it?"
+   - If continuing an existing spec, READ_FILE the spec's `implementation.md` to recover session context (decision log, deviations, blockers, session log), then resume from the appropriate phase
+   - If starting fresh, proceed normally
+3. **Pre-flight check**: Verify SpecOps skill availability for team collaboration:
    - READ_FILE `.gitignore` if it exists
    - If `.gitignore` contains patterns matching `.claude/` or `.claude/*`, NOTIFY_USER with warning:
      > "⚠️ `.claude/` is excluded by your `.gitignore`. SpecOps spec files will still be created in `<specsDir>/` and tracked normally, but the SpecOps skill itself (`SKILL.md`) won't be visible to other contributors. To fix: (1) use user-level installation (`~/.claude/skills/specops/`), or (2) add `!.claude/skills/` to your `.gitignore` to selectively un-ignore just the skills directory."
    - If no `.gitignore` exists or doesn't conflict, continue normally
-3. Analyze the user's request to determine type (feature, bugfix, refactor)
-4. Determine the project vertical:
+4. Analyze the user's request to determine type (feature, bugfix, refactor)
+5. Determine the project vertical:
    - If `config.vertical` is set, use it directly
    - If not set, infer from request keywords and codebase:
      - **infrastructure**: terraform, ansible, kubernetes, docker, CI/CD, pipeline, deploy, provision, networking, IAM, cloud, AWS, GCP, Azure, helm, CDK
@@ -24,16 +29,28 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
      - **fullstack**: request spans both frontend and backend concerns
    - Default to `fullstack` if unclear
    - Display the detected vertical in configuration summary
-5. Explore codebase to understand existing patterns and architecture
-6. Identify affected components and dependencies
+6. Explore codebase to understand existing patterns and architecture
+7. Identify affected components and dependencies
 
 **Phase 2: Create Specification**
 1. Generate a structured spec directory in the configured `specsDir`
 2. Create four core files:
-   - `requirements.md` (or `bugfix.md` for bugs, `refactor.md` for refactors) - User stories, acceptance criteria, bug analysis, or refactoring rationale
+   - `requirements.md` (or `bugfix.md` for bugs, `refactor.md` for refactors) - User stories with EARS acceptance criteria, bug analysis, or refactoring rationale
    - `design.md` - Technical architecture, sequence diagrams, implementation approach
    - `tasks.md` - Discrete, trackable implementation tasks with dependencies
    - `implementation.md` - Living decision journal, updated during Phase 3. Created empty (template headers only) — populated incrementally as implementation decisions arise.
+
+   **EARS Notation for Acceptance Criteria:**
+   Write acceptance criteria using EARS (Easy Approach to Requirements Syntax) for precision and testability. Select the pattern that best fits each criterion:
+   - **Ubiquitous** (always true): `THE SYSTEM SHALL [behavior]`
+   - **Event-Driven** (triggered by event): `WHEN [event] THE SYSTEM SHALL [behavior]`
+   - **State-Driven** (while condition holds): `WHILE [state] THE SYSTEM SHALL [behavior]`
+   - **Optional Feature** (when enabled): `WHERE [feature is enabled] THE SYSTEM SHALL [behavior]`
+   - **Unwanted Behavior** (error/edge case): `IF [unwanted condition] THEN THE SYSTEM SHALL [response]`
+
+   Keep EARS proportional to scope — 2-3 statements for small features, more for complex ones.
+
+   **For bugfix specs:** Add an "Unchanged Behavior" section using `WHEN [condition] THE SYSTEM SHALL CONTINUE TO [existing behavior]` to prevent regressions. Structure the Testing Plan into three categories: Current Behavior (verify bug exists), Expected Behavior (verify fix works), Unchanged Behavior (verify no regressions). If the fix reveals the need for broader changes, create a separate Feature Spec.
 3. Create `spec.json` with metadata (author from git config, type, status, version, created date). Set status to `draft`.
 4. Regenerate `<specsDir>/index.json` from all `*/spec.json` files.
 5. **First-spec README prompt**: If `index.json` contains exactly one spec entry (this is the project's first spec):
@@ -68,13 +85,23 @@ See "Collaborative Spec Review" module for the full review workflow including re
 7. Commit changes based on `autoCommit` setting
 
 **Phase 4: Complete**
-1. Verify all acceptance criteria are met
+1. Verify all acceptance criteria are met:
+   - READ_FILE `requirements.md` (or `bugfix.md`/`refactor.md`)
+   - Find the **Acceptance Criteria** section (in feature specs this may be the **Progress Checklist** under each story; in bugfix/refactor specs this is the dedicated **Acceptance Criteria** section)
+   - For each criterion the implementation satisfies, check it off: `- [ ]` → `- [x]`
+   - If a criterion was intentionally deferred (out of scope for this spec), move it to a **Deferred Criteria** subsection with a reason annotation: `- criterion text *(deferred — reason)*`
+   - Any criterion that remains unchecked in the main acceptance criteria list (not in Deferred) means the spec is NOT complete — return to Phase 3 to address it
 2. Finalize `implementation.md`:
    - Populate the Summary section with a brief synthesis: total tasks completed, key decisions made, any deviations from design, and overall implementation health
    - Remove any empty sections (tables with no rows) to keep it clean
-3. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp, and regenerate `index.json`
-4. Create PR if `createPR` is true
-5. Summarize completed work
+3. **Documentation check**: Identify project documentation that may need updating based on files modified during implementation:
+   - Scan for documentation files (README.md, CLAUDE.md, and files in a docs/ directory if one exists)
+   - For each doc file, check if it references components, features, or configurations that were modified during this spec
+   - If stale documentation is detected, update the affected sections
+   - If unsure whether a doc needs updating, flag it to the user rather than skipping silently
+4. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp, and regenerate `index.json`
+5. Create PR if `createPR` is true
+6. Summarize completed work
 
 ## Autonomous Behavior Guidelines
 
