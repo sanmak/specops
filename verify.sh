@@ -87,7 +87,6 @@ check_file "generator/templates/claude.j2"
 check_file "generator/templates/cursor.j2"
 check_file "generator/templates/codex.j2"
 check_file "generator/templates/copilot.j2"
-check_file "generator/templates/claude-init.j2"
 echo ""
 
 # Check platform adapters
