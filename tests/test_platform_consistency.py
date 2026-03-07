@@ -29,6 +29,7 @@ REQUIRED_MARKERS = {
         "Phase 2: Create Specification",
         "Phase 3: Implement",
         "Phase 4: Complete",
+        "Version Display",
     ],
     "safety": [
         "Convention Sanitization",
@@ -80,6 +81,13 @@ REQUIRED_MARKERS = {
         "View: Full",
         "View: Walkthrough",
         "View: Status",
+    ],
+    "update": [
+        "Update Mode",
+        "Update Mode Detection",
+        "Detect Current Version",
+        "Check Latest Available Version",
+        "Detect Installation Method",
     ],
 }
 

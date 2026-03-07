@@ -55,7 +55,7 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
 See "Collaborative Spec Review" module for the full review workflow including review mode, revision mode, and approval tracking.
 
 **Phase 3: Implement**
-1. Check the implementation gate: if spec review is enabled, verify `spec.json` status is `approved` before proceeding. Update status to `implementing` and regenerate `index.json`.
+1. Check the implementation gate: if spec review is enabled, verify `spec.json` status is `approved` before proceeding. Update status to `implementing`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp, and regenerate `index.json`.
 2. Execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions)
 3. For each task: set `In Progress` in tasks.md FIRST, then implement, then report progress
 4. After completing each code-modifying task, update `implementation.md`:
@@ -72,7 +72,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
 2. Finalize `implementation.md`:
    - Populate the Summary section with a brief synthesis: total tasks completed, key decisions made, any deviations from design, and overall implementation health
    - Remove any empty sections (tables with no rows) to keep it clean
-3. Set `spec.json` status to `completed` and regenerate `index.json`
+3. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp, and regenerate `index.json`
 4. Create PR if `createPR` is true
 5. Summarize completed work
 
@@ -109,16 +109,55 @@ Even in high autonomy mode, ask for clarification when:
 When invoked:
 1. Greet the user briefly
 2. Check if the request is an **init** command (see "Init Mode" module). Patterns: "init", "initialize", "setup", "configure", "create config". If so, follow the init workflow instead of the standard phases below.
-3. Check if the request is a **view** or **list** command (see "Spec Viewing" module). If so, follow the view/list workflow instead of the standard phases below.
-4. Check if interview mode is triggered (see "Interview Mode" module):
+3. Check if the request is a **version** command. Patterns: "version", "--version", "-v". If so, follow the "Version Display" section below and stop.
+4. Check if the request is an **update** command (see "Update Mode" module). Patterns: "update", "upgrade", "check for updates", "get latest version", "get latest". If so, follow the update workflow instead of the standard phases below.
+5. Check if the request is a **view** or **list** command (see "Spec Viewing" module). If so, follow the view/list workflow instead of the standard phases below.
+6. Check if interview mode is triggered (see "Interview Mode" module):
    - Explicit: request contains "interview" keyword
    - Auto (interactive platforms only): request is vague (≤5 words, no technical keywords, no action verb)
    - If triggered: follow the Interview Mode workflow, then continue with the enriched context
-5. Confirm the request type (feature/bugfix/implement/other)
-6. Show the configuration you'll use (including detected vertical)
-7. Begin the workflow immediately (high autonomy)
-8. Provide progress updates as you work
-9. Summarize completion clearly
+7. Confirm the request type (feature/bugfix/implement/other)
+8. Show the configuration you'll use (including detected vertical)
+9. Begin the workflow immediately (high autonomy)
+10. Provide progress updates as you work
+11. Summarize completion clearly
+
+## Version Display
+
+When the user requests the version (`/specops version`, `/specops --version`, `/specops -v`, or equivalent on non-Claude platforms):
+
+1. Read this instruction file's own YAML frontmatter to extract the `version:` field value. This is the installed SpecOps version.
+2. Display the version information:
+
+   ```
+   SpecOps v{version}
+
+   Latest releases: https://github.com/sanmak/specops/releases
+   ```
+
+3. If FILE_EXISTS(`.specops.json`), READ_FILE(`.specops.json`) and check for `_installedVersion` and `_installedAt` fields. If present, display:
+
+   ```
+   Installed version: {_installedVersion}
+   Installed at: {_installedAt}
+   ```
+
+4. **Spec audit summary**: If a specs directory exists (from config `specsDir` or default `.specops`):
+   - LIST_DIR(`<specsDir>`) to find all spec directories
+   - For each directory, READ_FILE(`<specsDir>/<dir>/spec.json`) if it exists
+   - Collect the `specopsCreatedWith` field from each spec (skip specs without this field)
+   - Group specs by `specopsCreatedWith` version and display a summary:
+
+     ```
+     Specs by SpecOps version:
+       v1.1.0: 3 specs
+       v1.2.0: 5 specs
+       Unknown: 2 specs (created before version tracking)
+     ```
+
+   - If no specs directory exists or no specs are found, skip this section.
+
+5. Do not **automatically** make network calls to check for newer versions. The releases URL is sufficient for users to check manually. (User-initiated update checks via `/specops update` are permitted — see "Update Mode" module.)
 
 ---
 

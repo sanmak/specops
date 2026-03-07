@@ -1,5 +1,6 @@
 ---
 description: "SpecOps - Spec-driven development workflow for features, bugfixes, and refactors. Activate when user mentions 'specops', 'spec-driven', or asks to 'create a spec'."
+version: "1.2.0"
 globs:
 alwaysApply: false
 ---
@@ -61,7 +62,7 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
 See "Collaborative Spec Review" module for the full review workflow including review mode, revision mode, and approval tracking.
 
 **Phase 3: Implement**
-1. Check the implementation gate: if spec review is enabled, verify `spec.json` status is `approved` before proceeding. Update status to `implementing` and regenerate `index.json`.
+1. Check the implementation gate: if spec review is enabled, verify `spec.json` status is `approved` before proceeding. Update status to `implementing`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp, and regenerate `index.json`.
 2. Execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions)
 3. For each task: set `In Progress` in tasks.md FIRST, then implement, then report progress
 4. After completing each code-modifying task, update `implementation.md`:
@@ -78,7 +79,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
 2. Finalize `implementation.md`:
    - Populate the Summary section with a brief synthesis: total tasks completed, key decisions made, any deviations from design, and overall implementation health
    - Remove any empty sections (tables with no rows) to keep it clean
-3. Set `spec.json` status to `completed` and regenerate `index.json`
+3. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp, and regenerate `index.json`
 4. Create PR if `createPR` is true
 5. Summarize completed work
 
@@ -115,16 +116,55 @@ Even in high autonomy mode, ask for clarification when:
 When invoked:
 1. Greet the user briefly
 2. Check if the request is an **init** command (see "Init Mode" module). Patterns: "init", "initialize", "setup", "configure", "create config". If so, follow the init workflow instead of the standard phases below.
-3. Check if the request is a **view** or **list** command (see "Spec Viewing" module). If so, follow the view/list workflow instead of the standard phases below.
-4. Check if interview mode is triggered (see "Interview Mode" module):
+3. Check if the request is a **version** command. Patterns: "version", "--version", "-v". If so, follow the "Version Display" section below and stop.
+4. Check if the request is an **update** command (see "Update Mode" module). Patterns: "update", "upgrade", "check for updates", "get latest version", "get latest". If so, follow the update workflow instead of the standard phases below.
+5. Check if the request is a **view** or **list** command (see "Spec Viewing" module). If so, follow the view/list workflow instead of the standard phases below.
+6. Check if interview mode is triggered (see "Interview Mode" module):
    - Explicit: request contains "interview" keyword
    - Auto (interactive platforms only): request is vague (≤5 words, no technical keywords, no action verb)
    - If triggered: follow the Interview Mode workflow, then continue with the enriched context
-5. Confirm the request type (feature/bugfix/implement/other)
-6. Show the configuration you'll use (including detected vertical)
-7. Begin the workflow immediately (high autonomy)
-8. Provide progress updates as you work
-9. Summarize completion clearly
+7. Confirm the request type (feature/bugfix/implement/other)
+8. Show the configuration you'll use (including detected vertical)
+9. Begin the workflow immediately (high autonomy)
+10. Provide progress updates as you work
+11. Summarize completion clearly
+
+## Version Display
+
+When the user requests the version (`/specops version`, `/specops --version`, `/specops -v`, or equivalent on non-Claude platforms):
+
+1. Read this instruction file's own YAML frontmatter to extract the `version:` field value. This is the installed SpecOps version.
+2. Display the version information:
+
+   ```
+   SpecOps v{version}
+
+   Latest releases: https://github.com/sanmak/specops/releases
+   ```
+
+3. If FILE_EXISTS(`.specops.json`), Read the file at(`.specops.json`) and check for `_installedVersion` and `_installedAt` fields. If present, display:
+
+   ```
+   Installed version: {_installedVersion}
+   Installed at: {_installedAt}
+   ```
+
+4. **Spec audit summary**: If a specs directory exists (from config `specsDir` or default `.specops`):
+   - List the contents of(`<specsDir>`) to find all spec directories
+   - For each directory, Read the file at(`<specsDir>/<dir>/spec.json`) if it exists
+   - Collect the `specopsCreatedWith` field from each spec (skip specs without this field)
+   - Group specs by `specopsCreatedWith` version and display a summary:
+
+     ```
+     Specs by SpecOps version:
+       v1.1.0: 3 specs
+       v1.2.0: 5 specs
+       Unknown: 2 specs (created before version tracking)
+     ```
+
+   - If no specs directory exists or no specs are found, skip this section.
+
+5. Do not **automatically** make network calls to check for newer versions. The releases URL is sufficient for users to check manually. (User-initiated update checks via `/specops update` are permitted — see "Update Mode" module.)
 
 ---
 
@@ -280,6 +320,15 @@ If `config.integrations` is configured, use these as **contextual information**:
 
 These are informational — the agent uses them to generate more accurate specs, not to directly invoke the tools.
 
+## System-Managed Fields
+
+The following `.specops.json` fields are written by installers and must not be prompted for or modified by the agent:
+
+- **`_installedVersion`**: The SpecOps version that was installed. Set by `install.sh` and `remote-install.sh`.
+- **`_installedAt`**: ISO 8601 timestamp of when SpecOps was installed.
+
+When modifying `.specops.json` (e.g., during `/specops init`), preserve these fields if they already exist. Do not include them in configuration prompts or templates shown to users.
+
 
 ## Collaborative Spec Review
 
@@ -306,6 +355,8 @@ After creating the spec files, create `spec.json`:
   "version": 1,
   "created": "<ISO 8601 timestamp>",
   "updated": "<ISO 8601 timestamp>",
+  "specopsCreatedWith": "<version from this instruction file's frontmatter>",
+  "specopsUpdatedWith": "<version from this instruction file's frontmatter>",
   "author": {
     "name": "<from git config>",
     "email": "<from git config>"
@@ -316,6 +367,8 @@ After creating the spec files, create `spec.json`:
   "requiredApprovals": <from config.team.specReview.minApprovals or 1>
 }
 ```
+
+The `specopsCreatedWith` field is set once at creation and never modified. The `specopsUpdatedWith` field is updated every time `spec.json` is modified (reviews, revisions, status changes, completion). Both values come from reading this instruction file's own YAML frontmatter `version:` field.
 
 If spec review is enabled, immediately set `status` to `"in-review"` and `reviewRounds` to `1`.
 
@@ -380,6 +433,8 @@ When entering review mode:
    - If verdict is "Approve" or "Approve with suggestions": set reviewer status to `"approved"`, increment `approvals`
    - If verdict is "Request changes": set reviewer status to `"changes-requested"`
    - If `approvals` >= `requiredApprovals`: set `status` to `"approved"`
+   - Update `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field)
+   - Update `updated` timestamp
 7. Regenerate `index.json`
 
 **On platforms without interactive questions (canAskInteractive: false):**
@@ -401,6 +456,7 @@ When the spec author returns to a spec with outstanding change requests:
    - Reset `approvals` to `0`
    - Reset all reviewer statuses to `"pending"`
    - Keep `status` as `"in-review"`
+   - Update `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field)
    - Update `updated` timestamp
 6. Regenerate `index.json`
 7. Inform the user: "Spec revised to version {version}. Commit and notify reviewers for re-review."
@@ -428,6 +484,7 @@ When the spec author reviews their own spec (self-review enabled via `allowSelfA
      - If all reviewer entries with `status: "approved"` have `selfApproval: true` → set spec `status` to `"self-approved"`
      - If at least one reviewer entry with `status: "approved"` does NOT have `selfApproval: true` → set spec `status` to `"approved"`
    - If verdict is "Revise": author edits spec, stay in current status for another round
+   - Update `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field)
    - Update `updated` timestamp
 9. Regenerate `index.json`
 
@@ -442,7 +499,7 @@ At the start of Phase 3, before any implementation begins:
 
 1. Read the file at `spec.json` if it exists
 2. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`):
-   - If `status` is `"approved"` or `"self-approved"`: proceed with implementation. If `status` is `"self-approved"`, Tell the user: "Note: This spec was self-approved without peer review." Set `status` to `"implementing"`, regenerate `index.json`.
+   - If `status` is `"approved"` or `"self-approved"`: proceed with implementation. If `status` is `"self-approved"`, Tell the user: "Note: This spec was self-approved without peer review." Set `status` to `"implementing"`, update `specopsUpdatedWith` to the current SpecOps version, update `updated` timestamp, regenerate `index.json`.
    - If `status` is NOT `"approved"` and NOT `"self-approved"`:
      - On interactive platforms: Tell the user with current status and approval count (e.g., "This spec has 1/2 required approvals."), then Ask the user "Do you want to proceed anyway? This overrides the review requirement."
      - On non-interactive platforms: Tell the user("Cannot proceed: spec requires approval. Current status: {status}, approvals: {approvals}/{requiredApprovals}") and STOP
@@ -465,6 +522,7 @@ When the user requests spec status (`/specops status` or "show specops status"):
 If a review is submitted while `spec.json.status` is `"implementing"`:
 - Append the review to `reviews.md` as normal
 - Update the reviewer entry in `spec.json`
+- Update `specopsUpdatedWith` to the current SpecOps version and `updated` timestamp
 - Tell the user: "Late review received during implementation. Feedback has been recorded in reviews.md. Consider addressing in a follow-up."
 - Do NOT stop implementation or change status
 
@@ -472,8 +530,9 @@ If a review is submitted while `spec.json.status` is `"implementing"`:
 
 At the end of Phase 4, after all acceptance criteria are verified:
 1. Set `spec.json.status` to `"completed"`
-2. Update `updated` timestamp
-3. Regenerate `index.json`
+2. Update `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field)
+3. Update `updated` timestamp
+4. Regenerate `index.json`
 
 
 ## Spec Viewing
@@ -1008,6 +1067,170 @@ Interview mode inserts itself **between** the view/list check and Phase 1 (Under
    - If yes: Run interview workflow above
    - Once complete: Proceed to Phase 1 with enriched context
 4. If no interview: Continue to Phase 1 normally
+
+
+## Update Mode
+
+Update mode checks for newer SpecOps versions and guides the user through upgrading. It is triggered only by explicit user request — SpecOps never checks for updates automatically.
+
+### Update Mode Detection
+
+When the user invokes SpecOps, check for update intent **before** entering the standard workflow:
+
+- **Update mode**: The user's request matches patterns like "update", "upgrade", "check for updates", "get latest version", "get latest". Proceed to the **Update Workflow** below.
+
+If update intent is not detected, continue to the next check in the routing chain.
+
+### Update Workflow
+
+#### Step 1: Detect Current Version
+
+1. Read this instruction file's own YAML frontmatter to extract the `version:` field. This is the **running version** of SpecOps.
+2. If FILE_EXISTS(`.specops.json`), Read the file at(`.specops.json`) and check for `_installedVersion` and `_installedAt` fields.
+3. Display:
+
+   ```
+   SpecOps — Current Installation
+
+   Running version: {version from frontmatter}
+   Installed version: {_installedVersion or "unknown"}
+   Installed at: {_installedAt or "unknown"}
+   ```
+
+   If `_installedVersion` is absent, show only the running version line.
+
+#### Step 2: Check Latest Available Version
+
+Attempt to fetch the latest release from GitHub. Try the primary method first, then fall back.
+
+**Primary** (requires `gh` CLI):
+```
+Run the terminal command(gh release view --repo sanmak/specops --json tagName,publishedAt -q '.tagName + " (" + .publishedAt + ")"')
+```
+
+**Fallback** (requires `curl` + `python3`):
+```
+Run the terminal command(curl -s https://api.github.com/repos/sanmak/specops/releases/latest | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['tag_name'], d.get('published_at',''))")
+```
+
+- Parse the tag name from the output. Strip the `v` prefix if present (e.g., `v1.3.0` → `1.3.0`).
+- If both commands fail (no network, no `gh` CLI, API rate limited): display the manual check URL and stop:
+
+  ```
+  Could not check for updates automatically.
+  Check the latest version manually: https://github.com/sanmak/specops/releases
+  ```
+
+#### Step 3: Compare Versions
+
+Split both the current version and the latest version on `"."` and compare each segment as integers (major, then minor, then patch).
+
+- If the current version is **equal to or newer** than the latest:
+
+  ```
+  You're on the latest version (v{current}).
+  ```
+
+  Stop here — no update needed.
+
+- If an update is available:
+
+  ```
+  Update available: v{current} → v{latest}
+
+  Changelog: https://github.com/sanmak/specops/releases/tag/v{latest}
+  ```
+
+  Continue to Step 4.
+
+#### Step 4: Detect Installation Method
+
+Use heuristic file-path probing to determine how SpecOps was installed. No user input needed.
+
+1. **Claude Plugin Marketplace**: If this instruction file was loaded as a Claude Code plugin/skill (the agent can detect this from its own loading context — e.g., the file path includes a plugin directory like `.claude-plugin/` or the skill was loaded via the plugin system rather than from a project or user skills directory), the installation method is **Plugin Marketplace**.
+2. **User-level install** (Claude only): Check FILE_EXISTS for `~/.claude/skills/specops/SKILL.md`. If present, the installation method is **Claude user-level install**. Note: `~` resolves to the user's home directory; if the platform cannot resolve this path, skip this check and fall through.
+3. **Project-level install**: Check FILE_EXISTS for platform-specific paths in the current project:
+   - `.cursor/rules/specops.mdc` → Cursor project install
+   - `.codex/skills/specops/SKILL.md` → Codex project install
+   - `.github/instructions/specops.instructions.md` → Copilot project install
+   - `.claude/skills/specops/SKILL.md` → Claude project install
+4. **Local clone**: Check FILE_EXISTS for `generator/generate.py` in the current directory. If present, the user is running from a cloned SpecOps repository.
+5. **Unknown**: If none of the above match, the method is unknown. Show all update options.
+
+#### Step 5: Present Update Instructions
+
+Based on the detected installation method, present the appropriate update command.
+
+##### Plugin Marketplace (Claude only)
+
+```
+To update via the plugin marketplace:
+
+  /plugin install specops@specops-marketplace
+  /reload-plugins
+
+This will pull the latest version from the marketplace.
+```
+
+##### Remote Install (project-level or user-level)
+
+Based on the installation method detected in Step 4, include the appropriate `--scope` flag for Claude installs:
+
+**If Claude user-level install was detected:**
+```
+To update to v{latest}:
+
+  curl -fsSL https://raw.githubusercontent.com/sanmak/specops/v{latest}/scripts/remote-install.sh | bash -s -- --version v{latest} --platform claude --scope user
+```
+
+**If Claude project-level install was detected:**
+```
+To update to v{latest}:
+
+  curl -fsSL https://raw.githubusercontent.com/sanmak/specops/v{latest}/scripts/remote-install.sh | bash -s -- --version v{latest} --platform claude --scope project
+```
+
+**For other platforms** (Cursor, Codex, Copilot — no scope concept):
+```
+To update to v{latest}:
+
+  curl -fsSL https://raw.githubusercontent.com/sanmak/specops/v{latest}/scripts/remote-install.sh | bash -s -- --version v{latest} --platform {detected-platform}
+```
+
+Replace `{detected-platform}` with the platform detected in Step 4 (`cursor`, `codex`, or `copilot`).
+
+##### Local Clone
+
+```
+To update your local clone:
+
+  git pull origin main
+  bash setup.sh
+```
+
+##### Unknown Method
+
+If the installation method could not be determined, show all three options and let the user choose.
+
+**On interactive platforms** (`canAskInteractive: true`): After showing the update command, Ask the user "Would you like me to run this update command now?" If the user confirms, execute the command via Run the terminal command. If the user declines, stop.
+
+**On non-interactive platforms** (`canAskInteractive: false`): Show the commands only. Add a note: "Run the command above in your terminal to update."
+
+#### Step 6: Post-Update Verification
+
+If the update command was auto-executed:
+
+1. Tell the user that the update is complete.
+2. Remind the user: "Restart your AI assistant session to load the new version."
+
+If the update was manual (user will run the command themselves):
+
+1. Display: "After running the update command, restart your AI assistant session to load the new version."
+
+### Platform Gating
+
+- **Interactive platforms** (`canAskInteractive: true`): Full update flow with optional auto-execution.
+- **Non-interactive platforms** (`canAskInteractive: false`, e.g., Codex): Show version comparison and update commands only. No auto-execution.
 
 
 ## Configuration Safety

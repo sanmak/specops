@@ -109,6 +109,15 @@ TASK_TRACKING_MARKERS = [
     "Blocked",
 ]
 
+# Update workflow markers that MUST appear in every output
+UPDATE_MARKERS = [
+    "Update Mode",
+    "Update Mode Detection",
+    "Detect Current Version",
+    "Check Latest Available Version",
+    "Detect Installation Method",
+]
+
 
 def read_file(path):
     with open(path, "r", encoding="utf-8") as f:
@@ -227,25 +236,28 @@ def validate_platform(platform, info):
     # Check task tracking present
     errors.extend(check_markers_present(platform, content, TASK_TRACKING_MARKERS, "task-tracking"))
 
+    # Check update workflow present
+    errors.extend(check_markers_present(platform, content, UPDATE_MARKERS, "update"))
+
     # Platform-specific format validation
     if platform == "cursor":
         fmt_errors, _ = validate_frontmatter_format(
-            content, "Cursor .mdc", ["description"]
+            content, "Cursor .mdc", ["description", "version"]
         )
         errors.extend(fmt_errors)
     elif platform == "claude":
         fmt_errors, _ = validate_frontmatter_format(
-            content, "Claude SKILL.md", ["name", "description"]
+            content, "Claude SKILL.md", ["name", "description", "version"]
         )
         errors.extend(fmt_errors)
     elif platform == "codex":
         fmt_errors, _ = validate_frontmatter_format(
-            content, "Codex SKILL.md", ["name", "description"]
+            content, "Codex SKILL.md", ["name", "description", "version"]
         )
         errors.extend(fmt_errors)
     elif platform == "copilot":
         fmt_errors, _ = validate_frontmatter_format(
-            content, "Copilot specops.instructions.md", ["applyTo"]
+            content, "Copilot specops.instructions.md", ["applyTo", "version"]
         )
         errors.extend(fmt_errors)
 
@@ -327,6 +339,38 @@ def validate_plugin_manifests():
     return errors
 
 
+def validate_version_in_frontmatter(generated):
+    """Check that all generated outputs have a version field in frontmatter."""
+    errors = []
+    for platform, info in generated.items():
+        content = info["content"]
+        if not content.startswith("---\n"):
+            continue
+        second_dash = content.find("---\n", 4)
+        if second_dash == -1:
+            continue
+        frontmatter = content[4:second_dash]
+        if "version:" not in frontmatter:
+            errors.append(f"  {platform} frontmatter missing 'version' field")
+        else:
+            # Verify version matches platform.json
+            config_path = os.path.join(PLATFORMS_DIR, platform, "platform.json")
+            if os.path.exists(config_path):
+                with open(config_path, "r", encoding="utf-8") as f:
+                    config = json.load(f)
+                expected_version = config.get("version", "")
+                for line in frontmatter.splitlines():
+                    if line.startswith("version:"):
+                        actual_version = line.split(":", 1)[1].strip().strip('"')
+                        if actual_version != expected_version:
+                            errors.append(
+                                f"  {platform} frontmatter version ({actual_version})"
+                                f" != platform.json ({expected_version})"
+                            )
+                        break
+    return errors
+
+
 def validate_init_skill():
     """Validate init mode content is present in Claude SKILL.md."""
     errors = []
@@ -377,6 +421,16 @@ def main():
         else:
             print("  PASS: All checks passed")
 
+    # Version in frontmatter validation
+    print("\nValidating: version in frontmatter")
+    version_errors = validate_version_in_frontmatter(generated)
+    if version_errors:
+        for err in version_errors:
+            print(f"  FAIL: {err}")
+        all_errors.extend(version_errors)
+    else:
+        print("  PASS: All platforms have version in frontmatter")
+
     # Plugin manifest validation
     print("\nValidating: plugin manifests")
     plugin_errors = validate_plugin_manifests()
@@ -401,7 +455,7 @@ def main():
     print("\nCross-platform consistency:")
     if len(generated) >= 2:
         platforms = list(generated.keys())
-        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + TASK_TRACKING_MARKERS:
+        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS:
             present_in = [p for p in platforms if marker in generated[p]["content"]]
             if len(present_in) != len(platforms):
                 missing = set(platforms) - set(present_in)

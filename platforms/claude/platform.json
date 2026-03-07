@@ -34,6 +34,7 @@
     "usage": "/specops [mode] [description]",
     "examples": [
       "/specops",
+      "/specops version",
       "/specops spec Add user authentication",
       "/specops implement auth-feature",
       "/specops bugfix Users seeing 500 on checkout",
@@ -45,7 +46,8 @@
       "/specops view auth-feature design",
       "/specops view auth-feature full",
       "/specops view auth-feature walkthrough",
-      "/specops list"
+      "/specops list",
+      "/specops update"
     ]
   }
 }
