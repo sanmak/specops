@@ -118,6 +118,16 @@ UPDATE_MARKERS = [
     "Detect Installation Method",
 ]
 
+# Regression risk analysis markers that MUST appear in every output (bugfix template)
+REGRESSION_MARKERS = [
+    "Regression Risk Analysis",
+    "Blast Radius",
+    "Behavior Inventory",
+    "Test Coverage Assessment",
+    "Risk Tier",
+    "Scope Escalation",
+]
+
 
 def read_file(path):
     with open(path, "r", encoding="utf-8") as f:
@@ -238,6 +248,9 @@ def validate_platform(platform, info):
 
     # Check update workflow present
     errors.extend(check_markers_present(platform, content, UPDATE_MARKERS, "update"))
+
+    # Check regression risk analysis present
+    errors.extend(check_markers_present(platform, content, REGRESSION_MARKERS, "regression"))
 
     # Platform-specific format validation
     if platform == "cursor":
@@ -456,7 +469,7 @@ def main():
     if len(generated) >= 2:
         platforms = list(generated.keys())
         consistency_errors = []
-        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS:
+        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + REGRESSION_MARKERS:
             present_in = [p for p in platforms if marker in generated[p]["content"]]
             if len(present_in) != len(platforms):
                 missing = set(platforms) - set(present_in)

@@ -1,0 +1,17 @@
+{
+  "id": "bugfix-regression-analysis",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "created": "2026-03-08T10:00:00Z",
+  "updated": "2026-03-08T11:00:00Z",
+  "specopsCreatedWith": "1.2.0",
+  "specopsUpdatedWith": "1.2.0",
+  "author": {
+    "name": "sanmak"
+  },
+  "reviewers": [],
+  "reviewRounds": 0,
+  "approvals": 0,
+  "requiredApprovals": 0
+}

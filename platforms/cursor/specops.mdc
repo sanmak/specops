@@ -57,7 +57,20 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
 
    Keep EARS proportional to scope — 2-3 statements for small features, more for complex ones.
 
-   **For bugfix specs:** Add an "Unchanged Behavior" section using `WHEN [condition] THE SYSTEM SHALL CONTINUE TO [existing behavior]` to prevent regressions. Structure the Testing Plan into three categories: Current Behavior (verify bug exists), Expected Behavior (verify fix works), Unchanged Behavior (verify no regressions). If the fix reveals the need for broader changes, create a separate Feature Spec.
+   **For bugfix specs:** After completing Root Cause Analysis and Impact Assessment, conduct Regression Risk Analysis before writing the Proposed Fix. The analysis depth scales with the Severity field from Impact Assessment:
+
+   **Critical or High severity:**
+   1. **Blast Radius Survey** — List the contents of and Read the file at the affected component's directory. Identify every module, function, or API that imports or calls the affected code. If Run the terminal command is available, search for usages across the codebase. Record each entry point in the Blast Radius subsection.
+   2. **Behavior Inventory** — For each blast radius item, Read the file at its code and list the behaviors that depend on the affected area. Ask: "What does this path do correctly today that must remain true after the fix?"
+   3. **Test Coverage Check** — Read the file at the relevant test files. For each inventoried behavior, note whether a test already covers it or whether it is a gap. Gaps must be added to the Testing Plan.
+   4. **Risk Tier** — Classify each inventoried behavior: Must-Test (direct coupling to changed code), Nice-To-Test (indirect), or Low-Risk (independent path). Only Must-Test items are acceptance gates.
+   5. **Scope Escalation** — Review the blast radius. If fixing the bug correctly requires adding new abstractions, a new API, or addressing a missing feature (not a defect), signal "Scope escalation needed" and create a Feature Spec. The bugfix spec may still proceed for the narrowest contained fix, or may be replaced entirely.
+
+   **Medium severity:** Complete steps 1 (Blast Radius) and 2 (Behavior Inventory). Brief Risk Tier table. Skip detailed coverage check unless the codebase has obvious test gaps.
+
+   **Low severity:** Brief step 1 only. If the blast radius is clearly one isolated function with no callers in critical paths, note "minimal regression risk — isolated change" and proceed.
+
+   After the Regression Risk Analysis, populate the "Unchanged Behavior" section from the Must-Test behaviors. Structure the Testing Plan into three categories: Current Behavior (verify bug exists), Expected Behavior (verify fix works), Unchanged Behavior (verify no regressions using Must-Test items from the analysis).
 3. Create `spec.json` with metadata (author from git config, type, status, version, created date). Set status to `draft`.
 4. Regenerate `<specsDir>/index.json` from all `*/spec.json` files.
 5. **First-spec README prompt**: If `index.json` contains exactly one spec entry (this is the project's first spec):
@@ -1381,13 +1394,61 @@ Detailed analysis of what's causing the bug.
 3. Expected: [expected behavior]
 4. Actual: [actual behavior]
 
+## Regression Risk Analysis
+<!-- Depth scales with Severity from Impact Assessment:
+     Critical/High → complete all five subsections
+     Medium        → complete Blast Radius + Behavior Inventory; brief Risk Tier
+     Low           → brief Blast Radius scan only; note "minimal regression risk" if confirmed -->
+
+### Blast Radius
+<!-- Survey what code paths are touched by the affected component(s).
+     Use List the contents of and Read the file at to find callers, importers, and dependents.
+     Use Run the terminal command to search for usages if the platform supports code execution.
+     List each affected entry point, module boundary, or API surface. -->
+- [Affected code path or module 1]
+- [Affected code path or module 2]
+
+### Behavior Inventory
+<!-- For each item in the Blast Radius, list the existing behaviors that interact
+     with the affected area. Ask: "What does this code path do correctly today?"
+     These are the candidate behaviors the fix must not disturb. -->
+- [Existing behavior that touches the affected area]
+- [Existing behavior that touches the affected area]
+
+### Test Coverage Assessment
+<!-- Identify which behaviors in the inventory are already covered by tests,
+     and which are gaps. Read the file at test files for the affected component(s).
+     Gaps must be addressed in the Testing Plan below. -->
+- **Covered:** [behavior] → [test file / test name]
+- **Gap:** [behavior] → no existing test
+
+### Risk Tier
+<!-- Classify each inventoried behavior by regression likelihood:
+     Must-Test    → close coupling to changed code; high mutation chance
+     Nice-To-Test → indirect coupling; moderate risk
+     Low-Risk     → separate module boundary; independent codepath
+     Only Must-Test items are required gates for Unchanged Behavior verification. -->
+| Behavior | Tier | Reason |
+|----------|------|--------|
+| [behavior] | Must-Test | [why] |
+| [behavior] | Nice-To-Test | [why] |
+
+### Scope Escalation Check
+<!-- After surveying the blast radius: does the fix require changes beyond
+     correcting the broken behavior? If yes, create a Feature Spec instead of
+     (or in addition to) this bugfix. Common triggers:
+     - The root cause is a missing feature, not a defect
+     - Fixing correctly requires new abstractions used in multiple places
+     - The correct behavior has never been implemented (not a regression) -->
+**Scope:** [Contained | Escalation needed — reason]
+
 ## Proposed Fix
 Description of the fix approach and why it addresses the root cause.
 
 ## Unchanged Behavior
-<!-- Document behaviors that MUST NOT change as a result of this fix.
-     Use EARS notation: WHEN [condition] THE SYSTEM SHALL CONTINUE TO [existing behavior]
-     This prevents regressions by making preserved behavior explicit and testable. -->
+<!-- Drawn from Must-Test behaviors in the Regression Risk Analysis above.
+     Each item here is a formal commitment backed by discovery, not a guess.
+     Use EARS notation: WHEN [condition] THE SYSTEM SHALL CONTINUE TO [existing behavior] -->
 - WHEN [condition] THE SYSTEM SHALL CONTINUE TO [existing behavior that must be preserved]
 - WHEN [condition] THE SYSTEM SHALL CONTINUE TO [existing behavior that must be preserved]
 
@@ -1400,15 +1461,16 @@ Description of the fix approach and why it addresses the root cause.
 - WHEN [reproduction condition] THE SYSTEM SHALL [correct behavior after fix]
 
 ### Unchanged Behavior (verify no regressions)
+<!-- Must-Test behaviors from Regression Risk Analysis. Nice-To-Test items are optional.
+     Gap behaviors (no existing test) from Coverage Assessment must have new tests here. -->
 - WHEN [related condition] THE SYSTEM SHALL CONTINUE TO [preserved behavior]
 
-<!-- If this fix reveals the need for broader changes beyond the bug scope,
-     create a separate Feature Spec rather than expanding this bugfix. -->
-
 ## Acceptance Criteria
+- [ ] Regression Risk Analysis completed (blast radius surveyed, behaviors inventoried)
 - [ ] Bug reproduction confirmed (Current Behavior verified)
 - [ ] Fix verified (Expected Behavior tests pass)
-- [ ] No regressions (Unchanged Behavior tests pass)
+- [ ] No regressions (all Must-Test Unchanged Behavior tests pass)
+- [ ] Test coverage gaps from Coverage Assessment addressed
 
 ## Team Conventions
 [Load from config.team.conventions]
