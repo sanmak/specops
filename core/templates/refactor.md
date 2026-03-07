@@ -23,8 +23,7 @@ Description of the desired end state after refactoring.
 - **Behavioral changes:** None (refactoring preserves external behavior)
 
 ## Migration Strategy
-- [ ] Incremental (parallel implementation, gradual switchover)
-- [ ] Big-bang (single replacement)
+**Approach:** [Incremental (parallel implementation, gradual switchover) / Big-bang (single replacement)]
 
 ## Risk Assessment
 - **Regression risk:** [Low/Medium/High]
@@ -33,6 +32,11 @@ Description of the desired end state after refactoring.
 ## Success Metrics
 - [Measurable improvement 1]
 - [Measurable improvement 2]
+
+## Acceptance Criteria
+- [ ] [Derived from success metric 1]
+- [ ] [Derived from success metric 2]
+- [ ] External behavior preserved (all existing tests pass)
 
 ## Team Conventions
 [Load from config.team.conventions]

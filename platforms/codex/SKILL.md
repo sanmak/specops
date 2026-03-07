@@ -1402,6 +1402,11 @@ Description of the fix approach and why it addresses the root cause.
 <!-- If this fix reveals the need for broader changes beyond the bug scope,
      create a separate Feature Spec rather than expanding this bugfix. -->
 
+## Acceptance Criteria
+- [ ] Bug reproduction confirmed (Current Behavior verified)
+- [ ] Fix verified (Expected Behavior tests pass)
+- [ ] No regressions (Unchanged Behavior tests pass)
+
 ## Team Conventions
 [Load from config.team.conventions]
 ```
@@ -1434,8 +1439,7 @@ Description of the desired end state after refactoring.
 - **Behavioral changes:** None (refactoring preserves external behavior)
 
 ## Migration Strategy
-- [ ] Incremental (parallel implementation, gradual switchover)
-- [ ] Big-bang (single replacement)
+**Approach:** [Incremental (parallel implementation, gradual switchover) / Big-bang (single replacement)]
 
 ## Risk Assessment
 - **Regression risk:** [Low/Medium/High]
@@ -1444,6 +1448,11 @@ Description of the desired end state after refactoring.
 ## Success Metrics
 - [Measurable improvement 1]
 - [Measurable improvement 2]
+
+## Acceptance Criteria
+- [ ] [Derived from success metric 1]
+- [ ] [Derived from success metric 2]
+- [ ] External behavior preserved (all existing tests pass)
 
 ## Team Conventions
 [Load from config.team.conventions]

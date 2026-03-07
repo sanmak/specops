@@ -49,5 +49,10 @@ Description of the fix approach and why it addresses the root cause.
 <!-- If this fix reveals the need for broader changes beyond the bug scope,
      create a separate Feature Spec rather than expanding this bugfix. -->
 
+## Acceptance Criteria
+- [ ] Bug reproduction confirmed (Current Behavior verified)
+- [ ] Fix verified (Expected Behavior tests pass)
+- [ ] No regressions (Unchanged Behavior tests pass)
+
 ## Team Conventions
 [Load from config.team.conventions]
