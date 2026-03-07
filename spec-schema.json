@@ -108,8 +108,8 @@
     },
     "requiredApprovals": {
       "type": "integer",
-      "minimum": 1,
-      "description": "Number of approvals needed (copied from config at creation time)"
+      "minimum": 0,
+      "description": "Number of approvals needed. Set to 0 when review is disabled, otherwise copied from config at creation time."
     }
   },
   "required": ["id", "type", "status", "version", "created", "updated", "author"],

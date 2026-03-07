@@ -389,9 +389,11 @@ After creating the spec files, create `spec.json`:
   "reviewers": [],
   "reviewRounds": 0,
   "approvals": 0,
-  "requiredApprovals": <from config.team.specReview.minApprovals or 1>
+  "requiredApprovals": <from config.team.specReview.minApprovals; 0 if review is not enabled>
 }
 ```
+
+When spec review is not enabled (`specReview.enabled` is false/absent AND `reviewRequired` is false/absent), set `requiredApprovals` to `0`. This signals that no review was configured, not that the spec failed to achieve approvals.
 
 The `specopsCreatedWith` field is set once at creation and never modified. The `specopsUpdatedWith` field is updated every time `spec.json` is modified (reviews, revisions, status changes, completion). Both values come from reading this instruction file's own YAML frontmatter `version:` field.
 

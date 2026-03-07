@@ -107,7 +107,23 @@ def main():
         "requiredApprovals": 2
     }, "Full valid spec.json with reviewers"))
 
+    # Valid: requiredApprovals 0 for review-disabled projects
+    check(expect_valid(spec_schema, {
+        "id": "no-review",
+        "type": "feature",
+        "status": "completed",
+        "version": 1,
+        "created": "2026-03-07T10:00:00Z",
+        "updated": "2026-03-07T12:00:00Z",
+        "author": {"name": "Solo Dev"},
+        "reviewers": [],
+        "reviewRounds": 0,
+        "approvals": 0,
+        "requiredApprovals": 0
+    }, "Valid spec.json with requiredApprovals 0 (review disabled)"))
+
     # Invalid: email field in author (PII prevention — email property removed from schema)
+    # Payload is otherwise valid so rejection is clearly due to the email field
     check(expect_invalid(spec_schema, {
         "id": "email-leak",
         "type": "feature",
@@ -115,10 +131,15 @@ def main():
         "version": 1,
         "created": "2026-03-01T10:00:00Z",
         "updated": "2026-03-01T10:00:00Z",
-        "author": {"name": "Alice", "email": "alice@acme.com"}
+        "author": {"name": "Alice", "email": "alice@acme.com"},
+        "reviewers": [],
+        "reviewRounds": 0,
+        "approvals": 0,
+        "requiredApprovals": 1
     }, "Rejects author with email field (PII prevention)"))
 
     # Invalid: email field in reviewer (PII prevention)
+    # Payload is otherwise valid so rejection is clearly due to the email field
     check(expect_invalid(spec_schema, {
         "id": "email-leak-reviewer",
         "type": "feature",
@@ -127,7 +148,10 @@ def main():
         "created": "2026-03-01T10:00:00Z",
         "updated": "2026-03-01T10:00:00Z",
         "author": {"name": "Alice"},
-        "reviewers": [{"name": "Bob", "email": "bob@acme.com", "status": "approved"}]
+        "reviewers": [{"name": "Bob", "email": "bob@acme.com", "status": "approved"}],
+        "reviewRounds": 0,
+        "approvals": 0,
+        "requiredApprovals": 1
     }, "Rejects reviewer with email field (PII prevention)"))
 
     # Invalid: missing required field
