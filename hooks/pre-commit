@@ -182,6 +182,55 @@ if [ "$CHECKSUMMED_STAGED" = true ] && [ "$CHECKSUMS_FILE_STAGED" = false ]; the
   ERRORS=$((ERRORS + 1))
 fi
 
+# --- Check 5: PII and absolute path detection ---
+# Prevent personal emails in spec metadata and absolute paths in committed files.
+
+# 5a: Real email addresses in .specops/**/*.json
+STAGED_SPEC_JSON="$(echo "$STAGED_FILES" | grep '^\.specops/.*\.json$' || true)"
+if [ -n "$STAGED_SPEC_JSON" ]; then
+  while IFS= read -r spec_file; do
+    if [ -f "$ROOT_DIR/$spec_file" ]; then
+      # Match "email": "..." lines with real-looking emails (has @, not safe domains)
+      if grep -nE '"email"\s*:\s*"[^"]+@' "$ROOT_DIR/$spec_file" \
+         | grep -vE '@(example\.com|acme\.com|users\.noreply\.github\.com|test\.com)"' \
+         | grep -vE '"email"\s*:\s*""' > /dev/null 2>&1; then
+        printf '%b' "${RED}FAIL${RESET} Personal email detected in: ${spec_file}\n"
+        printf "  Spec metadata should not contain personal email addresses.\n"
+        printf "  Remove the email field or use a noreply address.\n"
+        ERRORS=$((ERRORS + 1))
+      fi
+    fi
+  done <<< "$STAGED_SPEC_JSON"
+fi
+
+# 5b: Absolute home directory paths in any staged file
+while IFS= read -r staged_file; do
+  if [ -f "$ROOT_DIR/$staged_file" ]; then
+    if grep -nE '(/Users/[a-zA-Z0-9._-]+/|/home/[a-zA-Z0-9._-]+/)' "$ROOT_DIR/$staged_file" > /dev/null 2>&1; then
+      printf '%b' "${RED}FAIL${RESET} Absolute path detected in: ${staged_file}\n"
+      printf "  Do not commit files containing absolute home directory paths.\n"
+      printf "  Use relative paths instead.\n"
+      ERRORS=$((ERRORS + 1))
+    fi
+  fi
+done <<< "$STAGED_FILES"
+
+# 5c: Symlinks with absolute targets
+STAGED_SYMLINKS="$(git diff --cached --diff-filter=ACM --raw | awk '$2 ~ /^120/ {print $NF}' || true)"
+if [ -n "$STAGED_SYMLINKS" ]; then
+  while IFS= read -r sym_file; do
+    if [ -L "$ROOT_DIR/$sym_file" ]; then
+      SYM_TARGET="$(readlink "$ROOT_DIR/$sym_file")"
+      if [[ "$SYM_TARGET" == /* ]]; then
+        printf '%b' "${RED}FAIL${RESET} Absolute symlink target in: ${sym_file}\n"
+        printf "  Target: %s\n" "$SYM_TARGET"
+        printf "  Use a relative symlink instead.\n"
+        ERRORS=$((ERRORS + 1))
+      fi
+    fi
+  done <<< "$STAGED_SYMLINKS"
+fi
+
 # --- Summary ---
 if [ "$ERRORS" -gt 0 ]; then
   printf '%b' "\n${RED}${BOLD}Pre-commit failed with ${ERRORS} error(s).${RESET}\n"

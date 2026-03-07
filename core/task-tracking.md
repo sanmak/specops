@@ -75,8 +75,19 @@ If none of these conditions apply (the task was implemented exactly as designed 
 
 When resuming implementation in a new session, READ_FILE `implementation.md` before starting work to recover context from previous sessions. The Session Log section records session boundaries — append a brief entry noting which task you are resuming from.
 
+### Acceptance Criteria Verification
+
+Checkboxes in `tasks.md` are completion gates, not decoration. When transitioning a task to `Completed`:
+
+1. Review every item under **Acceptance Criteria:** — check off each satisfied criterion: `- [ ]` → `- [x]`
+2. Review every item under **Tests Required:** — check off each passing test: `- [ ]` → `- [x]`
+3. If any acceptance criterion is NOT satisfied, do NOT mark the task `Completed` — keep it `In Progress` or set it to `Blocked` with the unmet criterion as the blocker
+
+A task with unchecked acceptance criteria and a `Completed` status is a protocol breach — it signals verified work that was never actually verified.
+
 ### Conformance Rules
 
 - **File-chat consistency**: reported status in chat must match what is persisted in `tasks.md`
+- **Checkbox-status consistency**: a `Completed` task must have all acceptance criteria and test items checked off
 - **Dependency enforcement**: if Task B depends on Task A, and Task A is `Blocked`, Task B cannot be set to `In Progress`
 - **Progress summary accuracy**: the Progress Tracking counts at the bottom of `tasks.md` must reflect actual statuses

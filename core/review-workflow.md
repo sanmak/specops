@@ -11,9 +11,8 @@ When `config.team.specReview.enabled` is true (or `config.team.reviewRequired` i
 After creating the spec files, create `spec.json`:
 
 1. RUN_COMMAND(`git config user.name`) to get author name
-2. RUN_COMMAND(`git config user.email`) to get author email
-3. If git config is unavailable, use "Unknown" for name and "" for email
-4. WRITE_FILE(`<specsDir>/<spec-name>/spec.json`) with:
+2. If git config is unavailable, use "Unknown" for name
+3. WRITE_FILE(`<specsDir>/<spec-name>/spec.json`) with:
 
 ```json
 {
@@ -26,8 +25,7 @@ After creating the spec files, create `spec.json`:
   "specopsCreatedWith": "<version from this instruction file's frontmatter>",
   "specopsUpdatedWith": "<version from this instruction file's frontmatter>",
   "author": {
-    "name": "<from git config>",
-    "email": "<from git config>"
+    "name": "<from git config>"
   },
   "reviewers": [],
   "reviewRounds": 0,
@@ -73,12 +71,12 @@ When the user invokes SpecOps referencing an existing spec, detect the interacti
 
 1. READ_FILE(`<specsDir>/<spec-name>/spec.json`)
 2. **Validate spec.json**: If the file does not exist, or contains invalid JSON, or is missing required fields (`id`, `type`, `status`, `author`), or `status` is not a valid enum value (`draft`, `in-review`, `approved`, `self-approved`, `implementing`, `completed`) → treat as **legacy spec**, proceed with implementation. If the file existed but was invalid, NOTIFY_USER: "spec.json is invalid — proceeding without review tracking. Re-run `/specops` on this spec to regenerate it."
-3. RUN_COMMAND(`git config user.email`) to get the current user's email
+3. RUN_COMMAND(`git config user.name`) to get the current user's name
 4. Determine mode:
-   - If current user email ≠ `author.email` AND status is `"draft"` or `"in-review"` → **Review mode**
-   - If current user email = `author.email` AND status is `"in-review"` AND any reviewer has `"changes-requested"` → **Revision mode**
-   - If current user email = `author.email` AND status is `"draft"` or `"in-review"` AND `config.team.specReview.allowSelfApproval` is `true` → **Self-review mode**
-   - If current user email = `author.email` AND status is `"draft"` or `"in-review"` → **Author waiting**. Message varies by status:
+   - If current user name ≠ `author.name` AND status is `"draft"` or `"in-review"` → **Review mode**
+   - If current user name = `author.name` AND status is `"in-review"` AND any reviewer has `"changes-requested"` → **Revision mode**
+   - If current user name = `author.name` AND status is `"draft"` or `"in-review"` AND `config.team.specReview.allowSelfApproval` is `true` → **Self-review mode**
+   - If current user name = `author.name` AND status is `"draft"` or `"in-review"` → **Author waiting**. Message varies by status:
      - `"draft"`: "Your spec is in draft. Submit it for review to get team feedback, or enable `allowSelfApproval: true` in `.specops.json` for solo workflows."
      - `"in-review"`: "Your spec is awaiting review from teammates. Tip: enable `allowSelfApproval: true` in `.specops.json` for solo workflows."
    - If status is `"approved"` or `"self-approved"` → **Implement mode**
@@ -97,7 +95,7 @@ When entering review mode:
 4. ASK_USER for verdict: "Approve", "Approve with suggestions", or "Request changes"
 5. WRITE_FILE or EDIT_FILE `reviews.md` — append feedback under the current review round (see reviews.md template)
 6. EDIT_FILE `spec.json`:
-   - Add or update the reviewer entry with name, email, status, reviewedAt, and round
+   - Add or update the reviewer entry with name, status, reviewedAt, and round
    - If verdict is "Approve" or "Approve with suggestions": set reviewer status to `"approved"`, increment `approvals`
    - If verdict is "Request changes": set reviewer status to `"changes-requested"`
    - If `approvals` >= `requiredApprovals`: set `status` to `"approved"`
@@ -146,7 +144,7 @@ When the spec author reviews their own spec (self-review enabled via `allowSelfA
    - Content: feedback notes
    - Verdict line: "Self-approved", "Self-approved with notes", or "Revision needed"
 8. EDIT_FILE `spec.json`:
-   - Add reviewer entry: `{ "name": "<author.name>", "email": "<author.email>", "status": "approved", "selfApproval": true, "reviewedAt": "<ISO 8601>", "round": <round> }`
+   - Add reviewer entry: `{ "name": "<author.name>", "status": "approved", "selfApproval": true, "reviewedAt": "<ISO 8601>", "round": <round> }`
    - If verdict is "Self-approve" or "Self-approve with notes": increment `approvals`
    - If `approvals` >= `requiredApprovals`:
      - If all reviewer entries with `status: "approved"` have `selfApproval: true` → set spec `status` to `"self-approved"`

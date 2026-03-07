@@ -2,7 +2,7 @@
 
 ## Round {{round}}
 
-### {{reviewer_name}} ({{reviewer_email}}) - {{date}}
+### {{reviewer_name}} - {{date}}
 
 **Verdict:** [Approved | Approved with suggestions | Changes Requested]
 

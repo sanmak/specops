@@ -64,7 +64,7 @@ def main():
     print("\n--- spec.json Validation ---")
     spec_schema = load_schema("spec-schema.json")
 
-    # Valid minimal spec.json
+    # Valid minimal spec.json (no email — new default)
     check(expect_valid(spec_schema, {
         "id": "user-auth",
         "type": "feature",
@@ -72,14 +72,14 @@ def main():
         "version": 1,
         "created": "2026-03-01T10:00:00Z",
         "updated": "2026-03-01T10:00:00Z",
-        "author": {"name": "Alice", "email": "alice@acme.com"},
+        "author": {"name": "Alice"},
         "reviewers": [],
         "reviewRounds": 0,
         "approvals": 0,
         "requiredApprovals": 1
-    }, "Minimal valid spec.json"))
+    }, "Minimal valid spec.json (no email)"))
 
-    # Valid full spec.json
+    # Valid full spec.json (no email)
     check(expect_valid(spec_schema, {
         "id": "user-auth",
         "type": "feature",
@@ -87,18 +87,16 @@ def main():
         "version": 2,
         "created": "2026-03-01T10:00:00Z",
         "updated": "2026-03-02T14:30:00Z",
-        "author": {"name": "Alice", "email": "alice@acme.com"},
+        "author": {"name": "Alice"},
         "reviewers": [
             {
                 "name": "Bob",
-                "email": "bob@acme.com",
                 "status": "approved",
                 "reviewedAt": "2026-03-02T12:00:00Z",
                 "round": 2
             },
             {
                 "name": "Carol",
-                "email": "carol@acme.com",
                 "status": "approved",
                 "reviewedAt": "2026-03-02T14:00:00Z",
                 "round": 2
@@ -108,6 +106,29 @@ def main():
         "approvals": 2,
         "requiredApprovals": 2
     }, "Full valid spec.json with reviewers"))
+
+    # Invalid: email field in author (PII prevention — email property removed from schema)
+    check(expect_invalid(spec_schema, {
+        "id": "email-leak",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-01T10:00:00Z",
+        "updated": "2026-03-01T10:00:00Z",
+        "author": {"name": "Alice", "email": "alice@acme.com"}
+    }, "Rejects author with email field (PII prevention)"))
+
+    # Invalid: email field in reviewer (PII prevention)
+    check(expect_invalid(spec_schema, {
+        "id": "email-leak-reviewer",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-01T10:00:00Z",
+        "updated": "2026-03-01T10:00:00Z",
+        "author": {"name": "Alice"},
+        "reviewers": [{"name": "Bob", "email": "bob@acme.com", "status": "approved"}]
+    }, "Rejects reviewer with email field (PII prevention)"))
 
     # Invalid: missing required field
     check(expect_invalid(spec_schema, {
@@ -127,7 +148,7 @@ def main():
         "version": 1,
         "created": "2026-03-01T10:00:00Z",
         "updated": "2026-03-01T10:00:00Z",
-        "author": {"name": "Alice", "email": "alice@acme.com"},
+        "author": {"name": "Alice"},
         "reviewers": [],
         "reviewRounds": 0,
         "approvals": 0,
@@ -142,7 +163,7 @@ def main():
         "version": 1,
         "created": "2026-03-01T10:00:00Z",
         "updated": "2026-03-01T10:00:00Z",
-        "author": {"name": "Alice", "email": "alice@acme.com"},
+        "author": {"name": "Alice"},
         "reviewers": [],
         "reviewRounds": 0,
         "approvals": 0,
@@ -157,7 +178,7 @@ def main():
         "version": 0,
         "created": "2026-03-01T10:00:00Z",
         "updated": "2026-03-01T10:00:00Z",
-        "author": {"name": "Alice", "email": "alice@acme.com"},
+        "author": {"name": "Alice"},
         "reviewers": [],
         "reviewRounds": 0,
         "approvals": 0,
@@ -172,7 +193,7 @@ def main():
         "version": 1,
         "created": "2026-03-01T10:00:00Z",
         "updated": "2026-03-01T10:00:00Z",
-        "author": {"name": "Alice", "email": "alice@acme.com"},
+        "author": {"name": "Alice"},
         "reviewers": [],
         "reviewRounds": 0,
         "approvals": 0,
@@ -187,7 +208,7 @@ def main():
         "version": 1,
         "created": "2026-03-01T10:00:00Z",
         "updated": "2026-03-01T10:00:00Z",
-        "author": {"name": "Alice", "email": "alice@acme.com"},
+        "author": {"name": "Alice"},
         "reviewers": [],
         "reviewRounds": 0,
         "approvals": 0,
@@ -203,8 +224,8 @@ def main():
         "version": 1,
         "created": "2026-03-01T10:00:00Z",
         "updated": "2026-03-01T10:00:00Z",
-        "author": {"name": "Alice", "email": "alice@acme.com"},
-        "reviewers": [{"name": "Bob", "email": "bob@acme.com", "status": "pending", "reviewedAt": "", "round": 1, "extra": "bad"}],
+        "author": {"name": "Alice"},
+        "reviewers": [{"name": "Bob", "status": "pending", "reviewedAt": "", "round": 1, "extra": "bad"}],
         "reviewRounds": 0,
         "approvals": 0,
         "requiredApprovals": 1
@@ -218,11 +239,10 @@ def main():
         "version": 1,
         "created": "2026-03-05T10:00:00Z",
         "updated": "2026-03-05T11:30:00Z",
-        "author": {"name": "Solo Dev", "email": "solo@dev.com"},
+        "author": {"name": "Solo Dev"},
         "reviewers": [
             {
                 "name": "Solo Dev",
-                "email": "solo@dev.com",
                 "status": "approved",
                 "selfApproval": True,
                 "reviewedAt": "2026-03-05T11:30:00Z",
@@ -242,11 +262,10 @@ def main():
         "version": 1,
         "created": "2026-03-05T10:00:00Z",
         "updated": "2026-03-05T11:30:00Z",
-        "author": {"name": "Alice", "email": "alice@acme.com"},
+        "author": {"name": "Alice"},
         "reviewers": [
             {
                 "name": "Bob",
-                "email": "bob@acme.com",
                 "status": "approved",
                 "reviewedAt": "2026-03-05T11:30:00Z",
                 "round": 1
@@ -255,7 +274,7 @@ def main():
         "reviewRounds": 1,
         "approvals": 1,
         "requiredApprovals": 1
-    }, "Valid peer-approved spec without selfApproval flag (backward compat)"))
+    }, "Valid peer-approved spec without selfApproval flag"))
 
     # --- Validate example spec.json ---
     print("\n--- Example spec.json Validation ---")
@@ -290,7 +309,7 @@ def main():
         "updated": "2026-03-07T10:00:00Z",
         "specopsCreatedWith": "1.2.0",
         "specopsUpdatedWith": "1.2.0",
-        "author": {"name": "Alice", "email": "alice@acme.com"},
+        "author": {"name": "Alice"},
         "reviewers": [],
         "reviewRounds": 0,
         "approvals": 0,
@@ -305,7 +324,7 @@ def main():
         "version": 1,
         "created": "2026-03-01T10:00:00Z",
         "updated": "2026-03-01T10:00:00Z",
-        "author": {"name": "Alice", "email": "alice@acme.com"},
+        "author": {"name": "Alice"},
         "reviewers": [],
         "reviewRounds": 0,
         "approvals": 0,
@@ -321,7 +340,7 @@ def main():
         "created": "2026-03-07T10:00:00Z",
         "updated": "2026-03-07T10:00:00Z",
         "specopsCreatedWith": "v1.2.0",
-        "author": {"name": "Alice", "email": "alice@acme.com"},
+        "author": {"name": "Alice"},
         "reviewers": [],
         "reviewRounds": 0,
         "approvals": 0,
@@ -336,7 +355,7 @@ def main():
         "version": 1,
         "created": "not-a-date",
         "updated": "2026-03-01T10:00:00Z",
-        "author": {"name": "Alice", "email": "alice@acme.com"}
+        "author": {"name": "Alice"}
     }, "Rejects malformed timestamp in created"))
 
     # Invalid: date-only (missing time component)
@@ -347,7 +366,7 @@ def main():
         "version": 1,
         "created": "2026-03-01",
         "updated": "2026-03-01T10:00:00Z",
-        "author": {"name": "Alice", "email": "alice@acme.com"}
+        "author": {"name": "Alice"}
     }, "Rejects date-only timestamp (missing time component)"))
 
     # Valid: timestamp with timezone offset
@@ -358,7 +377,7 @@ def main():
         "version": 1,
         "created": "2026-03-01T10:00:00+05:30",
         "updated": "2026-03-01T10:00:00-04:00",
-        "author": {"name": "Alice", "email": "alice@acme.com"}
+        "author": {"name": "Alice"}
     }, "Valid timestamps with timezone offsets"))
 
     # --- index-schema.json tests ---

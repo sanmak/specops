@@ -13,13 +13,18 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
 
 **Phase 1: Understand Context**
 1. Read `.specops.json` config if it exists, use defaults otherwise
-2. **Pre-flight check**: Verify SpecOps skill availability for team collaboration:
+2. **Context recovery**: Check for prior work that may inform this session:
+   - If FILE_EXISTS(`<specsDir>/index.json`), Read the file at it
+   - If any specs have status `implementing` or `in-review`, Tell the user: "Found incomplete spec: <name> (status: <status>). Continue working on it?"
+   - If continuing an existing spec, Read the file at the spec's `implementation.md` to recover session context (decision log, deviations, blockers, session log), then resume from the appropriate phase
+   - If starting fresh, proceed normally
+3. **Pre-flight check**: Verify SpecOps skill availability for team collaboration:
    - Read the file at `.gitignore` if it exists
    - If `.gitignore` contains patterns matching `.claude/` or `.claude/*`, Tell the user with warning:
      > "⚠️ `.claude/` is excluded by your `.gitignore`. SpecOps spec files will still be created in `<specsDir>/` and tracked normally, but the SpecOps skill itself (`SKILL.md`) won't be visible to other contributors. To fix: (1) use user-level installation (`~/.claude/skills/specops/`), or (2) add `!.claude/skills/` to your `.gitignore` to selectively un-ignore just the skills directory."
    - If no `.gitignore` exists or doesn't conflict, continue normally
-3. Analyze the user's request to determine type (feature, bugfix, refactor)
-4. Determine the project vertical:
+4. Analyze the user's request to determine type (feature, bugfix, refactor)
+5. Determine the project vertical:
    - If `config.vertical` is set, use it directly
    - If not set, infer from request keywords and codebase:
      - **infrastructure**: terraform, ansible, kubernetes, docker, CI/CD, pipeline, deploy, provision, networking, IAM, cloud, AWS, GCP, Azure, helm, CDK
@@ -31,16 +36,28 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
      - **fullstack**: request spans both frontend and backend concerns
    - Default to `fullstack` if unclear
    - Display the detected vertical in configuration summary
-5. Explore codebase to understand existing patterns and architecture
-6. Identify affected components and dependencies
+6. Explore codebase to understand existing patterns and architecture
+7. Identify affected components and dependencies
 
 **Phase 2: Create Specification**
 1. Generate a structured spec directory in the configured `specsDir`
 2. Create four core files:
-   - `requirements.md` (or `bugfix.md` for bugs, `refactor.md` for refactors) - User stories, acceptance criteria, bug analysis, or refactoring rationale
+   - `requirements.md` (or `bugfix.md` for bugs, `refactor.md` for refactors) - User stories with EARS acceptance criteria, bug analysis, or refactoring rationale
    - `design.md` - Technical architecture, sequence diagrams, implementation approach
    - `tasks.md` - Discrete, trackable implementation tasks with dependencies
    - `implementation.md` - Living decision journal, updated during Phase 3. Created empty (template headers only) — populated incrementally as implementation decisions arise.
+
+   **EARS Notation for Acceptance Criteria:**
+   Write acceptance criteria using EARS (Easy Approach to Requirements Syntax) for precision and testability. Select the pattern that best fits each criterion:
+   - **Ubiquitous** (always true): `THE SYSTEM SHALL [behavior]`
+   - **Event-Driven** (triggered by event): `WHEN [event] THE SYSTEM SHALL [behavior]`
+   - **State-Driven** (while condition holds): `WHILE [state] THE SYSTEM SHALL [behavior]`
+   - **Optional Feature** (when enabled): `WHERE [feature is enabled] THE SYSTEM SHALL [behavior]`
+   - **Unwanted Behavior** (error/edge case): `IF [unwanted condition] THEN THE SYSTEM SHALL [response]`
+
+   Keep EARS proportional to scope — 2-3 statements for small features, more for complex ones.
+
+   **For bugfix specs:** Add an "Unchanged Behavior" section using `WHEN [condition] THE SYSTEM SHALL CONTINUE TO [existing behavior]` to prevent regressions. Structure the Testing Plan into three categories: Current Behavior (verify bug exists), Expected Behavior (verify fix works), Unchanged Behavior (verify no regressions). If the fix reveals the need for broader changes, create a separate Feature Spec.
 3. Create `spec.json` with metadata (author from git config, type, status, version, created date). Set status to `draft`.
 4. Regenerate `<specsDir>/index.json` from all `*/spec.json` files.
 5. **First-spec README prompt**: If `index.json` contains exactly one spec entry (this is the project's first spec):
@@ -75,13 +92,21 @@ See "Collaborative Spec Review" module for the full review workflow including re
 7. Commit changes based on `autoCommit` setting
 
 **Phase 4: Complete**
-1. Verify all acceptance criteria are met
+1. Verify all acceptance criteria are met:
+   - Read the file at `requirements.md` (or `bugfix.md`/`refactor.md`)
+   - For each acceptance criterion the implementation satisfies, check it off: `- [ ]` → `- [x]`
+   - Any criterion that remains unchecked means the spec is NOT complete — return to Phase 3 to address it
 2. Finalize `implementation.md`:
    - Populate the Summary section with a brief synthesis: total tasks completed, key decisions made, any deviations from design, and overall implementation health
    - Remove any empty sections (tables with no rows) to keep it clean
-3. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp, and regenerate `index.json`
-4. Create PR if `createPR` is true
-5. Summarize completed work
+3. **Documentation check**: Identify project documentation that may need updating based on files modified during implementation:
+   - Scan for documentation files (README.md, CLAUDE.md, and files in a docs/ directory if one exists)
+   - For each doc file, check if it references components, features, or configurations that were modified during this spec
+   - If stale documentation is detected, update the affected sections
+   - If unsure whether a doc needs updating, flag it to the user rather than skipping silently
+4. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp, and regenerate `index.json`
+5. Create PR if `createPR` is true
+6. Summarize completed work
 
 ## Autonomous Behavior Guidelines
 
@@ -343,9 +368,8 @@ When `config.team.specReview.enabled` is true (or `config.team.reviewRequired` i
 After creating the spec files, create `spec.json`:
 
 1. Run the terminal command(`git config user.name`) to get author name
-2. Run the terminal command(`git config user.email`) to get author email
-3. If git config is unavailable, use "Unknown" for name and "" for email
-4. Create the file at(`<specsDir>/<spec-name>/spec.json`) with:
+2. If git config is unavailable, use "Unknown" for name
+3. Create the file at(`<specsDir>/<spec-name>/spec.json`) with:
 
 ```json
 {
@@ -358,8 +382,7 @@ After creating the spec files, create `spec.json`:
   "specopsCreatedWith": "<version from this instruction file's frontmatter>",
   "specopsUpdatedWith": "<version from this instruction file's frontmatter>",
   "author": {
-    "name": "<from git config>",
-    "email": "<from git config>"
+    "name": "<from git config>"
   },
   "reviewers": [],
   "reviewRounds": 0,
@@ -405,12 +428,12 @@ When the user invokes SpecOps referencing an existing spec, detect the interacti
 
 1. Read the file at(`<specsDir>/<spec-name>/spec.json`)
 2. **Validate spec.json**: If the file does not exist, or contains invalid JSON, or is missing required fields (`id`, `type`, `status`, `author`), or `status` is not a valid enum value (`draft`, `in-review`, `approved`, `self-approved`, `implementing`, `completed`) → treat as **legacy spec**, proceed with implementation. If the file existed but was invalid, Tell the user: "spec.json is invalid — proceeding without review tracking. Re-run `/specops` on this spec to regenerate it."
-3. Run the terminal command(`git config user.email`) to get the current user's email
+3. Run the terminal command(`git config user.name`) to get the current user's name
 4. Determine mode:
-   - If current user email ≠ `author.email` AND status is `"draft"` or `"in-review"` → **Review mode**
-   - If current user email = `author.email` AND status is `"in-review"` AND any reviewer has `"changes-requested"` → **Revision mode**
-   - If current user email = `author.email` AND status is `"draft"` or `"in-review"` AND `config.team.specReview.allowSelfApproval` is `true` → **Self-review mode**
-   - If current user email = `author.email` AND status is `"draft"` or `"in-review"` → **Author waiting**. Message varies by status:
+   - If current user name ≠ `author.name` AND status is `"draft"` or `"in-review"` → **Review mode**
+   - If current user name = `author.name` AND status is `"in-review"` AND any reviewer has `"changes-requested"` → **Revision mode**
+   - If current user name = `author.name` AND status is `"draft"` or `"in-review"` AND `config.team.specReview.allowSelfApproval` is `true` → **Self-review mode**
+   - If current user name = `author.name` AND status is `"draft"` or `"in-review"` → **Author waiting**. Message varies by status:
      - `"draft"`: "Your spec is in draft. Submit it for review to get team feedback, or enable `allowSelfApproval: true` in `.specops.json` for solo workflows."
      - `"in-review"`: "Your spec is awaiting review from teammates. Tip: enable `allowSelfApproval: true` in `.specops.json` for solo workflows."
    - If status is `"approved"` or `"self-approved"` → **Implement mode**
@@ -429,7 +452,7 @@ When entering review mode:
 4. Ask the user for verdict: "Approve", "Approve with suggestions", or "Request changes"
 5. Create the file at or Edit the file at `reviews.md` — append feedback under the current review round (see reviews.md template)
 6. Edit the file at `spec.json`:
-   - Add or update the reviewer entry with name, email, status, reviewedAt, and round
+   - Add or update the reviewer entry with name, status, reviewedAt, and round
    - If verdict is "Approve" or "Approve with suggestions": set reviewer status to `"approved"`, increment `approvals`
    - If verdict is "Request changes": set reviewer status to `"changes-requested"`
    - If `approvals` >= `requiredApprovals`: set `status` to `"approved"`
@@ -478,7 +501,7 @@ When the spec author reviews their own spec (self-review enabled via `allowSelfA
    - Content: feedback notes
    - Verdict line: "Self-approved", "Self-approved with notes", or "Revision needed"
 8. Edit the file at `spec.json`:
-   - Add reviewer entry: `{ "name": "<author.name>", "email": "<author.email>", "status": "approved", "selfApproval": true, "reviewedAt": "<ISO 8601>", "round": <round> }`
+   - Add reviewer entry: `{ "name": "<author.name>", "status": "approved", "selfApproval": true, "reviewedAt": "<ISO 8601>", "round": <round> }`
    - If verdict is "Self-approve" or "Self-approve with notes": increment `approvals`
    - If `approvals` >= `requiredApprovals`:
      - If all reviewer entries with `status: "approved"` have `selfApproval: true` → set spec `status` to `"self-approved"`
@@ -1284,10 +1307,20 @@ Brief description of the feature and its purpose.
 **I want** [capability]
 **So that** [benefit]
 
-**Acceptance Criteria:**
-- [ ] Criterion 1
-- [ ] Criterion 2
-- [ ] Criterion 3
+**Acceptance Criteria (EARS):**
+<!-- Use the EARS pattern that best fits each criterion:
+  Ubiquitous:     THE SYSTEM SHALL [behavior]
+  Event-Driven:   WHEN [event] THE SYSTEM SHALL [behavior]
+  State-Driven:   WHILE [state] THE SYSTEM SHALL [behavior]
+  Optional:       WHERE [feature is enabled] THE SYSTEM SHALL [behavior]
+  Unwanted:       IF [unwanted condition] THEN THE SYSTEM SHALL [response]
+-->
+- WHEN [condition/event] THE SYSTEM SHALL [expected behavior]
+- WHEN [condition/event] THE SYSTEM SHALL [expected behavior]
+
+**Progress Checklist:**
+- [ ] [derived from EARS criterion 1]
+- [ ] [derived from EARS criterion 2]
 
 ### Story 2: [Title]
 ...
@@ -1346,11 +1379,26 @@ Detailed analysis of what's causing the bug.
 ## Proposed Fix
 Description of the fix approach and why it addresses the root cause.
 
+## Unchanged Behavior
+<!-- Document behaviors that MUST NOT change as a result of this fix.
+     Use EARS notation: WHEN [condition] THE SYSTEM SHALL CONTINUE TO [existing behavior]
+     This prevents regressions by making preserved behavior explicit and testable. -->
+- WHEN [condition] THE SYSTEM SHALL CONTINUE TO [existing behavior that must be preserved]
+- WHEN [condition] THE SYSTEM SHALL CONTINUE TO [existing behavior that must be preserved]
+
 ## Testing Plan
-- [ ] Unit tests for fix
-- [ ] Integration tests
-- [ ] Manual testing steps
-- [ ] Regression testing
+
+### Current Behavior (verify the bug exists)
+- WHEN [reproduction condition] THE SYSTEM CURRENTLY [broken behavior]
+
+### Expected Behavior (verify the fix works)
+- WHEN [reproduction condition] THE SYSTEM SHALL [correct behavior after fix]
+
+### Unchanged Behavior (verify no regressions)
+- WHEN [related condition] THE SYSTEM SHALL CONTINUE TO [preserved behavior]
+
+<!-- If this fix reveals the need for broader changes beyond the bug scope,
+     create a separate Feature Spec rather than expanding this bugfix. -->
 
 ## Team Conventions
 [Load from config.team.conventions]
@@ -1580,7 +1628,7 @@ Detailed description of what needs to be done.
 
 ## Round {{round}}
 
-### {{reviewer_name}} ({{reviewer_email}}) - {{date}}
+### {{reviewer_name}} - {{date}}
 
 **Verdict:** [Approved | Approved with suggestions | Changes Requested]
 
@@ -1880,9 +1928,20 @@ If none of these conditions apply (the task was implemented exactly as designed 
 
 When resuming implementation in a new session, Read the file at `implementation.md` before starting work to recover context from previous sessions. The Session Log section records session boundaries — append a brief entry noting which task you are resuming from.
 
+### Acceptance Criteria Verification
+
+Checkboxes in `tasks.md` are completion gates, not decoration. When transitioning a task to `Completed`:
+
+1. Review every item under **Acceptance Criteria:** — check off each satisfied criterion: `- [ ]` → `- [x]`
+2. Review every item under **Tests Required:** — check off each passing test: `- [ ]` → `- [x]`
+3. If any acceptance criterion is NOT satisfied, do NOT mark the task `Completed` — keep it `In Progress` or set it to `Blocked` with the unmet criterion as the blocker
+
+A task with unchecked acceptance criteria and a `Completed` status is a protocol breach — it signals verified work that was never actually verified.
+
 ### Conformance Rules
 
 - **File-chat consistency**: reported status in chat must match what is persisted in `tasks.md`
+- **Checkbox-status consistency**: a `Completed` task must have all acceptance criteria and test items checked off
 - **Dependency enforcement**: if Task B depends on Task A, and Task A is `Blocked`, Task B cannot be set to `In Progress`
 - **Progress summary accuracy**: the Progress Tracking counts at the bottom of `tasks.md` must reflect actual statuses
 
@@ -1897,6 +1956,10 @@ When exploring a codebase and generating specification files, follow these data 
 
 ### Personal Data (PII)
 - **Use synthetic data in specs.** If user data examples are needed (e.g., for API design or data model documentation), use clearly fake data (e.g., `jane.doe@example.com`, `123 Example Street`). Never copy real user data from the codebase into spec files.
+
+### Spec Metadata
+- **No personal emails in spec.json.** The `author` and `reviewers` fields use `name` only (from `git config user.name`). Do not populate `email` fields with personal email addresses.
+- **No absolute paths.** Never commit files containing absolute filesystem paths (e.g., `/Users/...`, `/home/...`). Use relative paths for symlinks and file references.
 
 ### Data Classification
 - When generating `design.md` security considerations, identify data classification levels for any data the feature handles:

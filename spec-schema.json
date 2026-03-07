@@ -44,13 +44,9 @@
         "name": {
           "type": "string",
           "maxLength": 100
-        },
-        "email": {
-          "type": "string",
-          "maxLength": 200
         }
       },
-      "required": ["name", "email"],
+      "required": ["name"],
       "additionalProperties": false
     },
     "reviewers": {
@@ -63,10 +59,6 @@
           "name": {
             "type": "string",
             "maxLength": 100
-          },
-          "email": {
-            "type": "string",
-            "maxLength": 200
           },
           "status": {
             "type": "string",
@@ -88,7 +80,7 @@
             "description": "True when the reviewer is also the spec author (self-review)"
           }
         },
-        "required": ["name", "email", "status"],
+        "required": ["name", "status"],
         "additionalProperties": false
       }
     },
