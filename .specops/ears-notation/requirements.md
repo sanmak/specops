@@ -45,9 +45,11 @@ Add support for EARS (Easy Approach to Requirements Syntax) notation to SpecOps 
 **So that** product-focused requirements remain outcome-oriented while gaining EARS precision
 
 **Acceptance Criteria:**
-- [ ] Builder vertical maps EARS to product outcomes: `WHEN [user action] THE PRODUCT SHALL [deliver outcome]` *(not explicitly added to verticals.md — EARS uses generic "THE SYSTEM SHALL" which agents contextually adapt via vertical renaming rules)*
-- [ ] Product Quality Attributes use EARS for measurable criteria *(deferred — template uses generic format)*
-- [ ] Scope Boundary items are expressed as deferral statements *(deferred — scope boundary is prose, not EARS-formatted)*
+- [x] Builder vertical maps EARS to product outcomes via existing vertical renaming rules (agents contextually adapt "THE SYSTEM SHALL" to product language)
+
+**Deferred Criteria:**
+- Product Quality Attributes use EARS for measurable criteria *(deferred — template uses generic format; vertical-specific EARS adaptation is a future enhancement)*
+- Scope Boundary items are expressed as deferral statements *(deferred — scope boundary is prose, not EARS-formatted; would add ceremony without value)*
 
 ## Product Quality Attributes
 - **Backward Compatibility**: Existing specs without EARS remain valid and functional

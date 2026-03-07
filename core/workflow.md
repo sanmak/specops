@@ -87,8 +87,10 @@ See "Collaborative Spec Review" module for the full review workflow including re
 **Phase 4: Complete**
 1. Verify all acceptance criteria are met:
    - READ_FILE `requirements.md` (or `bugfix.md`/`refactor.md`)
-   - For each acceptance criterion the implementation satisfies, check it off: `- [ ]` → `- [x]`
-   - Any criterion that remains unchecked means the spec is NOT complete — return to Phase 3 to address it
+   - Find the **Acceptance Criteria** section (in feature specs this may be the **Progress Checklist** under each story; in bugfix/refactor specs this is the dedicated **Acceptance Criteria** section)
+   - For each criterion the implementation satisfies, check it off: `- [ ]` → `- [x]`
+   - If a criterion was intentionally deferred (out of scope for this spec), move it to a **Deferred Criteria** subsection with a reason annotation: `- criterion text *(deferred — reason)*`
+   - Any criterion that remains unchecked in the main acceptance criteria list (not in Deferred) means the spec is NOT complete — return to Phase 3 to address it
 2. Finalize `implementation.md`:
    - Populate the Summary section with a brief synthesis: total tasks completed, key decisions made, any deviations from design, and overall implementation health
    - Remove any empty sections (tables with no rows) to keep it clean

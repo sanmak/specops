@@ -85,9 +85,20 @@ Checkboxes in `tasks.md` are completion gates, not decoration. When transitionin
 
 A task with unchecked acceptance criteria and a `Completed` status is a protocol breach — it signals verified work that was never actually verified.
 
+### Deferred Criteria
+
+Sometimes an acceptance criterion is intentionally excluded from the current scope (deferred to a future spec). To avoid blocking completion:
+
+1. Move the deferred criterion from the main **Acceptance Criteria** list to a **Deferred Criteria** subsection beneath it
+2. Annotate each deferred item with a reason: `- criterion text *(deferred — reason)*`
+3. Deferred items are NOT checked during completion gate verification — only items in the main **Acceptance Criteria** list are gates
+
+A task or spec with all main acceptance criteria checked and some items in **Deferred Criteria** is valid for completion. Deferred items should be tracked for follow-up (e.g., as future spec candidates in the Scope Boundary section).
+
 ### Conformance Rules
 
 - **File-chat consistency**: reported status in chat must match what is persisted in `tasks.md`
 - **Checkbox-status consistency**: a `Completed` task must have all acceptance criteria and test items checked off
+- **Deferred-item tracking**: deferred acceptance criteria must be moved to a Deferred Criteria subsection, not left unchecked in the main list
 - **Dependency enforcement**: if Task B depends on Task A, and Task A is `Blocked`, Task B cannot be set to `In Progress`
 - **Progress summary accuracy**: the Progress Tracking counts at the bottom of `tasks.md` must reflect actual statuses

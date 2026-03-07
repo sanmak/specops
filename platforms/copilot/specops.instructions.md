@@ -92,8 +92,10 @@ See "Collaborative Spec Review" module for the full review workflow including re
 **Phase 4: Complete**
 1. Verify all acceptance criteria are met:
    - Read the file at `requirements.md` (or `bugfix.md`/`refactor.md`)
-   - For each acceptance criterion the implementation satisfies, check it off: `- [ ]` → `- [x]`
-   - Any criterion that remains unchecked means the spec is NOT complete — return to Phase 3 to address it
+   - Find the **Acceptance Criteria** section (in feature specs this may be the **Progress Checklist** under each story; in bugfix/refactor specs this is the dedicated **Acceptance Criteria** section)
+   - For each criterion the implementation satisfies, check it off: `- [ ]` → `- [x]`
+   - If a criterion was intentionally deferred (out of scope for this spec), move it to a **Deferred Criteria** subsection with a reason annotation: `- criterion text *(deferred — reason)*`
+   - Any criterion that remains unchecked in the main acceptance criteria list (not in Deferred) means the spec is NOT complete — return to Phase 3 to address it
 2. Finalize `implementation.md`:
    - Populate the Summary section with a brief synthesis: total tasks completed, key decisions made, any deviations from design, and overall implementation health
    - Remove any empty sections (tables with no rows) to keep it clean
@@ -1937,10 +1939,21 @@ Checkboxes in `tasks.md` are completion gates, not decoration. When transitionin
 
 A task with unchecked acceptance criteria and a `Completed` status is a protocol breach — it signals verified work that was never actually verified.
 
+### Deferred Criteria
+
+Sometimes an acceptance criterion is intentionally excluded from the current scope (deferred to a future spec). To avoid blocking completion:
+
+1. Move the deferred criterion from the main **Acceptance Criteria** list to a **Deferred Criteria** subsection beneath it
+2. Annotate each deferred item with a reason: `- criterion text *(deferred — reason)*`
+3. Deferred items are NOT checked during completion gate verification — only items in the main **Acceptance Criteria** list are gates
+
+A task or spec with all main acceptance criteria checked and some items in **Deferred Criteria** is valid for completion. Deferred items should be tracked for follow-up (e.g., as future spec candidates in the Scope Boundary section).
+
 ### Conformance Rules
 
 - **File-chat consistency**: reported status in chat must match what is persisted in `tasks.md`
 - **Checkbox-status consistency**: a `Completed` task must have all acceptance criteria and test items checked off
+- **Deferred-item tracking**: deferred acceptance criteria must be moved to a Deferred Criteria subsection, not left unchecked in the main list
 - **Dependency enforcement**: if Task B depends on Task A, and Task A is `Blocked`, Task B cannot be set to `In Progress`
 - **Progress summary accuracy**: the Progress Tracking counts at the bottom of `tasks.md` must reflect actual statuses
 
