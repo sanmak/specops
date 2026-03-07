@@ -142,7 +142,7 @@ When the user requests the version (`/specops version`, `/specops --version`, `/
    Latest releases: https://github.com/sanmak/specops/releases
    ```
 
-3. If FILE_EXISTS(`.specops.json`), Use the Read tool to read it and check for `_installedVersion` and `_installedAt` fields. If present, display:
+3. If FILE_EXISTS(`.specops.json`), Use the Read tool to read(`.specops.json`) and check for `_installedVersion` and `_installedAt` fields. If present, display:
 
    ```
    Installed version: {_installedVersion}
@@ -1326,7 +1326,7 @@ If update intent is not detected, continue to the next check in the routing chai
 #### Step 1: Detect Current Version
 
 1. Read this instruction file's own YAML frontmatter to extract the `version:` field. This is the **running version** of SpecOps.
-2. If FILE_EXISTS(`.specops.json`), Use the Read tool to read it and check for `_installedVersion` and `_installedAt` fields.
+2. If FILE_EXISTS(`.specops.json`), Use the Read tool to read(`.specops.json`) and check for `_installedVersion` and `_installedAt` fields.
 3. Display:
 
    ```

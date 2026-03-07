@@ -244,20 +244,23 @@ install_claude() {
   fi
 
   # Update .specops.json with version metadata if it exists
-  if [ -f ".specops.json" ]; then
+  if [ -f ".specops.json" ] && command -v python3 >/dev/null 2>&1; then
     SPECOPS_VER="$(grep '^version:' "$install_dir/SKILL.md" | head -1 | sed 's/version: *"//;s/"//')"
     INSTALL_TS="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
     if [ -n "$SPECOPS_VER" ]; then
-      python3 -c "
+      SPECOPS_VER="$SPECOPS_VER" INSTALL_TS="$INSTALL_TS" python3 - <<'PY'
 import json
-with open('.specops.json', 'r') as f:
+import os
+
+with open(".specops.json", "r") as f:
     d = json.load(f)
-d['_installedVersion'] = '${SPECOPS_VER}'
-d['_installedAt'] = '${INSTALL_TS}'
-with open('.specops.json', 'w') as f:
+d["_installedVersion"] = os.environ["SPECOPS_VER"]
+d["_installedAt"] = os.environ["INSTALL_TS"]
+with open(".specops.json", "w") as f:
     json.dump(d, f, indent=2)
-    f.write('\n')
-" && echo "Updated .specops.json with version metadata"
+    f.write("\n")
+PY
+      echo "Updated .specops.json with version metadata"
     fi
   fi
   echo ""
@@ -274,20 +277,23 @@ install_cursor() {
   echo "Installed successfully!"
 
   # Update .specops.json with version metadata if it exists
-  if [ -f ".specops.json" ]; then
+  if [ -f ".specops.json" ] && command -v python3 >/dev/null 2>&1; then
     SPECOPS_VER="$(grep '^version:' "$rules_dir/specops.mdc" | head -1 | sed 's/version: *"//;s/"//')"
     INSTALL_TS="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
     if [ -n "$SPECOPS_VER" ]; then
-      python3 -c "
+      SPECOPS_VER="$SPECOPS_VER" INSTALL_TS="$INSTALL_TS" python3 - <<'PY'
 import json
-with open('.specops.json', 'r') as f:
+import os
+
+with open(".specops.json", "r") as f:
     d = json.load(f)
-d['_installedVersion'] = '${SPECOPS_VER}'
-d['_installedAt'] = '${INSTALL_TS}'
-with open('.specops.json', 'w') as f:
+d["_installedVersion"] = os.environ["SPECOPS_VER"]
+d["_installedAt"] = os.environ["INSTALL_TS"]
+with open(".specops.json", "w") as f:
     json.dump(d, f, indent=2)
-    f.write('\n')
-" && echo "Updated .specops.json with version metadata"
+    f.write("\n")
+PY
+      echo "Updated .specops.json with version metadata"
     fi
   fi
   echo ""
@@ -304,20 +310,23 @@ install_codex() {
   echo "Installed successfully!"
 
   # Update .specops.json with version metadata if it exists
-  if [ -f ".specops.json" ]; then
+  if [ -f ".specops.json" ] && command -v python3 >/dev/null 2>&1; then
     SPECOPS_VER="$(grep '^version:' "$skill_dir/SKILL.md" | head -1 | sed 's/version: *"//;s/"//')"
     INSTALL_TS="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
     if [ -n "$SPECOPS_VER" ]; then
-      python3 -c "
+      SPECOPS_VER="$SPECOPS_VER" INSTALL_TS="$INSTALL_TS" python3 - <<'PY'
 import json
-with open('.specops.json', 'r') as f:
+import os
+
+with open(".specops.json", "r") as f:
     d = json.load(f)
-d['_installedVersion'] = '${SPECOPS_VER}'
-d['_installedAt'] = '${INSTALL_TS}'
-with open('.specops.json', 'w') as f:
+d["_installedVersion"] = os.environ["SPECOPS_VER"]
+d["_installedAt"] = os.environ["INSTALL_TS"]
+with open(".specops.json", "w") as f:
     json.dump(d, f, indent=2)
-    f.write('\n')
-" && echo "Updated .specops.json with version metadata"
+    f.write("\n")
+PY
+      echo "Updated .specops.json with version metadata"
     fi
   fi
   echo ""
@@ -334,20 +343,23 @@ install_copilot() {
   echo "Installed successfully!"
 
   # Update .specops.json with version metadata if it exists
-  if [ -f ".specops.json" ]; then
+  if [ -f ".specops.json" ] && command -v python3 >/dev/null 2>&1; then
     SPECOPS_VER="$(grep '^version:' "$instructions_dir/specops.instructions.md" | head -1 | sed 's/version: *"//;s/"//')"
     INSTALL_TS="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
     if [ -n "$SPECOPS_VER" ]; then
-      python3 -c "
+      SPECOPS_VER="$SPECOPS_VER" INSTALL_TS="$INSTALL_TS" python3 - <<'PY'
 import json
-with open('.specops.json', 'r') as f:
+import os
+
+with open(".specops.json", "r") as f:
     d = json.load(f)
-d['_installedVersion'] = '${SPECOPS_VER}'
-d['_installedAt'] = '${INSTALL_TS}'
-with open('.specops.json', 'w') as f:
+d["_installedVersion"] = os.environ["SPECOPS_VER"]
+d["_installedAt"] = os.environ["INSTALL_TS"]
+with open(".specops.json", "w") as f:
     json.dump(d, f, indent=2)
-    f.write('\n')
-" && echo "Updated .specops.json with version metadata"
+    f.write("\n")
+PY
+      echo "Updated .specops.json with version metadata"
     fi
   fi
   echo ""

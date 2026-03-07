@@ -10,11 +10,9 @@ This command performs a commit → branch → push → PR workflow. Follow these
 
 Run `git rev-parse --abbrev-ref HEAD` and save the result as `ORIGINAL_BRANCH`.
 
-Determine the PR target branch:
-- If `ORIGINAL_BRANCH` is `main` or `master` → `TARGET_BRANCH` = `ORIGINAL_BRANCH`
-- Otherwise → `TARGET_BRANCH` = `ORIGINAL_BRANCH`
+Set `TARGET_BRANCH` = `ORIGINAL_BRANCH`.
 
-(In all cases the PR will target the branch the user was on when they ran this command.)
+(The PR will always target the branch the user was on when they ran this command.)
 
 ---
 

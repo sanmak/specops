@@ -57,6 +57,7 @@ Project-local Claude Code commands in `.claude/commands/` for git workflow autom
 | `/push` | Validate pre-push checks, push to remote |
 | `/ship` | Combined commit + push in one operation |
 | `/ship-pr` | Commit changes to a new branch, push, and open a PR for review |
+| `/pr-fix` | Fetch PR review comments, group by issue, fix, and push. Use `watch` submode with `/loop` for PR babysitting |
 | `/release` | Full release workflow: auto-generate CHANGELOG, bump version, validate, commit, push, and create GitHub Release |
 | `/monitor` | Monitor GitHub Actions CI status, diagnose failures, auto-fix and re-push (up to 3 cycles) |
 | `/docs-sync` | Detect stale documentation after code changes, propose targeted updates for approval |

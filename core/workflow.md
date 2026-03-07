@@ -135,7 +135,7 @@ When the user requests the version (`/specops version`, `/specops --version`, `/
    Latest releases: https://github.com/sanmak/specops/releases
    ```
 
-3. If FILE_EXISTS(`.specops.json`), READ_FILE it and check for `_installedVersion` and `_installedAt` fields. If present, display:
+3. If FILE_EXISTS(`.specops.json`), READ_FILE(`.specops.json`) and check for `_installedVersion` and `_installedAt` fields. If present, display:
 
    ```
    Installed version: {_installedVersion}
