@@ -22,6 +22,7 @@ All supported commands across Claude Code, Cursor, OpenAI Codex, and GitHub Copi
 | Status dashboard (filtered) | `/specops status in-review` | `show specops status in-review` |
 | Interview (explicit) | `/specops interview <idea>` | `Use specops interview <idea>` |
 | Init config | `/specops init` | `Use specops init` |
+| Manage steering files | `/specops steering` | `Use specops steering` |
 | Check version | `/specops version` | `Use specops version` |
 | Update SpecOps | `/specops update` | `Use specops update` |
 | Review a spec | `review <spec-name>` | `review <spec-name>` |
@@ -139,6 +140,36 @@ Use specops update
 ```
 
 **Notes:** Only triggers when the request is about updating SpecOps itself — not for product changes like "update login flow".
+
+---
+
+## Manage Steering Files
+
+Scaffold, view, and manage steering files — markdown files with YAML frontmatter that provide persistent project context (product overview, tech stack, project structure). `always`-included files are loaded before every spec; `fileMatch` files load conditionally; `manual` files are never auto-loaded.
+
+**Claude Code:**
+```text
+/specops steering
+```
+
+**Other platforms:**
+```text
+Use specops steering
+```
+
+**Workflow:**
+- If no steering directory exists, offers to create three foundation files: `product.md`, `tech.md`, `structure.md`
+- If the directory exists, shows a summary table of all steering files (name, inclusion mode, description) and offers to add, edit, or done on interactive platforms
+
+**Steering file inclusion modes:**
+
+| Mode | Description |
+|------|-------------|
+| `always` | Loaded before every spec (use for product overview, tech stack, project structure) |
+| `fileMatch` | Loaded only when affected files match the file globs (e.g., `["*.sql", "migrations/**"]`) |
+| `manual` | Not loaded automatically — available for explicit reference only |
+
+**Notes:** Only triggers when the request is about managing SpecOps steering files — not for product features like "add steering wheel component". Steering files live in `<specsDir>/steering/` (default: `.specops/steering/`).
 
 ---
 
@@ -418,5 +449,6 @@ These are the valid states a spec can be in, usable as filters with the status c
 | I'm updating my spec after feedback | `revise <name>` |
 | I'm ready to code | `implement <name>` |
 | I want to set up SpecOps in my project | `/specops init` |
+| I want to create or manage steering files | `/specops steering` |
 | I want to check my SpecOps version | `/specops version` |
 | I want to update SpecOps | `/specops update` |

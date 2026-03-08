@@ -11,13 +11,14 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
    - If any specs have status `implementing` or `in-review`, NOTIFY_USER: "Found incomplete spec: <name> (status: <status>). Continue working on it?"
    - If continuing an existing spec, READ_FILE the spec's `implementation.md` to recover session context (decision log, deviations, blockers, session log), then resume from the appropriate phase
    - If starting fresh, proceed normally
-3. **Pre-flight check**: Verify SpecOps skill availability for team collaboration:
+3. **Load steering files**: If FILE_EXISTS(`<specsDir>/steering/`), load persistent project context from steering files following the Steering Files module. Always-included files are loaded now; fileMatch files are deferred until after affected components and dependencies are identified (step 8). If `<specsDir>/steering/` does not exist, NOTIFY_USER: "Tip: Create steering files in `<specsDir>/steering/` (product.md, tech.md, structure.md) to give the agent persistent project context. Run `/specops steering` to set them up, or see the Steering Files module for templates."
+4. **Pre-flight check**: Verify SpecOps skill availability for team collaboration:
    - READ_FILE `.gitignore` if it exists
    - If `.gitignore` contains patterns matching `.claude/` or `.claude/*`, NOTIFY_USER with warning:
      > "⚠️ `.claude/` is excluded by your `.gitignore`. SpecOps spec files will still be created in `<specsDir>/` and tracked normally, but the SpecOps skill itself (`SKILL.md`) won't be visible to other contributors. To fix: (1) use user-level installation (`~/.claude/skills/specops/`), or (2) add `!.claude/skills/` to your `.gitignore` to selectively un-ignore just the skills directory."
    - If no `.gitignore` exists or doesn't conflict, continue normally
-4. Analyze the user's request to determine type (feature, bugfix, refactor)
-5. Determine the project vertical:
+5. Analyze the user's request to determine type (feature, bugfix, refactor)
+6. Determine the project vertical:
    - If `config.vertical` is set, use it directly
    - If not set, infer from request keywords and codebase:
      - **infrastructure**: terraform, ansible, kubernetes, docker, CI/CD, pipeline, deploy, provision, networking, IAM, cloud, AWS, GCP, Azure, helm, CDK
@@ -29,8 +30,8 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
      - **fullstack**: request spans both frontend and backend concerns
    - Default to `fullstack` if unclear
    - Display the detected vertical in configuration summary
-6. Explore codebase to understand existing patterns and architecture
-7. Identify affected components and dependencies
+7. Explore codebase to understand existing patterns and architecture
+8. Identify affected files, components, and dependencies — produce a concrete list of affected file paths for `fileMatch` steering file evaluation
 
 **Phase 2: Create Specification**
 1. Generate a structured spec directory in the configured `specsDir`
@@ -148,19 +149,20 @@ Even in high autonomy mode, ask for clarification when:
 
 When invoked:
 1. Greet the user briefly
-2. Check if the request is an **init** command (see "Init Mode" module). Patterns: "init", "initialize", "setup specops", "configure specops", "create config". These must refer to setting up SpecOps itself (creating `.specops.json`), NOT to a product feature. If the request describes a product capability (e.g., "set up autoscaling", "configure logging"), skip init and continue to step 7.
+2. Check if the request is an **init** command (see "Init Mode" module). Patterns: "init", "initialize", "setup specops", "configure specops", "create config". These must refer to setting up SpecOps itself (creating `.specops.json`), NOT to a product feature. If the request describes a product capability (e.g., "set up autoscaling", "configure logging"), skip init and continue to step 3.
 3. Check if the request is a **version** command. Patterns: "version", "--version", "-v". If so, follow the "Version Display" section below and stop.
 4. Check if the request is an **update** command (see "Update Mode" module). Patterns: "update specops", "upgrade specops", "check for updates", "get latest version", "get latest". These must refer to updating SpecOps itself, NOT to a product feature. If the request describes a product change (e.g., "update login flow", "upgrade the database"), skip update and continue to step 5.
 5. Check if the request is a **view** or **list** command (see "Spec Viewing" module). If so, follow the view/list workflow instead of the standard phases below.
-6. Check if interview mode is triggered (see "Interview Mode" module):
+6. Check if the request is a **steering** command (see "Steering Command" in the Steering Files module). Patterns: "steering", "create steering", "setup steering", "manage steering", "steering files", "add steering". These must refer to managing SpecOps steering files, NOT to a product feature. If so, follow the Steering Command workflow instead of the standard phases below.
+7. Check if interview mode is triggered (see "Interview Mode" module):
    - Explicit: request contains "interview" keyword
    - Auto (interactive platforms only): request is vague (≤5 words, no technical keywords, no action verb)
    - If triggered: follow the Interview Mode workflow, then continue with the enriched context
-7. Confirm the request type (feature/bugfix/implement/other)
-8. Show the configuration you'll use (including detected vertical)
-9. Begin the workflow immediately (high autonomy)
-10. Provide progress updates as you work
-11. Summarize completion clearly
+8. Confirm the request type (feature/bugfix/implement/other)
+9. Show the configuration you'll use (including detected vertical)
+10. Begin the workflow immediately (high autonomy)
+11. Provide progress updates as you work
+12. Summarize completion clearly
 
 ## Version Display
 

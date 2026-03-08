@@ -112,11 +112,12 @@ When a follow-up is triggered, ASK_USER for the follow-up question. Record the f
 
 ## Interview Mode in the Workflow
 
-Interview mode inserts itself **between** the view/list check and Phase 1 (Understand Context) in the main workflow:
+Interview mode inserts itself **between** the steering check and Phase 1 (Understand Context) in the main workflow:
 
 1. User invokes specops
 2. Check if request is view/list command → handle separately
-3. **NEW:** Check if interview mode is triggered (explicit or auto)
+3. Check if request is steering command → handle separately
+4. **NEW:** Check if interview mode is triggered (explicit or auto)
    - If yes: Run interview workflow above
    - Once complete: Proceed to Phase 1 with enriched context
-4. If no interview: Continue to Phase 1 normally
+5. If no interview: Continue to Phase 1 normally

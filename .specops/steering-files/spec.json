@@ -1,0 +1,17 @@
+{
+  "id": "steering-files",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "created": "2026-03-08T06:34:51Z",
+  "updated": "2026-03-08T06:46:57Z",
+  "specopsCreatedWith": "1.2.0",
+  "specopsUpdatedWith": "1.2.0",
+  "author": {
+    "name": "sanmak"
+  },
+  "reviewers": [],
+  "reviewRounds": 0,
+  "approvals": 0,
+  "requiredApprovals": 0
+}
