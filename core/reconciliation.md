@@ -14,9 +14,11 @@ If neither pattern matches, continue to interview check and the standard phases.
 ### Audit Workflow
 
 1. If FILE_EXISTS(`.specops.json`), READ_FILE(`.specops.json`) to get `specsDir`; otherwise use default `.specops`
-2. Parse target spec name from the request if present. If no name given, audit all specs (including completed — Post-Completion Modification only runs on completed specs).
+2. Parse target spec name from the request if present.
+   - If a name is given, audit that spec (any status, including completed — Post-Completion Modification runs for completed specs only when audited by name).
+   - If no name is given, LIST_DIR(`<specsDir>`) to enumerate all spec directories, then audit all specs whose `status` is not `completed` (completed specs are frozen; use `/specops audit <name>` to explicitly audit a completed spec).
 3. For each target spec:
-   a. If FILE_EXISTS(`<specsDir>/<name>/spec.json`), READ_FILE(`<specsDir>/<name>/spec.json`) to load metadata. If not found, NOTIFY_USER(`"Spec '<name>' not found in <specsDir>. Run LIST_DIR(<specsDir>) to see available specs."`) and stop.
+   a. If FILE_EXISTS(`<specsDir>/<name>/spec.json`), READ_FILE(`<specsDir>/<name>/spec.json`) to load metadata. If not found, NOTIFY_USER(`"Spec '<name>' not found in <specsDir>. Run '/specops list' to see available specs."`) and stop.
    b. If FILE_EXISTS(`<specsDir>/<name>/tasks.md`), READ_FILE(`<specsDir>/<name>/tasks.md`) to load tasks.
    c. Run the 5 drift checks below. Record each result as `Healthy`, `Warning`, or `Drift`.
    d. Overall health = worst result across all checks.
@@ -65,7 +67,7 @@ Detect specs stuck without activity.
   - `implementing`: > 14 days inactive → **Drift**; > 7 days → **Warning**
   - `draft` or `in-review`: > 30 days → **Warning**
   - `completed`: always **Healthy** (completed specs don't go stale)
-- If `canAccessGit` is false and `spec.json.updated` is unavailable → **Warning** (cannot determine age)
+- If `spec.json.updated` is missing (malformed or legacy spec) → **Warning** (cannot determine age)
 
 ### Cross-Spec Conflicts
 
@@ -162,7 +164,7 @@ Guided interactive repair for drifted specs. Available only on platforms with `c
 | File missing (deleted) | Remove reference from tasks.md / Provide new path / Skip |
 | Completed task, file missing | Provide new path / Note as discrepancy in tasks.md / Skip |
 | Pending task, file already exists | Mark task In Progress / Skip |
-| Stale spec | Continue as-is / Mark as draft / Mark completed / Skip |
+| Stale spec | Continue as-is / Skip |
 | Cross-spec conflict | Informational only — no repair action |
 
 9. For each repair: EDIT_FILE(`<specsDir>/<name>/tasks.md`) to apply path or status changes.

@@ -18,7 +18,7 @@ Add `audit` and `reconcile` subcommands to SpecOps. `audit` detects drift betwee
 - WHEN all checks pass THE SYSTEM SHALL report overall health as `Healthy`
 - WHEN any check finds a mismatch without confirmed data loss THE SYSTEM SHALL report `Warning`
 - WHEN any check confirms missing files or irrecoverable drift THE SYSTEM SHALL report `Drift`
-- IF `canAccessGit` is false THE SYSTEM SHALL skip git-dependent checks (Post-Completion Modification and Staleness via git) and note each skip in the report
+- IF `canAccessGit` is false THE SYSTEM SHALL skip git-dependent checks (Post-Completion Modification and git-based rename detection in File Drift) and note each skip in the report; the Staleness check is timestamp-based and runs regardless of git access
 - IF no specs exist in `<specsDir>` THEN THE SYSTEM SHALL report "No specs found to audit"
 
 **Progress Checklist:**

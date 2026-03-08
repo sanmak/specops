@@ -24,7 +24,7 @@ All supported commands across Claude Code, Cursor, OpenAI Codex, and GitHub Copi
 | Init config | `/specops init` | `Use specops init` |
 | Manage steering files | `/specops steering` | `Use specops steering` |
 | Audit spec health | `/specops audit <name>` | `audit <name>` |
-| Audit all specs | `/specops audit` | `health check` or `check drift` or `spec health` |
+| Audit all active specs | `/specops audit` | `health check` or `check drift` or `spec health` |
 | Reconcile a drifted spec | `/specops reconcile <name>` | `reconcile <name>` or `fix <name>` |
 | Check version | `/specops version` | `Use specops version` |
 | Update SpecOps | `/specops update` | `Use specops update` |

@@ -70,14 +70,13 @@ run_check "Test suite" bash scripts/run-tests.sh
 if command -v shellcheck >/dev/null 2>&1; then
   shopt -s nullglob
   shell_targets=(
-    setup.sh
-    verify.sh
     scripts/*.sh
     platforms/*/install.sh
-    hooks/pre-commit
-    hooks/pre-push
   )
   shopt -u nullglob
+  for _f in setup.sh verify.sh hooks/pre-commit hooks/pre-push; do
+    [ -f "$_f" ] && shell_targets+=("$_f")
+  done
   if [ "${#shell_targets[@]}" -gt 0 ]; then
     run_check "Shell static analysis" shellcheck "${shell_targets[@]}"
   else

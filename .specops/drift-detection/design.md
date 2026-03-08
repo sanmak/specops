@@ -16,7 +16,7 @@ A new `core/reconciliation.md` module added as the 17th core module, following t
 
 ### Decision 2: Reconciliation markers (Gap 13 lesson)
 **Context:** Markers must be specific enough to not match workflow prose (substring collision), and must use heading-level anchors.
-**Decision:** Use heading-prefixed markers: `"## Audit Mode"`, `"## Reconcile Mode"`, `"### File Drift"`, `"### Post-Completion Modification"`, `"### Task Status Inconsistency"`, `"### Staleness"`, `"### Cross-Spec Conflicts"`, `"### Health Summary"`, `"Audit Report"`
+**Decision:** Use heading-prefixed markers: `"## Audit Mode"`, `"## Reconcile Mode"`, `"### File Drift"`, `"### Post-Completion Modification"`, `"### Task Status Inconsistency"`, `"### Staleness"`, `"### Cross-Spec Conflicts"`, `"### Health Summary"`, `"### Audit Report"`
 **Rationale:** Heading-level markers are unique to the reconciliation module and cannot collide with prose references to the same concepts in other modules.
 
 ### Decision 3: No schema changes
