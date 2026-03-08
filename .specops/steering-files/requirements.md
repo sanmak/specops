@@ -18,9 +18,9 @@ Add a steering files system that provides persistent project context to the Spec
 - IF a steering file has invalid or missing frontmatter THEN THE SYSTEM SHALL skip it with a warning and continue loading other files
 
 **Progress Checklist:**
-- [x]Steering files recognized from `<specsDir>/steering/` directory
-- [x]YAML frontmatter parsed for name, description, inclusion fields
-- [x]Invalid files skipped with warning
+- [x] Steering files recognized from `<specsDir>/steering/` directory
+- [x] YAML frontmatter parsed for name, description, inclusion fields
+- [x] Invalid files skipped with warning
 
 ### Requirement 2: Inclusion Modes
 **As a** developer with diverse project context
@@ -35,10 +35,10 @@ Add a steering files system that provides persistent project context to the Spec
 - IF the `inclusion` field has an unrecognized value THEN THE SYSTEM SHALL skip the file with a warning
 
 **Progress Checklist:**
-- [x]`always` mode loads unconditionally in Phase 1
-- [x]`fileMatch` mode loads conditionally based on glob patterns
-- [x]`manual` mode skips automatic loading
-- [x]Unrecognized inclusion values handled with warning
+- [x] `always` mode loads unconditionally in Phase 1
+- [x] `fileMatch` mode loads conditionally based on glob patterns
+- [x] `manual` mode skips automatic loading
+- [x] Unrecognized inclusion values handled with warning
 
 ### Requirement 3: Phase 1 Integration
 **As a** developer using SpecOps
@@ -49,16 +49,14 @@ Add a steering files system that provides persistent project context to the Spec
 <!-- Event-Driven: Phase 1 workflow trigger -->
 - WHEN Phase 1 begins and `<specsDir>/steering/` exists THE SYSTEM SHALL load steering files between config reading and pre-flight check
 - WHEN `always` steering files are loaded THE SYSTEM SHALL inject their content as project context before codebase exploration
-- WHEN `fileMatch` steering files exist THE SYSTEM SHALL defer their evaluation until after request analysis identifies affected files
-- IF `config.steering.enabled` is `false` THE SYSTEM SHALL skip steering file loading entirely
-- IF the number of steering files exceeds `config.steering.maxFiles` (default 20) THE SYSTEM SHALL load only up to the limit and warn about skipped files
+- WHEN `fileMatch` steering files exist THE SYSTEM SHALL defer their evaluation until after affected components and dependencies are identified
+- IF the number of steering files exceeds the fixed limit of 20 THE SYSTEM SHALL load only the first 20 files (sorted alphabetically) and warn about skipped files
 
 **Progress Checklist:**
-- [x]Steering loading integrated into Phase 1 workflow
-- [x]Always-included files loaded before codebase exploration
-- [x]fileMatch files deferred until after request analysis
-- [x]Loading disabled when config.steering.enabled is false
-- [x]maxFiles limit enforced with warning
+- [x] Steering loading integrated into Phase 1 workflow
+- [x] Always-included files loaded before codebase exploration
+- [x] fileMatch files deferred until after affected components are identified
+- [x] Fixed 20-file safety limit enforced with warning
 
 ### Requirement 4: Foundation File Templates
 **As a** developer starting with steering files
@@ -72,17 +70,17 @@ Add a steering files system that provides persistent project context to the Spec
 - THE SYSTEM SHALL include YAML frontmatter with `inclusion: always` in all foundation templates
 
 **Progress Checklist:**
-- [x]product.md template defined (Product Overview, Target Users, Key Differentiators)
-- [x]tech.md template defined (Core Stack, Development Tools, Quality & Testing)
-- [x]structure.md template defined (Directory Layout, Key Files, Module Boundaries)
-- [x]All templates include proper YAML frontmatter
+- [x] product.md template defined (Product Overview, Target Users, Key Differentiators)
+- [x] tech.md template defined (Core Stack, Development Tools, Quality & Testing)
+- [x] structure.md template defined (Directory Layout, Key Files, Module Boundaries)
+- [x] All templates include proper YAML frontmatter
 
 ## Scope Boundary
 
 **Ships in this spec:**
 - `core/steering.md` module with format, inclusion modes, loading procedure, safety rules, foundation templates
 - `core/workflow.md` Phase 1 update with steering loading step
-- `schema.json` optional steering config (`enabled`, `maxFiles`)
+- Convention-based steering loading via `<specsDir>/steering/` with a fixed 20-file safety limit
 - Generator pipeline integration (generate.py + 4 platform templates)
 - Validation markers (`STEERING_MARKERS` in validate.py)
 - Platform consistency tests

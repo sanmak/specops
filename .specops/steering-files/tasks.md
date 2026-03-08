@@ -63,7 +63,7 @@ Insert a new step in Phase 1 between "Context recovery" (step 2) and "Pre-flight
 
 ---
 
-### Task 3: Update schema.json and config-handling.md
+### Task 3: Finalize Convention-Based Steering Scope
 **Status:** Completed
 **Estimated Effort:** S
 **Dependencies:** None
@@ -73,25 +73,25 @@ Insert a new step in Phase 1 between "Context recovery" (step 2) and "Pre-flight
 **Blocker:** None
 
 **Description:**
-Add optional `steering` object to the JSON schema with `enabled` (boolean) and `maxFiles` (integer) properties. Update config-handling.md with steering defaults.
+Remove schema/config steering assumptions from the spec artifacts and align them with the shipped convention-based behavior: steering activates via `<specsDir>/steering/` and enforces a fixed 20-file safety limit.
 
 **Implementation Steps:**
-1. Add `steering` property to schema.json root object
-2. Use `additionalProperties: false` per project convention
-3. Add steering defaults to config-handling.md
+1. Remove references to `steering.enabled` / `steering.maxFiles` from spec docs
+2. Update design and requirements docs to describe directory-driven activation and fixed limit
+3. Update this tasks file to document the convention-based scope
 
 **Acceptance Criteria:**
-- [x] `steering` object added to schema.json with `enabled` and `maxFiles` properties
-- [x] `additionalProperties: false` set on steering object
-- [x] Config defaults documented in config-handling.md
-- [x] Schema validation passes (`python3 tests/check_schema_sync.py`)
+- [x] Spec docs no longer claim a schema-level `steering` object
+- [x] Requirement and design language matches convention-based `<specsDir>/steering/` behavior
+- [x] Fixed 20-file safety limit is documented consistently
 
 **Files to Modify:**
-- `schema.json`
-- `core/config-handling.md`
+- `.specops/steering-files/design.md`
+- `.specops/steering-files/requirements.md`
+- `.specops/steering-files/tasks.md`
 
 **Tests Required:**
-- [x] Schema validation passes
+- [x] `python3 generator/validate.py`
 
 ---
 

@@ -85,6 +85,6 @@ Example: /specops Add user authentication with OAuth
 
 If steering files were created in Step 4.5, append to the message:
 
-```
+```text
 Steering files created in <specsDir>/steering/. Edit product.md, tech.md, and structure.md to describe your project.
 ```

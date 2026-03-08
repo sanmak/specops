@@ -41,15 +41,15 @@ During Phase 1, after reading the config and completing context recovery, load s
    - LIST_DIR(`<specsDir>/steering/`) to find all `.md` files
    - If the number of files exceeds 20, NOTIFY_USER("Steering file limit reached: loading first 20 of {total} files. Consider consolidating steering files to stay within the limit.") and process only the first 20 files (sorted alphabetically by filename).
    - For each `.md` file:
-     - READ_FILE to get the full content
+     - READ_FILE(`<specsDir>/steering/<filename>`) to get the full content
      - Parse the YAML frontmatter to extract `name`, `description`, `inclusion`, and optionally `globs`
      - If frontmatter is missing or invalid (missing required fields, unparseable YAML), NOTIFY_USER("Skipping steering file {filename}: invalid or missing frontmatter") and continue to the next file
      - If `inclusion` is `always`: store the file body content as loaded project context, available for all subsequent phases
-     - If `inclusion` is `fileMatch`: store the file with its `globs` for deferred evaluation (matched after request analysis identifies affected files in step 5 of Phase 1)
+     - If `inclusion` is `fileMatch`: store the file with its `globs` for deferred evaluation after affected components and dependencies are identified in Phase 1
      - If `inclusion` is `manual`: skip (not loaded automatically)
      - If `inclusion` has an unrecognized value: NOTIFY_USER("Skipping steering file {filename}: unrecognized inclusion mode '{value}'") and continue
 2. After loading `always` files, NOTIFY_USER with a brief summary: "Loaded {N} steering file(s): {names}"
-3. After request analysis (Phase 1 step 5, after affected files are identified): evaluate `fileMatch` steering files by checking each file's `globs` against the set of affected files. Load any matching files and add their content to the project context.
+3. After Phase 1 identifies affected components and dependencies (step 8), evaluate `fileMatch` steering files by checking each file's `globs` against the set of affected files. Load any matching files and add their content to the project context.
 
 ### Steering Safety
 
@@ -138,20 +138,25 @@ These must refer to managing SpecOps steering files, NOT to a product feature (e
 
 #### Workflow
 
-1. READ_FILE `.specops.json` to get `specsDir` (default `.specops`)
+1. If FILE_EXISTS(`.specops.json`), READ_FILE(`.specops.json`) to get `specsDir`; otherwise use default `.specops`
 2. Check if `<specsDir>/steering/` exists:
 
 **If steering directory does NOT exist:**
-- ASK_USER: "No steering files found. Would you like to create foundation steering files (product.md, tech.md, structure.md) for persistent project context?"
-- If yes: create the 3 foundation templates using WRITE_FILE (see Foundation File Templates above), then NOTIFY_USER: "Created 3 steering files in `<specsDir>/steering/`. Edit them to describe your project — the agent will load them automatically before every spec."
-- If no: NOTIFY_USER: "No steering files created. You can create them manually in `<specsDir>/steering/` — see the Foundation File Templates section for the expected format."
+- On interactive platforms (`canAskInteractive = true`), ASK_USER: "No steering files found. Would you like to create foundation steering files (product.md, tech.md, structure.md) for persistent project context?"
+  - If yes: create the 3 foundation templates using:
+    - `WRITE_FILE(<specsDir>/steering/product.md, <productTemplate>)`
+    - `WRITE_FILE(<specsDir>/steering/tech.md, <techTemplate>)`
+    - `WRITE_FILE(<specsDir>/steering/structure.md, <structureTemplate>)`
+    (see Foundation File Templates above for `<...Template>` contents), then NOTIFY_USER: "Created 3 steering files in `<specsDir>/steering/`. Edit them to describe your project — the agent will load them automatically before every spec."
+  - If no: NOTIFY_USER: "No steering files created. You can create them manually in `<specsDir>/steering/` — see the Foundation File Templates section for the expected format."
+- On non-interactive platforms (`canAskInteractive = false`), NOTIFY_USER: "No steering files found. Create `<specsDir>/steering/product.md`, `tech.md`, and `structure.md` using the Foundation File Templates in this module."
 
 **If steering directory exists:**
 - LIST_DIR(`<specsDir>/steering/`) to find all `.md` files
-- For each file, READ_FILE and parse YAML frontmatter
+- For each file, READ_FILE(`<specsDir>/steering/<filename>`) and parse YAML frontmatter
 - Present a summary table:
 
-```
+```text
 Steering Files (<specsDir>/steering/)
 
 | File | Name | Inclusion | Description |

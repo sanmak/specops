@@ -35,14 +35,14 @@ Steering files add a new layer of persistent project context to SpecOps. They ar
 **Decision:** Option 1 — inline in `core/steering.md`
 **Rationale:** Foundation templates are short stubs (5-10 lines each). Separate files would require extending `render_templates_section()` and adding template ordering logic. The init module already inlines config templates successfully.
 
-### Decision 4: Schema Config Scope
-**Context:** What steering configuration goes in `.specops.json`?
+### Decision 4: Convention-Based Scope
+**Context:** How should steering activation and safety limits be defined?
 **Options Considered:**
-1. Minimal: `enabled` boolean + `maxFiles` limit — steering definitions live in markdown files
-2. Full: also include file list, default inclusion mode, template selection
+1. Convention-based: steering activates when `<specsDir>/steering/` exists, with a fixed safety limit of 20 files
+2. Schema-based: add `.specops.json` `steering` config (`enabled`, `maxFiles`)
 
-**Decision:** Option 1 — minimal config
-**Rationale:** Steering files are self-describing via YAML frontmatter. The config only needs to control whether steering is active and a safety limit. This avoids duplicating file metadata in two places.
+**Decision:** Option 1 — convention-based with fixed limit
+**Rationale:** The shipped implementation is directory-driven and does not add schema/config fields. This keeps steering metadata in one place (the steering files themselves) and avoids dual-source drift between docs and config.
 
 ## Product Module Design
 
@@ -56,9 +56,9 @@ Steering files add a new layer of persistent project context to SpecOps. They ar
 **Interface:** New step between "Context recovery" and "Pre-flight check"
 **Dependencies:** `core/steering.md` (references steering module for full procedure)
 
-### Module: Schema Update (`schema.json`)
-**Responsibility:** Validate optional steering configuration in `.specops.json`
-**Interface:** New `steering` object property at schema root
+### Module: Convention Handling (`core/steering.md`)
+**Responsibility:** Define directory-driven steering activation and enforce the fixed 20-file safety limit
+**Interface:** Steering loads when `<specsDir>/steering/` exists; no schema-level steering contract
 **Dependencies:** None
 
 ### Module: Generator Pipeline
@@ -91,7 +91,7 @@ Context recovery (index.json)
 Pre-flight check
     │
     ▼
-Analyze request → match fileMatch globs → load matching steering
+Analyze request → identify affected components/files → match fileMatch globs → load matching steering
     │
     ▼
 Explore codebase (with steering context)
@@ -109,13 +109,13 @@ Explore codebase (with steering context)
 ## Security Considerations
 - **Convention Sanitization**: Steering file content is treated as project context only. Meta-instructions detected in steering content are skipped with a warning (same rules as `team.conventions`).
 - **Path Containment**: Steering file names must not contain `..` or absolute paths. The steering directory inherits `specsDir` path containment.
-- **Max Files**: Default limit of 20 steering files prevents excessive context injection.
+- **Max Files**: Fixed limit of 20 steering files prevents excessive context injection.
 
 ## Ship Plan
 
 1. Create `core/steering.md` — the core module (no dependencies, can be developed independently)
 2. Update `core/workflow.md` — Phase 1 integration (depends on steering.md existing)
-3. Update `schema.json` + `core/config-handling.md` — config support (independent)
+3. Finalize convention-based scope (no schema/config steering fields)
 4. Update generator pipeline — include in all platforms (depends on steering.md)
 5. Update validation + tests — ensure consistency (depends on generator changes)
 6. Regenerate all platform outputs — final integration step
