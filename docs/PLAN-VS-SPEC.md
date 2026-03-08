@@ -75,14 +75,14 @@ The most effective workflow layers both:
 **Example — Adding OAuth authentication:**
 
 Without SpecOps:
-```
+```text
 Enter plan mode → sketch approach → exit → code → close session →
 reopen → re-explain context → code more → forget edge cases →
 ship → discover regressions
 ```
 
 With SpecOps:
-```
+```text
 /specops Add OAuth authentication
 → Structured requirements with EARS criteria
 → Design doc with technical decisions recorded
@@ -98,7 +98,7 @@ The spec survives session boundaries. The decisions are recorded. The acceptance
 
 ```bash
 # Install SpecOps (Claude Code)
-curl -fsSL https://raw.githubusercontent.com/sanmak/specops/main/scripts/remote-install.sh | bash
+bash <(curl -fsSL https://raw.githubusercontent.com/sanmak/specops/main/scripts/remote-install.sh)
 
 # Create your first spec
 /specops Add user authentication with OAuth
