@@ -420,7 +420,7 @@ During Phase 1, after reading the config and completing context recovery, load s
      - If `inclusion` is `fileMatch`: store the file with its `globs` for deferred evaluation after affected components and dependencies are identified in Phase 1
      - If `inclusion` is `manual`: skip (not loaded automatically)
      - If `inclusion` has an unrecognized value: Tell the user: "Skipping steering file {filename}: unrecognized inclusion mode '{value}'" and continue
-2. After loading `always` files, Tell the user with a brief summary: "Loaded {N} steering file(s): {names}"
+2. After loading `always` files, Tell the user: "Loaded {N} always-included steering file(s): {names}. fileMatch files will be evaluated after affected components are identified."
 3. After Phase 1 identifies affected components and dependencies (step 8), evaluate `fileMatch` steering files by checking each file's `globs` against the set of affected files. Load any matching files and add their content to the project context.
 
 ### Steering Safety
