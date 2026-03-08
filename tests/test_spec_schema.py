@@ -1,7 +1,9 @@
 """Validate spec-schema.json and index-schema.json are well-formed and test examples against them."""
 
+import glob
 import json
 import sys
+from datetime import datetime
 
 try:
     from jsonschema import validate, ValidationError, Draft7Validator
@@ -403,6 +405,39 @@ def main():
         "updated": "2026-03-01T10:00:00-04:00",
         "author": {"name": "Alice"}
     }, "Valid timestamps with timezone offsets"))
+
+    # --- Timestamp ordering tests ---
+    print("\n--- Timestamp Ordering Validation ---")
+
+    def parse_ts(ts_str):
+        """Parse ISO 8601 timestamp to datetime for comparison."""
+        ts_str = ts_str.replace("Z", "+00:00")
+        return datetime.fromisoformat(ts_str)
+
+    def check_timestamp_ordering(spec_path):
+        """Verify updated >= created and reviewedAt >= created in a spec.json."""
+        with open(spec_path) as f:
+            spec = json.load(f)
+        created = spec.get("created")
+        updated = spec.get("updated")
+        if created and updated:
+            if parse_ts(updated) < parse_ts(created):
+                print(f"FAIL: {spec_path} - updated < created ({updated} < {created})")
+                return False
+        for reviewer in spec.get("reviewers", []):
+            reviewed_at = reviewer.get("reviewedAt")
+            if reviewed_at and created:
+                if parse_ts(reviewed_at) < parse_ts(created):
+                    print(f"FAIL: {spec_path} - reviewedAt < created ({reviewed_at} < {created})")
+                    return False
+        print(f"PASS: {spec_path} - timestamp ordering valid")
+        return True
+
+    for spec_file in sorted(glob.glob("examples/specs/*/spec.json")):
+        check(check_timestamp_ordering(spec_file))
+
+    for spec_file in sorted(glob.glob(".specops/*/spec.json")):
+        check(check_timestamp_ordering(spec_file))
 
     # --- index-schema.json tests ---
     print("\n--- index.json Validation ---")
