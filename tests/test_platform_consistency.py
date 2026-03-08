@@ -111,6 +111,13 @@ REQUIRED_MARKERS = {
         "### Health Summary",
         "### Audit Report",
     ],
+    "from_plan": [
+        "# From Plan Mode",
+        "From Plan mode",
+        "Faithful Conversion",
+        "from-plan",
+        "Parse the plan",
+    ],
 }
 
 

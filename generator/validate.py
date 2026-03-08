@@ -154,6 +154,15 @@ STEERING_MARKERS = [
     "structure.md",
 ]
 
+# From Plan mode markers that MUST appear in every output
+FROM_PLAN_MARKERS = [
+    "# From Plan Mode",
+    "From Plan mode",
+    "Faithful Conversion",
+    "from-plan",
+    "Parse the plan",
+]
+
 
 def read_file(path):
     with open(path, "r", encoding="utf-8") as f:
@@ -283,6 +292,9 @@ def validate_platform(platform, info):
 
     # Check reconciliation (audit/reconcile) present
     errors.extend(check_markers_present(platform, content, RECONCILIATION_MARKERS, "reconciliation"))
+
+    # Check from-plan mode present
+    errors.extend(check_markers_present(platform, content, FROM_PLAN_MARKERS, "from-plan"))
 
     # Platform-specific format validation
     if platform == "cursor":
@@ -501,7 +513,7 @@ def main():
     if len(generated) >= 2:
         platforms = list(generated.keys())
         consistency_errors = []
-        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS:
+        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS:
             present_in = [p for p in platforms if marker in generated[p]["content"]]
             if len(present_in) != len(platforms):
                 missing = set(platforms) - set(present_in)
