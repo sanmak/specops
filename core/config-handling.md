@@ -30,10 +30,6 @@ Load configuration from `.specops.json` at project root. If not found, use these
     "testing": "auto",
     "linting": { "enabled": true, "fixOnSave": false },
     "formatting": { "enabled": true }
-  },
-  "steering": {
-    "enabled": true,
-    "maxFiles": 20
   }
 }
 ```

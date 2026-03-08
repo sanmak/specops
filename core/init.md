@@ -58,6 +58,18 @@ After writing the config, ASK_USER: "Would you like to customize any fields? Com
 
 If the user wants to customize, EDIT_FILE(`.specops.json`) to modify the specific fields they request.
 
+#### Step 4.5: Steering Files (Optional)
+
+ASK_USER: "Would you like to create steering files for persistent project context? Steering files give the agent foundational knowledge about your project (what it builds, tech stack, codebase structure) so every spec starts with informed context."
+
+If yes:
+1. WRITE_FILE(`<specsDir>/steering/product.md`) with the product.md foundation template from the Steering Files module
+2. WRITE_FILE(`<specsDir>/steering/tech.md`) with the tech.md foundation template from the Steering Files module
+3. WRITE_FILE(`<specsDir>/steering/structure.md`) with the structure.md foundation template from the Steering Files module
+4. NOTIFY_USER: "Created 3 steering files in `<specsDir>/steering/`. Edit them to describe your project — the agent will load them automatically before every spec."
+
+If no, continue to Step 5.
+
 #### Step 5: Next Steps
 
 NOTIFY_USER with:
@@ -69,4 +81,10 @@ SpecOps initialized! Your config:
 
 Next: Run `/specops <description>` to create your first spec.
 Example: /specops Add user authentication with OAuth
+```
+
+If steering files were created in Step 4.5, append to the message:
+
+```
+Steering files created in <specsDir>/steering/. Edit product.md, tech.md, and structure.md to describe your project.
 ```
