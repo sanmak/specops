@@ -1,6 +1,6 @@
 # Steering Files Guide
 
-Steering files are persistent project context documents that SpecOps loads before every spec. They give the agent a stable understanding of what your project is, how it's built, and how it's organized — so you don't re-explain the same context at the start of each spec.
+Steering files are persistent project context documents that SpecOps loads during Phase 1 to give the agent stable project context for spec generation. They help the agent understand what your project is, how it's built, and how it's organized — so you don't re-explain the same context at the start of each spec.
 
 ---
 
@@ -108,12 +108,12 @@ inclusion: manual
 Run the steering command and SpecOps will scaffold the three foundation files for you:
 
 **Claude Code:**
-```
+```text
 /specops steering
 ```
 
 **Other platforms:**
-```
+```text
 Use specops steering
 ```
 

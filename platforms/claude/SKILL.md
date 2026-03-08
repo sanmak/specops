@@ -1365,7 +1365,7 @@ Guided interactive repair for drifted specs. Available only on platforms with `c
 
 | Capability | Impact |
 |-----------|--------|
-| `canAccessGit: false` | Checks 2 (post-completion mods) and 4 (git-based staleness) degrade gracefully; Check 1 loses rename detection; each skipped check notes the reason in the report |
+| `canAccessGit: false` | Checks 2 (post-completion mods) degrade gracefully; Check 1 loses rename detection; Check 4 (staleness) works via `spec.json.updated` timestamp regardless of git access; each skipped check notes the reason in the report |
 | `canAskInteractive: false` | Audit works fully (read-only report); Reconcile mode blocked with message |
 | `canTrackProgress: false` | Report progress in response text instead of the built-in todo system |
 

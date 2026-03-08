@@ -78,7 +78,11 @@ if command -v shellcheck >/dev/null 2>&1; then
     hooks/pre-push
   )
   shopt -u nullglob
-  run_check "Shell static analysis" shellcheck "${shell_targets[@]}"
+  if [ "${#shell_targets[@]}" -gt 0 ]; then
+    run_check "Shell static analysis" shellcheck "${shell_targets[@]}"
+  else
+    warn "Shell static analysis skipped: no target shell files found"
+  fi
 else
   warn "Shell static analysis skipped because shellcheck is not installed"
 fi

@@ -217,7 +217,7 @@ spec health
 
 **Result levels:** `Healthy` → `Warning` → `Drift`. Overall = worst check across all 5.
 
-**Notes:** Checks 2 and 4 (git-based) degrade gracefully when `canAccessGit: false` — they skip with a note rather than failing. Only triggers for SpecOps spec health — not for product features like "audit log" or "health endpoint".
+**Notes:** Check 2 (post-completion mods) degrades gracefully when `canAccessGit: false` — it skips with a note. Check 4 (staleness) works via `spec.json.updated` timestamp regardless of git access. Only triggers for SpecOps spec health — not for product features like "audit log" or "health endpoint".
 
 ---
 
