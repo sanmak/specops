@@ -89,6 +89,17 @@ REQUIRED_MARKERS = {
         "Check Latest Available Version",
         "Detect Installation Method",
     ],
+    "steering": [
+        "## Steering Files",
+        "Steering File Format",
+        "Inclusion Modes",
+        "fileMatch",
+        "Loading Procedure",
+        "Foundation File Templates",
+        "product.md",
+        "tech.md",
+        "structure.md",
+    ],
 }
 
 

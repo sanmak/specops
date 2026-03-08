@@ -338,6 +338,7 @@ def generate_claude(core, platform_config):
     context = {
         "workflow": core["workflow"],
         "config_handling": core["config-handling"],
+        "steering": core["steering"],
         "review_workflow": core["review-workflow"],
         "view": core["view"],
         "interview": core["interview"],
@@ -451,6 +452,7 @@ def generate_cursor(core, platform_config):
     context = {
         "workflow": core["workflow"],
         "config_handling": core["config-handling"],
+        "steering": core["steering"],
         "review_workflow": core["review-workflow"],
         "view": core["view"],
         "interview": core["interview"],
@@ -484,6 +486,7 @@ def generate_codex(core, platform_config):
     context = {
         "workflow": core["workflow"],
         "config_handling": core["config-handling"],
+        "steering": core["steering"],
         "review_workflow": core["review-workflow"],
         "view": core["view"],
         "interview": core["interview"],
@@ -528,6 +531,7 @@ def generate_copilot(core, platform_config):
     context = {
         "workflow": core["workflow"],
         "config_handling": core["config-handling"],
+        "steering": core["steering"],
         "review_workflow": core["review-workflow"],
         "view": core["view"],
         "interview": core["interview"],

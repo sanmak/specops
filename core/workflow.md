@@ -11,13 +11,14 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
    - If any specs have status `implementing` or `in-review`, NOTIFY_USER: "Found incomplete spec: <name> (status: <status>). Continue working on it?"
    - If continuing an existing spec, READ_FILE the spec's `implementation.md` to recover session context (decision log, deviations, blockers, session log), then resume from the appropriate phase
    - If starting fresh, proceed normally
-3. **Pre-flight check**: Verify SpecOps skill availability for team collaboration:
+3. **Load steering files**: If FILE_EXISTS(`<specsDir>/steering/`), load persistent project context from steering files following the Steering Files module. Always-included files are loaded now; fileMatch files are deferred until after request analysis (step 6). If `config.steering.enabled` is `false`, skip this step.
+4. **Pre-flight check**: Verify SpecOps skill availability for team collaboration:
    - READ_FILE `.gitignore` if it exists
    - If `.gitignore` contains patterns matching `.claude/` or `.claude/*`, NOTIFY_USER with warning:
      > "⚠️ `.claude/` is excluded by your `.gitignore`. SpecOps spec files will still be created in `<specsDir>/` and tracked normally, but the SpecOps skill itself (`SKILL.md`) won't be visible to other contributors. To fix: (1) use user-level installation (`~/.claude/skills/specops/`), or (2) add `!.claude/skills/` to your `.gitignore` to selectively un-ignore just the skills directory."
    - If no `.gitignore` exists or doesn't conflict, continue normally
-4. Analyze the user's request to determine type (feature, bugfix, refactor)
-5. Determine the project vertical:
+5. Analyze the user's request to determine type (feature, bugfix, refactor)
+6. Determine the project vertical:
    - If `config.vertical` is set, use it directly
    - If not set, infer from request keywords and codebase:
      - **infrastructure**: terraform, ansible, kubernetes, docker, CI/CD, pipeline, deploy, provision, networking, IAM, cloud, AWS, GCP, Azure, helm, CDK
@@ -29,8 +30,8 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
      - **fullstack**: request spans both frontend and backend concerns
    - Default to `fullstack` if unclear
    - Display the detected vertical in configuration summary
-6. Explore codebase to understand existing patterns and architecture
-7. Identify affected components and dependencies
+7. Explore codebase to understand existing patterns and architecture
+8. Identify affected components and dependencies
 
 **Phase 2: Create Specification**
 1. Generate a structured spec directory in the configured `specsDir`

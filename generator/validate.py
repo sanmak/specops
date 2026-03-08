@@ -128,6 +128,19 @@ REGRESSION_MARKERS = [
     "### Scope Escalation Check",
 ]
 
+# Steering files markers that MUST appear in every output
+STEERING_MARKERS = [
+    "## Steering Files",
+    "Steering File Format",
+    "Inclusion Modes",
+    "fileMatch",
+    "Loading Procedure",
+    "Foundation File Templates",
+    "product.md",
+    "tech.md",
+    "structure.md",
+]
+
 
 def read_file(path):
     with open(path, "r", encoding="utf-8") as f:
@@ -251,6 +264,9 @@ def validate_platform(platform, info):
 
     # Check regression risk analysis present
     errors.extend(check_markers_present(platform, content, REGRESSION_MARKERS, "regression"))
+
+    # Check steering files present
+    errors.extend(check_markers_present(platform, content, STEERING_MARKERS, "steering"))
 
     # Platform-specific format validation
     if platform == "cursor":

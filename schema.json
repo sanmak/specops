@@ -234,6 +234,25 @@
       "format": "date-time",
       "description": "ISO 8601 timestamp of when SpecOps was installed. Written by installers, do not edit manually."
     },
+    "steering": {
+      "type": "object",
+      "description": "Steering files configuration for persistent project context. Steering files live in <specsDir>/steering/ as markdown with YAML frontmatter.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to load steering files during Phase 1. Set to false to disable steering without deleting files."
+        },
+        "maxFiles": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50,
+          "default": 20,
+          "description": "Maximum number of steering files to load. Prevents excessive context injection."
+        }
+      },
+      "additionalProperties": false
+    },
     "integrations": {
       "type": "object",
       "description": "External tool integrations",

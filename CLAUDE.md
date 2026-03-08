@@ -84,7 +84,7 @@ generator/      Generates platform outputs from core + platform adapters
 ```
 
 The `core/` directory defines the workflow, safety rules, templates, and vertical adaptations once. The `generator/generate.py` script assembles platform-specific instruction files by:
-1. Loading all `core/*.md` modules (workflow, safety, config-handling, verticals, simplicity, data-handling, error-handling, custom-templates, view, interview, init, update, review-workflow, task-tracking, and spec templates from `core/templates/`)
+1. Loading all `core/*.md` modules (workflow, safety, config-handling, steering, verticals, simplicity, data-handling, error-handling, custom-templates, view, interview, init, update, review-workflow, task-tracking, and spec templates from `core/templates/`)
 2. Loading `platforms/{name}/platform.json` for tool mappings and capabilities
 3. Rendering through `generator/templates/{name}.j2` Jinja2-style templates
 4. Substituting abstract tool operations (e.g., `READ_FILE`) with platform-specific language from each platform's `toolMapping`
@@ -130,7 +130,7 @@ Plugin manifests (`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json
 
 - **Never edit generated platform output files directly** (`SKILL.md`, `specops.mdc`, `specops.instructions.md`). Edit `core/` modules or `generator/templates/*.j2` instead, then regenerate with `python3 generator/generate.py --all`.
 - **`core/` must remain platform-agnostic** — use abstract operations from `core/tool-abstraction.md` (e.g., `READ_FILE`, `WRITE_FILE`), never platform-specific tool names.
-- **Preserve the 4-phase workflow structure** in `core/workflow.md`: Understand → Spec → Implement → Complete. Phase 1 includes context recovery (resume incomplete specs). Phase 2 uses EARS notation for acceptance criteria. Phase 4 includes docs check and checkbox verification.
+- **Preserve the 4-phase workflow structure** in `core/workflow.md`: Understand → Spec → Implement → Complete. Phase 1 includes context recovery (resume incomplete specs) and steering file loading (persistent project context from `<specsDir>/steering/`). Phase 2 uses EARS notation for acceptance criteria. Phase 4 includes docs check and checkbox verification.
 - **Preserve the Simplicity Principle** in `core/simplicity.md` and all safety mechanisms in `core/safety.md`.
 - **`schema.json`** is the single source of truth for `.specops.json` configuration validation. Run `python3 tests/check_schema_sync.py` to verify it is well-formed.
 - **All JSON schema objects** must use `"additionalProperties": false`, strings must have `maxLength`, arrays must have `maxItems`.
@@ -180,6 +180,7 @@ CI verifies generated files aren't stale — after regenerating, the diff of `pl
 - **Update markers present** — update mode detection, version detection, update workflow
 - **Interview markers present** — interview mode, trigger conditions, question flow
 - **Task tracking markers present** — task state machine, write ordering protocol, acceptance criteria verification
+- **Steering markers present** — steering file format, inclusion modes, loading procedure, foundation templates
 
 ## Configuration
 
