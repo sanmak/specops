@@ -23,8 +23,8 @@ All supported commands across Claude Code, Cursor, OpenAI Codex, and GitHub Copi
 | Interview (explicit) | `/specops interview <idea>` | `Use specops interview <idea>` |
 | Init config | `/specops init` | `Use specops init` |
 | Manage steering files | `/specops steering` | `Use specops steering` |
-| Audit spec health | `/specops audit` | `audit <name>` or `health check` |
-| Audit all active specs | `/specops audit` (no name) | `check drift` or `spec health` |
+| Audit spec health | `/specops audit <name>` | `audit <name>` |
+| Audit all specs | `/specops audit` | `health check` or `check drift` or `spec health` |
 | Reconcile a drifted spec | `/specops reconcile <name>` | `reconcile <name>` or `fix <name>` |
 | Check version | `/specops version` | `Use specops version` |
 | Update SpecOps | `/specops update` | `Use specops update` |
@@ -238,6 +238,7 @@ Guided interactive repair for drifted specs. Presents numbered findings and appl
 reconcile <name>
 fix <name>
 repair <name>
+sync <name>
 ```
 
 **Workflow:**
@@ -254,8 +255,8 @@ repair <name>
 |---------|---------|
 | Missing file (renamed) | Update path in tasks.md / Skip |
 | Missing file (deleted) | Remove reference / Provide new path / Skip |
-| Completed task, file missing | Mark task Pending / Provide new path / Skip |
-| Pending task, file already exists | Mark Completed / Mark In Progress / Skip |
+| Completed task, file missing | Provide new path / Note as discrepancy in tasks.md / Skip |
+| Pending task, file already exists | Mark In Progress / Skip |
 | Stale spec | Continue / Mark draft / Mark completed / Skip |
 | Cross-spec conflict | Informational only — no repair |
 

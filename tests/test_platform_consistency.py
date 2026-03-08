@@ -109,7 +109,7 @@ REQUIRED_MARKERS = {
         "### Staleness",
         "### Cross-Spec Conflicts",
         "### Health Summary",
-        "Audit Report",
+        "### Audit Report",
     ],
 }
 

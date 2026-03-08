@@ -121,7 +121,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - If stale documentation is detected, update the affected sections
    - If unsure whether a doc needs updating, flag it to the user rather than skipping silently
    - **New subcommand check**: If this spec shipped a new `/specops` subcommand (a new command branch in Getting Started or a new module routed from there):
-     - [ ] `canAskInteractive = false` fallback written for every `Use the AskUserQuestion tool` branch in the new subcommand
+     - [ ] `canAskInteractive = false` fallback written for every interactive prompt in the new subcommand
      - [ ] Row added to `docs/COMMANDS.md` Quick Lookup table for the new subcommand
      - [ ] `FILE_EXISTS` guard used before reading any optional config (e.g., `.specops.json`) in the subcommand's first step
 4. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp (Use the Bash tool to run(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`
@@ -1205,7 +1205,7 @@ If neither pattern matches, continue to interview check and the standard phases.
 ### Audit Workflow
 
 1. If FILE_EXISTS(`.specops.json`), Use the Read tool to read(`.specops.json`) to get `specsDir`; otherwise use default `.specops`
-2. Parse target spec name from the request if present. If no name given, audit all specs whose `status` is not `completed`.
+2. Parse target spec name from the request if present. If no name given, audit all specs (including completed — Post-Completion Modification only runs on completed specs).
 3. For each target spec:
    a. If FILE_EXISTS(`<specsDir>/<name>/spec.json`), Use the Read tool to read(`<specsDir>/<name>/spec.json`) to load metadata. If not found, Display a message to the user(`"Spec '<name>' not found in <specsDir>. Run Use the Glob tool to list(<specsDir>) to see available specs."`) and stop.
    b. If FILE_EXISTS(`<specsDir>/<name>/tasks.md`), Use the Read tool to read(`<specsDir>/<name>/tasks.md`) to load tasks.
@@ -1264,8 +1264,8 @@ Detect multiple active (non-completed) specs referencing the same files.
 
 - Use the Glob tool to list(`<specsDir>`) to find all spec directories
 - For each active spec (status ≠ completed): Use the Read tool to read(`<specsDir>/<dir>/tasks.md`) if it exists, collect all "Files to Modify" paths
-- Build a map: `file_path → [spec names]`
-- Any file with 2+ specs → **Warning** (no repair available — informational only)
+- Build a map: `file_path → [distinct spec names]` (deduplicate spec names per file — a single spec referencing the same file in multiple tasks counts as one)
+- Any file with 2+ distinct specs → **Warning** (no repair available — informational only)
 - For single-spec audit: still load all active specs to detect conflicts involving the target
 
 ### Health Summary
@@ -1344,20 +1344,20 @@ Guided interactive repair for drifted specs. Available only on platforms with `c
 4. Run full audit on the target spec (all 5 checks).
 5. If all checks Healthy → Display a message to the user(`"No drift detected in <spec-name>. No reconciliation needed."`) and stop.
 6. Present numbered findings list to the user.
-7. Use the AskUserQuestion tool(`"Which findings to fix? Enter 'all', comma-separated numbers (e.g. '1,3'), or 'skip' to exit."`)
+7. Prompt the user: "Which findings to fix? Enter 'all', comma-separated numbers (e.g. '1,3'), or 'skip' to exit."
 8. For each selected finding, apply the appropriate repair:
 
 | Finding Type | Repair Options |
 |-------------|----------------|
 | File missing (renamed) | Update path in tasks.md / Skip |
 | File missing (deleted) | Remove reference from tasks.md / Provide new path / Skip |
-| Completed task, file missing | Mark task Pending (set status back to Pending) / Provide new path / Skip |
-| Pending task, file already exists | Mark task Completed / Mark In Progress / Skip |
+| Completed task, file missing | Provide new path / Note as discrepancy in tasks.md / Skip |
+| Pending task, file already exists | Mark task In Progress / Skip |
 | Stale spec | Continue as-is / Mark as draft / Mark completed / Skip |
 | Cross-spec conflict | Informational only — no repair action |
 
 9. For each repair: Use the Edit tool to modify(`<specsDir>/<name>/tasks.md`) to apply path or status changes.
-10. Update `spec.json.updated` timestamp: Use the Bash tool to run(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) and Use the Edit tool to modify(`<specsDir>/<name>/spec.json`) with the new timestamp.
+10. Update `spec.json`: Use the Bash tool to run(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) and Use the Edit tool to modify(`<specsDir>/<name>/spec.json`) to set `updated` to the current timestamp and `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field).
 11. Regenerate `<specsDir>/index.json` from all `*/spec.json` files.
 12. Display a message to the user(`"Reconciliation complete. Applied N fix(es) to <spec-name>."`)
 

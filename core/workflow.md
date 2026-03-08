@@ -114,7 +114,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - If stale documentation is detected, update the affected sections
    - If unsure whether a doc needs updating, flag it to the user rather than skipping silently
    - **New subcommand check**: If this spec shipped a new `/specops` subcommand (a new command branch in Getting Started or a new module routed from there):
-     - [ ] `canAskInteractive = false` fallback written for every `ASK_USER` branch in the new subcommand
+     - [ ] `canAskInteractive = false` fallback written for every interactive prompt in the new subcommand
      - [ ] Row added to `docs/COMMANDS.md` Quick Lookup table for the new subcommand
      - [ ] `FILE_EXISTS` guard used before reading any optional config (e.g., `.specops.json`) in the subcommand's first step
 4. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp (RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`

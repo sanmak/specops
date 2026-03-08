@@ -138,7 +138,7 @@ RECONCILIATION_MARKERS = [
     "### Staleness",
     "### Cross-Spec Conflicts",
     "### Health Summary",
-    "Audit Report",
+    "### Audit Report",
 ]
 
 # Steering files markers that MUST appear in every output

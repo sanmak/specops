@@ -14,7 +14,7 @@ If neither pattern matches, continue to interview check and the standard phases.
 ### Audit Workflow
 
 1. If FILE_EXISTS(`.specops.json`), READ_FILE(`.specops.json`) to get `specsDir`; otherwise use default `.specops`
-2. Parse target spec name from the request if present. If no name given, audit all specs whose `status` is not `completed`.
+2. Parse target spec name from the request if present. If no name given, audit all specs (including completed — Post-Completion Modification only runs on completed specs).
 3. For each target spec:
    a. If FILE_EXISTS(`<specsDir>/<name>/spec.json`), READ_FILE(`<specsDir>/<name>/spec.json`) to load metadata. If not found, NOTIFY_USER(`"Spec '<name>' not found in <specsDir>. Run LIST_DIR(<specsDir>) to see available specs."`) and stop.
    b. If FILE_EXISTS(`<specsDir>/<name>/tasks.md`), READ_FILE(`<specsDir>/<name>/tasks.md`) to load tasks.
@@ -73,8 +73,8 @@ Detect multiple active (non-completed) specs referencing the same files.
 
 - LIST_DIR(`<specsDir>`) to find all spec directories
 - For each active spec (status ≠ completed): READ_FILE(`<specsDir>/<dir>/tasks.md`) if it exists, collect all "Files to Modify" paths
-- Build a map: `file_path → [spec names]`
-- Any file with 2+ specs → **Warning** (no repair available — informational only)
+- Build a map: `file_path → [distinct spec names]` (deduplicate spec names per file — a single spec referencing the same file in multiple tasks counts as one)
+- Any file with 2+ distinct specs → **Warning** (no repair available — informational only)
 - For single-spec audit: still load all active specs to detect conflicts involving the target
 
 ### Health Summary
@@ -153,20 +153,20 @@ Guided interactive repair for drifted specs. Available only on platforms with `c
 4. Run full audit on the target spec (all 5 checks).
 5. If all checks Healthy → NOTIFY_USER(`"No drift detected in <spec-name>. No reconciliation needed."`) and stop.
 6. Present numbered findings list to the user.
-7. ASK_USER(`"Which findings to fix? Enter 'all', comma-separated numbers (e.g. '1,3'), or 'skip' to exit."`)
+7. Prompt the user: "Which findings to fix? Enter 'all', comma-separated numbers (e.g. '1,3'), or 'skip' to exit."
 8. For each selected finding, apply the appropriate repair:
 
 | Finding Type | Repair Options |
 |-------------|----------------|
 | File missing (renamed) | Update path in tasks.md / Skip |
 | File missing (deleted) | Remove reference from tasks.md / Provide new path / Skip |
-| Completed task, file missing | Mark task Pending (set status back to Pending) / Provide new path / Skip |
-| Pending task, file already exists | Mark task Completed / Mark In Progress / Skip |
+| Completed task, file missing | Provide new path / Note as discrepancy in tasks.md / Skip |
+| Pending task, file already exists | Mark task In Progress / Skip |
 | Stale spec | Continue as-is / Mark as draft / Mark completed / Skip |
 | Cross-spec conflict | Informational only — no repair action |
 
 9. For each repair: EDIT_FILE(`<specsDir>/<name>/tasks.md`) to apply path or status changes.
-10. Update `spec.json.updated` timestamp: RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) and EDIT_FILE(`<specsDir>/<name>/spec.json`) with the new timestamp.
+10. Update `spec.json`: RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) and EDIT_FILE(`<specsDir>/<name>/spec.json`) to set `updated` to the current timestamp and `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field).
 11. Regenerate `<specsDir>/index.json` from all `*/spec.json` files.
 12. NOTIFY_USER(`"Reconciliation complete. Applied N fix(es) to <spec-name>."`)
 

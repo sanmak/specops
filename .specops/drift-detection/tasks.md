@@ -23,17 +23,17 @@ Create `core/reconciliation.md` as the platform-agnostic reconciliation module. 
 6. Verify: generate one platform output and read it to confirm all abstract op substitutions are grammatical
 
 **Acceptance Criteria:**
-- [ ] Module covers all 5 audit checks with correct severity levels
-- [ ] All abstract operations use argument form: `READ_FILE(<path>)`, `FILE_EXISTS(<path>)`, `RUN_COMMAND(<cmd>)`, `LIST_DIR(<path>)`, `ASK_USER(<msg>)`, `NOTIFY_USER(<msg>)`
-- [ ] Non-interactive fallback for reconcile is explicit (`canAskInteractive = false` → blocked with message)
-- [ ] `canAccessGit = false` graceful degradation documented
-- [ ] git commands use quoted path arguments (security — no command injection)
+- [x] Module covers all 5 audit checks with correct severity levels
+- [x] All abstract operations use argument form: `READ_FILE(<path>)`, `FILE_EXISTS(<path>)`, `RUN_COMMAND(<cmd>)`, `LIST_DIR(<path>)`, `ASK_USER(<msg>)`, `NOTIFY_USER(<msg>)`
+- [x] Non-interactive fallback for reconcile is explicit (`canAskInteractive = false` → blocked with message)
+- [x] `canAccessGit = false` graceful degradation documented
+- [x] git commands use quoted path arguments (security — no command injection)
 
 **Files to Modify:**
 - `core/reconciliation.md` (new file)
 
 **Tests Required:**
-- [ ] Manual: read generated platform output and verify no "at and" / "using " broken phrases from missing args
+- [x] Manual: read generated platform output and verify no "at and" / "using " broken phrases from missing args
 
 ---
 
@@ -54,15 +54,15 @@ Add audit/reconcile mode detection to the Getting Started routing chain in `core
 2. After the steering command check, add: "Check if the request is an **audit** or **reconcile** command (see Reconciliation module). Patterns: `audit`, `audit <name>`, `health check`, `check drift`, `spec health` for audit; `reconcile <name>`, `fix <name>`, `repair <name>`, `sync <name>` for reconcile. These must refer to SpecOps spec health, NOT product features. If so, follow the Reconciliation module workflow instead of the standard phases below."
 
 **Acceptance Criteria:**
-- [ ] New routing step added to Getting Started between steering and interview
-- [ ] Trigger patterns match what is documented in core/reconciliation.md
-- [ ] No hard-coded step numbers used in the new text
+- [x] New routing step added to Getting Started between steering and interview
+- [x] Trigger patterns match what is documented in core/reconciliation.md
+- [x] No hard-coded step numbers used in the new text
 
 **Files to Modify:**
 - `core/workflow.md`
 
 **Tests Required:**
-- [ ] Read the updated section and verify wording is unambiguous
+- [x] Read the updated section and verify wording is unambiguous
 
 ---
 
@@ -86,9 +86,9 @@ Add `"reconciliation": core["reconciliation"]` to all 4 context dicts in `genera
 5. Edit `generator/templates/copilot.j2`: add `{{ reconciliation }}` after `{{ view }}`
 
 **Acceptance Criteria:**
-- [ ] All 4 context dicts in generate.py include `"reconciliation"` key
-- [ ] All 4 Jinja2 templates include `{{ reconciliation }}` after `{{ view }}`
-- [ ] `python3 generator/generate.py --all` runs without errors
+- [x] All 4 context dicts in generate.py include `"reconciliation"` key
+- [x] All 4 Jinja2 templates include `{{ reconciliation }}` after `{{ view }}`
+- [x] `python3 generator/generate.py --all` runs without errors
 
 **Files to Modify:**
 - `generator/generate.py`
@@ -98,7 +98,7 @@ Add `"reconciliation": core["reconciliation"]` to all 4 context dicts in `genera
 - `generator/templates/copilot.j2`
 
 **Tests Required:**
-- [ ] Run `python3 generator/generate.py --all` without errors
+- [x] Run `python3 generator/generate.py --all` without errors
 
 ---
 
@@ -135,15 +135,15 @@ RECONCILIATION_MARKERS = [
 ```
 
 **Acceptance Criteria:**
-- [ ] `RECONCILIATION_MARKERS` list defined in validate.py with 9 markers
-- [ ] `validate_platform()` calls `check_markers_present` with RECONCILIATION_MARKERS
-- [ ] `main()` cross-platform consistency check includes RECONCILIATION_MARKERS
+- [x] `RECONCILIATION_MARKERS` list defined in validate.py with 9 markers
+- [x] `validate_platform()` calls `check_markers_present` with RECONCILIATION_MARKERS
+- [x] `main()` cross-platform consistency check includes RECONCILIATION_MARKERS
 
 **Files to Modify:**
 - `generator/validate.py`
 
 **Tests Required:**
-- [ ] Run `python3 generator/validate.py` and verify all platforms pass
+- [x] Run `python3 generator/validate.py` and verify all platforms pass
 
 ---
 
@@ -170,7 +170,7 @@ Add `"reconciliation"` category to `REQUIRED_MARKERS` in `tests/test_platform_co
 - `tests/test_platform_consistency.py`
 
 **Tests Required:**
-- [ ] Run `python3 tests/test_platform_consistency.py` and verify pass
+- [x] Run `python3 tests/test_platform_consistency.py` and verify pass
 
 ---
 

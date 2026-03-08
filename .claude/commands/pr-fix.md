@@ -159,7 +159,7 @@ Watch mode is designed for use with `/loop` to babysit a PR. It checks CI status
 ### Step W1: Pre-flight
 
 1. Extract PR number from `$ARGUMENTS` (after `watch`).
-2. Validate PR exists and is open: `gh pr view <PR_NUMBER> --json number,state,headRefName,title`.
+2. Validate PR exists and is open: `gh pr view <PR_NUMBER> --json number,state,headRefName,title`. Save `headRefName` as `PR_BRANCH`.
 3. Extract owner/repo: `gh repo view --json owner,name -q '.owner.login + "/" + .name'`. Save as `OWNER_REPO`.
 
 ### Step W2: Load state
