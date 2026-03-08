@@ -289,7 +289,7 @@ Use specops from-plan
 
 **Supported plan formats:** Free-form markdown, numbered steps, structured headers — any format accepted. SpecOps extracts sections using keyword heuristics.
 
-**Notes:** Only triggers when the request is about converting an AI coding plan into a spec — not for product features like "import plan data from an external system". On non-interactive platforms (Codex, Copilot), the plan content must be included inline in the request.
+**Notes:** Only triggers when the request is about converting an AI coding plan into a spec — not for product features like "import plan data from an external system". On platforms where `canAskInteractive = false` (e.g., Codex), the plan content must be included inline in the request.
 
 ---
 

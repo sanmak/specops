@@ -12,7 +12,7 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
 
 ## Workflow
 
-1. **Receive plan content**: If plan content was provided inline with the invocation, use it directly. Otherwise, ASK_USER: "Please paste your plan below."
+1. **Receive plan content**: If plan content was provided inline with the invocation, use it directly. Otherwise, if `canAskInteractive`, ASK_USER: "Please paste your plan below." If `canAskInteractive` is false and no inline content was provided, NOTIFY_USER: "From Plan mode requires the plan to be pasted inline. Re-invoke with your plan content included in the request." and stop.
 
 2. **Parse the plan**: Read through the plan content and identify sections using these keyword heuristics:
 
@@ -25,10 +25,10 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
    | **Constraints** | "Constraints", "Trade-offs", "Risks", "Considerations", "Out of scope", "Do NOT touch", "Limitations" |
    | **Files / paths** | Any file paths mentioned (e.g., `src/auth.ts`, `core/workflow.md`) |
 
-3. **Detect vertical and codebase context**: Use file paths and keywords in the plan to detect the project vertical (backend, frontend, infrastructure, etc.) using the same vertical detection rules as Phase 1. Do a lightweight codebase scan — READ_FILE the files mentioned in the plan and identify any affected files not already listed.
+3. **Detect vertical and codebase context**: Use file paths and keywords in the plan to detect the project vertical (backend, frontend, infrastructure, etc.) using the same vertical detection rules as Phase 1. Do a lightweight codebase scan — for each file path mentioned in the plan, READ_FILE(`<path>`) to examine its current content and identify any additional affected files not already listed.
 
 4. **Show mapping summary**: NOTIFY_USER with a brief mapping summary before generating files:
-   ```
+   ```text
    From Plan → Spec mapping:
      Goals found → requirements.md (user stories + EARS criteria)
      Decisions found → design.md
@@ -51,13 +51,13 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
    - If the plan mentioned specific libraries, patterns, or approaches, include them verbatim
 
    **tasks.md**:
-   - Extract implementation steps and convert to spec task format with `[ ]` checkboxes and `Status: Not Started`
+   - Extract implementation steps and convert to spec task format with `[ ]` checkboxes and `Status: Pending`
    - Preserve the plan's step order — do not re-sequence
-   - Add any gap tasks identified from the codebase scan that the plan omitted
+   - If the codebase scan reveals missing prerequisite work not addressed in the plan, record it as a gap note in the mapping summary rather than adding tasks to `tasks.md`
 
-   **implementation.md**: WRITE_FILE with template headers only (empty — populated incrementally during Phase 3).
+   **implementation.md**: WRITE_FILE(`<specsDir>/<specName>/implementation.md`) with template headers only (empty — populated incrementally during Phase 3).
 
-   **spec.json**: Create with `status: draft`, `type` inferred from plan content (feature/bugfix/refactor).
+   **spec.json**: Create following the Spec Metadata protocol (see "Review Workflow" module) — run `RUN_COMMAND(\`git config user.name\`)` for author name, `RUN_COMMAND(\`date -u +"%Y-%m-%dT%H:%M:%SZ"\`)` for timestamps, set `status: draft`, infer `type` from plan content (feature/bugfix/refactor), and set `requiredApprovals` to 0 unless spec review is configured. Include all required fields: `id`, `type`, `status`, `version`, `created`, `updated`, `specopsCreatedWith`, `specopsUpdatedWith`, `author`, `reviewers`, `reviewRounds`, `approvals`, `requiredApprovals`. After writing `spec.json`, regenerate `<specsDir>/index.json` using the Global Index protocol.
 
 6. **Gap-fill rule**: If a section could not be extracted (e.g., no acceptance criteria in the plan), add `[To be defined]` placeholder text rather than inventing content. Note the gap in the mapping summary.
 
@@ -76,7 +76,7 @@ It DOES:
 - Apply EARS notation to extracted acceptance criteria
 - Enrich goal statements with user story framing (As a / I want / So that)
 - Fill structural gaps with `[To be defined]` placeholders
-- Add tasks for codebase gaps the plan omitted (noted as "Gap task: not in original plan")
+- Record codebase gaps in the mapping summary (noted as "Gap: not in original plan") rather than adding tasks to `tasks.md`
 
 ## Relationship to Interview Mode
 
