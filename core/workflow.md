@@ -50,7 +50,20 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
 
    Keep EARS proportional to scope — 2-3 statements for small features, more for complex ones.
 
-   **For bugfix specs:** Add an "Unchanged Behavior" section using `WHEN [condition] THE SYSTEM SHALL CONTINUE TO [existing behavior]` to prevent regressions. Structure the Testing Plan into three categories: Current Behavior (verify bug exists), Expected Behavior (verify fix works), Unchanged Behavior (verify no regressions). If the fix reveals the need for broader changes, create a separate Feature Spec.
+   **For bugfix specs:** After completing Root Cause Analysis and Impact Assessment, conduct Regression Risk Analysis before writing the Proposed Fix. The analysis depth scales with the Severity field from Impact Assessment:
+
+   **Critical or High severity:**
+   1. **Blast Radius Survey** — LIST_DIR and READ_FILE the affected component's directory. Identify every module, function, or API that imports or calls the affected code. If RUN_COMMAND is available, search for usages across the codebase. Record each entry point in the Blast Radius subsection.
+   2. **Behavior Inventory** — For each blast radius item, READ_FILE its code and list the behaviors that depend on the affected area. Ask: "What does this path do correctly today that must remain true after the fix?"
+   3. **Test Coverage Check** — READ_FILE the relevant test files. For each inventoried behavior, note whether a test already covers it or whether it is a gap. Gaps must be added to the Testing Plan.
+   4. **Risk Tier** — Classify each inventoried behavior: Must-Test (direct coupling to changed code), Nice-To-Test (indirect), or Low-Risk (independent path). Only Must-Test items are acceptance gates.
+   5. **Scope Escalation** — Review the blast radius. If fixing the bug correctly requires adding new abstractions, a new API, or addressing a missing feature (not a defect), signal "Scope escalation needed" and create a Feature Spec. The bugfix spec may still proceed for the narrowest contained fix, or may be replaced entirely.
+
+   **Medium severity:** Complete steps 1 (Blast Radius) and 2 (Behavior Inventory). Brief Risk Tier table. Skip detailed coverage check unless the codebase has obvious test gaps.
+
+   **Low severity:** Brief step 1 only. If the blast radius is clearly one isolated function with no callers in critical paths, note "minimal regression risk — isolated change". Also record at least one caller-visible behavior to preserve and classify it in a lightweight Risk Tier entry, or note "No caller-visible unchanged behavior — isolated internal fix" which explicitly skips Must-Test-derived unchanged-behavior gates for this spec.
+
+   After the Regression Risk Analysis, populate the "Unchanged Behavior" section from the Must-Test behaviors. For Low severity with no Must-Test behaviors identified, note "N/A — isolated change with no caller-visible behavior to preserve" in the Unchanged Behavior section and mark the regression/coverage acceptance criteria as checked with a note. Structure the Testing Plan into three categories: Current Behavior (verify bug exists), Expected Behavior (verify fix works), Unchanged Behavior (verify no regressions using Must-Test items from the analysis; for Low severity with no Must-Test items, this section may be empty).
 3. Create `spec.json` with metadata (author from git config, type, status, version, created date). Set status to `draft`.
 4. Regenerate `<specsDir>/index.json` from all `*/spec.json` files.
 5. **First-spec README prompt**: If `index.json` contains exactly one spec entry (this is the project's first spec):
@@ -72,7 +85,7 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
 See "Collaborative Spec Review" module for the full review workflow including review mode, revision mode, and approval tracking.
 
 **Phase 3: Implement**
-1. Check the implementation gate: if spec review is enabled, verify `spec.json` status is `approved` before proceeding. Update status to `implementing`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp, and regenerate `index.json`.
+1. Check the implementation gate: if spec review is enabled, verify `spec.json` status is `approved` before proceeding. Update status to `implementing`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp (use RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`.
 2. Execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions)
 3. For each task: set `In Progress` in tasks.md FIRST, then implement, then report progress
 4. After completing each code-modifying task, update `implementation.md`:
@@ -99,7 +112,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - For each doc file, check if it references components, features, or configurations that were modified during this spec
    - If stale documentation is detected, update the affected sections
    - If unsure whether a doc needs updating, flag it to the user rather than skipping silently
-4. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp, and regenerate `index.json`
+4. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp (use RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`
 5. Create PR if `createPR` is true
 6. Summarize completed work
 
