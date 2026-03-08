@@ -94,6 +94,12 @@ SpecOps and [Spec Kit](https://github.com/github/spec-kit) share the same core p
 | **Security hardening** | Prompt injection defense, schema validation, path containment | Not documented |
 | **Platform breadth** | 4 platforms | 18+ platforms |
 
+### Plan Mode vs Spec Mode
+
+Most AI coding assistants include a **plan mode** for session-scoped planning. SpecOps adds persistent, reviewable specifications that survive across sessions and team members. Plan mode is a whiteboard sketch; spec mode is the architectural blueprint. Use plan mode for tactical "how" decisions during implementation — use SpecOps when the work spans sessions, involves teammates, or touches code where regressions matter.
+
+[See the full comparison →](docs/PLAN-VS-SPEC.md)
+
 ## Configuration
 
 Create `.specops.json` in your project root. Configuration is optional — SpecOps uses sensible defaults.
