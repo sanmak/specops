@@ -61,9 +61,9 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
 
    **Medium severity:** Complete steps 1 (Blast Radius) and 2 (Behavior Inventory). Brief Risk Tier table. Skip detailed coverage check unless the codebase has obvious test gaps.
 
-   **Low severity:** Brief step 1 only. If the blast radius is clearly one isolated function with no callers in critical paths, note "minimal regression risk — isolated change" and proceed.
+   **Low severity:** Brief step 1 only. If the blast radius is clearly one isolated function with no callers in critical paths, note "minimal regression risk — isolated change". Also record at least one caller-visible behavior to preserve and classify it in a lightweight Risk Tier entry, or note "No caller-visible unchanged behavior — isolated internal fix" which explicitly skips Must-Test-derived unchanged-behavior gates for this spec.
 
-   After the Regression Risk Analysis, populate the "Unchanged Behavior" section from the Must-Test behaviors. Structure the Testing Plan into three categories: Current Behavior (verify bug exists), Expected Behavior (verify fix works), Unchanged Behavior (verify no regressions using Must-Test items from the analysis).
+   After the Regression Risk Analysis, populate the "Unchanged Behavior" section from the Must-Test behaviors. For Low severity with no Must-Test behaviors identified, note "N/A — isolated change with no caller-visible behavior to preserve" in the Unchanged Behavior section and mark the regression/coverage acceptance criteria as checked with a note. Structure the Testing Plan into three categories: Current Behavior (verify bug exists), Expected Behavior (verify fix works), Unchanged Behavior (verify no regressions using Must-Test items from the analysis; for Low severity with no Must-Test items, this section may be empty).
 3. Create `spec.json` with metadata (author from git config, type, status, version, created date). Set status to `draft`.
 4. Regenerate `<specsDir>/index.json` from all `*/spec.json` files.
 5. **First-spec README prompt**: If `index.json` contains exactly one spec entry (this is the project's first spec):

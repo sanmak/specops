@@ -120,12 +120,12 @@ UPDATE_MARKERS = [
 
 # Regression risk analysis markers that MUST appear in every output (bugfix template)
 REGRESSION_MARKERS = [
-    "Regression Risk Analysis",
-    "Blast Radius",
-    "Behavior Inventory",
-    "Test Coverage Assessment",
-    "Risk Tier",
-    "Scope Escalation",
+    "## Regression Risk Analysis",
+    "### Blast Radius",
+    "### Behavior Inventory",
+    "### Test Coverage Assessment",
+    "### Risk Tier",
+    "### Scope Escalation Check",
 ]
 
 

@@ -33,8 +33,8 @@ Detailed analysis of what's causing the bug.
 
 ### Blast Radius
 <!-- Survey what code paths are touched by the affected component(s).
-     Use LIST_DIR and READ_FILE to find callers, importers, and dependents.
-     Use RUN_COMMAND to search for usages if the platform supports code execution.
+     LIST_DIR and READ_FILE to find callers, importers, and dependents.
+     RUN_COMMAND to search for usages if the platform supports code execution.
      List each affected entry point, module boundary, or API surface. -->
 - [Affected code path or module 1]
 - [Affected code path or module 2]

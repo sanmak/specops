@@ -99,8 +99,8 @@ Add REGRESSION_MARKERS list to `generator/validate.py`. Add check call in `valid
 - `generator/validate.py`
 
 **Tests Required:**
-- [ ] validate.py runs without errors
-- [ ] All platform outputs pass regression marker check after regeneration
+- [x] validate.py runs without errors
+- [x] All platform outputs pass regression marker check after regeneration
 
 ---
 
