@@ -46,15 +46,17 @@ run_negative_rg_check() {
   fi
 
   printf '\n== %s ==\n' "$name"
-  if rg -n --hidden --color=never -P "$pattern" "$@" .; then
-    fail "$name (potential matches found)"
+  # Use --files-with-matches to avoid printing sensitive content to stdout.
+  # Capture exit code explicitly (not via $? inside if/else which is always 0).
+  local code
+  rg --files-with-matches --hidden --color=never -P "$pattern" "$@" . >/dev/null 2>&1
+  code=$?
+  if [ "$code" -eq 0 ]; then
+    fail "$name (potential matches found — run rg manually to inspect)"
+  elif [ "$code" -eq 1 ]; then
+    pass "$name"
   else
-    local code=$?
-    if [ "$code" -eq 1 ]; then
-      pass "$name"
-    else
-      fail "$name (rg execution error)"
-    fi
+    fail "$name (rg execution error)"
   fi
 }
 
@@ -62,6 +64,7 @@ printf 'Full Review Gate Baseline\n'
 printf '=========================\n'
 
 run_check "Repository integrity checks" bash verify.sh
+run_check "Checksum verification" shasum -a 256 -c CHECKSUMS.sha256
 run_check "Test suite" bash scripts/run-tests.sh
 
 if command -v shellcheck >/dev/null 2>&1; then

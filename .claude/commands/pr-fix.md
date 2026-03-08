@@ -31,10 +31,11 @@ For fix mode, extract the PR number from `$ARGUMENTS`. If empty, try auto-detect
 ### Step 2: Create worktree
 
 1. Fetch the latest remote state: `git fetch origin <PR_BRANCH>`.
-2. Create an isolated worktree:
+2. Create an isolated worktree attached to a local branch tracking the PR head:
    ```
-   git worktree add .claude/worktrees/pr-fix-<PR_NUMBER> origin/<PR_BRANCH>
+   git worktree add -b <PR_BRANCH> .claude/worktrees/pr-fix-<PR_NUMBER> origin/<PR_BRANCH>
    ```
+   If the local branch already exists, use `git worktree add .claude/worktrees/pr-fix-<PR_NUMBER> <PR_BRANCH>` instead.
 3. If worktree creation fails (e.g., branch already checked out), report the error and stop.
 
 Save `.claude/worktrees/pr-fix-<PR_NUMBER>` as `WORKTREE_DIR`.
@@ -321,10 +322,11 @@ For each PR in `PR_LIST` (sequentially, one at a time):
 #### Step A5a: Create worktree
 
 1. Fetch the latest remote state: `git fetch origin <headRefName>`.
-2. Create an isolated worktree:
+2. Create an isolated worktree attached to a local branch tracking the PR head:
    ```
-   git worktree add .claude/worktrees/pr-fix-<NUMBER> origin/<headRefName>
+   git worktree add -b <headRefName> .claude/worktrees/pr-fix-<NUMBER> origin/<headRefName>
    ```
+   If the local branch already exists, use `git worktree add .claude/worktrees/pr-fix-<NUMBER> <headRefName>` instead.
 3. If worktree creation fails, log the error, record this PR as `SKIPPED: <reason>`, and continue to the next PR.
 
 Save `.claude/worktrees/pr-fix-<NUMBER>` as `WORKTREE_DIR`.

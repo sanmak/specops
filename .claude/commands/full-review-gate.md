@@ -16,6 +16,8 @@ Record the current branch:
 ORIGINAL_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 ```
 
+If `ORIGINAL_BRANCH` is `HEAD` (detached HEAD state), stop and tell the user: "You are in a detached HEAD state. Check out a branch before running this command (e.g., `git checkout main`)."
+
 Ask the user which scope to use:
 
 - **Full-repository scope**: use for complete reviews or release readiness checks.
