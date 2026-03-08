@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Steering files system**: Persistent project context in `<specsDir>/steering/` — markdown files with YAML frontmatter loaded automatically during Phase 1. Three inclusion modes: `always` (every spec), `fileMatch` (only when affected files match globs), and `manual` (on-demand). Foundation templates: `product.md`, `tech.md`, `structure.md`
+- **`/specops steering` subcommand**: On-demand command to scaffold, view, and manage steering files. Creates foundation files if none exist; shows summary table with add/edit options if the directory already exists
 - **Self-review workflow for solo developers**: New `allowSelfApproval` config option in `team.specReview` enables solo developers to review and approve their own specs. Authors go through the full review ritual (read spec, provide feedback, self-approve) with results recorded in `reviews.md` as a self-review
 - **`self-approved` spec status**: Distinct from peer `approved` — both allow implementation, but `self-approved` provides audit trail showing no peer review was performed. Reviewer entries include `selfApproval: true` flag
 - **Init-time solo/team detection**: `/specops init` now asks "Are you working solo or with a team?" when a review-enabled template is selected, and pre-configures `allowSelfApproval` accordingly
@@ -37,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Bugfix and refactor templates include acceptance criteria checklists**: Phase 4 checkbox verification is now uniformly executable across all spec types
 - **Deferred criteria pattern**: Task-tracking and workflow support moving deferred items to a "Deferred Criteria" subsection
 - **`spec.json` requiredApprovals defaults to 0**: When review is disabled, `requiredApprovals` defaults to 0 instead of requiring a minimum of 1
+- **Steering not in schema**: Steering file configuration is not stored in `.specops.json` — it is convention-based (files in `<specsDir>/steering/` with YAML frontmatter). The `/specops steering` command and Phase 1 loader handle discovery automatically
 
 ### Fixed
 
