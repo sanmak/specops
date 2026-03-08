@@ -31,7 +31,7 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
    - Default to `fullstack` if unclear
    - Display the detected vertical in configuration summary
 7. Explore codebase to understand existing patterns and architecture
-8. Identify affected components and dependencies
+8. Identify affected files, components, and dependencies — produce a concrete list of affected file paths for `fileMatch` steering file evaluation
 
 **Phase 2: Create Specification**
 1. Generate a structured spec directory in the configured `specsDir`

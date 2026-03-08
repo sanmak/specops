@@ -37,7 +37,7 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
    - Default to `fullstack` if unclear
    - Display the detected vertical in configuration summary
 7. Explore codebase to understand existing patterns and architecture
-8. Identify affected components and dependencies
+8. Identify affected files, components, and dependencies — produce a concrete list of affected file paths for `fileMatch` steering file evaluation
 
 **Phase 2: Create Specification**
 1. Generate a structured spec directory in the configured `specsDir`
@@ -412,13 +412,14 @@ During Phase 1, after reading the config and completing context recovery, load s
 
 1. If FILE_EXISTS(`<specsDir>/steering/`):
    - List the directory at(`<specsDir>/steering/`) to find all `.md` files
-   - If the number of files exceeds 20, Print to stdout: "Steering file limit reached: loading first 20 of {total} files. Consider consolidating steering files to stay within the limit." and process only the first 20 files (sorted alphabetically by filename).
+   - Sort filenames alphabetically
+   - If the number of files exceeds 20, Print to stdout: "Steering file limit reached: loading first 20 of {total} files. Consider consolidating steering files to stay within the limit." and process only the first 20 files from the sorted list.
    - For each `.md` file:
      - Read the file at(`<specsDir>/steering/<filename>`) to get the full content
      - Parse the YAML frontmatter to extract `name`, `description`, `inclusion`, and optionally `globs`
      - If frontmatter is missing or invalid (missing required fields, unparseable YAML), Print to stdout: "Skipping steering file {filename}: invalid or missing frontmatter" and continue to the next file
      - If `inclusion` is `always`: store the file body content as loaded project context, available for all subsequent phases
-     - If `inclusion` is `fileMatch`: store the file with its `globs` for deferred evaluation after affected components and dependencies are identified in Phase 1
+     - If `inclusion` is `fileMatch`: validate that `globs` is a non-empty array of strings. If `globs` is missing, empty, or not a string array, Print to stdout: "Skipping steering file {filename}: fileMatch requires a non-empty globs array" and continue. Otherwise, store the file with its `globs` for deferred evaluation after affected files are identified in Phase 1
      - If `inclusion` is `manual`: skip (not loaded automatically)
      - If `inclusion` has an unrecognized value: Print to stdout: "Skipping steering file {filename}: unrecognized inclusion mode '{value}'" and continue
 2. After loading `always` files, Print to stdout: "Loaded {N} always-included steering file(s): {names}. fileMatch files will be evaluated after affected components are identified."
@@ -516,7 +517,8 @@ These must refer to managing SpecOps steering files, NOT to a product feature (e
 
 **If steering directory does NOT exist:**
 - On interactive platforms (`canAskInteractive = true`), If uncertain, note assumptions in the spec and proceed. List any ambiguities for the user to review: "No steering files found. Would you like to create foundation steering files (product.md, tech.md, structure.md) for persistent project context?"
-  - If yes: create the 3 foundation templates using:
+  - If yes: create the directory and 3 foundation templates using:
+    - Execute the command(`mkdir -p <specsDir>/steering`)
     - `Write the file at(<specsDir>/steering/product.md, <productTemplate>)`
     - `Write the file at(<specsDir>/steering/tech.md, <techTemplate>)`
     - `Write the file at(<specsDir>/steering/structure.md, <structureTemplate>)`
@@ -525,8 +527,8 @@ These must refer to managing SpecOps steering files, NOT to a product feature (e
 - On non-interactive platforms (`canAskInteractive = false`), Print to stdout: "No steering files found. Create `<specsDir>/steering/product.md`, `tech.md`, and `structure.md` using the Foundation File Templates in this module."
 
 **If steering directory exists:**
-- List the directory at(`<specsDir>/steering/`) to find all `.md` files
-- For each file, Read the file at(`<specsDir>/steering/<filename>`) and parse YAML frontmatter
+- List the directory at(`<specsDir>/steering/`) to find all `.md` files, sort alphabetically, and process up to 20 files (apply the same safety cap used in the loading procedure)
+- For each selected file, Read the file at(`<specsDir>/steering/<filename>`) and parse YAML frontmatter
 - Present a summary table:
 
 ```text
