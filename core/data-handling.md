@@ -12,6 +12,7 @@ When exploring a codebase and generating specification files, follow these data 
 ### Spec Metadata
 - **No personal emails in spec.json.** The `author` and `reviewers` fields use `name` only (from `git config user.name`). Do not populate `email` fields with personal email addresses.
 - **No absolute paths.** Never commit files containing absolute filesystem paths (e.g., `/Users/...`, `/home/...`). Use relative paths for symlinks and file references.
+- **Never fabricate timestamps.** All ISO 8601 timestamps in `spec.json` must come from the system clock via RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`). Invariant: `updated` >= `created`.
 
 ### Data Classification
 - When generating `design.md` security considerations, identify data classification levels for any data the feature handles:

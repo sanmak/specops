@@ -12,7 +12,8 @@ After creating the spec files, create `spec.json`:
 
 1. RUN_COMMAND(`git config user.name`) to get author name
 2. If git config is unavailable, use "Unknown" for name
-3. WRITE_FILE(`<specsDir>/<spec-name>/spec.json`) with:
+3. RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) to get the current UTC timestamp
+4. WRITE_FILE(`<specsDir>/<spec-name>/spec.json`) with:
 
 ```json
 {
@@ -20,8 +21,8 @@ After creating the spec files, create `spec.json`:
   "type": "<feature|bugfix|refactor>",
   "status": "draft",
   "version": 1,
-  "created": "<ISO 8601 timestamp>",
-  "updated": "<ISO 8601 timestamp>",
+  "created": "<timestamp from date command>",
+  "updated": "<timestamp from date command>",
   "specopsCreatedWith": "<version from this instruction file's frontmatter>",
   "specopsUpdatedWith": "<version from this instruction file's frontmatter>",
   "author": {
@@ -37,6 +38,14 @@ After creating the spec files, create `spec.json`:
 When spec review is not enabled (`specReview.enabled` is false/absent AND `reviewRequired` is false/absent), set `requiredApprovals` to `0`. This signals that no review was configured, not that the spec failed to achieve approvals.
 
 The `specopsCreatedWith` field is set once at creation and never modified. The `specopsUpdatedWith` field is updated every time `spec.json` is modified (reviews, revisions, status changes, completion). Both values come from reading this instruction file's own YAML frontmatter `version:` field.
+
+### Timestamp Protocol
+
+All timestamps in `spec.json` (`created`, `updated`, `reviewedAt`) must come from the system clock. Never estimate or fabricate timestamps.
+
+To get the current UTC timestamp: RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`)
+
+Use this command's output wherever a timestamp is needed.
 
 If spec review is enabled, immediately set `status` to `"in-review"` and `reviewRounds` to `1`.
 
@@ -103,7 +112,7 @@ When entering review mode:
    - If verdict is "Request changes": set reviewer status to `"changes-requested"`
    - If `approvals` >= `requiredApprovals`: set `status` to `"approved"`
    - Update `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field)
-   - Update `updated` timestamp
+   - Update `updated` timestamp (via `date -u` command)
 7. Regenerate `index.json`
 
 **On platforms without interactive questions (canAskInteractive: false):**
@@ -126,7 +135,7 @@ When the spec author returns to a spec with outstanding change requests:
    - Reset all reviewer statuses to `"pending"`
    - Keep `status` as `"in-review"`
    - Update `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field)
-   - Update `updated` timestamp
+   - Update `updated` timestamp (via `date -u` command)
 6. Regenerate `index.json`
 7. Inform the user: "Spec revised to version {version}. Commit and notify reviewers for re-review."
 
@@ -147,14 +156,14 @@ When the spec author reviews their own spec (self-review enabled via `allowSelfA
    - Content: feedback notes
    - Verdict line: "Self-approved", "Self-approved with notes", or "Revision needed"
 8. EDIT_FILE `spec.json`:
-   - Add reviewer entry: `{ "name": "<author.name>", "status": "approved", "selfApproval": true, "reviewedAt": "<ISO 8601>", "round": <round> }`
+   - Add reviewer entry: `{ "name": "<author.name>", "status": "approved", "selfApproval": true, "reviewedAt": "<timestamp from date command>", "round": <round> }`
    - If verdict is "Self-approve" or "Self-approve with notes": increment `approvals`
    - If `approvals` >= `requiredApprovals`:
      - If all reviewer entries with `status: "approved"` have `selfApproval: true` → set spec `status` to `"self-approved"`
      - If at least one reviewer entry with `status: "approved"` does NOT have `selfApproval: true` → set spec `status` to `"approved"`
    - If verdict is "Revise": author edits spec, stay in current status for another round
    - Update `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field)
-   - Update `updated` timestamp
+   - Update `updated` timestamp (via `date -u` command)
 9. Regenerate `index.json`
 
 **On platforms without interactive questions (canAskInteractive: false):**
@@ -168,7 +177,7 @@ At the start of Phase 3, before any implementation begins:
 
 1. READ_FILE `spec.json` if it exists
 2. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`):
-   - If `status` is `"approved"` or `"self-approved"`: proceed with implementation. If `status` is `"self-approved"`, NOTIFY_USER: "Note: This spec was self-approved without peer review." Set `status` to `"implementing"`, update `specopsUpdatedWith` to the current SpecOps version, update `updated` timestamp, regenerate `index.json`.
+   - If `status` is `"approved"` or `"self-approved"`: proceed with implementation. If `status` is `"self-approved"`, NOTIFY_USER: "Note: This spec was self-approved without peer review." Set `status` to `"implementing"`, update `specopsUpdatedWith` to the current SpecOps version, update `updated` timestamp (via `date -u` command), regenerate `index.json`.
    - If `status` is NOT `"approved"` and NOT `"self-approved"`:
      - On interactive platforms: NOTIFY_USER with current status and approval count (e.g., "This spec has 1/2 required approvals."), then ASK_USER "Do you want to proceed anyway? This overrides the review requirement."
      - On non-interactive platforms: NOTIFY_USER("Cannot proceed: spec requires approval. Current status: {status}, approvals: {approvals}/{requiredApprovals}") and STOP
@@ -200,5 +209,5 @@ If a review is submitted while `spec.json.status` is `"implementing"`:
 At the end of Phase 4, after all acceptance criteria are verified:
 1. Set `spec.json.status` to `"completed"`
 2. Update `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field)
-3. Update `updated` timestamp
+3. Update `updated` timestamp (via `date -u` command)
 4. Regenerate `index.json`
