@@ -68,6 +68,7 @@ run_check "Checksum verification" shasum -a 256 -c CHECKSUMS.sha256
 run_check "Test suite" bash scripts/run-tests.sh
 
 if command -v shellcheck >/dev/null 2>&1; then
+  shopt -s nullglob
   shell_targets=(
     setup.sh
     verify.sh
@@ -76,6 +77,7 @@ if command -v shellcheck >/dev/null 2>&1; then
     hooks/pre-commit
     hooks/pre-push
   )
+  shopt -u nullglob
   run_check "Shell static analysis" shellcheck "${shell_targets[@]}"
 else
   warn "Shell static analysis skipped because shellcheck is not installed"

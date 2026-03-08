@@ -122,6 +122,12 @@ Create `.specops.json` in your project root. Configuration is optional — SpecO
 
 See [examples/](examples/) for minimal, standard, and full configurations. Full schema reference in [REFERENCE.md](docs/REFERENCE.md).
 
+### Steering Files
+
+Steering files are persistent Markdown documents that give SpecOps rich project context — product overview, technology stack, directory structure — loaded automatically before every spec. Unlike `team.conventions` (short coding rules), steering files carry multi-paragraph narrative that the agent uses to understand your project without re-asking the same questions.
+
+Run `/specops steering` to scaffold the three foundation files (`product.md`, `tech.md`, `structure.md`), or create them manually in `<specsDir>/steering/`. See the [Steering Files Guide](docs/STEERING_GUIDE.md) for the file format, inclusion modes, and best practices.
+
 ### Vertical Adaptation
 
 SpecOps adapts spec templates to your project type. Set the `vertical` key in `.specops.json` or let SpecOps auto-detect from your codebase.

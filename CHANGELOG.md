@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Drift detection & reconciliation**: New `audit` and `reconcile` subcommands (`core/reconciliation.md`). `audit` runs 5 drift checks (File Drift, Post-Completion Modification, Task Status Inconsistency, Staleness, Cross-Spec Conflicts) and produces a health report per spec. `reconcile` guides interactive repair of findings. Git-dependent checks degrade gracefully when `canAccessGit: false`; reconcile is blocked on non-interactive platforms with a clear message
+- **`/specops audit` subcommand**: Detect drift between spec artifacts and codebase. Supports single-spec (`audit <name>`) and all-active-specs (bare `audit`) modes. Trigger patterns: `audit`, `audit <name>`, `health check`, `check drift`, `spec health`
+- **`/specops reconcile` subcommand**: Interactive guided repair for drifted specs. Presents numbered findings list, applies selected repairs to `tasks.md` and `spec.json`. Trigger patterns: `reconcile <name>`, `fix <name>`, `repair <name>`, `sync <name>`
 - **Steering files system**: Persistent project context in `<specsDir>/steering/` — markdown files with YAML frontmatter loaded automatically during Phase 1. Three inclusion modes: `always` (every spec), `fileMatch` (only when affected files match globs), and `manual` (on-demand). Foundation templates: `product.md`, `tech.md`, `structure.md`
 - **`/specops steering` subcommand**: On-demand command to scaffold, view, and manage steering files. Creates foundation files if none exist; shows summary table with add/edit options if the directory already exists
 - **Self-review workflow for solo developers**: New `allowSelfApproval` config option in `team.specReview` enables solo developers to review and approve their own specs. Authors go through the full review ritual (read spec, provide feedback, self-approve) with results recorded in `reviews.md` as a self-review

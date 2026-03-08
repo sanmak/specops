@@ -144,6 +144,8 @@ list
 
 > **Note:** All configuration objects enforce `additionalProperties: false` — unknown keys will be rejected during schema validation.
 
+> **Project context beyond conventions:** For rich, multi-paragraph context (product overview, tech stack, directory structure), use [Steering Files](STEERING_GUIDE.md) instead of cramming it into `team.conventions` strings.
+
 ## Spec Templates
 
 > **Vertical adaptation:** When a vertical is configured or detected, default template sections are adapted. For example, with `"vertical": "infrastructure"`, "User Stories" becomes "Infrastructure Requirements" and "Component Design" becomes "Infrastructure Topology".

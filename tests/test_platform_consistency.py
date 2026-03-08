@@ -100,6 +100,17 @@ REQUIRED_MARKERS = {
         "tech.md",
         "structure.md",
     ],
+    "reconciliation": [
+        "## Audit Mode",
+        "## Reconcile Mode",
+        "### File Drift",
+        "### Post-Completion Modification",
+        "### Task Status Inconsistency",
+        "### Staleness",
+        "### Cross-Spec Conflicts",
+        "### Health Summary",
+        "Audit Report",
+    ],
 }
 
 

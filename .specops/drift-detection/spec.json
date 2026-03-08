@@ -1,0 +1,17 @@
+{
+  "id": "drift-detection",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "created": "2026-03-08T09:23:09Z",
+  "updated": "2026-03-08T09:36:18Z",
+  "specopsCreatedWith": "1.2.0",
+  "specopsUpdatedWith": "1.2.0",
+  "author": {
+    "name": "sanmak"
+  },
+  "reviewers": [],
+  "reviewRounds": 0,
+  "approvals": 0,
+  "requiredApprovals": 0
+}

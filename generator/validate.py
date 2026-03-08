@@ -128,6 +128,19 @@ REGRESSION_MARKERS = [
     "### Scope Escalation Check",
 ]
 
+# Reconciliation (audit/reconcile) markers that MUST appear in every output
+RECONCILIATION_MARKERS = [
+    "## Audit Mode",
+    "## Reconcile Mode",
+    "### File Drift",
+    "### Post-Completion Modification",
+    "### Task Status Inconsistency",
+    "### Staleness",
+    "### Cross-Spec Conflicts",
+    "### Health Summary",
+    "Audit Report",
+]
+
 # Steering files markers that MUST appear in every output
 STEERING_MARKERS = [
     "## Steering Files",
@@ -267,6 +280,9 @@ def validate_platform(platform, info):
 
     # Check steering files present
     errors.extend(check_markers_present(platform, content, STEERING_MARKERS, "steering"))
+
+    # Check reconciliation (audit/reconcile) present
+    errors.extend(check_markers_present(platform, content, RECONCILIATION_MARKERS, "reconciliation"))
 
     # Platform-specific format validation
     if platform == "cursor":
@@ -485,7 +501,7 @@ def main():
     if len(generated) >= 2:
         platforms = list(generated.keys())
         consistency_errors = []
-        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + REGRESSION_MARKERS:
+        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS:
             present_in = [p for p in platforms if marker in generated[p]["content"]]
             if len(present_in) != len(platforms):
                 missing = set(platforms) - set(present_in)
