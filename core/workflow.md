@@ -149,7 +149,7 @@ Even in high autonomy mode, ask for clarification when:
 
 When invoked:
 1. Greet the user briefly
-2. Check if the request is an **init** command (see "Init Mode" module). Patterns: "init", "initialize", "setup specops", "configure specops", "create config". These must refer to setting up SpecOps itself (creating `.specops.json`), NOT to a product feature. If the request describes a product capability (e.g., "set up autoscaling", "configure logging"), skip init and continue to step 7.
+2. Check if the request is an **init** command (see "Init Mode" module). Patterns: "init", "initialize", "setup specops", "configure specops", "create config". These must refer to setting up SpecOps itself (creating `.specops.json`), NOT to a product feature. If the request describes a product capability (e.g., "set up autoscaling", "configure logging"), skip init and continue to step 3.
 3. Check if the request is a **version** command. Patterns: "version", "--version", "-v". If so, follow the "Version Display" section below and stop.
 4. Check if the request is an **update** command (see "Update Mode" module). Patterns: "update specops", "upgrade specops", "check for updates", "get latest version", "get latest". These must refer to updating SpecOps itself, NOT to a product feature. If the request describes a product change (e.g., "update login flow", "upgrade the database"), skip update and continue to step 5.
 5. Check if the request is a **view** or **list** command (see "Spec Viewing" module). If so, follow the view/list workflow instead of the standard phases below.

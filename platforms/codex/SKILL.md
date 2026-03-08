@@ -155,7 +155,7 @@ Even in high autonomy mode, ask for clarification when:
 
 When invoked:
 1. Greet the user briefly
-2. Check if the request is an **init** command (see "Init Mode" module). Patterns: "init", "initialize", "setup specops", "configure specops", "create config". These must refer to setting up SpecOps itself (creating `.specops.json`), NOT to a product feature. If the request describes a product capability (e.g., "set up autoscaling", "configure logging"), skip init and continue to step 7.
+2. Check if the request is an **init** command (see "Init Mode" module). Patterns: "init", "initialize", "setup specops", "configure specops", "create config". These must refer to setting up SpecOps itself (creating `.specops.json`), NOT to a product feature. If the request describes a product capability (e.g., "set up autoscaling", "configure logging"), skip init and continue to step 3.
 3. Check if the request is a **version** command. Patterns: "version", "--version", "-v". If so, follow the "Version Display" section below and stop.
 4. Check if the request is an **update** command (see "Update Mode" module). Patterns: "update specops", "upgrade specops", "check for updates", "get latest version", "get latest". These must refer to updating SpecOps itself, NOT to a product feature. If the request describes a product change (e.g., "update login flow", "upgrade the database"), skip update and continue to step 5.
 5. Check if the request is a **view** or **list** command (see "Spec Viewing" module). If so, follow the view/list workflow instead of the standard phases below.
@@ -402,7 +402,7 @@ The body content after the frontmatter is the project context itself — free-fo
 
 **`always`** — Loaded every time Phase 1 runs. Use for foundational project context that is relevant to every spec: product overview, technology stack, project structure.
 
-**`fileMatch`** — Loaded only when the user's request or the files identified as affected match any of the `globs` patterns. Use for domain-specific context that is only relevant when working in certain areas of the codebase. Example: a `database.md` steering file with `globs: ["*.sql", "migrations/**", "src/db/**"]` loads only when database-related files are involved.
+**`fileMatch`** — Loaded only after Phase 1 identifies affected files, and only when those affected files match any of the `globs` patterns. Use for domain-specific context that is only relevant when working in certain areas of the codebase. Example: a `database.md` steering file with `globs: ["*.sql", "migrations/**", "src/db/**"]` loads only when database-related files are involved.
 
 **`manual`** — Not loaded automatically. Available for explicit reference by name when the user or agent specifically needs the context. Use for rarely-needed reference material.
 
@@ -412,15 +412,15 @@ During Phase 1, after reading the config and completing context recovery, load s
 
 1. If FILE_EXISTS(`<specsDir>/steering/`):
    - List the directory at(`<specsDir>/steering/`) to find all `.md` files
-   - If the number of files exceeds 20, Print to stdout("Steering file limit reached: loading first 20 of {total} files. Consider consolidating steering files to stay within the limit.") and process only the first 20 files (sorted alphabetically by filename).
+   - If the number of files exceeds 20, Print to stdout: "Steering file limit reached: loading first 20 of {total} files. Consider consolidating steering files to stay within the limit." and process only the first 20 files (sorted alphabetically by filename).
    - For each `.md` file:
      - Read the file at(`<specsDir>/steering/<filename>`) to get the full content
      - Parse the YAML frontmatter to extract `name`, `description`, `inclusion`, and optionally `globs`
-     - If frontmatter is missing or invalid (missing required fields, unparseable YAML), Print to stdout("Skipping steering file {filename}: invalid or missing frontmatter") and continue to the next file
+     - If frontmatter is missing or invalid (missing required fields, unparseable YAML), Print to stdout: "Skipping steering file {filename}: invalid or missing frontmatter" and continue to the next file
      - If `inclusion` is `always`: store the file body content as loaded project context, available for all subsequent phases
      - If `inclusion` is `fileMatch`: store the file with its `globs` for deferred evaluation after affected components and dependencies are identified in Phase 1
      - If `inclusion` is `manual`: skip (not loaded automatically)
-     - If `inclusion` has an unrecognized value: Print to stdout("Skipping steering file {filename}: unrecognized inclusion mode '{value}'") and continue
+     - If `inclusion` has an unrecognized value: Print to stdout: "Skipping steering file {filename}: unrecognized inclusion mode '{value}'" and continue
 2. After loading `always` files, Print to stdout with a brief summary: "Loaded {N} steering file(s): {names}"
 3. After Phase 1 identifies affected components and dependencies (step 8), evaluate `fileMatch` steering files by checking each file's `globs` against the set of affected files. Load any matching files and add their content to the project context.
 

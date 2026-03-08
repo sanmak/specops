@@ -29,7 +29,7 @@ The body content after the frontmatter is the project context itself — free-fo
 
 **`always`** — Loaded every time Phase 1 runs. Use for foundational project context that is relevant to every spec: product overview, technology stack, project structure.
 
-**`fileMatch`** — Loaded only when the user's request or the files identified as affected match any of the `globs` patterns. Use for domain-specific context that is only relevant when working in certain areas of the codebase. Example: a `database.md` steering file with `globs: ["*.sql", "migrations/**", "src/db/**"]` loads only when database-related files are involved.
+**`fileMatch`** — Loaded only after Phase 1 identifies affected files, and only when those affected files match any of the `globs` patterns. Use for domain-specific context that is only relevant when working in certain areas of the codebase. Example: a `database.md` steering file with `globs: ["*.sql", "migrations/**", "src/db/**"]` loads only when database-related files are involved.
 
 **`manual`** — Not loaded automatically. Available for explicit reference by name when the user or agent specifically needs the context. Use for rarely-needed reference material.
 
@@ -39,15 +39,15 @@ During Phase 1, after reading the config and completing context recovery, load s
 
 1. If FILE_EXISTS(`<specsDir>/steering/`):
    - LIST_DIR(`<specsDir>/steering/`) to find all `.md` files
-   - If the number of files exceeds 20, NOTIFY_USER("Steering file limit reached: loading first 20 of {total} files. Consider consolidating steering files to stay within the limit.") and process only the first 20 files (sorted alphabetically by filename).
+   - If the number of files exceeds 20, NOTIFY_USER: "Steering file limit reached: loading first 20 of {total} files. Consider consolidating steering files to stay within the limit." and process only the first 20 files (sorted alphabetically by filename).
    - For each `.md` file:
      - READ_FILE(`<specsDir>/steering/<filename>`) to get the full content
      - Parse the YAML frontmatter to extract `name`, `description`, `inclusion`, and optionally `globs`
-     - If frontmatter is missing or invalid (missing required fields, unparseable YAML), NOTIFY_USER("Skipping steering file {filename}: invalid or missing frontmatter") and continue to the next file
+     - If frontmatter is missing or invalid (missing required fields, unparseable YAML), NOTIFY_USER: "Skipping steering file {filename}: invalid or missing frontmatter" and continue to the next file
      - If `inclusion` is `always`: store the file body content as loaded project context, available for all subsequent phases
      - If `inclusion` is `fileMatch`: store the file with its `globs` for deferred evaluation after affected components and dependencies are identified in Phase 1
      - If `inclusion` is `manual`: skip (not loaded automatically)
-     - If `inclusion` has an unrecognized value: NOTIFY_USER("Skipping steering file {filename}: unrecognized inclusion mode '{value}'") and continue
+     - If `inclusion` has an unrecognized value: NOTIFY_USER: "Skipping steering file {filename}: unrecognized inclusion mode '{value}'" and continue
 2. After loading `always` files, NOTIFY_USER with a brief summary: "Loaded {N} steering file(s): {names}"
 3. After Phase 1 identifies affected components and dependencies (step 8), evaluate `fileMatch` steering files by checking each file's `globs` against the set of affected files. Load any matching files and add their content to the project context.
 
