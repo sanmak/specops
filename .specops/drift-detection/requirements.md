@@ -36,7 +36,7 @@ Add `audit` and `reconcile` subcommands to SpecOps. `audit` detects drift betwee
 **Acceptance Criteria (EARS):**
 - WHEN the user invokes reconcile mode on a spec THE SYSTEM SHALL first run a full audit, then present findings as a numbered list with repair options per finding
 - WHEN all checks are Healthy THE SYSTEM SHALL report "No drift detected. No reconciliation needed." and stop
-- WHEN the user selects findings to fix THE SYSTEM SHALL apply the chosen repairs, update `spec.json.updated` via `RUN_COMMAND(\`date -u\`)`, and regenerate `index.json`
+- WHEN the user selects findings to fix THE SYSTEM SHALL apply the chosen repairs, update `spec.json.updated` via `RUN_COMMAND(\`date -u +"%Y-%m-%dT%H:%M:%SZ"\`)`, and regenerate `index.json`
 - IF `canAskInteractive` is false THEN THE SYSTEM SHALL display "Reconcile mode requires interactive input" and stop without making changes
 
 **Progress Checklist:**

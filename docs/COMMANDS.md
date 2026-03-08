@@ -257,7 +257,7 @@ sync <name>
 | Missing file (deleted) | Remove reference / Provide new path / Skip |
 | Completed task, file missing | Provide new path / Note as discrepancy in tasks.md / Skip |
 | Pending task, file already exists | Mark In Progress / Skip |
-| Stale spec | Continue / Mark draft / Mark completed / Skip |
+| Stale spec | Continue as-is / Skip |
 | Cross-spec conflict | Informational only — no repair |
 
 **Notes:** Requires interactive platform (`canAskInteractive: true`). On Codex, reconcile is blocked — run audit instead and apply fixes manually. Only triggers when referring to SpecOps spec repair, not product commands like "fix auth bug".

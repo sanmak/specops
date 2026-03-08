@@ -16,7 +16,7 @@ If neither pattern matches, continue to interview check and the standard phases.
 1. If FILE_EXISTS(`.specops.json`), READ_FILE(`.specops.json`) to get `specsDir`; otherwise use default `.specops`
 2. Parse target spec name from the request if present.
    - If a name is given, audit that spec (any status, including completed — Post-Completion Modification runs for completed specs only when audited by name).
-   - If no name is given, LIST_DIR(`<specsDir>`) to enumerate all spec directories, then audit all specs whose `status` is not `completed` (completed specs are frozen; use `/specops audit <name>` to explicitly audit a completed spec).
+   - If no name is given, LIST_DIR(`<specsDir>`) to enumerate candidate directories, keep only entries where FILE_EXISTS(`<specsDir>/<dir>/spec.json`) is true (skipping non-spec folders like `steering/`), load each retained `spec.json`, then audit all specs whose `status` is not `completed` (completed specs are frozen; use `/specops audit <name>` to explicitly audit a completed spec).
 3. For each target spec:
    a. If FILE_EXISTS(`<specsDir>/<name>/spec.json`), READ_FILE(`<specsDir>/<name>/spec.json`) to load metadata. If not found, NOTIFY_USER(`"Spec '<name>' not found in <specsDir>. Run '/specops list' to see available specs."`) and stop.
    b. If FILE_EXISTS(`<specsDir>/<name>/tasks.md`), READ_FILE(`<specsDir>/<name>/tasks.md`) to load tasks.
@@ -54,7 +54,7 @@ For completed specs, detect files modified after `spec.json.updated` timestamp.
 Detect tasks whose claimed status conflicts with file reality.
 
 - **Completed tasks with missing files**: If a task is marked `Completed` and any of its "Files to Modify" paths do not exist → **Drift**
-- **Pending tasks with early implementations**: If a task is `Pending` and its "Files to Modify" files already exist with commits after `spec.json.created` → **Warning**
+- **Pending tasks with early implementations**: If `canAccessGit` is true and a task is `Pending` and its "Files to Modify" files have commits after `spec.json.created` → **Warning**; if `canAccessGit` is false → skip this sub-check and note "git unavailable, cannot detect early implementation" in the report
 - Tasks with no "Files to Modify" section → skip that task
 - If no inconsistencies found → **Healthy**
 
@@ -73,8 +73,8 @@ Detect specs stuck without activity.
 
 Detect multiple active (non-completed) specs referencing the same files.
 
-- LIST_DIR(`<specsDir>`) to find all spec directories
-- For each active spec (status ≠ completed): READ_FILE(`<specsDir>/<dir>/tasks.md`) if it exists, collect all "Files to Modify" paths
+- LIST_DIR(`<specsDir>`) to find candidate directories; keep only those where FILE_EXISTS(`<specsDir>/<dir>/spec.json`) is true; READ_FILE each `<specsDir>/<dir>/spec.json` to load metadata
+- For each spec with `status ≠ completed` (active specs only): READ_FILE(`<specsDir>/<dir>/tasks.md`) if it exists, collect all "Files to Modify" paths
 - Build a map: `file_path → [distinct spec names]` (deduplicate spec names per file — a single spec referencing the same file in multiple tasks counts as one)
 - Any file with 2+ distinct specs → **Warning** (no repair available — informational only)
 - For single-spec audit: still load all active specs to detect conflicts involving the target
