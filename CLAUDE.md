@@ -21,7 +21,7 @@ python3 generator/generate.py --platform claude
 python3 generator/validate.py
 
 # Lint shell scripts
-shellcheck setup.sh verify.sh scripts/bump-version.sh scripts/run-tests.sh scripts/remote-install.sh scripts/install-hooks.sh platforms/*/install.sh hooks/pre-commit hooks/pre-push
+shellcheck setup.sh verify.sh scripts/bump-version.sh scripts/run-tests.sh scripts/remote-install.sh scripts/install-hooks.sh scripts/run-review-gate.sh platforms/*/install.sh hooks/pre-commit hooks/pre-push
 
 # Install git hooks (run once after cloning)
 bash scripts/install-hooks.sh
@@ -57,10 +57,11 @@ Project-local Claude Code commands in `.claude/commands/` for git workflow autom
 | `/push` | Validate pre-push checks, push to remote |
 | `/ship` | Combined commit + push in one operation |
 | `/ship-pr` | Commit changes to a new branch, push, and open a PR for review |
-| `/pr-fix` | Fetch PR review comments, group by issue, fix, and push. Use `watch` submode with `/loop` for PR babysitting |
+| `/pr-fix` | Fetch PR review comments, group by issue, fix, and push in an isolated worktree. Use `watch` submode with `/loop` for babysitting, `all` submode to fix all open PRs |
 | `/release` | Full release workflow: auto-generate CHANGELOG, bump version, validate, commit, push, and create GitHub Release |
 | `/monitor` | Monitor GitHub Actions CI status, diagnose failures, auto-fix and re-push (up to 3 cycles) |
 | `/docs-sync` | Detect stale documentation after code changes, propose targeted updates for approval |
+| `/full-review-gate` | Comprehensive code review gate: bugs, security, PII/privacy, dependency risks with P0-P3 severity findings and go/no-go release status |
 
 These commands enforce project conventions automatically: conventional commit prefixes (`feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`), sensitive file exclusion, automatic regeneration of platform outputs and checksums when source files change, and pre-commit/pre-push hook compliance (never bypasses hooks).
 
