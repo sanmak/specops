@@ -60,7 +60,7 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
    **For bugfix specs:** After completing Root Cause Analysis and Impact Assessment, conduct Regression Risk Analysis before writing the Proposed Fix. The analysis depth scales with the Severity field from Impact Assessment:
 
    **Critical or High severity:**
-   1. **Blast Radius Survey** — List the contents of and Read the file at the affected component's directory. Identify every module, function, or API that imports or calls the affected code. If Run the terminal command is available, search for usages across the codebase. Record each entry point in the Blast Radius subsection.
+   1. **Blast Radius Survey** — List the contents of the affected component's directory. Then Read the file at the specific source files, callers, and entry points discovered in that scan. Identify every module, function, or API that imports or calls the affected code. If Run the terminal command is available, search for usages across the codebase. Record each entry point in the Blast Radius subsection.
    2. **Behavior Inventory** — For each blast radius item, Read the file at its code and list the behaviors that depend on the affected area. Ask: "What does this path do correctly today that must remain true after the fix?"
    3. **Test Coverage Check** — Read the file at the relevant test files. For each inventoried behavior, note whether a test already covers it or whether it is a gap. Gaps must be added to the Testing Plan.
    4. **Risk Tier** — Classify each inventoried behavior: Must-Test (direct coupling to changed code), Nice-To-Test (indirect), or Low-Risk (independent path). Only Must-Test items are acceptance gates.
@@ -70,7 +70,7 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
 
    **Low severity:** Brief step 1 only. If the blast radius is clearly one isolated function with no callers in critical paths, note "minimal regression risk — isolated change". Also record at least one caller-visible behavior to preserve and classify it in a lightweight Risk Tier entry, or note "No caller-visible unchanged behavior — isolated internal fix" which explicitly skips Must-Test-derived unchanged-behavior gates for this spec.
 
-   After the Regression Risk Analysis, populate the "Unchanged Behavior" section from the Must-Test behaviors. For Low severity with no Must-Test behaviors identified, note "N/A — isolated change with no caller-visible behavior to preserve" in the Unchanged Behavior section and mark the regression/coverage acceptance criteria as checked with a note. Structure the Testing Plan into three categories: Current Behavior (verify bug exists), Expected Behavior (verify fix works), Unchanged Behavior (verify no regressions using Must-Test items from the analysis; for Low severity with no Must-Test items, this section may be empty).
+   After the Regression Risk Analysis, populate the "Unchanged Behavior" section from the Must-Test behaviors. For Low severity with no Must-Test behaviors identified, note "N/A — isolated change with no caller-visible behavior to preserve" in the Unchanged Behavior section and record why the regression/coverage criteria will be trivially satisfied at verification time. Structure the Testing Plan into three categories: Current Behavior (verify bug exists), Expected Behavior (verify fix works), Unchanged Behavior (verify no regressions using Must-Test items from the analysis; for Low severity with no Must-Test items, this section may be empty).
 3. Create `spec.json` with metadata (author from git config, type, status, version, created date). Set status to `draft`.
 4. Regenerate `<specsDir>/index.json` from all `*/spec.json` files.
 5. **First-spec README prompt**: If `index.json` contains exactly one spec entry (this is the project's first spec):
@@ -92,7 +92,7 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
 See "Collaborative Spec Review" module for the full review workflow including review mode, revision mode, and approval tracking.
 
 **Phase 3: Implement**
-1. Check the implementation gate: if spec review is enabled, verify `spec.json` status is `approved` before proceeding. Update status to `implementing`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp (use Run the terminal command(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`.
+1. Check the implementation gate: if spec review is enabled, verify `spec.json` status is `approved` or `self-approved` before proceeding. Update status to `implementing`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp (Run the terminal command(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`.
 2. Execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions)
 3. For each task: set `In Progress` in tasks.md FIRST, then implement, then report progress
 4. After completing each code-modifying task, update `implementation.md`:
@@ -119,7 +119,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - For each doc file, check if it references components, features, or configurations that were modified during this spec
    - If stale documentation is detected, update the affected sections
    - If unsure whether a doc needs updating, flag it to the user rather than skipping silently
-4. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp (use Run the terminal command(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`
+4. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp (Run the terminal command(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`
 5. Create PR if `createPR` is true
 6. Summarize completed work
 
@@ -1475,6 +1475,10 @@ Description of the fix approach and why it addresses the root cause.
 - WHEN [related condition] THE SYSTEM SHALL CONTINUE TO [preserved behavior]
 
 ## Acceptance Criteria
+<!-- Keep or remove criteria based on Severity from Impact Assessment:
+     Critical/High → all five criteria apply
+     Medium        → keep criteria 1-4; criterion 5 only if coverage gaps were found
+     Low           → keep criteria 1-3; omit 4 if no Must-Test items; omit 5 (no Coverage Assessment) -->
 - [ ] Regression Risk Analysis completed (blast radius surveyed, behaviors inventoried)
 - [ ] Bug reproduction confirmed (Current Behavior verified)
 - [ ] Fix verified (Expected Behavior tests pass)

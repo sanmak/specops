@@ -430,6 +430,10 @@ def main():
                 if parse_ts(reviewed_at) < parse_ts(created):
                     print(f"FAIL: {spec_path} - reviewedAt < created ({reviewed_at} < {created})")
                     return False
+            if reviewed_at and updated:
+                if parse_ts(updated) < parse_ts(reviewed_at):
+                    print(f"FAIL: {spec_path} - updated < reviewedAt ({updated} < {reviewed_at})")
+                    return False
         print(f"PASS: {spec_path} - timestamp ordering valid")
         return True
 

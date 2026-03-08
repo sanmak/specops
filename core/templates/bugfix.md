@@ -97,6 +97,10 @@ Description of the fix approach and why it addresses the root cause.
 - WHEN [related condition] THE SYSTEM SHALL CONTINUE TO [preserved behavior]
 
 ## Acceptance Criteria
+<!-- Keep or remove criteria based on Severity from Impact Assessment:
+     Critical/High → all five criteria apply
+     Medium        → keep criteria 1-4; criterion 5 only if coverage gaps were found
+     Low           → keep criteria 1-3; omit 4 if no Must-Test items; omit 5 (no Coverage Assessment) -->
 - [ ] Regression Risk Analysis completed (blast radius surveyed, behaviors inventoried)
 - [ ] Bug reproduction confirmed (Current Behavior verified)
 - [ ] Fix verified (Expected Behavior tests pass)
