@@ -47,7 +47,10 @@ Detailed analysis of what's causing the bug.
 - [Existing behavior that touches the affected area]
 
 ### Test Coverage Assessment
-<!-- Identify which behaviors in the inventory are already covered by tests,
+<!-- Critical/High → complete this section fully.
+     Medium → complete only if obvious test gaps exist.
+     Low → skip this section entirely (no Behavior Inventory to assess).
+     Identify which behaviors in the inventory are already covered by tests,
      and which are gaps. READ_FILE test files for the affected component(s).
      Gaps must be addressed in the Testing Plan below. -->
 - **Covered:** [behavior] → [test file / test name]
@@ -65,7 +68,9 @@ Detailed analysis of what's causing the bug.
 | [behavior] | Nice-To-Test | [why] |
 
 ### Scope Escalation Check
-<!-- After surveying the blast radius: does the fix require changes beyond
+<!-- Critical/High → complete this section.
+     Medium/Low → skip unless the blast radius scan revealed surprising scope.
+     After surveying the blast radius: does the fix require changes beyond
      correcting the broken behavior? If yes, create a Feature Spec instead of
      (or in addition to) this bugfix. Common triggers:
      - The root cause is a missing feature, not a defect
@@ -101,7 +106,7 @@ Description of the fix approach and why it addresses the root cause.
      Critical/High → all five criteria apply
      Medium        → keep criteria 1-4; criterion 5 only if coverage gaps were found
      Low           → keep criteria 1-3; omit 4 if no Must-Test items; omit 5 (no Coverage Assessment) -->
-- [ ] Regression Risk Analysis completed (blast radius surveyed, behaviors inventoried)
+- [ ] Regression Risk Analysis completed to the required depth for the selected severity
 - [ ] Bug reproduction confirmed (Current Behavior verified)
 - [ ] Fix verified (Expected Behavior tests pass)
 - [ ] No regressions (all Must-Test Unchanged Behavior tests pass)

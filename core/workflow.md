@@ -85,7 +85,7 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
 See "Collaborative Spec Review" module for the full review workflow including review mode, revision mode, and approval tracking.
 
 **Phase 3: Implement**
-1. Check the implementation gate: if spec review is enabled, verify `spec.json` status is `approved` or `self-approved` before proceeding. Update status to `implementing`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp (RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`.
+1. Check the implementation gate: if spec review is enabled, verify `spec.json` status is `approved` or `self-approved` before proceeding (see the Implementation Gate section in the Collaborative Spec Review module for interactive override behavior when the spec is not yet approved). Update status to `implementing`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp (RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`.
 2. Execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions)
 3. For each task: set `In Progress` in tasks.md FIRST, then implement, then report progress
 4. After completing each code-modifying task, update `implementation.md`:

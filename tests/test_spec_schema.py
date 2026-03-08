@@ -415,23 +415,34 @@ def main():
         return datetime.fromisoformat(ts_str)
 
     def check_timestamp_ordering(spec_path):
-        """Verify updated >= created and reviewedAt >= created in a spec.json."""
+        """Verify timestamp ordering invariants in a spec.json."""
         with open(spec_path) as f:
             spec = json.load(f)
         created = spec.get("created")
         updated = spec.get("updated")
-        if created and updated:
-            if parse_ts(updated) < parse_ts(created):
+        try:
+            created_ts = parse_ts(created) if created else None
+            updated_ts = parse_ts(updated) if updated else None
+        except ValueError as e:
+            print(f"FAIL: {spec_path} - invalid timestamp ({e})")
+            return False
+        if created_ts and updated_ts:
+            if updated_ts < created_ts:
                 print(f"FAIL: {spec_path} - updated < created ({updated} < {created})")
                 return False
         for reviewer in spec.get("reviewers", []):
             reviewed_at = reviewer.get("reviewedAt")
-            if reviewed_at and created:
-                if parse_ts(reviewed_at) < parse_ts(created):
+            try:
+                reviewed_at_ts = parse_ts(reviewed_at) if reviewed_at else None
+            except ValueError as e:
+                print(f"FAIL: {spec_path} - invalid reviewedAt ({e})")
+                return False
+            if reviewed_at_ts and created_ts:
+                if reviewed_at_ts < created_ts:
                     print(f"FAIL: {spec_path} - reviewedAt < created ({reviewed_at} < {created})")
                     return False
-            if reviewed_at and updated:
-                if parse_ts(updated) < parse_ts(reviewed_at):
+            if reviewed_at_ts and updated_ts:
+                if updated_ts < reviewed_at_ts:
                     print(f"FAIL: {spec_path} - updated < reviewedAt ({updated} < {reviewed_at})")
                     return False
         print(f"PASS: {spec_path} - timestamp ordering valid")
