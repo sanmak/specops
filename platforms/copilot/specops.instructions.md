@@ -536,7 +536,7 @@ Steering Files (<specsDir>/steering/)
 | product.md | Product Context | always | What this project builds... |
 | tech.md | Technology Stack | always | Languages, frameworks... |
 
-{N} steering file(s) loaded in every Phase 1 run.
+{N} always-included steering file(s) loaded in every Phase 1 run. fileMatch files are loaded conditionally; manual files are never auto-loaded.
 ```
 
 - On interactive platforms (`canAskInteractive = true`), Ask the user: "Would you like to add a new steering file, edit an existing one, or done?"
@@ -1294,14 +1294,15 @@ When a follow-up is triggered, Ask the user for the follow-up question. Record t
 
 ## Interview Mode in the Workflow
 
-Interview mode inserts itself **between** the view/list check and Phase 1 (Understand Context) in the main workflow:
+Interview mode inserts itself **between** the steering check and Phase 1 (Understand Context) in the main workflow:
 
 1. User invokes specops
 2. Check if request is view/list command → handle separately
-3. **NEW:** Check if interview mode is triggered (explicit or auto)
+3. Check if request is steering command → handle separately
+4. **NEW:** Check if interview mode is triggered (explicit or auto)
    - If yes: Run interview workflow above
    - Once complete: Proceed to Phase 1 with enriched context
-4. If no interview: Continue to Phase 1 normally
+5. If no interview: Continue to Phase 1 normally
 
 
 ## Update Mode

@@ -145,15 +145,15 @@ Use specops update
 
 ## Manage Steering Files
 
-Scaffold, view, and manage steering files — markdown files with YAML frontmatter that provide persistent project context (product overview, tech stack, project structure) loaded automatically before every spec.
+Scaffold, view, and manage steering files — markdown files with YAML frontmatter that provide persistent project context (product overview, tech stack, project structure). `always`-included files are loaded before every spec; `fileMatch` files load conditionally; `manual` files are never auto-loaded.
 
 **Claude Code:**
-```
+```text
 /specops steering
 ```
 
 **Other platforms:**
-```
+```text
 Use specops steering
 ```
 
@@ -162,6 +162,7 @@ Use specops steering
 - If the directory exists, shows a summary table of all steering files (name, inclusion mode, description) and offers to add, edit, or done on interactive platforms
 
 **Steering file inclusion modes:**
+
 | Mode | Description |
 |------|-------------|
 | `always` | Loaded before every spec (use for product overview, tech stack, project structure) |
@@ -448,5 +449,6 @@ These are the valid states a spec can be in, usable as filters with the status c
 | I'm updating my spec after feedback | `revise <name>` |
 | I'm ready to code | `implement <name>` |
 | I want to set up SpecOps in my project | `/specops init` |
+| I want to create or manage steering files | `/specops steering` |
 | I want to check my SpecOps version | `/specops version` |
 | I want to update SpecOps | `/specops update` |

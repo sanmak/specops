@@ -185,7 +185,7 @@ Run the full regeneration pipeline and verify all outputs include steering conte
 - [x] All platform outputs regenerated without errors
 - [x] Validation passes including STEERING_MARKERS
 - [x] All tests pass
-- [x] No raw abstract operations in generated outputs
+- [x] No unmapped abstract operations in generated outputs (FILE_EXISTS is intentionally preserved as a conditional guard)
 
 **Files to Modify:**
 - `platforms/claude/SKILL.md` (regenerated)

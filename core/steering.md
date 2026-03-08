@@ -164,7 +164,7 @@ Steering Files (<specsDir>/steering/)
 | product.md | Product Context | always | What this project builds... |
 | tech.md | Technology Stack | always | Languages, frameworks... |
 
-{N} steering file(s) loaded in every Phase 1 run.
+{N} always-included steering file(s) loaded in every Phase 1 run. fileMatch files are loaded conditionally; manual files are never auto-loaded.
 ```
 
 - On interactive platforms (`canAskInteractive = true`), ASK_USER: "Would you like to add a new steering file, edit an existing one, or done?"
