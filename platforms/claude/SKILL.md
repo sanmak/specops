@@ -1647,7 +1647,7 @@ Detailed analysis of what's causing the bug.
 <!-- Depth scales with Severity from Impact Assessment:
      Critical/High → complete all five subsections
      Medium        → complete Blast Radius + Behavior Inventory; brief Risk Tier
-     Low           → brief Blast Radius scan only; note "minimal regression risk" if confirmed -->
+     Low           → brief Blast Radius scan; also record a lightweight Risk Tier entry for at least one caller-visible behavior, or explicitly note "No caller-visible unchanged behavior — isolated internal fix"; note "minimal regression risk" if confirmed -->
 
 ### Blast Radius
 <!-- Survey what code paths are touched by the affected component(s).

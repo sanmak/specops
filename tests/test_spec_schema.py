@@ -440,7 +440,7 @@ def main():
     for spec_file in sorted(glob.glob("examples/specs/*/spec.json")):
         check(check_timestamp_ordering(spec_file))
 
-    for spec_file in sorted(glob.glob(".specops/*/spec.json")):
+    for spec_file in sorted(glob.glob(".specops/**/spec.json", recursive=True)):
         check(check_timestamp_ordering(spec_file))
 
     # --- index-schema.json tests ---
