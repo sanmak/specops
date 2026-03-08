@@ -126,6 +126,48 @@ inclusion: always
 [How modules relate and communicate]
 ```
 
+### Steering Command
+
+When the user invokes SpecOps with steering intent, enter steering mode.
+
+#### Detection
+
+Patterns: "steering", "create steering", "setup steering", "manage steering", "steering files", "add steering".
+
+These must refer to managing SpecOps steering files, NOT to a product feature (e.g., "add steering wheel component" is NOT steering mode).
+
+#### Workflow
+
+1. READ_FILE `.specops.json` to get `specsDir` (default `.specops`)
+2. Check if `<specsDir>/steering/` exists:
+
+**If steering directory does NOT exist:**
+- ASK_USER: "No steering files found. Would you like to create foundation steering files (product.md, tech.md, structure.md) for persistent project context?"
+- If yes: create the 3 foundation templates using WRITE_FILE (see Foundation File Templates above), then NOTIFY_USER: "Created 3 steering files in `<specsDir>/steering/`. Edit them to describe your project — the agent will load them automatically before every spec."
+- If no: NOTIFY_USER: "No steering files created. You can create them manually in `<specsDir>/steering/` — see the Foundation File Templates section for the expected format."
+
+**If steering directory exists:**
+- LIST_DIR(`<specsDir>/steering/`) to find all `.md` files
+- For each file, READ_FILE and parse YAML frontmatter
+- Present a summary table:
+
+```
+Steering Files (<specsDir>/steering/)
+
+| File | Name | Inclusion | Description |
+|------|------|-----------|-------------|
+| product.md | Product Context | always | What this project builds... |
+| tech.md | Technology Stack | always | Languages, frameworks... |
+
+{N} steering file(s) loaded in every Phase 1 run.
+```
+
+- On interactive platforms (`canAskInteractive = true`), ASK_USER: "Would you like to add a new steering file, edit an existing one, or done?"
+  - **Add**: ASK_USER for the steering file name and inclusion mode, create with appropriate template
+  - **Edit**: ASK_USER which file to edit, then help update its content
+  - **Done**: exit steering mode
+- On non-interactive platforms (`canAskInteractive = false`), display the table and stop
+
 ### Relationship to team.conventions
 
 `team.conventions` in `.specops.json` and steering files are **complementary**:

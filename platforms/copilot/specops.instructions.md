@@ -16,7 +16,7 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
    - If any specs have status `implementing` or `in-review`, Tell the user: "Found incomplete spec: <name> (status: <status>). Continue working on it?"
    - If continuing an existing spec, Read the file at the spec's `implementation.md` to recover session context (decision log, deviations, blockers, session log), then resume from the appropriate phase
    - If starting fresh, proceed normally
-3. **Load steering files**: If FILE_EXISTS(`<specsDir>/steering/`), load persistent project context from steering files following the Steering Files module. Always-included files are loaded now; fileMatch files are deferred until after request analysis (step 6). If `<specsDir>/steering/` does not exist, Tell the user: "Tip: Create steering files in `<specsDir>/steering/` (product.md, tech.md, structure.md) to give the agent persistent project context. Run `/specops init` or see the Steering Files module for templates."
+3. **Load steering files**: If FILE_EXISTS(`<specsDir>/steering/`), load persistent project context from steering files following the Steering Files module. Always-included files are loaded now; fileMatch files are deferred until after request analysis (step 6). If `<specsDir>/steering/` does not exist, Tell the user: "Tip: Create steering files in `<specsDir>/steering/` (product.md, tech.md, structure.md) to give the agent persistent project context. Run `/specops steering` to set them up, or see the Steering Files module for templates."
 4. **Pre-flight check**: Verify SpecOps skill availability for team collaboration:
    - Read the file at `.gitignore` if it exists
    - If `.gitignore` contains patterns matching `.claude/` or `.claude/*`, Tell the user with warning:
@@ -158,15 +158,16 @@ When invoked:
 3. Check if the request is a **version** command. Patterns: "version", "--version", "-v". If so, follow the "Version Display" section below and stop.
 4. Check if the request is an **update** command (see "Update Mode" module). Patterns: "update specops", "upgrade specops", "check for updates", "get latest version", "get latest". These must refer to updating SpecOps itself, NOT to a product feature. If the request describes a product change (e.g., "update login flow", "upgrade the database"), skip update and continue to step 5.
 5. Check if the request is a **view** or **list** command (see "Spec Viewing" module). If so, follow the view/list workflow instead of the standard phases below.
-6. Check if interview mode is triggered (see "Interview Mode" module):
+6. Check if the request is a **steering** command (see "Steering Command" in the Steering Files module). Patterns: "steering", "create steering", "setup steering", "manage steering", "steering files", "add steering". These must refer to managing SpecOps steering files, NOT to a product feature. If so, follow the Steering Command workflow instead of the standard phases below.
+7. Check if interview mode is triggered (see "Interview Mode" module):
    - Explicit: request contains "interview" keyword
    - Auto (interactive platforms only): request is vague (≤5 words, no technical keywords, no action verb)
    - If triggered: follow the Interview Mode workflow, then continue with the enriched context
-7. Confirm the request type (feature/bugfix/implement/other)
-8. Show the configuration you'll use (including detected vertical)
-9. Begin the workflow immediately (high autonomy)
-10. Provide progress updates as you work
-11. Summarize completion clearly
+8. Confirm the request type (feature/bugfix/implement/other)
+9. Show the configuration you'll use (including detected vertical)
+10. Begin the workflow immediately (high autonomy)
+11. Provide progress updates as you work
+12. Summarize completion clearly
 
 ## Version Display
 
@@ -496,6 +497,48 @@ inclusion: always
 ## Module Boundaries
 [How modules relate and communicate]
 ```
+
+### Steering Command
+
+When the user invokes SpecOps with steering intent, enter steering mode.
+
+#### Detection
+
+Patterns: "steering", "create steering", "setup steering", "manage steering", "steering files", "add steering".
+
+These must refer to managing SpecOps steering files, NOT to a product feature (e.g., "add steering wheel component" is NOT steering mode).
+
+#### Workflow
+
+1. Read the file at `.specops.json` to get `specsDir` (default `.specops`)
+2. Check if `<specsDir>/steering/` exists:
+
+**If steering directory does NOT exist:**
+- Ask the user: "No steering files found. Would you like to create foundation steering files (product.md, tech.md, structure.md) for persistent project context?"
+- If yes: create the 3 foundation templates using Create the file at (see Foundation File Templates above), then Tell the user: "Created 3 steering files in `<specsDir>/steering/`. Edit them to describe your project — the agent will load them automatically before every spec."
+- If no: Tell the user: "No steering files created. You can create them manually in `<specsDir>/steering/` — see the Foundation File Templates section for the expected format."
+
+**If steering directory exists:**
+- List the contents of(`<specsDir>/steering/`) to find all `.md` files
+- For each file, Read the file at and parse YAML frontmatter
+- Present a summary table:
+
+```
+Steering Files (<specsDir>/steering/)
+
+| File | Name | Inclusion | Description |
+|------|------|-----------|-------------|
+| product.md | Product Context | always | What this project builds... |
+| tech.md | Technology Stack | always | Languages, frameworks... |
+
+{N} steering file(s) loaded in every Phase 1 run.
+```
+
+- On interactive platforms (`canAskInteractive = true`), Ask the user: "Would you like to add a new steering file, edit an existing one, or done?"
+  - **Add**: Ask the user for the steering file name and inclusion mode, create with appropriate template
+  - **Edit**: Ask the user which file to edit, then help update its content
+  - **Done**: exit steering mode
+- On non-interactive platforms (`canAskInteractive = false`), display the table and stop
 
 ### Relationship to team.conventions
 
