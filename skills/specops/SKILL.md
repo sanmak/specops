@@ -772,7 +772,7 @@ These must refer to SpecOps memory management, NOT a product feature (e.g., "add
 **Seed workflow** (`/specops memory seed`):
 1. If FILE_EXISTS(`.specops.json`), Use the Read tool to read(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
 2. If FILE_EXISTS(`<specsDir>/`) is false: Display a message to the user("No specs directory found at `<specsDir>`. Create a spec first or run `/specops init`.") and stop.
-3. Use the Read tool to read(`<specsDir>/index.json`) to get all specs. If index.json does not exist, Use the Glob tool to list(`<specsDir>`) to get subdirectories, then for each subdirectory `<dir>` check FILE_EXISTS(`<specsDir>/<dir>/spec.json`), and Use the Read tool to read each found `spec.json` to build the spec list.
+3. If FILE_EXISTS(`<specsDir>/index.json`), Use the Read tool to read(`<specsDir>/index.json`) to get all specs. If the file contains invalid JSON, treat it as missing. If `index.json` does not exist or is invalid, Use the Glob tool to list(`<specsDir>`) to get subdirectories, then for each subdirectory `<dir>` check FILE_EXISTS(`<specsDir>/<dir>/spec.json`), and Use the Read tool to read each found `spec.json` to build the spec list.
 4. Filter to specs with `status == "completed"`.
 5. If no completed specs found: Display a message to the user("No completed specs found. Complete a spec first, then run seed.") and stop.
 6. For each completed spec:
@@ -785,9 +785,10 @@ These must refer to SpecOps memory management, NOT a product feature (e.g., "add
 10. Use the Bash tool to run(`mkdir -p <specsDir>/memory`) if the directory does not exist.
 11. **Merge with existing data**: If FILE_EXISTS(`<specsDir>/memory/decisions.json`), Use the Read tool to read it and parse. If JSON is invalid, Display a message to the user("Warning: existing decisions.json is malformed — it will be replaced with seeded data.") and skip merge. Otherwise, identify entries in the existing file whose `specId+number` combination does NOT appear in the seeded set (these are manually-added entries). Preserve those entries by appending them to the seeded decisions array.
 12. Use the Write tool to create(`<specsDir>/memory/decisions.json`) with the merged decisions array from step 11 (or step 7 if no existing file).
-13. If FILE_EXISTS(`<specsDir>/memory/context.md`), Use the Read tool to read it and check for custom content. Canonical (managed) content includes: the `# Project Memory` heading, the `## Completed Specs` heading, and any entry matching `### <spec-name> (<type>) — YYYY-MM-DD`. Everything outside these canonical sections is user-added custom content. If custom content exists, Display a message to the user("Warning: context.md contains manual additions that will be preserved at the end of the file.") and append those custom sections after the seeded completion summaries. Use the Write tool to create(`<specsDir>/memory/context.md`) with the seeded summaries from step 8 followed by any preserved custom sections.
-14. Use the Write tool to create(`<specsDir>/memory/patterns.json`) with the pattern data built in step 9.
-15. Display a message to the user("Seeded memory from {N} completed specs: {D} decisions, {P} patterns detected.")
+13. Initialize `preservedCustomSections` to empty. If FILE_EXISTS(`<specsDir>/memory/context.md`), Use the Read tool to read it and check for custom content. Canonical (managed) content includes: the `# Project Memory` heading, the `## Completed Specs` heading, and any entry matching `### <spec-name> (<type>) — YYYY-MM-DD`. Everything outside these canonical sections is user-added custom content. If custom content exists, Display a message to the user("Warning: context.md contains manual additions that will be preserved at the end of the file.") and store those sections in `preservedCustomSections`.
+14. Use the Write tool to create(`<specsDir>/memory/context.md`) with the seeded summaries from step 8 followed by `preservedCustomSections` (empty if no existing file or no custom content).
+15. Use the Write tool to create(`<specsDir>/memory/patterns.json`) with the pattern data built in step 9.
+16. Display a message to the user("Seeded memory from {N} completed specs: {D} decisions, {P} patterns detected.")
 
 ### Platform Adaptation
 
