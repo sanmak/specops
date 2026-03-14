@@ -21,6 +21,7 @@ specops/
 │   ├── TEAM_GUIDE.md                     # Team collaboration guide
 │   ├── SBOM.md                           # Software Bill of Materials
 │   ├── STEERING_GUIDE.md                 # Steering files guide
+│   ├── DIAGRAMS.md                       # Mermaid sequence diagrams for all workflows
 │   ├── PLAN-VS-SPEC.md                   # Plan Mode vs Spec Mode comparison
 │   ├── SECURITY-AUDIT.md                 # Security audit results
 │   └── MARKETPLACE_SUBMISSIONS.md        # Marketplace submission content
