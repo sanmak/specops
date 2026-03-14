@@ -196,7 +196,7 @@ _sourceHash: "eccb8847762f73887395831078955517cc6f01ead558f3e8e39a218890d43d7a"
 - `STRUCTURE.md`
 - `TEAM_GUIDE.md`
 
-#### Root files (13 files)
+#### Root files (17 files)
 
 - `.gitignore`
 - `.specops.json`

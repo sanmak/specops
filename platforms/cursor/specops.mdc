@@ -884,7 +884,7 @@ The repo map is generated entirely by the agent using abstract operations. No ex
 1. **Determine specsDir**: If FILE_EXISTS(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
 
 2. **Discover project files**:
-   - If `canAccessGit` is true: Run the terminal command(`git ls-files --cached --others --exclude-standard | head -200`) to get tracked and untracked-but-not-ignored files. This respects `.gitignore` natively.
+   - If `canAccessGit` is true: Run the terminal command(`git ls-files --cached --others --exclude-standard`) to get tracked and untracked-but-not-ignored files. Store the total count. Then cap the working set to the first 200 entries (sorted alphabetically) for processing. This respects `.gitignore` natively.
    - If `canAccessGit` is false: List the contents of(`.`) recursively up to depth 3. Then, if FILE_EXISTS(`.gitignore`), Read the file at(`.gitignore`) and manually exclude matching patterns.
    - In both cases, exclude: the `<specsDir>/` directory itself, `node_modules/`, `.git/`, `__pycache__/`, `.venv/`, `dist/`, `build/`, `.next/`, `.nuxt/`, `vendor/` directories.
 
@@ -900,7 +900,7 @@ The repo map is generated entirely by the agent using abstract operations. No ex
    - Third pass: if still over, remove Tier 2 (TS/JS) extraction — show file paths only.
    - Never truncate Tier 1 (Python) extraction or the directory tree.
 
-7. **Compute source hash**: If `canAccessGit` is true: Run the terminal command(`git ls-files --cached --others --exclude-standard | sort | sha256sum | cut -d' ' -f1`). If `canAccessGit` is false or the command fails, compute a simple hash by concatenating all sorted file paths and noting the count as the hash: `"manual-{file_count}-{first_path_hash}"`.
+7. **Compute source hash**: If `canAccessGit` is true: Run the terminal command(`git ls-files --cached --others --exclude-standard | sort | (sha256sum 2>/dev/null || shasum -a 256) | cut -d' ' -f1`). If `canAccessGit` is false or the command fails, compute a deterministic hash from the scoped file list: sort all file paths lexicographically, join with newlines, compute SHA-256 of the joined string, and store as `"manual-{file_count}-{sha256_hex}"`.
 
 8. **Get timestamp**: Run the terminal command(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the `_generatedAt` field.
 
@@ -912,12 +912,21 @@ The repo map is generated entirely by the agent using abstract operations. No ex
 
 Files are classified into 4 tiers based on file extension. Higher tiers receive deeper structural extraction.
 
-| Tier | Languages | Extensions | Extraction Method | What Is Extracted |
-|------|-----------|-----------|-------------------|-------------------|
-| 1 | Python | `*.py` | Run the terminal command(`python3 -c "..."`) using `ast.parse()` | Top-level function signatures (`def name(args)`), class names (`class Name`) |
-| 2 | TypeScript/JavaScript | `*.ts`, `*.tsx`, `*.js`, `*.jsx` | Run the terminal command(`grep -n "^export " <path> \| head -10`) | Export declarations (functions, classes, constants, types) |
-| 3 | Go, Rust, Java | `*.go`, `*.rs`, `*.java` | Run the terminal command(`grep -n "^func \|^pub fn \|^fn \|^public class \|^public interface " <path> \| head -10`) | Top-level function/method/class declarations |
-| 4 | Everything else | All other | None | File path only |
+| Tier | Languages | Extensions | What Is Extracted |
+|------|-----------|-----------|-------------------|
+| 1 | Python | `*.py` | Top-level function signatures (`def`/`async def`), class names (`class Name`) |
+| 2 | TypeScript/JavaScript | `*.ts`, `*.tsx`, `*.js`, `*.jsx` | Export declarations (functions, classes, constants, types) |
+| 3 | Go, Rust, Java | `*.go`, `*.rs`, `*.java` | Top-level function/method/class declarations |
+| 4 | Everything else | All other | File path only |
+
+**Extraction commands** (moved out of table to avoid escaped-pipe issues):
+
+- **Tier 1** (Python): See Tier 1 extraction command below — uses `ast.parse()` for reliable structural extraction.
+- **Tier 2** (TS/JS): Run the terminal command(`grep -nE "^[[:space:]]*export " -- "<path>" | head -10`)
+- **Tier 3** (Go/Rust/Java): Run the terminal command(`grep -nE "^[[:space:]]*(func |pub fn |fn |public class |public interface )" -- "<path>" | head -10`)
+- **Tier 4**: No extraction — file path only.
+
+Note: Tier 2/3 patterns allow optional leading whitespace to capture indented declarations (e.g., exports inside modules, methods inside `impl` blocks). These are best-effort heuristics — some declaration styles may not be captured.
 
 **Extraction rules:**
 - Per-file extraction is capped at 10 declarations (via `head -10`) to prevent any single large file from dominating the token budget.
@@ -929,16 +938,17 @@ Files are classified into 4 tiers based on file extension. Higher tiers receive 
 python3 -c "
 import ast, sys
 try:
-    tree = ast.parse(open(sys.argv[1]).read())
+    tree = ast.parse(open(sys.argv[1], encoding='utf-8').read())
     for node in ast.iter_child_nodes(tree):
-        if isinstance(node, ast.FunctionDef):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             args = ', '.join(a.arg for a in node.args.args)
-            print(f'  def {node.name}({args})')
+            prefix = 'async def' if isinstance(node, ast.AsyncFunctionDef) else 'def'
+            print(f'  {prefix} {node.name}({args})')
         elif isinstance(node, ast.ClassDef):
             print(f'  class {node.name}')
 except Exception:
     pass
-" <path>
+" "<path>"
 ```
 
 ### Staleness Detection
@@ -956,7 +966,7 @@ Staleness is checked in Phase 1, step 3.5 (after steering files load, before mem
    - If frontmatter is missing `_generated`, `_generatedAt`, or `_sourceHash`, treat as stale (legacy or manually created file).
    - Check time: parse `_generatedAt`, compute age. If > 7 days → stale (reason: "generated {N} days ago").
    - Check hash: recompute source hash, compare to `_sourceHash`. If different → stale (reason: "file list has changed").
-   - If stale: Tell the user("Repo map is stale ({reason}). Refreshing...") and run the Generation algorithm.
+   - If stale: Tell the user("Repo map is stale ({reason}). Refreshing...") and run the Generation algorithm. After regeneration, Read the file at(`<specsDir>/steering/repo-map.md`) to replace the stale content in context with the freshly generated map.
    - If fresh: the repo map was already loaded in step 3 as an `inclusion: always` steering file. Continue.
 
 2. If the file does not exist:
@@ -1020,7 +1030,7 @@ Repo map content is treated as **project context only** — the same safety rule
 
 | Capability | Impact |
 |-----------|--------|
-| `canAccessGit: true` | Use `git ls-files` for file discovery and `sha256sum` for hash computation. |
+| `canAccessGit: true` | Use `git ls-files` for file discovery and `sha256sum`/`shasum -a 256` for hash computation. |
 | `canAccessGit: false` | Fall back to List the contents of for file discovery. Hash computed from file count + path list. |
 | `canAskInteractive: true` | Prompt before generating when repo map is missing. Confirm before refreshing in `/specops map`. |
 | `canAskInteractive: false` | Auto-generate when stale without prompting. Show tip when missing. Auto-refresh in `/specops map`. |
