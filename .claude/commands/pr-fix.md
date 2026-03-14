@@ -6,11 +6,19 @@ Follow these steps precisely. Do NOT add a Co-Authored-By line to commits.
 
 ### Argument Parsing
 
+**Compact-state recovery pre-check**: Before detecting mode, check if `.claude/.pr-fix-compact-state.json` exists. If it does, read it and note the saved `mode`, `pr_number` (or `pr_list`), and `current_pr_index`. After detecting the current invocation's mode and PR target below, if they match the saved state, restore all state variables from the file and skip any already-completed steps. Delete `.claude/.pr-fix-compact-state.json` at the end of a successful run (see Step 9 / Step A7).
+
 Parse `$ARGUMENTS` for one of three modes:
+
+**Global flag — `--minor`**: If `--minor` is present anywhere in `$ARGUMENTS`, set `INCLUDE_MINOR = true` and strip it before further parsing. Default: `INCLUDE_MINOR = false`. When false, CodeRabbit comments with `_🟡 Minor_` severity are filtered out in Step 4a. When true, all severities are processed.
+
+Parse the remaining `$ARGUMENTS` for one of three modes:
 
 - **Fix mode** (default): `$ARGUMENTS` is a PR number (e.g., `3`) or empty.
 - **Watch mode**: `$ARGUMENTS` starts with `watch` followed by a PR number (e.g., `watch 3`).
 - **All mode**: `$ARGUMENTS` starts with `all`, optionally followed by `--dry-run` and/or a number limit (e.g., `all`, `all --dry-run`, `all 3`, `all --dry-run 3`).
+
+All modes support `--minor` (e.g., `/pr-fix 3 --minor`, `/pr-fix watch 3 --minor`, `/pr-fix all --minor --dry-run 3`).
 
 If watch mode is detected, skip to the **Watch Mode** section below.
 If all mode is detected, skip to the **All Mode** section below.
@@ -51,38 +59,134 @@ For each comment, extract: `id`, `path`, `line`, `original_line`, `body`, `diff_
 
 If no comments are found, report "No review comments on PR #<PR_NUMBER>" and skip to Step 9.
 
-### Step 4: Group and deduplicate comments
+### Compact Checkpoint FC1
 
-Group comments that describe the **same underlying issue**:
+After fetching raw comment payloads, estimate context window usage. If the conversation is ≥60% full:
+
+1. Write `.claude/.pr-fix-compact-state.json`:
+   ```json
+   {
+     "mode": "fix",
+     "pr_number": <PR_NUMBER>,
+     "pr_branch": "<PR_BRANCH>",
+     "pr_title": "<PR_TITLE>",
+     "owner_repo": "<OWNER_REPO>",
+     "worktree_dir": "<WORKTREE_DIR>",
+     "raw_comments": <full comments array from Step 3>
+   }
+   ```
+2. Run `/compact` with the hint: `"Compacting mid-execution of /pr-fix fix mode. PR #<PR_NUMBER> (<PR_TITLE>), worktree at <WORKTREE_DIR>. State saved to .claude/.pr-fix-compact-state.json. Resuming at Step 4 (group and fix comments)."`
+3. After compaction, read `.claude/.pr-fix-compact-state.json` to restore `PR_NUMBER`, `PR_BRANCH`, `PR_TITLE`, `OWNER_REPO`, `WORKTREE_DIR`, and the raw comments array, then continue to Step 4.
+
+If context usage is below 60%, skip this checkpoint and proceed directly to Step 4.
+
+### Step 4: Group, deduplicate, triage, and prioritize comments
+
+#### 4a: Filter non-actionable and minor-severity comments
+
+Before grouping, discard the following — they are never fix requests:
+- **CodeRabbit Walkthrough/Summary**: Any comment where `user.login == "coderabbitai[bot]"` AND it is a PR-level issue comment (not an inline review comment on a file). These are AI-generated PR summaries.
+- Any comment whose body starts with "## Walkthrough", "## Summary", "## Changes", or similar section headings with no inline file reference.
+
+**Severity filter** (applies only when `INCLUDE_MINOR` is false, which is the default):
+- For comments from `coderabbitai[bot]`: parse the comment body for severity markers using the pattern `_(🔴 Critical|🟠 Major|🟡 Minor)_`. If the severity is `🟡 Minor`, discard the comment. If no severity marker is found, keep the comment (treat as potentially important).
+- Comments from `copilot[bot]`, `greptile-apps[bot]`, `greptileai[bot]`, and all other reviewers: keep all comments regardless — these bots do not emit severity markers, so filtering is not possible.
+- Track the count of discarded minor comments as `MINOR_FILTERED_COUNT` for display in Step 4e.
+
+When `INCLUDE_MINOR` is true, skip this severity filter entirely — all comments pass through.
+
+#### 4b: Group comments
+
+Group remaining comments that describe the **same underlying issue**:
 - Comments with identical `body` text (ignoring trailing whitespace and code suggestion blocks) are grouped together
 - Comments describing the same fix pattern across different files (detected by similar body structure) should also be grouped
 
-For each unique issue group, create a summary:
-- **Issue title**: A concise description of the problem
-- **Affected files**: List of `path:line` locations
-- **Comment body**: The shared comment text (first 200 chars)
-- **Comment IDs**: All comment IDs in this group
+For each unique issue group, extract: **Issue title**, **Affected files** (`path:line`), **Comment body** (first 200 chars), **Comment IDs**, **Reviewer login**.
 
-Display the grouped summary:
+#### 4c: Classify each group into a tier
+
+Assign each issue group a tier:
+
+**Tier 1 — Auto-fix** (apply in Step 5 without asking):
+- Contains a code suggestion block (` ```suggestion ` fenced block) — highest confidence
+- Format/string fix: missing `###` heading prefix on a marker, spacing in checkboxes, off-by-one step references in prose
+- Missing entry in an additive list or table (COMMANDS.md, validator marker list, test marker list)
+- Variable name inconsistency (e.g., `{owner}/{repo}` should be `OWNER_REPO`)
+- Broken tool-abstraction syntax (`WRITE_FILE` or `READ_FILE` missing required arguments)
+- From `coderabbitai[bot]` inline (file-level) comment with a clear, localized fix
+
+**Tier 2 — Show & confirm** (display full comment, wait for user approval before fixing):
+- Affected file is in the security-sensitive list: `core/workflow.md`, `core/safety.md`, `core/review-workflow.md`, `generator/generate.py`, `hooks/pre-commit`, `hooks/pre-push`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`
+- From `copilot[bot]` — catches logic errors/edge cases; show before applying
+- From `greptile-apps[bot]` or `greptileai[bot]` (unless it contains a code suggestion block, which promotes to Tier 1) — these catch real architectural issues; show before applying
+- Comment body describes a behavior change (not just a cosmetic fix)
+- Multiple conflicting fixes suggested for the same location
+
+**Tier 3 — Skip** (report to user but do not fix):
+- Comment describes a design/architecture mismatch ("spec says X but impl does Y")
+- Comment is ambiguous about what the correct fix is
+- Affected file is a generated output: `platforms/claude/SKILL.md`, `platforms/cursor/specops.mdc`, `platforms/codex/SKILL.md`, `platforms/copilot/specops.instructions.md`, `skills/specops/SKILL.md` — these must be fixed at their source (see Step 5 generated-file rule)
+
+#### 4d: Assign priority
+
+Within each tier, assign a priority tag for ordering:
+- **P0**: Broken syntax, undefined/inconsistent variables, detached HEAD issues, missing required schema fields — fix these first
+- **P1**: Missing entries in validators/tests/docs, format inconsistencies — fix in normal order
+- **P2**: Security-sensitive file changes (Tier 2) — fix after Tier 1 with approval
+- **P3**: Skip with explanation (Tier 3) — listed last
+
+#### 4e: Display triage summary
+
 ```
 Found <N> review comments grouped into <M> unique issues:
+Severity filter: <MINOR_FILTERED_COUNT> minor comments excluded (use --minor to include)
 
-Issue 1/M: <issue title>
-  Files: <path1>:<line>, <path2>:<line>, ...
-  Comment: <truncated body>
+Triage: <T1> auto-fix, <T2> need approval, <T3> skipped
 
-Issue 2/M: <issue title>
-  ...
+✅ AUTO-FIX:
+  Issue 1/M [P0]: <issue title>
+    Reviewer: coderabbitai[bot] | Files: <path1>:<line>
+    Comment: <truncated body>
+
+  Issue 2/M [P1]: <issue title>
+    Reviewer: coderabbitai[bot] | Files: <path2>:<line>
+    Comment: <truncated body>
+
+⚠️  NEEDS APPROVAL:
+  Issue 3/M [P2]: <issue title>
+    Reviewer: copilot[bot] | Files: core/workflow.md:<line>
+    Comment: <truncated body>
+
+  Issue 4/M [P2]: <issue title>
+    Reviewer: greptile-apps[bot] | Files: <path>:<line>
+    Comment: <truncated body>
+
+⊘ SKIPPED:
+  Issue 5/M: <issue title> — CodeRabbit Walkthrough (not a fix request)
 ```
+
+When `INCLUDE_MINOR` is true, replace the severity filter line with: `Severity filter: off (--minor flag active, all severities included)`. When `MINOR_FILTERED_COUNT` is 0, display: `Severity filter: active (no minor comments found)`.
 
 ### Step 5: Fix each issue group
 
-For each unique issue group (maximum 10 groups — if more, warn and stop):
+Process groups in priority order (P0 → P1 → P2). Maximum 10 groups total — if more, warn and stop.
+
+**Tier 3 groups are not processed here** — they were already reported as skipped in Step 4.
+
+#### For each Tier 1 (auto-fix) group:
 
 1. **Present**: Show the full comment body and all affected file paths with their diff hunks.
-2. **Read**: Read each affected file from the worktree path (`<WORKTREE_DIR>/<path>`) to understand the current code.
-3. **Fix**: Apply the code change that addresses the review comment. If the comment includes a code suggestion block, use it as a starting point but verify correctness. All file edits must target files inside `WORKTREE_DIR`.
-4. **Report**: Tell the user what was changed in each file.
+2. **Generated-file re-routing**: If the affected file is a generated output (`platforms/claude/SKILL.md`, `platforms/cursor/specops.mdc`, `platforms/codex/SKILL.md`, `platforms/copilot/specops.instructions.md`, `skills/specops/SKILL.md`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`): do NOT edit the generated file. Instead, identify the source file in `core/` or `generator/templates/` that produces the relevant section. Apply the fix to the source file. Report: "Fixing in source file `<core/file.md>` — regeneration in Step 6 will propagate to generated outputs." Skip to the next group if no clear source file can be identified.
+3. **Read**: Read each affected file from the worktree path (`<WORKTREE_DIR>/<path>`) to understand the current code.
+4. **Fix**: Apply the code change. If a code suggestion block is present, use it as the basis but verify correctness. All edits must target files inside `WORKTREE_DIR`.
+5. **Report**: Tell the user what was changed in each file.
+
+#### For each Tier 2 (needs approval) group:
+
+1. **Present**: Show the full comment body, affected file paths with diff hunks, and explain why it requires approval (e.g., "This touches `core/workflow.md`, a security-sensitive file").
+2. **Ask**: "Apply this fix? (yes/no/skip)"
+3. If approved: apply fix as above (including generated-file re-routing check).
+4. If declined or skipped: record as `SKIPPED: user declined` and continue.
 
 After all groups are processed, proceed to Step 6.
 
@@ -141,6 +245,8 @@ git worktree remove <WORKTREE_DIR> --force
 
 If the `.claude/worktrees/` directory is empty after cleanup, remove it: `rmdir .claude/worktrees/ 2>/dev/null`.
 
+Delete the compact state file if it exists: `rm -f .claude/.pr-fix-compact-state.json`.
+
 ### Step 10: Confirm
 
 Report the result:
@@ -195,9 +301,10 @@ gh api repos/{OWNER_REPO}/pulls/<PR_NUMBER>/comments --paginate
 
 Compare the count against `lastCommentCount` from state. If new comments exist:
 1. Extract only comments with `id > lastCommentId`
-2. Group and deduplicate new comments (same logic as Fix Mode Step 4)
-3. For comments with code suggestion blocks: auto-fix if the fix is clear and isolated (single file, unambiguous change)
-4. For ambiguous comments: summarize and notify the user — do NOT auto-fix
+2. Apply severity filter: if `INCLUDE_MINOR` is false (default), discard CodeRabbit comments with `_🟡 Minor_` severity marker. Track filtered count for the status dashboard (Step W6).
+3. Group and deduplicate remaining new comments (same logic as Fix Mode Step 4, including Greptile promotion to Tier 2)
+4. For comments with code suggestion blocks: auto-fix if the fix is clear and isolated (single file, unambiguous change)
+5. For ambiguous comments: summarize and notify the user — do NOT auto-fix
 
 ### Step W5: Check PR conversations
 
@@ -217,7 +324,7 @@ Display a concise summary:
 ```
 PR #<N> Status (checked at HH:MM)
 ├─ CI: ✓ All checks passing / ✗ <name> failed / ⏳ <name> in progress
-├─ Review comments: <N> new since last check (<M> auto-fixed, <K> need attention)
+├─ Review comments: <N> new since last check (<M> auto-fixed, <K> need attention, <J> minor filtered)
 └─ Conversations: <N> new messages
 ```
 
@@ -243,6 +350,32 @@ Write updated state to `.claude/.pr-fix-state-<PR_NUMBER>.json`:
 - Auto-fixes are conservative: only apply when the fix is unambiguous (code suggestion blocks targeting a single clear change).
 - Never auto-fix changes to security-sensitive files (`core/safety.md`, `core/workflow.md`, `generator/generate.py`, etc.) — always notify the user.
 - The state file is gitignored (`.claude/` is typically in `.gitignore`).
+- **No compaction in Watch mode** — it is intentionally lightweight and completes in a single short turn. Compaction checkpoints apply only to Fix mode and All mode.
+
+---
+
+## Compaction Protocol
+
+Long-running executions (Fix mode with many issue groups, All mode with multiple PRs) can accumulate significant context from API payloads, file reads, and validation output. Compaction checkpoints prevent hitting context limits mid-execution.
+
+### When to compact
+
+At each designated checkpoint (FC1, AC1, AC2), estimate context window usage. If the conversation is **≥60% full**, trigger the compaction sequence. If below 60%, skip the checkpoint and continue.
+
+### How to compact
+
+1. **Save state**: Write `.claude/.pr-fix-compact-state.json` with all critical runtime variables for the current mode (PR number, branch, title, owner/repo, worktree path, issue groups or PR list, progress index, and any results accumulated so far).
+2. **Compact**: Run `/compact` with a descriptive hint summarizing the current state (mode, PR number, title, worktree path, what step resumes next). This gives the compaction algorithm enough context to produce a useful summary.
+3. **Restore**: Immediately after compaction, read `.claude/.pr-fix-compact-state.json` and restore all saved variables into the current session context.
+4. **Continue**: Proceed from the step immediately after the checkpoint — do not re-execute any already-completed steps.
+
+### State file lifecycle
+
+- **Path**: `.claude/.pr-fix-compact-state.json`
+- **Created**: Written at each compact checkpoint when usage is ≥60%
+- **Updated**: Overwritten at each subsequent checkpoint with latest progress
+- **Deleted**: Removed at successful run completion (Step 9 for Fix mode, Step A7 for All mode)
+- **Recovery**: If the file exists at command start and matches the current invocation, restore state and resume (see Argument Parsing pre-check)
 
 ---
 
@@ -252,11 +385,12 @@ All mode discovers every open PR with review comments and fixes them all, each i
 
 ### Argument Parsing (All Mode)
 
-Parse everything after `all` in `$ARGUMENTS`:
+Parse everything after `all` in `$ARGUMENTS` (after global `--minor` flag has been stripped):
 
 - `--dry-run` or `dry-run`: Preview mode — discover and display what would be fixed without applying changes.
+- `--minor`: Include minor-severity comments (see global flag description in Argument Parsing above).
 - A number (e.g., `3`): Override the maximum PR limit (default is 5).
-- Both can be combined: `all --dry-run 3` or `all 3 --dry-run`.
+- All flags can be combined: `all --dry-run --minor 3` or `all 3 --dry-run --minor`.
 
 ### Step A1: Pre-flight checks
 
@@ -284,8 +418,13 @@ For each PR in `PR_LIST`:
    ```
 2. For each comment, extract: `id`, `path`, `line`, `original_line`, `body`, `diff_hunk`.
 3. If no comments are found for this PR, remove it from `PR_LIST` and continue.
-4. Group comments that describe the **same underlying issue** (same logic as Fix Mode Step 4).
-5. For each unique issue group, create a summary with issue title, affected files, comment body, and comment IDs.
+4. Apply the **full Fix Mode Step 4 pipeline**:
+   - **4a**: Filter non-actionable comments (CodeRabbit Walkthrough/Summary PR-level comments, comments starting with "## Walkthrough"/"## Summary"/"## Changes", and minor-severity CodeRabbit comments when `INCLUDE_MINOR` is false).
+   - **4b**: Group remaining comments that describe the same underlying issue (same body structure across files, identical body text).
+   - **4c**: Classify each group into Tier 1 (auto-fix), Tier 2 (needs approval), or Tier 3 (skip) using the exact criteria from Fix Mode Step 4c.
+   - **4d**: Assign priority tags (P0–P3) using the exact criteria from Fix Mode Step 4d.
+5. Store the tier and priority on each issue group (used by Step A5b).
+6. For each unique issue group, create a summary with issue title, tier, priority, affected files, comment body, and comment IDs.
 
 ### Step A4: Display discovery dashboard
 
@@ -300,20 +439,43 @@ Found <N> open PRs with review comments:
 PR #<N1>: <title>
   Branch: <headRefName> → <baseRefName>
   Comments: <M> comments in <K> issue groups
+  Triage: <T1> auto-fix, <T2> need approval, <T3> skipped
   Issues:
-    1. <issue title> (<file count> files)
-    2. <issue title> (<file count> files)
+    ✅ 1. <issue title> [P0] (<file count> files) — auto-fix
+    ⚠️  2. <issue title> [P2] (<file>) — needs approval
+    ⚠️  3. <issue title> [P2] (<file>) — needs approval (Greptile architectural issue)
 
 PR #<N2>: <title>
   Branch: <headRefName> → <baseRefName>
   Comments: <M> comments in <K> issue groups
+  Triage: <T1> auto-fix, <T2> need approval, <T3> skipped
   Issues:
-    1. <issue title> (<file count> files)
+    ✅ 1. <issue title> [P1] (<file count> files) — auto-fix
 
 Total: <X> PRs, <Y> issue groups, <Z> comments
+Triage totals: <T1> auto-fix, <T2> need approval, <T3> skipped
 ```
 
 If `--dry-run` is active, display this dashboard and stop with message: "Dry run complete. Run `/pr-fix all` without --dry-run to apply fixes."
+
+### Compact Checkpoint AC1
+
+After displaying the discovery dashboard, estimate context window usage. If the conversation is ≥60% full:
+
+1. Write `.claude/.pr-fix-compact-state.json`:
+   ```json
+   {
+     "mode": "all",
+     "owner_repo": "<OWNER_REPO>",
+     "pr_list": <full PR_LIST array>,
+     "current_pr_index": 0,
+     "results": []
+   }
+   ```
+2. Run `/compact` with the hint: `"Compacting mid-execution of /pr-fix all mode. Discovered <N> PRs: [PR numbers and titles]. State saved to .claude/.pr-fix-compact-state.json. Resuming at Step A5 (process each PR)."`
+3. After compaction, read `.claude/.pr-fix-compact-state.json` to restore `OWNER_REPO`, `PR_LIST`, and `results`, then continue to Step A5.
+
+If context usage is below 60%, skip this checkpoint and proceed directly to Step A5.
 
 ### Step A5: Process each PR in a worktree
 
@@ -333,12 +495,24 @@ Save `.claude/worktrees/pr-fix-<NUMBER>` as `WORKTREE_DIR`.
 
 #### Step A5b: Fix each issue group
 
-For each unique issue group for this PR (maximum 10 groups — if more, warn and skip remaining):
+Process groups in priority order (P0 → P1 → P2). Maximum 10 groups — if more, warn and skip remaining.
+
+**Tier 3 groups are not processed here** — they were already reported as skipped in Step A4.
+
+##### For each Tier 1 (auto-fix) group:
 
 1. **Present**: Show the full comment body and all affected file paths with their diff hunks.
-2. **Read**: Read each affected file from `<WORKTREE_DIR>/<path>` to understand the current code.
-3. **Fix**: Apply the code change that addresses the review comment. All file edits must target files inside `WORKTREE_DIR`.
-4. **Report**: Tell the user what was changed in each file.
+2. **Generated-file re-routing**: If the affected file is a generated output (`platforms/claude/SKILL.md`, `platforms/cursor/specops.mdc`, `platforms/codex/SKILL.md`, `platforms/copilot/specops.instructions.md`, `skills/specops/SKILL.md`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`): do NOT edit the generated file. Instead, identify the source file in `core/` or `generator/templates/` that produces the relevant section. Apply the fix to the source file. Report: "Fixing in source file `<core/file.md>` — regeneration in Step A5c will propagate to generated outputs." Skip to the next group if no clear source file can be identified.
+3. **Read**: Read each affected file from `<WORKTREE_DIR>/<path>` to understand the current code.
+4. **Fix**: Apply the code change. If a code suggestion block is present, use it as the basis but verify correctness. All edits must target files inside `WORKTREE_DIR`.
+5. **Report**: Tell the user what was changed in each file.
+
+##### For each Tier 2 (needs approval) group:
+
+1. **Present**: Show the full comment body, affected file paths with diff hunks, and explain why it requires approval (e.g., "This touches `core/workflow.md`, a security-sensitive file").
+2. **Ask**: "Apply this fix? (yes/no/skip)"
+3. If approved: apply fix as above (including generated-file re-routing check).
+4. If declined or skipped: record as `SKIPPED: user declined` and continue.
 
 #### Step A5c: Regenerate and validate
 
@@ -377,8 +551,30 @@ Save the result for this PR:
 - **Status**: `FIXED`, `SKIPPED`, or `FAILED`
 - **Commit SHA** (if fixed)
 - **Files modified** (list)
-- **Issues fixed** (count)
+- **Issues auto-fixed** (Tier 1 applied count)
+- **Issues approved** (Tier 2 user-approved count)
+- **Issues skipped by user** (Tier 2 user-declined count)
+- **Issues skipped (tier 3)** (Tier 3 not-actionable count)
 - **Error message** (if skipped or failed)
+
+#### Compact Checkpoint AC2 (between PR iterations)
+
+After recording the result for this PR and before beginning the next PR, estimate context window usage. If the conversation is ≥60% full AND there are more PRs remaining:
+
+1. Update `.claude/.pr-fix-compact-state.json`:
+   ```json
+   {
+     "mode": "all",
+     "owner_repo": "<OWNER_REPO>",
+     "pr_list": <full PR_LIST array>,
+     "current_pr_index": <index of the NEXT PR to process>,
+     "results": <array of all results recorded so far>
+   }
+   ```
+2. Run `/compact` with the hint: `"Compacting mid-execution of /pr-fix all mode. Completed PR #<N> (<title>). <K> of <total> PRs processed so far. State saved to .claude/.pr-fix-compact-state.json. Resuming with next PR."`
+3. After compaction, read `.claude/.pr-fix-compact-state.json` to restore `OWNER_REPO`, `PR_LIST`, `current_pr_index`, and `results`, then continue with the next PR at index `current_pr_index`.
+
+If context usage is below 60% or no more PRs remain, skip this checkpoint and continue the loop normally.
 
 ### Step A6: Cleanup worktrees
 
@@ -388,6 +584,8 @@ git worktree remove .claude/worktrees/pr-fix-<NUMBER> --force
 ```
 
 If the `.claude/worktrees/` directory is empty after cleanup, remove it: `rmdir .claude/worktrees/ 2>/dev/null`.
+
+Delete the compact state file if it exists: `rm -f .claude/.pr-fix-compact-state.json`.
 
 ### Step A7: Summary dashboard
 
@@ -402,12 +600,12 @@ Processed: <N> PRs
 ✓ FIXED:
   PR #<N1>: <title>
     Commit: <sha> — fix: <message>
-    Issues fixed: <K>
+    Auto-fixed: <K1> | Approved: <K2> | Skipped (user): <K3> | Skipped (tier 3): <K4>
     Files modified: <file list>
 
   PR #<N2>: <title>
     Commit: <sha> — fix: <message>
-    Issues fixed: <K>
+    Auto-fixed: <K1> | Approved: <K2> | Skipped (user): <K3> | Skipped (tier 3): <K4>
     Files modified: <file list>
 
 ⊘ SKIPPED:

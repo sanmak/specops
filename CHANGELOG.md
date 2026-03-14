@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`/specops update` subcommand**: Check for newer SpecOps versions and guide through upgrading
 - **`/ship-pr` slash command**: Commit changes to a new branch, push, and open a PR for review
 - **`/docs-sync` slash command**: Detect stale documentation after code changes and propose targeted updates
+- **`/full-review-gate` slash command**: Comprehensive code review gate with worktree isolation — runs bug, security, PII/privacy, and dependency risk checks with P0–P3 severity findings and go/no-go release status
+- **Regression risk analysis**: Severity-scaled discovery methodology for bugfix specs — Blast Radius, Behavior Inventory, Test Coverage Assessment, Risk Tier, and Scope Escalation Check
+- **Plan Mode vs Spec Mode comparison guide**: `docs/PLAN-VS-SPEC.md` documenting when to use plan mode (session-scoped tactical) vs spec mode (persistent, reviewable, cross-session)
 - **Task state machine**: Formal task state tracking (`core/task-tracking.md`) with Write Ordering Protocol and single-active-task rule
 - **`implementation.md` promoted to decision journal**: Always created during implementation, structured as a Decision Log with deviations and blockers
 - **EARS notation for acceptance criteria**: Requirements templates use [EARS (Easy Approach to Requirements Syntax)](https://alistairmavin.com/ears/) with five patterns (Ubiquitous, Event-Driven, State-Driven, Optional, Unwanted) for precise, testable criteria. HTML comment annotations guide agents without affecting rendered markdown

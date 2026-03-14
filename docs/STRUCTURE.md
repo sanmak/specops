@@ -20,6 +20,8 @@ specops/
 │   ├── STRUCTURE.md                      # This file
 │   ├── TEAM_GUIDE.md                     # Team collaboration guide
 │   ├── SBOM.md                           # Software Bill of Materials
+│   ├── STEERING_GUIDE.md                 # Steering files guide
+│   ├── PLAN-VS-SPEC.md                   # Plan Mode vs Spec Mode comparison
 │   ├── SECURITY-AUDIT.md                 # Security audit results
 │   └── MARKETPLACE_SUBMISSIONS.md        # Marketplace submission content
 │
@@ -40,7 +42,8 @@ specops/
 │   ├── bump-version.sh                   # Version bumping utility
 │   ├── run-tests.sh                      # Test runner
 │   ├── remote-install.sh                 # Remote installer (curl-based, no clone needed)
-│   └── install-hooks.sh                  # Git hooks installer
+│   ├── install-hooks.sh                  # Git hooks installer
+│   └── run-review-gate.sh               # Review gate runner script
 │
 ├── hooks/                                # Git hooks
 │   ├── pre-commit                        # JSON validation, ShellCheck, stale file checks
@@ -55,7 +58,8 @@ specops/
 │       ├── pr-fix.md                     # /pr-fix command
 │       ├── release.md                    # /release command
 │       ├── monitor.md                    # /monitor command
-│       └── docs-sync.md                  # /docs-sync command
+│       ├── docs-sync.md                  # /docs-sync command
+│       └── full-review-gate.md           # /full-review-gate command
 │
 ├── core/                                 # Platform-agnostic source of truth
 │   ├── workflow.md                       # 4-phase workflow specification
@@ -71,6 +75,8 @@ specops/
 │   ├── init.md                           # Init mode (config creation)
 │   ├── update.md                         # Update mode (version checking)
 │   ├── review-workflow.md                # Collaborative spec review workflow
+│   ├── steering.md                       # Steering files system (persistent project context)
+│   ├── reconciliation.md                 # Drift detection and reconciliation
 │   ├── task-tracking.md                  # Task state machine and ordering
 │   ├── tool-abstraction.md               # Abstract tool operations and capability flags
 │   └── templates/                        # Default spec templates

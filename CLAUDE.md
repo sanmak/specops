@@ -57,11 +57,12 @@ Project-local Claude Code commands in `.claude/commands/` for git workflow autom
 | `/push` | Validate pre-push checks, push to remote |
 | `/ship` | Combined commit + push in one operation |
 | `/ship-pr` | Commit changes to a new branch, push, and open a PR for review |
-| `/pr-fix` | Fetch PR review comments, group by issue, fix, and push in an isolated worktree. Use `watch` submode with `/loop` for babysitting, `all` submode to fix all open PRs |
+| `/pr-fix` | Fetch PR review comments, group by issue, fix, and push in an isolated worktree. Filters to major/high severity by default (`--minor` to include all). Use `watch` submode with `/loop` for babysitting, `all` submode to fix all open PRs |
 | `/release` | Full release workflow: auto-generate CHANGELOG, bump version, validate, commit, push, and create GitHub Release |
 | `/monitor` | Monitor GitHub Actions CI status, diagnose failures, auto-fix and re-push (up to 3 cycles) |
 | `/docs-sync` | Detect stale documentation after code changes, propose targeted updates for approval |
 | `/full-review-gate` | Comprehensive code review gate: bugs, security, PII/privacy, dependency risks with P0-P3 severity findings and go/no-go release status |
+| `/core-review` | Review code changes against SpecOps project-specific patterns (tool abstraction violations, generated file drift, cross-platform gaps) |
 
 These commands enforce project conventions automatically: conventional commit prefixes (`feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`), sensitive file exclusion, automatic regeneration of platform outputs and checksums when source files change, and pre-commit/pre-push hook compliance (never bypasses hooks).
 
@@ -84,7 +85,7 @@ generator/      Generates platform outputs from core + platform adapters
 ```
 
 The `core/` directory defines the workflow, safety rules, templates, and vertical adaptations once. The `generator/generate.py` script assembles platform-specific instruction files by:
-1. Loading all `core/*.md` modules (workflow, safety, config-handling, steering, verticals, simplicity, data-handling, error-handling, custom-templates, view, interview, init, update, review-workflow, task-tracking, and spec templates from `core/templates/`)
+1. Loading all `core/*.md` modules (workflow, safety, config-handling, steering, verticals, simplicity, data-handling, error-handling, custom-templates, view, interview, init, update, review-workflow, task-tracking, reconciliation, and spec templates from `core/templates/`)
 2. Loading `platforms/{name}/platform.json` for tool mappings and capabilities
 3. Rendering through `generator/templates/{name}.j2` Jinja2-style templates
 4. Substituting abstract tool operations (e.g., `READ_FILE`) with platform-specific language from each platform's `toolMapping`
@@ -118,7 +119,7 @@ SpecOps is distributed as a Claude Code plugin via `.claude-plugin/` at the repo
 ```
 
 The plugin provides one skill:
-- `/specops` — spec-driven development workflow with subcommands: `init`, `view`, `list`, `interview`, `update` (from `skills/specops/SKILL.md`)
+- `/specops` — spec-driven development workflow with subcommands: `init`, `view`, `list`, `interview`, `update`, `steering`, `audit`, `reconcile`, `version`, `status` (from `skills/specops/SKILL.md`)
 
 Plugin manifests (`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`) are **generated** by `generator/generate.py` — do not edit directly. Version is synced from `platforms/claude/platform.json`.
 
@@ -180,6 +181,8 @@ CI verifies generated files aren't stale — after regenerating, the diff of `pl
 - **Update markers present** — update mode detection, version detection, update workflow
 - **Interview markers present** — interview mode, trigger conditions, question flow
 - **Task tracking markers present** — task state machine, write ordering protocol, acceptance criteria verification
+- **Regression markers present** — regression risk analysis rules included in bugfix workflow
+- **Reconciliation markers present** — drift detection audit and reconcile rules included
 - **Steering markers present** — steering file format, inclusion modes, loading procedure, foundation templates
 
 ## Configuration
