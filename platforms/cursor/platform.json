@@ -26,7 +26,7 @@
     "ASK_USER": "Ask the user",
     "NOTIFY_USER": "Tell the user",
     "UPDATE_PROGRESS": "Note the completed task in your response",
-    "GET_SPECOPS_VERSION": "Run the terminal command `grep '^version:' .cursor/rules/specops.mdc ~/.cursor/rules/specops.mdc 2>/dev/null | head -1 | sed 's/version: *\"//;s/\"//g'`"
+    "GET_SPECOPS_VERSION": "Run the terminal command `grep -h '^version:' .cursor/rules/specops.mdc ~/.cursor/rules/specops.mdc 2>/dev/null | head -1 | sed 's/version: *\"//;s/\"//g'`"
   },
   "entryPoint": {
     "type": "keyword",

@@ -613,7 +613,7 @@ Memory uses convention-based directory discovery — the `<specsDir>/memory/` di
       "rationale": "Why this choice was made",
       "task": "Task N",
       "date": "YYYY-MM-DD",
-      "completedAt": "ISO 8601 timestamp from spec.json.updated"
+      "completedAt": "ISO 8601 timestamp captured at completion time"
     }
   ]
 }
@@ -677,8 +677,9 @@ During Phase 1, after loading steering files (step 3) and before the pre-flight 
 During Phase 4, after finalizing `implementation.md` (step 2) and before the documentation check (step 4), update the memory layer:
 
 1. Use the Read tool to read(`<specsDir>/<spec-name>/implementation.md`) — extract Decision Log entries by parsing the markdown table under `## Decision Log`. Each table row after the header produces one decision entry. Skip rows that are empty or contain only separator characters (`|---|`).
-2. Use the Read tool to read(`<specsDir>/<spec-name>/spec.json`) — get `id`, `type`, and `updated` timestamp.
-3. **First-write auto-seed**: Before writing the current spec's data, check if this is the first time memory is being populated:
+2. Use the Read tool to read(`<specsDir>/<spec-name>/spec.json`) — get `id` and `type`.
+3. Capture a completion timestamp: Use the Bash tool to run(`date -u +"%Y-%m-%dT%H:%M:%SZ"`). Reuse this value for all `completedAt` fields in this completion flow.
+4. **First-write auto-seed**: Before writing the current spec's data, check if this is the first time memory is being populated:
    - If the directory does not exist, Use the Bash tool to run(`mkdir -p <specsDir>/memory`).
    - If FILE_EXISTS(`<specsDir>/memory/decisions.json`), Use the Read tool to read it and parse existing decisions. If file does not exist, create a new structure with `version: 1` and empty `decisions` array.
    - If the `decisions` array is empty (no prior decisions recorded), check for other completed specs that should be captured:
@@ -686,17 +687,17 @@ During Phase 4, after finalizing `implementation.md` (step 2) and before the doc
      - If completed specs exist, run the seed procedure for those specs first (same logic as the seed workflow in Memory Subcommand): for each completed spec, Use the Read tool to read its `implementation.md`, extract Decision Log entries, Use the Read tool to read its `spec.json` for metadata, and extract the Summary section for context.md.
      - Display a message to the user("First-time memory: auto-seeded {N} decisions from {M} prior completed specs.")
    - This ensures upgrading users automatically get full history from prior specs without needing to run `/specops memory seed` manually.
-4. **Update decisions.json**:
-   - For each extracted Decision Log entry from the current spec, create a decision object with fields: `specId`, `specType`, `number`, `decision`, `rationale`, `task`, `date`, `completedAt` (from spec.json `updated`).
+5. **Update decisions.json**:
+   - For each extracted Decision Log entry from the current spec, create a decision object with fields: `specId`, `specType`, `number`, `decision`, `rationale`, `task`, `date`, `completedAt` (from the timestamp captured in step 3).
    - Append new entries. Deduplicate: if an entry with the same `specId` and `number` already exists, skip it (prevents duplicates from re-running Phase 4 or running `memory seed` after completion).
    - Use the Write tool to create(`<specsDir>/memory/decisions.json`) with the updated structure, formatted with 2-space indentation.
-5. **Update context.md**:
+6. **Update context.md**:
    - If FILE_EXISTS(`<specsDir>/memory/context.md`), Use the Read tool to read it. If not, start with `# Project Memory\n\n## Completed Specs\n`.
    - Check if a section for this spec already exists (heading `### <spec-name>`). If it does, skip (idempotent).
    - Append a new section using the Summary from `implementation.md` and metadata from `spec.json`.
    - Use the Write tool to create(`<specsDir>/memory/context.md`).
-6. **Detect and update patterns** — see Pattern Detection section below.
-7. Display a message to the user("Memory updated: added {N} decisions, updated context, {P} patterns detected.")
+7. **Detect and update patterns** — see Pattern Detection section below.
+8. Display a message to the user("Memory updated: added {N} decisions, updated context, {P} patterns detected.")
 
 If the Decision Log table in `implementation.md` is empty (no data rows), skip the decisions.json update for this spec. Context.md is always updated (the Summary section is always populated in Phase 4 step 2).
 
@@ -2057,21 +2058,22 @@ If the user wants to customize, Use the Edit tool to modify(`.specops.json`) to 
 
 #### Step 4.5: Steering Files
 
-Create foundation steering files by default. These give the agent persistent project context for better specs.
+Create foundation steering files by default. These give the agent persistent project context for better specs. Only create files that do not already exist — existing user-authored content is never overwritten.
 
 1. Use the Bash tool to run(`mkdir -p <specsDir>/steering`)
-2. Use the Write tool to create(`<specsDir>/steering/product.md`) with the product.md foundation template from the Steering Files module
-3. Use the Write tool to create(`<specsDir>/steering/tech.md`) with the tech.md foundation template from the Steering Files module
-4. Use the Write tool to create(`<specsDir>/steering/structure.md`) with the structure.md foundation template from the Steering Files module
+2. If FILE_EXISTS(`<specsDir>/steering/product.md`) is false, Use the Write tool to create(`<specsDir>/steering/product.md`) with the product.md foundation template from the Steering Files module
+3. If FILE_EXISTS(`<specsDir>/steering/tech.md`) is false, Use the Write tool to create(`<specsDir>/steering/tech.md`) with the tech.md foundation template from the Steering Files module
+4. If FILE_EXISTS(`<specsDir>/steering/structure.md`) is false, Use the Write tool to create(`<specsDir>/steering/structure.md`) with the structure.md foundation template from the Steering Files module
+5. If all three files already existed, Display a message to the user("Steering files already exist — preserved existing content.")
 
 #### Step 4.6: Memory Scaffold
 
-Create empty memory files so the directory structure is complete from day one. Memory is populated automatically when specs complete Phase 4.
+Create empty memory files so the directory structure is complete from day one. Memory is populated automatically when specs complete Phase 4. Only create files that do not already exist — existing memory data is never overwritten.
 
 1. Use the Bash tool to run(`mkdir -p <specsDir>/memory`)
-2. Use the Write tool to create(`<specsDir>/memory/decisions.json`) with: `{"version": 1, "decisions": []}`
-3. Use the Write tool to create(`<specsDir>/memory/context.md`) with: `# Project Memory\n\n## Completed Specs\n`
-4. Use the Write tool to create(`<specsDir>/memory/patterns.json`) with: `{"version": 1, "decisionCategories": [], "fileOverlaps": []}`
+2. If FILE_EXISTS(`<specsDir>/memory/decisions.json`) is false, Use the Write tool to create(`<specsDir>/memory/decisions.json`) with: `{"version": 1, "decisions": []}`
+3. If FILE_EXISTS(`<specsDir>/memory/context.md`) is false, Use the Write tool to create(`<specsDir>/memory/context.md`) with: `# Project Memory\n\n## Completed Specs\n`
+4. If FILE_EXISTS(`<specsDir>/memory/patterns.json`) is false, Use the Write tool to create(`<specsDir>/memory/patterns.json`) with: `{"version": 1, "decisionCategories": [], "fileOverlaps": []}`
 
 #### Step 5: Next Steps
 

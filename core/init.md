@@ -60,21 +60,22 @@ If the user wants to customize, EDIT_FILE(`.specops.json`) to modify the specifi
 
 #### Step 4.5: Steering Files
 
-Create foundation steering files by default. These give the agent persistent project context for better specs.
+Create foundation steering files by default. These give the agent persistent project context for better specs. Only create files that do not already exist — existing user-authored content is never overwritten.
 
 1. RUN_COMMAND(`mkdir -p <specsDir>/steering`)
-2. WRITE_FILE(`<specsDir>/steering/product.md`) with the product.md foundation template from the Steering Files module
-3. WRITE_FILE(`<specsDir>/steering/tech.md`) with the tech.md foundation template from the Steering Files module
-4. WRITE_FILE(`<specsDir>/steering/structure.md`) with the structure.md foundation template from the Steering Files module
+2. If FILE_EXISTS(`<specsDir>/steering/product.md`) is false, WRITE_FILE(`<specsDir>/steering/product.md`) with the product.md foundation template from the Steering Files module
+3. If FILE_EXISTS(`<specsDir>/steering/tech.md`) is false, WRITE_FILE(`<specsDir>/steering/tech.md`) with the tech.md foundation template from the Steering Files module
+4. If FILE_EXISTS(`<specsDir>/steering/structure.md`) is false, WRITE_FILE(`<specsDir>/steering/structure.md`) with the structure.md foundation template from the Steering Files module
+5. If all three files already existed, NOTIFY_USER("Steering files already exist — preserved existing content.")
 
 #### Step 4.6: Memory Scaffold
 
-Create empty memory files so the directory structure is complete from day one. Memory is populated automatically when specs complete Phase 4.
+Create empty memory files so the directory structure is complete from day one. Memory is populated automatically when specs complete Phase 4. Only create files that do not already exist — existing memory data is never overwritten.
 
 1. RUN_COMMAND(`mkdir -p <specsDir>/memory`)
-2. WRITE_FILE(`<specsDir>/memory/decisions.json`) with: `{"version": 1, "decisions": []}`
-3. WRITE_FILE(`<specsDir>/memory/context.md`) with: `# Project Memory\n\n## Completed Specs\n`
-4. WRITE_FILE(`<specsDir>/memory/patterns.json`) with: `{"version": 1, "decisionCategories": [], "fileOverlaps": []}`
+2. If FILE_EXISTS(`<specsDir>/memory/decisions.json`) is false, WRITE_FILE(`<specsDir>/memory/decisions.json`) with: `{"version": 1, "decisions": []}`
+3. If FILE_EXISTS(`<specsDir>/memory/context.md`) is false, WRITE_FILE(`<specsDir>/memory/context.md`) with: `# Project Memory\n\n## Completed Specs\n`
+4. If FILE_EXISTS(`<specsDir>/memory/patterns.json`) is false, WRITE_FILE(`<specsDir>/memory/patterns.json`) with: `{"version": 1, "decisionCategories": [], "fileOverlaps": []}`
 
 #### Step 5: Next Steps
 
