@@ -454,7 +454,7 @@ During Phase 1, after reading the config and completing context recovery, load s
      - If `inclusion` is `manual`: skip (not loaded automatically)
      - If `inclusion` has an unrecognized value: Tell the user: "Skipping steering file {filename}: unrecognized inclusion mode '{value}'" and continue
 2. After loading `always` files, Tell the user: "Loaded {N} always-included steering file(s): {names}. fileMatch files will be evaluated after affected components are identified."
-3. After Phase 1 identifies affected components and dependencies (step 8), evaluate `fileMatch` steering files by checking each file's `globs` against the set of affected files. Load any matching files and add their content to the project context.
+3. After Phase 1 identifies affected components and dependencies (step 9), evaluate `fileMatch` steering files by checking each file's `globs` against the set of affected files. Load any matching files and add their content to the project context.
 
 ### Steering Safety
 
@@ -653,7 +653,7 @@ Memory uses convention-based directory discovery — the `<specsDir>/memory/` di
 
 ### Memory Loading
 
-During Phase 1, after loading steering files (step 3) and before the pre-flight check (step 4), load the memory layer:
+During Phase 1, after loading steering files (step 3) and before the pre-flight check (step 5), load the memory layer:
 
 1. If FILE_EXISTS(`<specsDir>/memory/`) is false: Tell the user("Tip: Memory will be created automatically after your first spec completes. Run `/specops memory seed` to populate from existing specs.") and continue.
 2. If FILE_EXISTS(`<specsDir>/memory/decisions.json`):
@@ -672,7 +672,7 @@ During Phase 1, after loading steering files (step 3) and before the pre-flight 
 
 ### Memory Writing
 
-During Phase 4, after finalizing `implementation.md` (step 2) and before the documentation check (step 3), update the memory layer:
+During Phase 4, after finalizing `implementation.md` (step 2) and before the documentation check (step 4), update the memory layer:
 
 1. Read the file at(`<specsDir>/<spec-name>/implementation.md`) — extract Decision Log entries by parsing the markdown table under `## Decision Log`. Each table row after the header produces one decision entry. Skip rows that are empty or contain only separator characters (`|---|`).
 2. Read the file at(`<specsDir>/<spec-name>/spec.json`) — get `id`, `type`, and `updated` timestamp.
@@ -700,7 +700,7 @@ If the Decision Log table in `implementation.md` is empty (no data rows), skip t
 
 ### Pattern Detection
 
-Pattern detection runs as part of memory writing (Phase 4, step 2.5). It produces `patterns.json` by analyzing the accumulated decisions and spec artifacts.
+Pattern detection runs as part of memory writing (Phase 4, step 3). It produces `patterns.json` by analyzing the accumulated decisions and spec artifacts.
 
 **Decision category detection:**
 1. Read the file at(`<specsDir>/memory/decisions.json`) — load all decisions.

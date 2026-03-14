@@ -62,7 +62,7 @@ Memory uses convention-based directory discovery — the `<specsDir>/memory/` di
 
 ### Memory Loading
 
-During Phase 1, after loading steering files (step 3) and before the pre-flight check (step 4), load the memory layer:
+During Phase 1, after loading steering files (step 3) and before the pre-flight check (step 5), load the memory layer:
 
 1. If FILE_EXISTS(`<specsDir>/memory/`) is false: NOTIFY_USER("Tip: Memory will be created automatically after your first spec completes. Run `/specops memory seed` to populate from existing specs.") and continue.
 2. If FILE_EXISTS(`<specsDir>/memory/decisions.json`):
@@ -81,7 +81,7 @@ During Phase 1, after loading steering files (step 3) and before the pre-flight 
 
 ### Memory Writing
 
-During Phase 4, after finalizing `implementation.md` (step 2) and before the documentation check (step 3), update the memory layer:
+During Phase 4, after finalizing `implementation.md` (step 2) and before the documentation check (step 4), update the memory layer:
 
 1. READ_FILE(`<specsDir>/<spec-name>/implementation.md`) — extract Decision Log entries by parsing the markdown table under `## Decision Log`. Each table row after the header produces one decision entry. Skip rows that are empty or contain only separator characters (`|---|`).
 2. READ_FILE(`<specsDir>/<spec-name>/spec.json`) — get `id`, `type`, and `updated` timestamp.
@@ -109,7 +109,7 @@ If the Decision Log table in `implementation.md` is empty (no data rows), skip t
 
 ### Pattern Detection
 
-Pattern detection runs as part of memory writing (Phase 4, step 2.5). It produces `patterns.json` by analyzing the accumulated decisions and spec artifacts.
+Pattern detection runs as part of memory writing (Phase 4, step 3). It produces `patterns.json` by analyzing the accumulated decisions and spec artifacts.
 
 **Decision category detection:**
 1. READ_FILE(`<specsDir>/memory/decisions.json`) — load all decisions.
