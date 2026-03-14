@@ -60,7 +60,8 @@ specops/
 │       ├── release.md                    # /release command
 │       ├── monitor.md                    # /monitor command
 │       ├── docs-sync.md                  # /docs-sync command
-│       └── full-review-gate.md           # /full-review-gate command
+│       ├── full-review-gate.md           # /full-review-gate command
+│       └── core-review.md               # /core-review command
 │
 ├── core/                                 # Platform-agnostic source of truth
 │   ├── workflow.md                       # 4-phase workflow specification
@@ -78,6 +79,8 @@ specops/
 │   ├── review-workflow.md                # Collaborative spec review workflow
 │   ├── steering.md                       # Steering files system (persistent project context)
 │   ├── reconciliation.md                 # Drift detection and reconciliation
+│   ├── from-plan.md                      # Convert plan mode output to spec
+│   ├── memory.md                         # Local memory layer
 │   ├── task-tracking.md                  # Task state machine and ordering
 │   ├── tool-abstraction.md               # Abstract tool operations and capability flags
 │   └── templates/                        # Default spec templates

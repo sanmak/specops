@@ -14,14 +14,15 @@ If update intent is not detected, continue to the next check in the routing chai
 
 #### Step 1: Detect Current Version
 
-1. Read this instruction file's own YAML frontmatter to extract the `version:` field. This is the **running version** of SpecOps.
+1. Attempt GET_SPECOPS_VERSION to extract the **running version** of SpecOps.
+   - If extraction fails (command returns empty or cannot execute), NOTIFY_USER("Could not determine the running SpecOps version automatically.") and stop update mode with manual fallback guidance: "Check the latest version manually: https://github.com/sanmak/specops/releases"
 2. If FILE_EXISTS(`.specops.json`), READ_FILE(`.specops.json`) and check for `_installedVersion` and `_installedAt` fields.
 3. Display:
 
    ```
    SpecOps — Current Installation
 
-   Running version: {version from frontmatter}
+   Running version: {version extracted in step 1}
    Installed version: {_installedVersion or "unknown"}
    Installed at: {_installedAt or "unknown"}
    ```

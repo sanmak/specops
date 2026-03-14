@@ -30,6 +30,7 @@ REQUIRED_MARKERS = {
         "Phase 3: Implement",
         "Phase 4: Complete",
         "Version Display",
+        "Version Extraction Protocol",
     ],
     "safety": [
         "Convention Sanitization",
@@ -117,6 +118,18 @@ REQUIRED_MARKERS = {
         "Faithful Conversion",
         "from-plan",
         "Parse the plan",
+    ],
+    "memory": [
+        "## Local Memory Layer",
+        "### Memory Storage Format",
+        "### Memory Loading",
+        "### Memory Writing",
+        "### Pattern Detection",
+        "### Memory Subcommand",
+        "### Memory Safety",
+        "decisions.json",
+        "context.md",
+        "patterns.json",
     ],
 }
 

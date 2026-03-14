@@ -29,6 +29,7 @@ ABSTRACT_OPERATIONS = [
     "ASK_USER(",
     "NOTIFY_USER(",
     "UPDATE_PROGRESS(",
+    "GET_SPECOPS_VERSION",
 ]
 
 # Key safety phrases that MUST appear in every generated output
@@ -58,6 +59,7 @@ WORKFLOW_MARKERS = [
     "Phase 2: Create Specification",
     "Phase 3: Implement",
     "Phase 4: Complete",
+    "Version Extraction Protocol",
 ]
 
 # Review workflow markers that MUST appear
@@ -161,6 +163,20 @@ FROM_PLAN_MARKERS = [
     "Faithful Conversion",
     "from-plan",
     "Parse the plan",
+]
+
+# Local Memory Layer markers that MUST appear in every output
+MEMORY_MARKERS = [
+    "## Local Memory Layer",
+    "### Memory Storage Format",
+    "### Memory Loading",
+    "### Memory Writing",
+    "### Pattern Detection",
+    "### Memory Subcommand",
+    "### Memory Safety",
+    "decisions.json",
+    "context.md",
+    "patterns.json",
 ]
 
 
@@ -295,6 +311,9 @@ def validate_platform(platform, info):
 
     # Check from-plan mode present
     errors.extend(check_markers_present(platform, content, FROM_PLAN_MARKERS, "from-plan"))
+
+    # Check memory layer present
+    errors.extend(check_markers_present(platform, content, MEMORY_MARKERS, "memory"))
 
     # Platform-specific format validation
     if platform == "cursor":
@@ -513,7 +532,7 @@ def main():
     if len(generated) >= 2:
         platforms = list(generated.keys())
         consistency_errors = []
-        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS:
+        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS:
             present_in = [p for p in platforms if marker in generated[p]["content"]]
             if len(present_in) != len(platforms):
                 missing = set(platforms) - set(present_in)

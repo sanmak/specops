@@ -168,7 +168,7 @@ Guided interactive repair for drifted specs. Available only on platforms with `c
 | Cross-spec conflict | Informational only — no repair action |
 
 9. For each repair: EDIT_FILE(`<specsDir>/<name>/tasks.md`) to apply path or status changes.
-10. Update `spec.json`: RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) and EDIT_FILE(`<specsDir>/<name>/spec.json`) to set `updated` to the current timestamp and `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field).
+10. Update `spec.json`: RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) and EDIT_FILE(`<specsDir>/<name>/spec.json`) to set `updated` to the current timestamp and `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol).
 11. Regenerate `<specsDir>/index.json` from all `*/spec.json` files.
 12. NOTIFY_USER(`"Reconciliation complete. Applied N fix(es) to <spec-name>."`)
 
