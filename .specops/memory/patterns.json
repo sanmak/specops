@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "decisionCategories": [
+    {
+      "category": "template structure",
+      "specs": ["ears-notation", "drift-detection"],
+      "count": 2,
+      "lesson": "Template and module structure decisions (HTML comments, heading levels) have downstream validator implications — heading text must match marker strings exactly"
+    },
+    {
+      "category": "platform adaptation",
+      "specs": ["ears-notation", "drift-detection"],
+      "count": 2,
+      "lesson": "Features split into interactive and non-interactive paths — read-only features work everywhere, destructive/interactive features require canAskInteractive"
+    }
+  ],
+  "fileOverlaps": [
+    {
+      "file": "core/workflow.md",
+      "specs": ["ears-notation", "bugfix-regression-analysis", "steering-files", "drift-detection"],
+      "count": 4
+    },
+    {
+      "file": "generator/validate.py",
+      "specs": ["bugfix-regression-analysis", "steering-files", "drift-detection"],
+      "count": 3
+    },
+    {
+      "file": "generator/generate.py",
+      "specs": ["steering-files", "drift-detection"],
+      "count": 2
+    },
+    {
+      "file": "tests/test_platform_consistency.py",
+      "specs": ["steering-files", "drift-detection"],
+      "count": 2
+    },
+    {
+      "file": "core/templates/bugfix.md",
+      "specs": ["ears-notation", "bugfix-regression-analysis"],
+      "count": 2
+    }
+  ]
+}

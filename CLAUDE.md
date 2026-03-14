@@ -85,7 +85,7 @@ generator/      Generates platform outputs from core + platform adapters
 ```
 
 The `core/` directory defines the workflow, safety rules, templates, and vertical adaptations once. The `generator/generate.py` script assembles platform-specific instruction files by:
-1. Loading all `core/*.md` modules (workflow, safety, config-handling, steering, verticals, simplicity, data-handling, error-handling, custom-templates, view, interview, init, update, review-workflow, task-tracking, reconciliation, and spec templates from `core/templates/`)
+1. Loading all `core/*.md` modules (workflow, safety, config-handling, steering, memory, verticals, simplicity, data-handling, error-handling, custom-templates, view, interview, init, update, review-workflow, task-tracking, reconciliation, from-plan, and spec templates from `core/templates/`)
 2. Loading `platforms/{name}/platform.json` for tool mappings and capabilities
 3. Rendering through `generator/templates/{name}.j2` Jinja2-style templates
 4. Substituting abstract tool operations (e.g., `READ_FILE`) with platform-specific language from each platform's `toolMapping`
@@ -95,7 +95,7 @@ The `core/` directory defines the workflow, safety rules, templates, and vertica
 
 ### Tool Abstraction
 
-`core/` files use abstract operations (`READ_FILE`, `WRITE_FILE`, `EDIT_FILE`, `LIST_DIR`, `FILE_EXISTS`, `RUN_COMMAND`, `ASK_USER`, `NOTIFY_USER`, `UPDATE_PROGRESS`) defined in `core/tool-abstraction.md`. Each platform's `platform.json` provides a `toolMapping` that translates these into platform-specific language. The generator performs this substitution during build.
+`core/` files use abstract operations (`READ_FILE`, `WRITE_FILE`, `EDIT_FILE`, `LIST_DIR`, `FILE_EXISTS`, `RUN_COMMAND`, `ASK_USER`, `NOTIFY_USER`, `UPDATE_PROGRESS`, `GET_SPECOPS_VERSION`) defined in `core/tool-abstraction.md`. Each platform's `platform.json` provides a `toolMapping` that translates these into platform-specific language. The generator performs this substitution during build.
 
 ### Platform Capabilities
 
@@ -119,7 +119,7 @@ SpecOps is distributed as a Claude Code plugin via `.claude-plugin/` at the repo
 ```
 
 The plugin provides one skill:
-- `/specops` — spec-driven development workflow with subcommands: `init`, `view`, `list`, `interview`, `update`, `steering`, `audit`, `reconcile`, `version`, `status` (from `skills/specops/SKILL.md`)
+- `/specops` — spec-driven development workflow with subcommands: `init`, `view`, `list`, `interview`, `update`, `steering`, `audit`, `reconcile`, `from-plan`, `memory`, `version`, `status` (from `skills/specops/SKILL.md`)
 
 Plugin manifests (`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`) are **generated** by `generator/generate.py` — do not edit directly. Version is synced from `platforms/claude/platform.json`.
 
@@ -184,6 +184,7 @@ CI verifies generated files aren't stale — after regenerating, the diff of `pl
 - **Regression markers present** — regression risk analysis rules included in bugfix workflow
 - **Reconciliation markers present** — drift detection audit and reconcile rules included
 - **Steering markers present** — steering file format, inclusion modes, loading procedure, foundation templates
+- **Memory markers present** — local memory layer storage format, loading, writing, pattern detection, and safety rules
 
 ## Configuration
 

@@ -25,7 +25,8 @@
     "RUN_COMMAND": "Execute the command",
     "ASK_USER": "If uncertain, note assumptions in the spec and proceed. List any ambiguities for the user to review",
     "NOTIFY_USER": "Print to stdout",
-    "UPDATE_PROGRESS": "Print progress to stdout"
+    "UPDATE_PROGRESS": "Print progress to stdout",
+    "GET_SPECOPS_VERSION": "Execute the command `grep '^version:' .codex/skills/specops/SKILL.md ~/.codex/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *\"//;s/\"//g'`"
   },
   "entryPoint": {
     "type": "keyword",

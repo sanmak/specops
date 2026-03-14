@@ -26,7 +26,8 @@
     "RUN_COMMAND": "Use the Bash tool to run",
     "ASK_USER": "Use the AskUserQuestion tool",
     "NOTIFY_USER": "Display a message to the user",
-    "UPDATE_PROGRESS": "Use the TodoWrite tool to update"
+    "UPDATE_PROGRESS": "Use the TodoWrite tool to update",
+    "GET_SPECOPS_VERSION": "Use the Bash tool to run `grep '^version:' .claude/skills/specops/SKILL.md ~/.claude/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *\"//;s/\"//g'`"
   },
   "entryPoint": {
     "type": "slash_command",

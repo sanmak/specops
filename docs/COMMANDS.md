@@ -26,6 +26,8 @@ All supported commands across Claude Code, Cursor, OpenAI Codex, and GitHub Copi
 | Audit spec health | `/specops audit <name>` | `audit <name>` |
 | Audit all active specs | `/specops audit` | `health check` or `check drift` or `spec health` |
 | Reconcile a drifted spec | `/specops reconcile <name>` | `reconcile <name>` or `fix <name>` |
+| View memory | `/specops memory` | `Use specops memory` |
+| Seed memory from specs | `/specops memory seed` | `Use specops memory seed` |
 | Check version | `/specops version` | `Use specops version` |
 | Update SpecOps | `/specops update` | `Use specops update` |
 | Review a spec | `review <spec-name>` | `review <spec-name>` |
@@ -94,7 +96,7 @@ Use specops to refactor the database layer
 
 ## Init Config
 
-Creates a `.specops.json` configuration file in the project. Presents template options (minimal, standard, full, review, builder) and writes the selected config.
+Creates a `.specops.json` configuration file in the project. Presents template options (minimal, standard, full, review, builder), writes the selected config, creates foundation steering files (`product.md`, `tech.md`, `structure.md` in `<specsDir>/steering/`), and scaffolds the memory directory (`<specsDir>/memory/`).
 
 **Claude Code:**
 ```
@@ -175,6 +177,42 @@ Use specops steering
 **Notes:** Only triggers when the request is about managing SpecOps steering files — not for product features like "add steering wheel component". Steering files live in `<specsDir>/steering/` (default: `.specops/steering/`).
 
 **See also:** [Steering Files Guide](STEERING_GUIDE.md) — file format, inclusion modes, glob patterns, and best practices.
+
+---
+
+## Local Memory
+
+### View Memory
+
+Shows decisions, project context, and detected patterns from completed specs.
+
+**Claude Code:**
+```
+/specops memory
+```
+
+**Other platforms:**
+```
+Use specops memory
+```
+
+**Output:** Formatted summary of decisions (from `decisions.json`), project history (from `context.md`), and recurring patterns (from `patterns.json`).
+
+### Seed Memory
+
+Populates the memory layer from all completed specs' `implementation.md` decision journals. Use after enabling memory on a project with existing specs.
+
+**Claude Code:**
+```
+/specops memory seed
+```
+
+**Other platforms:**
+```
+Use specops memory seed
+```
+
+**Output:** Creates/rebuilds `<specsDir>/memory/decisions.json`, `context.md`, and `patterns.json` from completed specs.
 
 ---
 
@@ -575,4 +613,6 @@ These are the valid states a spec can be in, usable as filters with the status c
 | I want to fix drift findings interactively | `/specops reconcile <name>` |
 | I have an AI plan and want to convert it to a spec | `/specops from-plan` |
 | I want to check my SpecOps version | `/specops version` |
+| I want to see project decisions and patterns | `/specops memory` |
+| I want to populate memory from existing specs | `/specops memory seed` |
 | I want to update SpecOps | `/specops update` |

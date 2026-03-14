@@ -58,17 +58,21 @@ After writing the config, ASK_USER: "Would you like to customize any fields? Com
 
 If the user wants to customize, EDIT_FILE(`.specops.json`) to modify the specific fields they request.
 
-#### Step 4.5: Steering Files (Optional)
+#### Step 4.5: Steering Files
 
-ASK_USER: "Would you like to create steering files for persistent project context? Steering files give the agent foundational knowledge about your project (what it builds, tech stack, codebase structure) so every spec starts with informed context."
+Create foundation steering files by default. These give the agent persistent project context for better specs.
 
-If yes:
 1. WRITE_FILE(`<specsDir>/steering/product.md`) with the product.md foundation template from the Steering Files module
 2. WRITE_FILE(`<specsDir>/steering/tech.md`) with the tech.md foundation template from the Steering Files module
 3. WRITE_FILE(`<specsDir>/steering/structure.md`) with the structure.md foundation template from the Steering Files module
-4. NOTIFY_USER: "Created 3 steering files in `<specsDir>/steering/`. Edit them to describe your project — the agent will load them automatically before every spec."
 
-If no, continue to Step 5.
+#### Step 4.6: Memory Scaffold
+
+Create empty memory files so the directory structure is complete from day one. Memory is populated automatically when specs complete Phase 4.
+
+1. WRITE_FILE(`<specsDir>/memory/decisions.json`) with: `{"version": 1, "decisions": []}`
+2. WRITE_FILE(`<specsDir>/memory/context.md`) with: `# Project Memory\n\n## Completed Specs\n`
+3. WRITE_FILE(`<specsDir>/memory/patterns.json`) with: `{"version": 1, "decisionCategories": [], "fileOverlaps": []}`
 
 #### Step 5: Next Steps
 
@@ -78,13 +82,11 @@ NOTIFY_USER with:
 SpecOps initialized! Your config:
 - Specs directory: <specsDir value>
 - Vertical: <vertical value or "auto-detect">
+- Steering files created in <specsDir>/steering/
+- Memory scaffold created in <specsDir>/memory/
+
+Edit product.md, tech.md, and structure.md to describe your project — the agent loads these automatically before every spec. Memory is populated automatically as you complete specs.
 
 Next: Run `/specops <description>` to create your first spec.
 Example: /specops Add user authentication with OAuth
-```
-
-If steering files were created in Step 4.5, append to the message:
-
-```text
-Steering files created in <specsDir>/steering/. Edit product.md, tech.md, and structure.md to describe your project.
 ```

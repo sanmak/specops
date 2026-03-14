@@ -13,6 +13,7 @@ SpecOps requires a set of tool operations that vary by platform. This document d
 
 #### Shell Operations
 - **RUN_COMMAND(command)** → output: Execute shell command
+- **GET_SPECOPS_VERSION** → version_string: Extract the installed SpecOps version by running a deterministic command. Never guess or infer the version.
 
 #### User Interaction
 - **ASK_USER(question)** → response: Ask user for clarification

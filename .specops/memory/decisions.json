@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "decisions": [
+    {
+      "specId": "ears-notation",
+      "specType": "feature",
+      "number": 1,
+      "decision": "EARS patterns as HTML comments in template",
+      "rationale": "Keeps template clean while providing pattern reference to agents — comments are invisible in rendered markdown but visible to the LLM reading the file",
+      "task": "Task 1",
+      "date": "2026-03-07",
+      "completedAt": "2026-03-07T12:30:00Z"
+    },
+    {
+      "specId": "ears-notation",
+      "specType": "feature",
+      "number": 2,
+      "decision": "Progress Checklist kept optional",
+      "rationale": "Design specified checkboxes as optional derivative of EARS; implemented as separate section agents can include or skip based on simplicity principle",
+      "task": "Task 1",
+      "date": "2026-03-07",
+      "completedAt": "2026-03-07T12:30:00Z"
+    },
+    {
+      "specId": "drift-detection",
+      "specType": "feature",
+      "number": 1,
+      "decision": "Used H3 headings for drift checks instead of H4 with Check N: prefix",
+      "rationale": "Heading-level markers prevent substring collision in validators (Gap 13). H4 Check N: naming was verbose and the prefix added no semantic value.",
+      "task": "Task 1 / Task 6",
+      "date": "2026-03-08",
+      "completedAt": "2026-03-08T09:36:18Z"
+    },
+    {
+      "specId": "drift-detection",
+      "specType": "feature",
+      "number": 2,
+      "decision": "Reconcile mode requires canAskInteractive: true; audit works on all platforms",
+      "rationale": "Audit is read-only and produces a report regardless of platform. Reconcile makes destructive edits to tasks.md and must confirm each repair — requires interactive input.",
+      "task": "Task 1",
+      "date": "2026-03-08",
+      "completedAt": "2026-03-08T09:36:18Z"
+    },
+    {
+      "specId": "drift-detection",
+      "specType": "feature",
+      "number": 3,
+      "decision": "All-specs audit targets status != completed instead of all specs",
+      "rationale": "Completed specs are frozen — auditing them for staleness would always produce false Warnings. Only active specs need drift detection.",
+      "task": "Task 1",
+      "date": "2026-03-08",
+      "completedAt": "2026-03-08T09:36:18Z"
+    }
+  ]
+}
