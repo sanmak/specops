@@ -62,22 +62,21 @@ Memory uses convention-based directory discovery — the `<specsDir>/memory/` di
 
 ### Memory Loading
 
-During Phase 1, after loading steering files (step 3) and before the pre-flight check (step 5), load the memory layer:
+During Phase 1, after loading steering files (step 3) and before the pre-flight check (step 5), load the memory layer. Note: `workflow.md` step 4 guards entry to this module with `FILE_EXISTS(<specsDir>/memory/)` — the directory is guaranteed to exist when this code runs.
 
-1. If FILE_EXISTS(`<specsDir>/memory/`) is false: NOTIFY_USER("Tip: Memory will be created automatically after your first spec completes. Run `/specops memory seed` to populate from existing specs.") and continue.
-2. If FILE_EXISTS(`<specsDir>/memory/decisions.json`):
+1. If FILE_EXISTS(`<specsDir>/memory/decisions.json`):
    - READ_FILE(`<specsDir>/memory/decisions.json`)
    - Parse JSON. If JSON is invalid, NOTIFY_USER("Warning: decisions.json contains invalid JSON — skipping memory loading. Run `/specops memory seed` to rebuild.") and continue without decisions.
    - Check `version` field. If version is not `1`, NOTIFY_USER("Warning: decisions.json has unsupported version {version} — skipping.") and continue.
    - Store decisions in context for reference during spec generation and implementation.
-3. If FILE_EXISTS(`<specsDir>/memory/context.md`):
+2. If FILE_EXISTS(`<specsDir>/memory/context.md`):
    - READ_FILE(`<specsDir>/memory/context.md`)
    - Add content to agent context as project history.
-4. If FILE_EXISTS(`<specsDir>/memory/patterns.json`):
+3. If FILE_EXISTS(`<specsDir>/memory/patterns.json`):
    - READ_FILE(`<specsDir>/memory/patterns.json`)
    - Parse JSON. If invalid, NOTIFY_USER("Warning: patterns.json contains invalid JSON — skipping.") and continue.
    - Surface any patterns with `count >= 2` to the user as recurring conventions.
-5. NOTIFY_USER("Loaded memory: {N} decisions from {M} specs, {P} patterns detected.") — or "No memory files found" if the directory exists but is empty.
+4. NOTIFY_USER("Loaded memory: {N} decisions from {M} specs, {P} patterns detected.") — or "No memory files found" if the directory exists but is empty.
 
 ### Memory Writing
 
@@ -88,7 +87,7 @@ During Phase 4, after finalizing `implementation.md` (step 2) and before the doc
 3. Capture a completion timestamp: RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`). Reuse this value for all `completedAt` fields in this completion flow.
 4. **First-write auto-seed**: Before writing the current spec's data, check if this is the first time memory is being populated:
    - If the directory does not exist, RUN_COMMAND(`mkdir -p <specsDir>/memory`).
-   - If FILE_EXISTS(`<specsDir>/memory/decisions.json`), READ_FILE it and parse existing decisions. If file does not exist, create a new structure with `version: 1` and empty `decisions` array.
+   - If FILE_EXISTS(`<specsDir>/memory/decisions.json`), READ_FILE it and parse existing decisions. If JSON is invalid or `version` is not `1`, NOTIFY_USER("Warning: decisions.json is malformed — reinitializing memory decisions structure.") and continue with `{ "version": 1, "decisions": [] }`. If file does not exist, create a new structure with `version: 1` and empty `decisions` array.
    - If the `decisions` array is empty (no prior decisions recorded), check for other completed specs that should be captured:
      - If FILE_EXISTS(`<specsDir>/index.json`), READ_FILE it and find specs with `status == "completed"` whose `id` is not the current spec being completed.
      - If completed specs exist, run the seed procedure for those specs first (same logic as the seed workflow in Memory Subcommand): for each completed spec, READ_FILE its `implementation.md`, extract Decision Log entries, READ_FILE its `spec.json` for metadata, and extract the Summary section for context.md.
@@ -179,21 +178,23 @@ These must refer to SpecOps memory management, NOT a product feature (e.g., "add
 
 **Seed workflow** (`/specops memory seed`):
 1. If FILE_EXISTS(`.specops.json`), READ_FILE(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
-2. READ_FILE(`<specsDir>/index.json`) to get all specs. If index.json does not exist, LIST_DIR(`<specsDir>`), then for each subdirectory check FILE_EXISTS(`<specsDir>/<dir>/spec.json`), and READ_FILE each found `spec.json`.
-3. Filter to specs with `status == "completed"`.
-4. If no completed specs found: NOTIFY_USER("No completed specs found. Complete a spec first, then run seed.") and stop.
-5. For each completed spec:
+2. If FILE_EXISTS(`<specsDir>/`) is false: NOTIFY_USER("No specs directory found at `<specsDir>`. Create a spec first or run `/specops init`.") and stop.
+3. READ_FILE(`<specsDir>/index.json`) to get all specs. If index.json does not exist, LIST_DIR(`<specsDir>`), then for each subdirectory check FILE_EXISTS(`<specsDir>/<dir>/spec.json`), and READ_FILE each found `spec.json`.
+4. Filter to specs with `status == "completed"`.
+5. If no completed specs found: NOTIFY_USER("No completed specs found. Complete a spec first, then run seed.") and stop.
+6. For each completed spec:
    a. READ_FILE(`<specsDir>/<spec>/implementation.md`) — extract Decision Log entries.
-   b. READ_FILE(`<specsDir>/<spec>/spec.json`) — get metadata.
+   b. READ_FILE(`<specsDir>/<spec>/spec.json`) — get metadata. Use `spec.json.updated` as the `completedAt` timestamp for this spec's decision entries (the closest available proxy for actual completion time).
    c. Extract Summary section content for context.md.
-6. Build `decisions.json` from all extracted entries (deduplicated by specId+number).
-7. Build `context.md` with completion summaries for all specs, ordered by `spec.json.updated` date ascending.
-8. Run Pattern Detection to build `patterns.json`.
-9. RUN_COMMAND(`mkdir -p <specsDir>/memory`) if the directory does not exist.
-10. WRITE_FILE(`<specsDir>/memory/decisions.json`) with the deduplicated decisions array built in step 6.
-11. WRITE_FILE(`<specsDir>/memory/context.md`) with the completion summaries built in step 7.
-12. WRITE_FILE(`<specsDir>/memory/patterns.json`) with the pattern data built in step 8.
-13. NOTIFY_USER("Seeded memory from {N} completed specs: {D} decisions, {P} patterns detected.")
+7. Build `decisions.json` from all extracted entries (deduplicated by specId+number).
+8. Build `context.md` with completion summaries for all specs, ordered by `spec.json.updated` date ascending.
+9. Run Pattern Detection to build `patterns.json`.
+10. RUN_COMMAND(`mkdir -p <specsDir>/memory`) if the directory does not exist.
+11. **Merge with existing data**: If FILE_EXISTS(`<specsDir>/memory/decisions.json`), READ_FILE it and parse. If JSON is invalid, NOTIFY_USER("Warning: existing decisions.json is malformed — it will be replaced with seeded data.") and skip merge. Otherwise, identify entries in the existing file whose `specId+number` combination does NOT appear in the seeded set (these are manually-added entries). Preserve those entries by appending them to the seeded decisions array.
+12. WRITE_FILE(`<specsDir>/memory/decisions.json`) with the merged decisions array from step 11 (or step 7 if no existing file).
+13. WRITE_FILE(`<specsDir>/memory/context.md`) with the completion summaries built in step 8.
+14. WRITE_FILE(`<specsDir>/memory/patterns.json`) with the pattern data built in step 9.
+15. NOTIFY_USER("Seeded memory from {N} completed specs: {D} decisions, {P} patterns detected.")
 
 ### Platform Adaptation
 
