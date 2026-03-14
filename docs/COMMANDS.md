@@ -264,6 +264,35 @@ sync <name>
 
 ---
 
+## Convert a Plan to a Spec
+
+Convert an existing AI coding assistant plan (from plan mode, a planning session, or any structured outline) into a persistent SpecOps spec. SpecOps faithfully maps the plan into the standard spec structure: goals → requirements with EARS acceptance criteria, approach → design.md, steps → tasks.md. Where the plan omits information, SpecOps uses `[To be defined]` placeholders rather than inferring content.
+
+**Claude Code:**
+```text
+/specops from-plan
+```
+
+**Other platforms:**
+```text
+Use specops from-plan
+```
+
+**Workflow:**
+1. If no plan content is included in the invocation, prompts you to paste the plan
+2. Parses the plan to identify goals, approach, steps, acceptance criteria, constraints, and file paths
+3. Shows a mapping summary before generating (e.g., "Found 2 goals → requirements.md, 8 steps → tasks.md")
+4. Generates spec files using faithful conversion — preserves the plan's intent without re-deriving
+5. Proceeds to review gate (if spec review is enabled) or notifies you the spec is ready
+
+**Faithful conversion:** From Plan mode does not second-guess the plan or re-derive requirements independently. If a section is missing from the plan (e.g., no acceptance criteria), it adds `[To be defined]` placeholders rather than inventing content.
+
+**Supported plan formats:** Free-form markdown, numbered steps, structured headers — any format accepted. SpecOps extracts sections using keyword heuristics.
+
+**Notes:** Only triggers when the request is about converting an AI coding plan into a spec — not for product features like "import plan data from an external system". On platforms where `canAskInteractive = false` (e.g., Codex), the plan content must be included inline in the request.
+
+---
+
 ## View a Spec
 
 Display an existing spec in a structured, readable format.
@@ -544,5 +573,6 @@ These are the valid states a spec can be in, usable as filters with the status c
 | I want to check if a spec has drifted from the codebase | `/specops audit <name>` |
 | I want to audit all active specs at once | `/specops audit` |
 | I want to fix drift findings interactively | `/specops reconcile <name>` |
+| I have an AI plan and want to convert it to a spec | `/specops from-plan` |
 | I want to check my SpecOps version | `/specops version` |
 | I want to update SpecOps | `/specops update` |
