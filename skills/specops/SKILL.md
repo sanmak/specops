@@ -772,7 +772,7 @@ These must refer to SpecOps memory management, NOT a product feature (e.g., "add
 **Seed workflow** (`/specops memory seed`):
 1. If FILE_EXISTS(`.specops.json`), Use the Read tool to read(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
 2. If FILE_EXISTS(`<specsDir>/`) is false: Display a message to the user("No specs directory found at `<specsDir>`. Create a spec first or run `/specops init`.") and stop.
-3. Use the Read tool to read(`<specsDir>/index.json`) to get all specs. If index.json does not exist, Use the Glob tool to list(`<specsDir>`), then for each subdirectory check FILE_EXISTS(`<specsDir>/<dir>/spec.json`), and Use the Read tool to read each found `spec.json`.
+3. Use the Read tool to read(`<specsDir>/index.json`) to get all specs. If index.json does not exist, Use the Glob tool to list(`<specsDir>`) to get subdirectories, then for each subdirectory `<dir>` check FILE_EXISTS(`<specsDir>/<dir>/spec.json`), and Use the Read tool to read each found `spec.json` to build the spec list.
 4. Filter to specs with `status == "completed"`.
 5. If no completed specs found: Display a message to the user("No completed specs found. Complete a spec first, then run seed.") and stop.
 6. For each completed spec:
@@ -785,7 +785,7 @@ These must refer to SpecOps memory management, NOT a product feature (e.g., "add
 10. Use the Bash tool to run(`mkdir -p <specsDir>/memory`) if the directory does not exist.
 11. **Merge with existing data**: If FILE_EXISTS(`<specsDir>/memory/decisions.json`), Use the Read tool to read it and parse. If JSON is invalid, Display a message to the user("Warning: existing decisions.json is malformed — it will be replaced with seeded data.") and skip merge. Otherwise, identify entries in the existing file whose `specId+number` combination does NOT appear in the seeded set (these are manually-added entries). Preserve those entries by appending them to the seeded decisions array.
 12. Use the Write tool to create(`<specsDir>/memory/decisions.json`) with the merged decisions array from step 11 (or step 7 if no existing file).
-13. Use the Write tool to create(`<specsDir>/memory/context.md`) with the completion summaries built in step 8.
+13. If FILE_EXISTS(`<specsDir>/memory/context.md`), Use the Read tool to read it and check for custom content (any section NOT matching the `### <spec-name> (<type>)` heading pattern is user-added content). If custom content exists, Display a message to the user("Warning: context.md contains manual additions that will be preserved at the end of the file.") and append those custom sections after the seeded completion summaries. Use the Write tool to create(`<specsDir>/memory/context.md`) with the seeded summaries from step 8 followed by any preserved custom sections.
 14. Use the Write tool to create(`<specsDir>/memory/patterns.json`) with the pattern data built in step 9.
 15. Display a message to the user("Seeded memory from {N} completed specs: {D} decisions, {P} patterns detected.")
 
@@ -2078,14 +2078,14 @@ Create empty memory files so the directory structure is complete from day one. M
 
 #### Step 5: Next Steps
 
-Display a message to the user with:
+Display a message to the user with a message that reflects what actually happened in Steps 4.5 and 4.6. Use "created" for files that were newly written and "verified existing" for files that were preserved:
 
 ```
 SpecOps initialized! Your config:
 - Specs directory: <specsDir value>
 - Vertical: <vertical value or "auto-detect">
-- Steering files created in <specsDir>/steering/
-- Memory scaffold created in <specsDir>/memory/
+- Steering files <created in | verified existing in> <specsDir>/steering/
+- Memory scaffold <created in | verified existing in> <specsDir>/memory/
 
 Edit product.md, tech.md, and structure.md to describe your project — the agent loads these automatically before every spec. Memory is populated automatically as you complete specs.
 
@@ -2998,13 +2998,18 @@ If none of these conditions apply (the task was implemented exactly as designed 
 
 When resuming implementation in a new session, Use the Read tool to read `implementation.md` before starting work to recover context from previous sessions. The Session Log section records session boundaries — append a brief entry noting which task you are resuming from.
 
+### Pivot Check
+
+Before marking a task `Completed`, compare the actual output against what was planned in `design.md` and `requirements.md`. If the implementation diverged from the plan (different approach, different data format, different API, scope change), update the affected spec artifact **before** closing the task. Spec artifacts that still describe the old approach after a pivot is a recurring drift class — Phase 4 checkbox verification cannot catch it because the outdated spec text has no checkboxes to fail.
+
 ### Acceptance Criteria Verification
 
 Checkboxes in `tasks.md` are completion gates, not decoration. When transitioning a task to `Completed`:
 
-1. Review every item under **Acceptance Criteria:** — check off each satisfied criterion: `- [ ]` → `- [x]`
-2. Review every item under **Tests Required:** — check off each passing test: `- [ ]` → `- [x]`
-3. If any acceptance criterion is NOT satisfied, do NOT mark the task `Completed` — keep it `In Progress` or set it to `Blocked` with the unmet criterion as the blocker
+1. **Pivot check**: Did this task's output differ from the plan? If yes, update the relevant spec artifact (design.md, requirements.md) before proceeding.
+2. Review every item under **Acceptance Criteria:** — check off each satisfied criterion: `- [ ]` → `- [x]`
+3. Review every item under **Tests Required:** — check off each passing test: `- [ ]` → `- [x]`
+4. If any acceptance criterion is NOT satisfied, do NOT mark the task `Completed` — keep it `In Progress` or set it to `Blocked` with the unmet criterion as the blocker
 
 A task with unchecked acceptance criteria and a `Completed` status is a protocol breach — it signals verified work that was never actually verified.
 

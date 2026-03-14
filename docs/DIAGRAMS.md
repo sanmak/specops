@@ -198,11 +198,11 @@ sequenceDiagram
         A->>S: Regenerate index.json
         A-->>Author: "Spec revised. Notify reviewers for re-review."
         Note over Reviewer: Another review round...
-    else Approved (approvals >= requiredApprovals, peer review)
+    else Approved or Approve with suggestions (approvals >= requiredApprovals)
         A->>S: Set status → approved
         A->>S: Regenerate index.json
         Note over A: → Implementation gate passes, proceed to Phase 3
-    else Self-approved (approvals >= requiredApprovals, all selfApproval: true)
+    else Self-approved (all reviewers have selfApproval: true)
         A->>S: Set status → self-approved
         A->>S: Regenerate index.json
         Note over A: → Implementation gate passes, proceed to Phase 3
@@ -330,7 +330,7 @@ sequenceDiagram
 ```
 
 **Valid state transitions:**
-```
+```text
 Pending ──────► In Progress
 In Progress ──► Completed
 In Progress ──► Blocked
@@ -454,7 +454,7 @@ sequenceDiagram
             end
         end
 
-        A-->>Ctx: "Loaded N always-included steering files"
+        A-->>U: "Loaded N always-included steering files"
 
         Note over A: Phase 1 continues... affected files identified
 
@@ -517,13 +517,14 @@ sequenceDiagram
         A->>FS: Edit .specops.json
     end
 
-    A-->>U: "Create steering files for persistent project context?"
-    alt Yes
-        A->>SD: Write product.md (foundation template)
-        A->>SD: Write tech.md (foundation template)
-        A->>SD: Write structure.md (foundation template)
-        A-->>U: "Created 3 steering files. Edit them to describe your project."
-    end
+    Note over A,SD: Create steering files (skip existing)
+    A->>SD: Write product.md (if not exists)
+    A->>SD: Write tech.md (if not exists)
+    A->>SD: Write structure.md (if not exists)
+
+    Note over A: Create memory scaffold (skip existing)
+    A->>FS: mkdir -p .specops/memory/
+    A->>FS: Write decisions.json, context.md, patterns.json (if not exists)
 
     A-->>U: "SpecOps initialized! Run /specops <description> to create your first spec."
 ```

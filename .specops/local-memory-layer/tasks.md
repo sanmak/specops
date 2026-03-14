@@ -34,7 +34,7 @@ Create the core memory module defining memory loading (Phase 1), memory writing 
 - `core/memory.md` (new)
 
 **Tests Required:**
-- [ ] Verify no raw abstract operations after generation (handled by validate.py)
+- [x] Verify no raw abstract operations after generation (handled by validate.py)
 
 ---
 
@@ -65,7 +65,7 @@ Add memory loading to Phase 1 (step 3.5, after steering files) and memory writin
 - `core/workflow.md`
 
 **Tests Required:**
-- [ ] Memory hooks appear in generated outputs (via validate.py markers)
+- [x] Memory hooks appear in generated outputs (via validate.py markers)
 
 ---
 
@@ -110,8 +110,8 @@ Add memory module to the generator build system following the established patter
 - `tests/test_platform_consistency.py`
 
 **Tests Required:**
-- [ ] validate.py passes with MEMORY_MARKERS in all platforms
-- [ ] test_platform_consistency.py passes with memory markers
+- [x] validate.py passes with MEMORY_MARKERS in all platforms
+- [x] test_platform_consistency.py passes with memory markers
 
 ---
 
@@ -150,8 +150,8 @@ Regenerate all platform outputs, run validation, and execute the full test suite
 - `docs/COMMANDS.md`
 
 **Tests Required:**
-- [ ] `python3 generator/validate.py` exits 0
-- [ ] `bash scripts/run-tests.sh` exits 0
+- [x] `python3 generator/validate.py` exits 0
+- [x] `bash scripts/run-tests.sh` exits 0
 
 ---
 
@@ -187,8 +187,8 @@ Manually seed the memory layer by reading all 4 completed specs' implementation.
 - `.specops/memory/patterns.json` (new)
 
 **Tests Required:**
-- [ ] decisions.json is valid JSON with version field
-- [ ] patterns.json is valid JSON with version field
+- [x] decisions.json is valid JSON with version field
+- [x] patterns.json is valid JSON with version field
 
 ---
 

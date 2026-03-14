@@ -79,14 +79,14 @@ Create empty memory files so the directory structure is complete from day one. M
 
 #### Step 5: Next Steps
 
-NOTIFY_USER with:
+NOTIFY_USER with a message that reflects what actually happened in Steps 4.5 and 4.6. Use "created" for files that were newly written and "verified existing" for files that were preserved:
 
 ```
 SpecOps initialized! Your config:
 - Specs directory: <specsDir value>
 - Vertical: <vertical value or "auto-detect">
-- Steering files created in <specsDir>/steering/
-- Memory scaffold created in <specsDir>/memory/
+- Steering files <created in | verified existing in> <specsDir>/steering/
+- Memory scaffold <created in | verified existing in> <specsDir>/memory/
 
 Edit product.md, tech.md, and structure.md to describe your project — the agent loads these automatically before every spec. Memory is populated automatically as you complete specs.
 

@@ -771,7 +771,7 @@ These must refer to SpecOps memory management, NOT a product feature (e.g., "add
 **Seed workflow** (`/specops memory seed`):
 1. If FILE_EXISTS(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
 2. If FILE_EXISTS(`<specsDir>/`) is false: Print to stdout("No specs directory found at `<specsDir>`. Create a spec first or run `/specops init`.") and stop.
-3. Read the file at(`<specsDir>/index.json`) to get all specs. If index.json does not exist, List the directory at(`<specsDir>`), then for each subdirectory check FILE_EXISTS(`<specsDir>/<dir>/spec.json`), and Read the file at each found `spec.json`.
+3. Read the file at(`<specsDir>/index.json`) to get all specs. If index.json does not exist, List the directory at(`<specsDir>`) to get subdirectories, then for each subdirectory `<dir>` check FILE_EXISTS(`<specsDir>/<dir>/spec.json`), and Read the file at each found `spec.json` to build the spec list.
 4. Filter to specs with `status == "completed"`.
 5. If no completed specs found: Print to stdout("No completed specs found. Complete a spec first, then run seed.") and stop.
 6. For each completed spec:
@@ -784,7 +784,7 @@ These must refer to SpecOps memory management, NOT a product feature (e.g., "add
 10. Execute the command(`mkdir -p <specsDir>/memory`) if the directory does not exist.
 11. **Merge with existing data**: If FILE_EXISTS(`<specsDir>/memory/decisions.json`), Read the file at it and parse. If JSON is invalid, Print to stdout("Warning: existing decisions.json is malformed — it will be replaced with seeded data.") and skip merge. Otherwise, identify entries in the existing file whose `specId+number` combination does NOT appear in the seeded set (these are manually-added entries). Preserve those entries by appending them to the seeded decisions array.
 12. Write the file at(`<specsDir>/memory/decisions.json`) with the merged decisions array from step 11 (or step 7 if no existing file).
-13. Write the file at(`<specsDir>/memory/context.md`) with the completion summaries built in step 8.
+13. If FILE_EXISTS(`<specsDir>/memory/context.md`), Read the file at it and check for custom content (any section NOT matching the `### <spec-name> (<type>)` heading pattern is user-added content). If custom content exists, Print to stdout("Warning: context.md contains manual additions that will be preserved at the end of the file.") and append those custom sections after the seeded completion summaries. Write the file at(`<specsDir>/memory/context.md`) with the seeded summaries from step 8 followed by any preserved custom sections.
 14. Write the file at(`<specsDir>/memory/patterns.json`) with the pattern data built in step 9.
 15. Print to stdout("Seeded memory from {N} completed specs: {D} decisions, {P} patterns detected.")
 
@@ -2734,13 +2734,18 @@ If none of these conditions apply (the task was implemented exactly as designed 
 
 When resuming implementation in a new session, Read the file at `implementation.md` before starting work to recover context from previous sessions. The Session Log section records session boundaries — append a brief entry noting which task you are resuming from.
 
+### Pivot Check
+
+Before marking a task `Completed`, compare the actual output against what was planned in `design.md` and `requirements.md`. If the implementation diverged from the plan (different approach, different data format, different API, scope change), update the affected spec artifact **before** closing the task. Spec artifacts that still describe the old approach after a pivot is a recurring drift class — Phase 4 checkbox verification cannot catch it because the outdated spec text has no checkboxes to fail.
+
 ### Acceptance Criteria Verification
 
 Checkboxes in `tasks.md` are completion gates, not decoration. When transitioning a task to `Completed`:
 
-1. Review every item under **Acceptance Criteria:** — check off each satisfied criterion: `- [ ]` → `- [x]`
-2. Review every item under **Tests Required:** — check off each passing test: `- [ ]` → `- [x]`
-3. If any acceptance criterion is NOT satisfied, do NOT mark the task `Completed` — keep it `In Progress` or set it to `Blocked` with the unmet criterion as the blocker
+1. **Pivot check**: Did this task's output differ from the plan? If yes, update the relevant spec artifact (design.md, requirements.md) before proceeding.
+2. Review every item under **Acceptance Criteria:** — check off each satisfied criterion: `- [ ]` → `- [x]`
+3. Review every item under **Tests Required:** — check off each passing test: `- [ ]` → `- [x]`
+4. If any acceptance criterion is NOT satisfied, do NOT mark the task `Completed` — keep it `In Progress` or set it to `Blocked` with the unmet criterion as the blocker
 
 A task with unchecked acceptance criteria and a `Completed` status is a protocol breach — it signals verified work that was never actually verified.
 
