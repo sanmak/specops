@@ -42,7 +42,7 @@ SpecOps brings structured spec-driven development to your AI coding assistant â€
   <img src="assets/workflow.svg" alt="SpecOps 4-phase workflow with optional interview mode: Understand, Spec, Implement, Complete" width="900"/>
 </p>
 
-One command triggers a 4-phase workflow: understand your codebase, generate a structured spec, implement it, and verify the result. For vague or high-level ideas, an optional interview mode gathers structured requirements before spec generation.
+One command triggers a 4-phase workflow: understand your codebase, generate a structured spec, implement it, and verify the result. For vague or high-level ideas, an optional interview mode gathers structured requirements before spec generation. See [Sequence Diagrams](docs/diagrams.md) for detailed actor interaction views of each workflow.
 
 ### Interview Mode (Optional)
 
