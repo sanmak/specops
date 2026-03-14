@@ -422,6 +422,7 @@ How persistent project context is loaded during Phase 1.
 
 ```mermaid
 sequenceDiagram
+    participant U as User
     participant A as Agent
     participant SD as .specops/steering/
     participant Ctx as Agent Context
@@ -431,7 +432,7 @@ sequenceDiagram
     A->>SD: FILE_EXISTS(steering/)?
 
     alt Directory does not exist
-        A-->>Ctx: Skip (notify user about steering setup)
+        A-->>U: "No steering directory — run /specops steering to set up"
     else Directory exists
         A->>SD: LIST_DIR — find all .md files
         SD-->>A: File list (sorted alphabetically, max 20)
@@ -442,7 +443,7 @@ sequenceDiagram
             A->>A: Parse frontmatter (name, description, inclusion, globs)
 
             alt Invalid frontmatter
-                A->>A: Skip file, notify user
+                A-->>U: "Skipping file — invalid frontmatter"
             else inclusion = "always"
                 A->>Ctx: Store content as loaded project context
             else inclusion = "fileMatch"
