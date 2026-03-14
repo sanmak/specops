@@ -198,7 +198,8 @@ sequenceDiagram
         A->>S: Regenerate index.json
         A-->>Author: "Spec revised. Notify reviewers for re-review."
         Note over Reviewer: Another review round...
-    else Approved (approvals >= requiredApprovals, peer review)
+    else Approved / Approve with suggestions (approvals >= requiredApprovals, peer review)
+        Note over A: "Approve with suggestions" is treated identically to "Approve"
         A->>S: Set status → approved
         A->>S: Regenerate index.json
         Note over A: → Implementation gate passes, proceed to Phase 3
@@ -432,7 +433,7 @@ sequenceDiagram
     A->>SD: FILE_EXISTS(steering/)?
 
     alt Directory does not exist
-        A-->>U: "No steering directory — run /specops steering to set up"
+        A-->>U: "Tip: Create steering files (product.md, tech.md, structure.md) via /specops steering"
     else Directory exists
         A->>SD: LIST_DIR — find all .md files
         SD-->>A: File list (sorted alphabetically, max 20)
@@ -454,7 +455,7 @@ sequenceDiagram
             end
         end
 
-        A-->>Ctx: "Loaded N always-included steering files"
+        A-->>U: "Loaded N always-included steering files"
 
         Note over A: Phase 1 continues... affected files identified
 
