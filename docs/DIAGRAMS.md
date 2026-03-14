@@ -202,7 +202,7 @@ sequenceDiagram
         A->>S: Set status → approved
         A->>S: Regenerate index.json
         Note over A: → Implementation gate passes, proceed to Phase 3
-    else Self-approved (all reviewers have selfApproval: true)
+    else Self-approved (approvals >= requiredApprovals AND all reviewers have selfApproval: true)
         A->>S: Set status → self-approved
         A->>S: Regenerate index.json
         Note over A: → Implementation gate passes, proceed to Phase 3
@@ -526,7 +526,11 @@ sequenceDiagram
     A->>FS: mkdir -p .specops/memory/
     A->>FS: Write decisions.json, context.md, patterns.json (if not exists)
 
-    A-->>U: "SpecOps initialized! Run /specops <description> to create your first spec."
+    alt All files newly created
+        A-->>U: "SpecOps initialized! Steering files created in .specops/steering/, memory scaffold created in .specops/memory/"
+    else Some or all files already existed
+        A-->>U: "SpecOps initialized! Steering files verified existing in .specops/steering/, memory scaffold verified existing in .specops/memory/"
+    end
 ```
 
 **Source:** [`core/init.md`](../core/init.md)

@@ -784,7 +784,7 @@ These must refer to SpecOps memory management, NOT a product feature (e.g., "add
 10. Execute the command(`mkdir -p <specsDir>/memory`) if the directory does not exist.
 11. **Merge with existing data**: If FILE_EXISTS(`<specsDir>/memory/decisions.json`), Read the file at it and parse. If JSON is invalid, Print to stdout("Warning: existing decisions.json is malformed — it will be replaced with seeded data.") and skip merge. Otherwise, identify entries in the existing file whose `specId+number` combination does NOT appear in the seeded set (these are manually-added entries). Preserve those entries by appending them to the seeded decisions array.
 12. Write the file at(`<specsDir>/memory/decisions.json`) with the merged decisions array from step 11 (or step 7 if no existing file).
-13. If FILE_EXISTS(`<specsDir>/memory/context.md`), Read the file at it and check for custom content (any section NOT matching the `### <spec-name> (<type>)` heading pattern is user-added content). If custom content exists, Print to stdout("Warning: context.md contains manual additions that will be preserved at the end of the file.") and append those custom sections after the seeded completion summaries. Write the file at(`<specsDir>/memory/context.md`) with the seeded summaries from step 8 followed by any preserved custom sections.
+13. If FILE_EXISTS(`<specsDir>/memory/context.md`), Read the file at it and check for custom content. Canonical (managed) content includes: the `# Project Memory` heading, the `## Completed Specs` heading, and any entry matching `### <spec-name> (<type>) — YYYY-MM-DD`. Everything outside these canonical sections is user-added custom content. If custom content exists, Print to stdout("Warning: context.md contains manual additions that will be preserved at the end of the file.") and append those custom sections after the seeded completion summaries. Write the file at(`<specsDir>/memory/context.md`) with the seeded summaries from step 8 followed by any preserved custom sections.
 14. Write the file at(`<specsDir>/memory/patterns.json`) with the pattern data built in step 9.
 15. Print to stdout("Seeded memory from {N} completed specs: {D} decisions, {P} patterns detected.")
 
@@ -2736,7 +2736,7 @@ When resuming implementation in a new session, Read the file at `implementation.
 
 ### Pivot Check
 
-Before marking a task `Completed`, compare the actual output against what was planned in `design.md` and `requirements.md`. If the implementation diverged from the plan (different approach, different data format, different API, scope change), update the affected spec artifact **before** closing the task. Spec artifacts that still describe the old approach after a pivot is a recurring drift class — Phase 4 checkbox verification cannot catch it because the outdated spec text has no checkboxes to fail.
+Before marking a task `Completed`, compare the actual output against what was planned in `design.md` and `requirements.md`. If the implementation diverged from the plan (different approach, different data format, different API, scope change), update the affected spec artifact **before** closing the task. Spec artifacts that still describe the old approach after a pivot are a recurring drift class — Phase 4 checkbox verification cannot catch it because the outdated spec text has no checkboxes to fail.
 
 ### Acceptance Criteria Verification
 

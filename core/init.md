@@ -79,17 +79,19 @@ Create empty memory files so the directory structure is complete from day one. M
 
 #### Step 5: Next Steps
 
-NOTIFY_USER with a message that reflects what actually happened in Steps 4.5 and 4.6. Use "created" for files that were newly written and "verified existing" for files that were preserved:
+NOTIFY_USER with a message that reflects what actually happened in Steps 4.5 and 4.6. For each of "Steering files" and "Memory scaffold", use "created in" if the files were newly written in that step, or "verified existing in" if the files already existed. Example when all files are new:
 
 ```
 SpecOps initialized! Your config:
 - Specs directory: <specsDir value>
 - Vertical: <vertical value or "auto-detect">
-- Steering files <created in | verified existing in> <specsDir>/steering/
-- Memory scaffold <created in | verified existing in> <specsDir>/memory/
+- Steering files created in <specsDir>/steering/
+- Memory scaffold created in <specsDir>/memory/
 
 Edit product.md, tech.md, and structure.md to describe your project — the agent loads these automatically before every spec. Memory is populated automatically as you complete specs.
 
 Next: Run `/specops <description>` to create your first spec.
 Example: /specops Add user authentication with OAuth
 ```
+
+Adjust each line to say "verified existing in" instead of "created in" if those files already existed before this run.

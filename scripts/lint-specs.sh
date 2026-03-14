@@ -38,7 +38,7 @@ for tasks_file in "$SPECS_DIR"/*/tasks.md; do
     fi
 
     # Check for unchecked checkboxes in completed tasks
-    if "$in_completed_task" && echo "$line" | grep -qE '^\s*- \[ \]'; then
+    if "$in_completed_task" && echo "$line" | grep -qE '^[[:space:]]*- \[ \]'; then
       echo "FAIL: $spec_name/tasks.md:$line_num — unchecked checkbox in completed task"
       echo "  Task: $task_name"
       echo "  Line: $line"

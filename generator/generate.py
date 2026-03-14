@@ -459,7 +459,6 @@ def generate_cursor(core, platform_config):
     """Generate Cursor platform files."""
     template = load_template("cursor")
     context = build_common_context(core, platform_config)
-    version = context["version"]
 
     output = render_template(template, context)
     output = substitute_tools(output, platform_config["toolMapping"])

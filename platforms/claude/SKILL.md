@@ -785,7 +785,7 @@ These must refer to SpecOps memory management, NOT a product feature (e.g., "add
 10. Use the Bash tool to run(`mkdir -p <specsDir>/memory`) if the directory does not exist.
 11. **Merge with existing data**: If FILE_EXISTS(`<specsDir>/memory/decisions.json`), Use the Read tool to read it and parse. If JSON is invalid, Display a message to the user("Warning: existing decisions.json is malformed — it will be replaced with seeded data.") and skip merge. Otherwise, identify entries in the existing file whose `specId+number` combination does NOT appear in the seeded set (these are manually-added entries). Preserve those entries by appending them to the seeded decisions array.
 12. Use the Write tool to create(`<specsDir>/memory/decisions.json`) with the merged decisions array from step 11 (or step 7 if no existing file).
-13. If FILE_EXISTS(`<specsDir>/memory/context.md`), Use the Read tool to read it and check for custom content (any section NOT matching the `### <spec-name> (<type>)` heading pattern is user-added content). If custom content exists, Display a message to the user("Warning: context.md contains manual additions that will be preserved at the end of the file.") and append those custom sections after the seeded completion summaries. Use the Write tool to create(`<specsDir>/memory/context.md`) with the seeded summaries from step 8 followed by any preserved custom sections.
+13. If FILE_EXISTS(`<specsDir>/memory/context.md`), Use the Read tool to read it and check for custom content. Canonical (managed) content includes: the `# Project Memory` heading, the `## Completed Specs` heading, and any entry matching `### <spec-name> (<type>) — YYYY-MM-DD`. Everything outside these canonical sections is user-added custom content. If custom content exists, Display a message to the user("Warning: context.md contains manual additions that will be preserved at the end of the file.") and append those custom sections after the seeded completion summaries. Use the Write tool to create(`<specsDir>/memory/context.md`) with the seeded summaries from step 8 followed by any preserved custom sections.
 14. Use the Write tool to create(`<specsDir>/memory/patterns.json`) with the pattern data built in step 9.
 15. Display a message to the user("Seeded memory from {N} completed specs: {D} decisions, {P} patterns detected.")
 
@@ -2078,20 +2078,22 @@ Create empty memory files so the directory structure is complete from day one. M
 
 #### Step 5: Next Steps
 
-Display a message to the user with a message that reflects what actually happened in Steps 4.5 and 4.6. Use "created" for files that were newly written and "verified existing" for files that were preserved:
+Display a message to the user with a message that reflects what actually happened in Steps 4.5 and 4.6. For each of "Steering files" and "Memory scaffold", use "created in" if the files were newly written in that step, or "verified existing in" if the files already existed. Example when all files are new:
 
 ```
 SpecOps initialized! Your config:
 - Specs directory: <specsDir value>
 - Vertical: <vertical value or "auto-detect">
-- Steering files <created in | verified existing in> <specsDir>/steering/
-- Memory scaffold <created in | verified existing in> <specsDir>/memory/
+- Steering files created in <specsDir>/steering/
+- Memory scaffold created in <specsDir>/memory/
 
 Edit product.md, tech.md, and structure.md to describe your project — the agent loads these automatically before every spec. Memory is populated automatically as you complete specs.
 
 Next: Run `/specops <description>` to create your first spec.
 Example: /specops Add user authentication with OAuth
 ```
+
+Adjust each line to say "verified existing in" instead of "created in" if those files already existed before this run.
 
 
 ## Update Mode
@@ -3000,7 +3002,7 @@ When resuming implementation in a new session, Use the Read tool to read `implem
 
 ### Pivot Check
 
-Before marking a task `Completed`, compare the actual output against what was planned in `design.md` and `requirements.md`. If the implementation diverged from the plan (different approach, different data format, different API, scope change), update the affected spec artifact **before** closing the task. Spec artifacts that still describe the old approach after a pivot is a recurring drift class — Phase 4 checkbox verification cannot catch it because the outdated spec text has no checkboxes to fail.
+Before marking a task `Completed`, compare the actual output against what was planned in `design.md` and `requirements.md`. If the implementation diverged from the plan (different approach, different data format, different API, scope change), update the affected spec artifact **before** closing the task. Spec artifacts that still describe the old approach after a pivot are a recurring drift class — Phase 4 checkbox verification cannot catch it because the outdated spec text has no checkboxes to fail.
 
 ### Acceptance Criteria Verification
 
