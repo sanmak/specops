@@ -113,6 +113,10 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - For each doc file, check if it references components, features, or configurations that were modified during this spec
    - If stale documentation is detected, update the affected sections
    - If unsure whether a doc needs updating, flag it to the user rather than skipping silently
+   - **New subcommand check**: If this spec shipped a new `/specops` subcommand (a new command branch in Getting Started or a new module routed from there):
+     - [ ] `canAskInteractive = false` fallback written for every interactive prompt in the new subcommand
+     - [ ] Row added to `docs/COMMANDS.md` Quick Lookup table for the new subcommand
+     - [ ] `FILE_EXISTS` guard used before reading any optional config (e.g., `.specops.json`) in the subcommand's first step
 4. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the current SpecOps version (from this instruction file's frontmatter `version:` field), update `updated` timestamp (RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`
 5. Create PR if `createPR` is true
 6. Summarize completed work
@@ -154,15 +158,16 @@ When invoked:
 4. Check if the request is an **update** command (see "Update Mode" module). Patterns: "update specops", "upgrade specops", "check for updates", "get latest version", "get latest". These must refer to updating SpecOps itself, NOT to a product feature. If the request describes a product change (e.g., "update login flow", "upgrade the database"), skip update and continue to step 5.
 5. Check if the request is a **view** or **list** command (see "Spec Viewing" module). If so, follow the view/list workflow instead of the standard phases below.
 6. Check if the request is a **steering** command (see "Steering Command" in the Steering Files module). Patterns: "steering", "create steering", "setup steering", "manage steering", "steering files", "add steering". These must refer to managing SpecOps steering files, NOT to a product feature. If so, follow the Steering Command workflow instead of the standard phases below.
-7. Check if interview mode is triggered (see "Interview Mode" module):
+7. Check if the request is an **audit** or **reconcile** command (see the Reconciliation module). Patterns for audit: "audit", "audit <name>", "health check", "check drift", "spec health". Patterns for reconcile: "reconcile <name>", "fix <name>" (when referring to a spec), "repair <name>", "sync <name>". These must refer to SpecOps spec health, NOT product features like "audit log" or "health endpoint". If detected, follow the Reconciliation module workflow instead of the standard phases below.
+8. Check if interview mode is triggered (see "Interview Mode" module):
    - Explicit: request contains "interview" keyword
    - Auto (interactive platforms only): request is vague (≤5 words, no technical keywords, no action verb)
    - If triggered: follow the Interview Mode workflow, then continue with the enriched context
-8. Confirm the request type (feature/bugfix/implement/other)
-9. Show the configuration you'll use (including detected vertical)
-10. Begin the workflow immediately (high autonomy)
-11. Provide progress updates as you work
-12. Summarize completion clearly
+9. Confirm the request type (feature/bugfix/implement/other)
+10. Show the configuration you'll use (including detected vertical)
+11. Begin the workflow immediately (high autonomy)
+12. Provide progress updates as you work
+13. Summarize completion clearly
 
 ## Version Display
 

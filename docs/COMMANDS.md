@@ -23,6 +23,9 @@ All supported commands across Claude Code, Cursor, OpenAI Codex, and GitHub Copi
 | Interview (explicit) | `/specops interview <idea>` | `Use specops interview <idea>` |
 | Init config | `/specops init` | `Use specops init` |
 | Manage steering files | `/specops steering` | `Use specops steering` |
+| Audit spec health | `/specops audit <name>` | `audit <name>` |
+| Audit all active specs | `/specops audit` | `health check` or `check drift` or `spec health` |
+| Reconcile a drifted spec | `/specops reconcile <name>` | `reconcile <name>` or `fix <name>` |
 | Check version | `/specops version` | `Use specops version` |
 | Update SpecOps | `/specops update` | `Use specops update` |
 | Review a spec | `review <spec-name>` | `review <spec-name>` |
@@ -170,6 +173,94 @@ Use specops steering
 | `manual` | Not loaded automatically — available for explicit reference only |
 
 **Notes:** Only triggers when the request is about managing SpecOps steering files — not for product features like "add steering wheel component". Steering files live in `<specsDir>/steering/` (default: `.specops/steering/`).
+
+**See also:** [Steering Files Guide](STEERING_GUIDE.md) — file format, inclusion modes, glob patterns, and best practices.
+
+---
+
+## Drift Detection
+
+### Audit Spec Health
+
+Runs 5 drift checks against one or more specs and produces a health report. Read-only — no files are modified.
+
+**Claude Code:**
+```
+/specops audit
+/specops audit <name>
+/specops health check
+/specops check drift
+/specops spec health
+```
+
+**Other platforms:**
+```
+audit <name>
+health check
+check drift
+spec health
+```
+
+**Behavior:**
+- With a name: audits that single spec
+- Without a name: audits all specs whose status is not `completed`
+
+**5 Drift Checks:**
+
+| Check | What it detects | Severity |
+|-------|-----------------|----------|
+| File Drift | "Files to Modify" paths that no longer exist | Drift / Warning |
+| Post-Completion Modification | Files changed after a completed spec's `updated` timestamp | Warning |
+| Task Status Inconsistency | Completed tasks with missing files; pending tasks with early implementations | Drift / Warning |
+| Staleness | Specs inactive beyond threshold (>14d implementing → Drift, >7d → Warning) | Drift / Warning |
+| Cross-Spec Conflicts | Multiple active specs referencing the same file paths | Warning |
+
+**Result levels:** `Healthy` → `Warning` → `Drift`. Overall = worst check across all 5.
+
+**Notes:** Check 2 (post-completion mods) degrades gracefully when `canAccessGit: false` — it skips with a note. Check 4 (staleness) works via `spec.json.updated` timestamp regardless of git access. Only triggers for SpecOps spec health — not for product features like "audit log" or "health endpoint".
+
+---
+
+### Reconcile a Spec
+
+Guided interactive repair for drifted specs. Presents numbered findings and applies selected fixes to `tasks.md` and `spec.json`.
+
+**Claude Code:**
+```
+/specops reconcile <name>
+/specops fix <name>
+/specops repair <name>
+/specops sync <name>
+```
+
+**Other platforms:**
+```
+reconcile <name>
+fix <name>
+repair <name>
+sync <name>
+```
+
+**Workflow:**
+1. Runs a full audit on the target spec
+2. If healthy → notifies no action needed
+3. Presents numbered findings list
+4. Asks which findings to fix (`all`, comma-separated numbers, or `skip`)
+5. Applies repairs: update/remove file paths, update task statuses, update `spec.json.updated`
+6. Regenerates `index.json`
+
+**Available repairs by finding type:**
+
+| Finding | Options |
+|---------|---------|
+| Missing file (renamed) | Update path in tasks.md / Skip |
+| Missing file (deleted) | Remove reference / Provide new path / Skip |
+| Completed task, file missing | Provide new path / Note as discrepancy in tasks.md / Skip |
+| Pending task, file already exists | Mark In Progress / Skip |
+| Stale spec | Continue as-is / Skip |
+| Cross-spec conflict | Informational only — no repair |
+
+**Notes:** Requires interactive platform (`canAskInteractive: true`). On Codex, reconcile is blocked — run audit instead and apply fixes manually. Only triggers when referring to SpecOps spec repair, not product commands like "fix auth bug".
 
 ---
 
@@ -450,5 +541,8 @@ These are the valid states a spec can be in, usable as filters with the status c
 | I'm ready to code | `implement <name>` |
 | I want to set up SpecOps in my project | `/specops init` |
 | I want to create or manage steering files | `/specops steering` |
+| I want to check if a spec has drifted from the codebase | `/specops audit <name>` |
+| I want to audit all active specs at once | `/specops audit` |
+| I want to fix drift findings interactively | `/specops reconcile <name>` |
 | I want to check my SpecOps version | `/specops version` |
 | I want to update SpecOps | `/specops update` |

@@ -159,8 +159,8 @@ Watch mode is designed for use with `/loop` to babysit a PR. It checks CI status
 ### Step W1: Pre-flight
 
 1. Extract PR number from `$ARGUMENTS` (after `watch`).
-2. Validate PR exists and is open: `gh pr view <PR_NUMBER> --json number,state,headRefName,title`.
-3. Extract owner/repo: `gh repo view --json owner,name -q '.owner.login + "/" + .name'`.
+2. Validate PR exists and is open: `gh pr view <PR_NUMBER> --json number,state,headRefName,title`. Save `headRefName` as `PR_BRANCH`.
+3. Extract owner/repo: `gh repo view --json owner,name -q '.owner.login + "/" + .name'`. Save as `OWNER_REPO`.
 
 ### Step W2: Load state
 
@@ -190,7 +190,7 @@ Categorize each workflow run:
 
 Fetch inline review comments:
 ```
-gh api repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments --paginate
+gh api repos/{OWNER_REPO}/pulls/<PR_NUMBER>/comments --paginate
 ```
 
 Compare the count against `lastCommentCount` from state. If new comments exist:
@@ -203,7 +203,7 @@ Compare the count against `lastCommentCount` from state. If new comments exist:
 
 Fetch PR issue comments (general discussion, not inline reviews):
 ```
-gh api repos/{owner}/{repo}/issues/<PR_NUMBER>/comments
+gh api repos/{OWNER_REPO}/issues/<PR_NUMBER>/comments
 ```
 
 Compare count against `lastIssueCommentCount`. If new messages:

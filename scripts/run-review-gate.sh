@@ -68,15 +68,20 @@ run_check "Checksum verification" shasum -a 256 -c CHECKSUMS.sha256
 run_check "Test suite" bash scripts/run-tests.sh
 
 if command -v shellcheck >/dev/null 2>&1; then
+  shopt -s nullglob
   shell_targets=(
-    setup.sh
-    verify.sh
     scripts/*.sh
     platforms/*/install.sh
-    hooks/pre-commit
-    hooks/pre-push
   )
-  run_check "Shell static analysis" shellcheck "${shell_targets[@]}"
+  shopt -u nullglob
+  for _f in setup.sh verify.sh hooks/pre-commit hooks/pre-push; do
+    [ -f "$_f" ] && shell_targets+=("$_f")
+  done
+  if [ "${#shell_targets[@]}" -gt 0 ]; then
+    run_check "Shell static analysis" shellcheck "${shell_targets[@]}"
+  else
+    warn "Shell static analysis skipped: no target shell files found"
+  fi
 else
   warn "Shell static analysis skipped because shellcheck is not installed"
 fi

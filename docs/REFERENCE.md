@@ -143,6 +143,8 @@ list
 | `team.codeReview.requireDocs` | boolean | `false` | | Require docs for public APIs |
 
 > **Note:** All configuration objects enforce `additionalProperties: false` — unknown keys will be rejected during schema validation.
+>
+> **Project context beyond conventions:** For rich, multi-paragraph context (product overview, tech stack, directory structure), use [Steering Files](STEERING_GUIDE.md) instead of cramming it into `team.conventions` strings.
 
 ## Spec Templates
 
