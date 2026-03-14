@@ -94,7 +94,7 @@ A persistent, git-tracked memory system for SpecOps that stores architectural de
 
 ## Non-Functional Requirements
 - Memory files must be human-readable (JSON with indentation, markdown)
-- Memory loading must not significantly increase Phase 1 duration (< 2 additional file reads)
+- Memory loading must not significantly increase Phase 1 duration (bounded to at most 3 additional memory file reads)
 - decisions.json schema must be forward-compatible (version field for future schema changes)
 
 ## Constraints & Assumptions

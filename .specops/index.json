@@ -24,19 +24,19 @@
     "updated": "2026-03-07T12:30:00Z"
   },
   {
-    "id": "local-memory-layer",
-    "type": "feature",
-    "status": "completed",
-    "version": 1,
-    "author": "sanmak",
-    "updated": "2026-03-14T09:28:58Z"
-  },
-  {
     "id": "steering-files",
     "type": "feature",
     "status": "completed",
     "version": 1,
     "author": "sanmak",
     "updated": "2026-03-08T06:46:57Z"
+  },
+  {
+    "id": "local-memory-layer",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-14T09:28:58Z"
   }
 ]

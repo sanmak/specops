@@ -181,7 +181,7 @@ At the start of Phase 3, before any implementation begins:
    - If `status` is NOT `"approved"` and NOT `"self-approved"`:
      - On interactive platforms: NOTIFY_USER with current status and approval count (e.g., "This spec has 1/2 required approvals."), then ASK_USER "Do you want to proceed anyway? This overrides the review requirement."
      - On non-interactive platforms: NOTIFY_USER("Cannot proceed: spec requires approval. Current status: {status}, approvals: {approvals}/{requiredApprovals}") and STOP
-3. If spec review is not enabled: set `status` to `"implementing"` and proceed
+3. If spec review is not enabled: set `status` to `"implementing"`, update `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (via `date -u` command), regenerate `index.json`, and proceed
 
 ### Status Dashboard
 

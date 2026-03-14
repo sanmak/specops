@@ -76,7 +76,7 @@ During Phase 1, after loading steering files (step 3) and before the pre-flight 
 4. If FILE_EXISTS(`<specsDir>/memory/patterns.json`):
    - READ_FILE(`<specsDir>/memory/patterns.json`)
    - Parse JSON. If invalid, NOTIFY_USER("Warning: patterns.json contains invalid JSON — skipping.") and continue.
-   - Surface any patterns with `count >= 3` to the user as recurring conventions.
+   - Surface any patterns with `count >= 2` to the user as recurring conventions.
 5. NOTIFY_USER("Loaded memory: {N} decisions from {M} specs, {P} patterns detected.") — or "No memory files found" if the directory exists but is empty.
 
 ### Memory Writing
@@ -178,7 +178,7 @@ These must refer to SpecOps memory management, NOT a product feature (e.g., "add
 
 **Seed workflow** (`/specops memory seed`):
 1. If FILE_EXISTS(`.specops.json`), READ_FILE(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
-2. READ_FILE(`<specsDir>/index.json`) to get all specs. If index.json does not exist, LIST_DIR(`<specsDir>`) and scan for `spec.json` files.
+2. READ_FILE(`<specsDir>/index.json`) to get all specs. If index.json does not exist, LIST_DIR(`<specsDir>`), then for each subdirectory check FILE_EXISTS(`<specsDir>/<dir>/spec.json`), and READ_FILE each found `spec.json`.
 3. Filter to specs with `status == "completed"`.
 4. If no completed specs found: NOTIFY_USER("No completed specs found. Complete a spec first, then run seed.") and stop.
 5. For each completed spec:
@@ -189,8 +189,10 @@ These must refer to SpecOps memory management, NOT a product feature (e.g., "add
 7. Build `context.md` with completion summaries for all specs, ordered by `spec.json.updated` date ascending.
 8. Run Pattern Detection to build `patterns.json`.
 9. RUN_COMMAND(`mkdir -p <specsDir>/memory`) if the directory does not exist.
-10. WRITE_FILE all three files.
-11. NOTIFY_USER("Seeded memory from {N} completed specs: {D} decisions, {P} patterns detected.")
+10. WRITE_FILE(`<specsDir>/memory/decisions.json`) with the deduplicated decisions array built in step 6.
+11. WRITE_FILE(`<specsDir>/memory/context.md`) with the completion summaries built in step 7.
+12. WRITE_FILE(`<specsDir>/memory/patterns.json`) with the pattern data built in step 8.
+13. NOTIFY_USER("Seeded memory from {N} completed specs: {D} decisions, {P} patterns detected.")
 
 ### Platform Adaptation
 

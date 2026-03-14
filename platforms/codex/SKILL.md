@@ -12,7 +12,7 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
 
 The SpecOps version is needed for `specopsCreatedWith` and `specopsUpdatedWith` fields in `spec.json`. Extract it deterministically — never guess or estimate.
 
-1. Execute the command `grep '^version:' .codex/skills/specops/SKILL.md ~/.codex/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to obtain the version string. Cache the result for the remainder of this session.
+1. Execute the command `grep -h '^version:' .codex/skills/specops/SKILL.md ~/.codex/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to obtain the version string. Cache the result for the remainder of this session.
 2. **Fallback**: If the command returns empty or fails and `.specops.json` was loaded with an `_installedVersion` field, use that value.
 3. **Last resort**: If neither source is available, use `"unknown"` and Print to stdout("Could not determine SpecOps version. Version metadata in spec.json will show 'unknown'.")
 
@@ -206,7 +206,7 @@ When invoked:
 
 When the user requests the version (`/specops version`, `/specops --version`, `/specops -v`, or equivalent on non-Claude platforms):
 
-1. Execute the command `grep '^version:' .codex/skills/specops/SKILL.md ~/.codex/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the installed SpecOps version.
+1. Execute the command `grep -h '^version:' .codex/skills/specops/SKILL.md ~/.codex/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the installed SpecOps version.
 2. Display the version information:
 
    ```
@@ -668,7 +668,7 @@ During Phase 1, after loading steering files (step 3) and before the pre-flight 
 4. If FILE_EXISTS(`<specsDir>/memory/patterns.json`):
    - Read the file at(`<specsDir>/memory/patterns.json`)
    - Parse JSON. If invalid, Print to stdout("Warning: patterns.json contains invalid JSON — skipping.") and continue.
-   - Surface any patterns with `count >= 3` to the user as recurring conventions.
+   - Surface any patterns with `count >= 2` to the user as recurring conventions.
 5. Print to stdout("Loaded memory: {N} decisions from {M} specs, {P} patterns detected.") — or "No memory files found" if the directory exists but is empty.
 
 ### Memory Writing
@@ -770,7 +770,7 @@ These must refer to SpecOps memory management, NOT a product feature (e.g., "add
 
 **Seed workflow** (`/specops memory seed`):
 1. If FILE_EXISTS(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
-2. Read the file at(`<specsDir>/index.json`) to get all specs. If index.json does not exist, List the directory at(`<specsDir>`) and scan for `spec.json` files.
+2. Read the file at(`<specsDir>/index.json`) to get all specs. If index.json does not exist, List the directory at(`<specsDir>`), then for each subdirectory check FILE_EXISTS(`<specsDir>/<dir>/spec.json`), and Read the file at each found `spec.json`.
 3. Filter to specs with `status == "completed"`.
 4. If no completed specs found: Print to stdout("No completed specs found. Complete a spec first, then run seed.") and stop.
 5. For each completed spec:
@@ -781,8 +781,10 @@ These must refer to SpecOps memory management, NOT a product feature (e.g., "add
 7. Build `context.md` with completion summaries for all specs, ordered by `spec.json.updated` date ascending.
 8. Run Pattern Detection to build `patterns.json`.
 9. Execute the command(`mkdir -p <specsDir>/memory`) if the directory does not exist.
-10. Write the file at all three files.
-11. Print to stdout("Seeded memory from {N} completed specs: {D} decisions, {P} patterns detected.")
+10. Write the file at(`<specsDir>/memory/decisions.json`) with the deduplicated decisions array built in step 6.
+11. Write the file at(`<specsDir>/memory/context.md`) with the completion summaries built in step 7.
+12. Write the file at(`<specsDir>/memory/patterns.json`) with the pattern data built in step 8.
+13. Print to stdout("Seeded memory from {N} completed specs: {D} decisions, {P} patterns detected.")
 
 ### Platform Adaptation
 
@@ -985,7 +987,7 @@ At the start of Phase 3, before any implementation begins:
    - If `status` is NOT `"approved"` and NOT `"self-approved"`:
      - On interactive platforms: Print to stdout with current status and approval count (e.g., "This spec has 1/2 required approvals."), then If uncertain, note assumptions in the spec and proceed. List any ambiguities for the user to review "Do you want to proceed anyway? This overrides the review requirement."
      - On non-interactive platforms: Print to stdout("Cannot proceed: spec requires approval. Current status: {status}, approvals: {approvals}/{requiredApprovals}") and STOP
-3. If spec review is not enabled: set `status` to `"implementing"` and proceed
+3. If spec review is not enabled: set `status` to `"implementing"`, update `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (via `date -u` command), regenerate `index.json`, and proceed
 
 ### Status Dashboard
 
@@ -1842,7 +1844,8 @@ If update intent is not detected, continue to the next check in the routing chai
 
 #### Step 1: Detect Current Version
 
-1. Execute the command `grep '^version:' .codex/skills/specops/SKILL.md ~/.codex/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the **running version** of SpecOps.
+1. Attempt Execute the command `grep -h '^version:' .codex/skills/specops/SKILL.md ~/.codex/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the **running version** of SpecOps.
+   - If extraction fails (command returns empty or cannot execute), Print to stdout("Could not determine the running SpecOps version automatically.") and stop update mode with manual fallback guidance: "Check the latest version manually: https://github.com/sanmak/specops/releases"
 2. If FILE_EXISTS(`.specops.json`), Read the file at(`.specops.json`) and check for `_installedVersion` and `_installedAt` fields.
 3. Display:
 

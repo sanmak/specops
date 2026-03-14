@@ -62,17 +62,19 @@ If the user wants to customize, EDIT_FILE(`.specops.json`) to modify the specifi
 
 Create foundation steering files by default. These give the agent persistent project context for better specs.
 
-1. WRITE_FILE(`<specsDir>/steering/product.md`) with the product.md foundation template from the Steering Files module
-2. WRITE_FILE(`<specsDir>/steering/tech.md`) with the tech.md foundation template from the Steering Files module
-3. WRITE_FILE(`<specsDir>/steering/structure.md`) with the structure.md foundation template from the Steering Files module
+1. RUN_COMMAND(`mkdir -p <specsDir>/steering`)
+2. WRITE_FILE(`<specsDir>/steering/product.md`) with the product.md foundation template from the Steering Files module
+3. WRITE_FILE(`<specsDir>/steering/tech.md`) with the tech.md foundation template from the Steering Files module
+4. WRITE_FILE(`<specsDir>/steering/structure.md`) with the structure.md foundation template from the Steering Files module
 
 #### Step 4.6: Memory Scaffold
 
 Create empty memory files so the directory structure is complete from day one. Memory is populated automatically when specs complete Phase 4.
 
-1. WRITE_FILE(`<specsDir>/memory/decisions.json`) with: `{"version": 1, "decisions": []}`
-2. WRITE_FILE(`<specsDir>/memory/context.md`) with: `# Project Memory\n\n## Completed Specs\n`
-3. WRITE_FILE(`<specsDir>/memory/patterns.json`) with: `{"version": 1, "decisionCategories": [], "fileOverlaps": []}`
+1. RUN_COMMAND(`mkdir -p <specsDir>/memory`)
+2. WRITE_FILE(`<specsDir>/memory/decisions.json`) with: `{"version": 1, "decisions": []}`
+3. WRITE_FILE(`<specsDir>/memory/context.md`) with: `# Project Memory\n\n## Completed Specs\n`
+4. WRITE_FILE(`<specsDir>/memory/patterns.json`) with: `{"version": 1, "decisionCategories": [], "fileOverlaps": []}`
 
 #### Step 5: Next Steps
 

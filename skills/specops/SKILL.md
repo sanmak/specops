@@ -13,7 +13,7 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
 
 The SpecOps version is needed for `specopsCreatedWith` and `specopsUpdatedWith` fields in `spec.json`. Extract it deterministically — never guess or estimate.
 
-1. Use the Bash tool to run `grep '^version:' .claude/skills/specops/SKILL.md ~/.claude/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to obtain the version string. Cache the result for the remainder of this session.
+1. Use the Bash tool to run `grep -h '^version:' .claude/skills/specops/SKILL.md ~/.claude/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to obtain the version string. Cache the result for the remainder of this session.
 2. **Fallback**: If the command returns empty or fails and `.specops.json` was loaded with an `_installedVersion` field, use that value.
 3. **Last resort**: If neither source is available, use `"unknown"` and Display a message to the user("Could not determine SpecOps version. Version metadata in spec.json will show 'unknown'.")
 
@@ -207,7 +207,7 @@ When invoked:
 
 When the user requests the version (`/specops version`, `/specops --version`, `/specops -v`, or equivalent on non-Claude platforms):
 
-1. Use the Bash tool to run `grep '^version:' .claude/skills/specops/SKILL.md ~/.claude/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the installed SpecOps version.
+1. Use the Bash tool to run `grep -h '^version:' .claude/skills/specops/SKILL.md ~/.claude/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the installed SpecOps version.
 2. Display the version information:
 
    ```
@@ -669,7 +669,7 @@ During Phase 1, after loading steering files (step 3) and before the pre-flight 
 4. If FILE_EXISTS(`<specsDir>/memory/patterns.json`):
    - Use the Read tool to read(`<specsDir>/memory/patterns.json`)
    - Parse JSON. If invalid, Display a message to the user("Warning: patterns.json contains invalid JSON — skipping.") and continue.
-   - Surface any patterns with `count >= 3` to the user as recurring conventions.
+   - Surface any patterns with `count >= 2` to the user as recurring conventions.
 5. Display a message to the user("Loaded memory: {N} decisions from {M} specs, {P} patterns detected.") — or "No memory files found" if the directory exists but is empty.
 
 ### Memory Writing
@@ -771,7 +771,7 @@ These must refer to SpecOps memory management, NOT a product feature (e.g., "add
 
 **Seed workflow** (`/specops memory seed`):
 1. If FILE_EXISTS(`.specops.json`), Use the Read tool to read(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
-2. Use the Read tool to read(`<specsDir>/index.json`) to get all specs. If index.json does not exist, Use the Glob tool to list(`<specsDir>`) and scan for `spec.json` files.
+2. Use the Read tool to read(`<specsDir>/index.json`) to get all specs. If index.json does not exist, Use the Glob tool to list(`<specsDir>`), then for each subdirectory check FILE_EXISTS(`<specsDir>/<dir>/spec.json`), and Use the Read tool to read each found `spec.json`.
 3. Filter to specs with `status == "completed"`.
 4. If no completed specs found: Display a message to the user("No completed specs found. Complete a spec first, then run seed.") and stop.
 5. For each completed spec:
@@ -782,8 +782,10 @@ These must refer to SpecOps memory management, NOT a product feature (e.g., "add
 7. Build `context.md` with completion summaries for all specs, ordered by `spec.json.updated` date ascending.
 8. Run Pattern Detection to build `patterns.json`.
 9. Use the Bash tool to run(`mkdir -p <specsDir>/memory`) if the directory does not exist.
-10. Use the Write tool to create all three files.
-11. Display a message to the user("Seeded memory from {N} completed specs: {D} decisions, {P} patterns detected.")
+10. Use the Write tool to create(`<specsDir>/memory/decisions.json`) with the deduplicated decisions array built in step 6.
+11. Use the Write tool to create(`<specsDir>/memory/context.md`) with the completion summaries built in step 7.
+12. Use the Write tool to create(`<specsDir>/memory/patterns.json`) with the pattern data built in step 8.
+13. Display a message to the user("Seeded memory from {N} completed specs: {D} decisions, {P} patterns detected.")
 
 ### Platform Adaptation
 
@@ -986,7 +988,7 @@ At the start of Phase 3, before any implementation begins:
    - If `status` is NOT `"approved"` and NOT `"self-approved"`:
      - On interactive platforms: Display a message to the user with current status and approval count (e.g., "This spec has 1/2 required approvals."), then Use the AskUserQuestion tool "Do you want to proceed anyway? This overrides the review requirement."
      - On non-interactive platforms: Display a message to the user("Cannot proceed: spec requires approval. Current status: {status}, approvals: {approvals}/{requiredApprovals}") and STOP
-3. If spec review is not enabled: set `status` to `"implementing"` and proceed
+3. If spec review is not enabled: set `status` to `"implementing"`, update `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (via `date -u` command), regenerate `index.json`, and proceed
 
 ### Status Dashboard
 
@@ -2057,17 +2059,19 @@ If the user wants to customize, Use the Edit tool to modify(`.specops.json`) to 
 
 Create foundation steering files by default. These give the agent persistent project context for better specs.
 
-1. Use the Write tool to create(`<specsDir>/steering/product.md`) with the product.md foundation template from the Steering Files module
-2. Use the Write tool to create(`<specsDir>/steering/tech.md`) with the tech.md foundation template from the Steering Files module
-3. Use the Write tool to create(`<specsDir>/steering/structure.md`) with the structure.md foundation template from the Steering Files module
+1. Use the Bash tool to run(`mkdir -p <specsDir>/steering`)
+2. Use the Write tool to create(`<specsDir>/steering/product.md`) with the product.md foundation template from the Steering Files module
+3. Use the Write tool to create(`<specsDir>/steering/tech.md`) with the tech.md foundation template from the Steering Files module
+4. Use the Write tool to create(`<specsDir>/steering/structure.md`) with the structure.md foundation template from the Steering Files module
 
 #### Step 4.6: Memory Scaffold
 
 Create empty memory files so the directory structure is complete from day one. Memory is populated automatically when specs complete Phase 4.
 
-1. Use the Write tool to create(`<specsDir>/memory/decisions.json`) with: `{"version": 1, "decisions": []}`
-2. Use the Write tool to create(`<specsDir>/memory/context.md`) with: `# Project Memory\n\n## Completed Specs\n`
-3. Use the Write tool to create(`<specsDir>/memory/patterns.json`) with: `{"version": 1, "decisionCategories": [], "fileOverlaps": []}`
+1. Use the Bash tool to run(`mkdir -p <specsDir>/memory`)
+2. Use the Write tool to create(`<specsDir>/memory/decisions.json`) with: `{"version": 1, "decisions": []}`
+3. Use the Write tool to create(`<specsDir>/memory/context.md`) with: `# Project Memory\n\n## Completed Specs\n`
+4. Use the Write tool to create(`<specsDir>/memory/patterns.json`) with: `{"version": 1, "decisionCategories": [], "fileOverlaps": []}`
 
 #### Step 5: Next Steps
 
@@ -2103,7 +2107,8 @@ If update intent is not detected, continue to the next check in the routing chai
 
 #### Step 1: Detect Current Version
 
-1. Use the Bash tool to run `grep '^version:' .claude/skills/specops/SKILL.md ~/.claude/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the **running version** of SpecOps.
+1. Attempt Use the Bash tool to run `grep -h '^version:' .claude/skills/specops/SKILL.md ~/.claude/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the **running version** of SpecOps.
+   - If extraction fails (command returns empty or cannot execute), Display a message to the user("Could not determine the running SpecOps version automatically.") and stop update mode with manual fallback guidance: "Check the latest version manually: https://github.com/sanmak/specops/releases"
 2. If FILE_EXISTS(`.specops.json`), Use the Read tool to read(`.specops.json`) and check for `_installedVersion` and `_installedAt` fields.
 3. Display:
 
