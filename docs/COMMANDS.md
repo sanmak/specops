@@ -266,7 +266,7 @@ sync <name>
 
 ## Convert a Plan to a Spec
 
-Convert an existing AI coding assistant plan (from plan mode, a planning session, or any structured outline) into a persistent SpecOps spec. SpecOps faithfully maps the plan into the standard spec structure: goals → requirements with EARS acceptance criteria, approach → design.md, steps → tasks.md. Codebase analysis fills any gaps the plan omitted.
+Convert an existing AI coding assistant plan (from plan mode, a planning session, or any structured outline) into a persistent SpecOps spec. SpecOps faithfully maps the plan into the standard spec structure: goals → requirements with EARS acceptance criteria, approach → design.md, steps → tasks.md. Where the plan omits information, SpecOps uses `[To be defined]` placeholders rather than inferring content.
 
 **Claude Code:**
 ```text

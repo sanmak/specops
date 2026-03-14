@@ -177,7 +177,7 @@ When invoked:
 5. Check if the request is a **view** or **list** command (see "Spec Viewing" module). If so, follow the view/list workflow instead of the standard phases below.
 6. Check if the request is a **steering** command (see "Steering Command" in the Steering Files module). Patterns: "steering", "create steering", "setup steering", "manage steering", "steering files", "add steering". These must refer to managing SpecOps steering files, NOT to a product feature. If so, follow the Steering Command workflow instead of the standard phases below.
 7. Check if the request is an **audit** or **reconcile** command (see the Reconciliation module). Patterns for audit: "audit", "audit <name>", "health check", "check drift", "spec health". Patterns for reconcile: "reconcile <name>", "fix <name>" (when referring to a spec), "repair <name>", "sync <name>". These must refer to SpecOps spec health, NOT product features like "audit log" or "health endpoint". If detected, follow the Reconciliation module workflow instead of the standard phases below.
-8. Check if the request is a **from-plan** command (see "From Plan Mode" module). Patterns: "from-plan", "from plan", "import plan", "convert plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan". These must refer to converting an AI coding assistant plan into a SpecOps spec, NOT to a product feature. If so, follow the From Plan Mode workflow instead of the standard phases below.
+8. Check if the request is a **from-plan** command (see "From Plan Mode" module). Patterns: "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan". These must refer to converting an AI coding assistant plan into a SpecOps spec, NOT to a product feature. If so, follow the From Plan Mode workflow instead of the standard phases below.
 9. Check if interview mode is triggered (see "Interview Mode" module):
    - Explicit: request contains "interview" keyword
    - Auto (interactive platforms only): request is vague (≤5 words, no technical keywords, no action verb)
@@ -1537,7 +1537,7 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
    | **Constraints** | "Constraints", "Trade-offs", "Risks", "Considerations", "Out of scope", "Do NOT touch", "Limitations" |
    | **Files / paths** | Any file paths mentioned (e.g., `src/auth.ts`, `core/workflow.md`) |
 
-3. **Detect vertical and codebase context**: Use file paths and keywords in the plan to detect the project vertical (backend, frontend, infrastructure, etc.) using the same vertical detection rules as Phase 1. Do a lightweight codebase scan — for each file path mentioned in the plan, Read the file at(`<path>`) to examine its current content and identify any additional affected files not already listed.
+3. **Detect vertical and codebase context**: Use file paths and keywords in the plan to detect the project vertical (backend, frontend, infrastructure, etc.) using the same vertical detection rules as Phase 1. Do a lightweight codebase scan — for each file path mentioned in the plan, validate the path before reading: reject absolute paths (starting with `/`), paths containing `../` traversal sequences, and paths outside the project root. For each valid relative path, check FILE_EXISTS(`<path>`) and if it exists Read the file at(`<path>`) to examine its current content and identify any additional affected files not already listed. Skip invalid or non-existent paths with a warning in the mapping summary.
 
 4. **Show mapping summary**: Tell the user with a brief mapping summary before generating files:
    ```text
@@ -1551,7 +1551,7 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
 5. **Generate spec files using faithful mapping**:
 
    **requirements.md**:
-   - Extract goal statements and rephrase as user stories: "As a [inferred role], I want [goal], so that [benefit]"
+   - Convert goal statements into user-story structure only when the plan already states the actor and benefit. When the plan omits actor or benefit, use `[role not specified]` or `[benefit not specified]` placeholders instead of inferring
    - Extract acceptance criteria / done criteria and rewrite in EARS notation (WHEN / THE SYSTEM SHALL patterns)
    - Add a Constraints section from any constraints/risks found in the plan. If none found, use `[To be defined]` placeholder
    - Faithfully preserve the intent — do NOT re-derive or expand beyond what the plan states
@@ -1586,7 +1586,7 @@ From Plan mode preserves the plan's intent. It does NOT:
 It DOES:
 - Reformat content into SpecOps spec structure
 - Apply EARS notation to extracted acceptance criteria
-- Enrich goal statements with user story framing (As a / I want / So that)
+- Apply user-story framing (As a / I want / So that) only when the plan states the actor and benefit; otherwise use `[role not specified]` or `[benefit not specified]` placeholders
 - Fill structural gaps with `[To be defined]` placeholders
 - Record codebase gaps in the mapping summary (noted as "Gap: not in original plan") rather than adding tasks to `tasks.md`
 

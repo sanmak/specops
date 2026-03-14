@@ -25,7 +25,7 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
    | **Constraints** | "Constraints", "Trade-offs", "Risks", "Considerations", "Out of scope", "Do NOT touch", "Limitations" |
    | **Files / paths** | Any file paths mentioned (e.g., `src/auth.ts`, `core/workflow.md`) |
 
-3. **Detect vertical and codebase context**: Use file paths and keywords in the plan to detect the project vertical (backend, frontend, infrastructure, etc.) using the same vertical detection rules as Phase 1. Do a lightweight codebase scan — for each file path mentioned in the plan, READ_FILE(`<path>`) to examine its current content and identify any additional affected files not already listed.
+3. **Detect vertical and codebase context**: Use file paths and keywords in the plan to detect the project vertical (backend, frontend, infrastructure, etc.) using the same vertical detection rules as Phase 1. Do a lightweight codebase scan — for each file path mentioned in the plan, validate the path before reading: reject absolute paths (starting with `/`), paths containing `../` traversal sequences, and paths outside the project root. For each valid relative path, check FILE_EXISTS(`<path>`) and if it exists READ_FILE(`<path>`) to examine its current content and identify any additional affected files not already listed. Skip invalid or non-existent paths with a warning in the mapping summary.
 
 4. **Show mapping summary**: NOTIFY_USER with a brief mapping summary before generating files:
    ```text
@@ -39,7 +39,7 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
 5. **Generate spec files using faithful mapping**:
 
    **requirements.md**:
-   - Extract goal statements and rephrase as user stories: "As a [inferred role], I want [goal], so that [benefit]"
+   - Convert goal statements into user-story structure only when the plan already states the actor and benefit. When the plan omits actor or benefit, use `[role not specified]` or `[benefit not specified]` placeholders instead of inferring
    - Extract acceptance criteria / done criteria and rewrite in EARS notation (WHEN / THE SYSTEM SHALL patterns)
    - Add a Constraints section from any constraints/risks found in the plan. If none found, use `[To be defined]` placeholder
    - Faithfully preserve the intent — do NOT re-derive or expand beyond what the plan states
@@ -74,7 +74,7 @@ From Plan mode preserves the plan's intent. It does NOT:
 It DOES:
 - Reformat content into SpecOps spec structure
 - Apply EARS notation to extracted acceptance criteria
-- Enrich goal statements with user story framing (As a / I want / So that)
+- Apply user-story framing (As a / I want / So that) only when the plan states the actor and benefit; otherwise use `[role not specified]` or `[benefit not specified]` placeholders
 - Fill structural gaps with `[To be defined]` placeholders
 - Record codebase gaps in the mapping summary (noted as "Gap: not in original plan") rather than adding tasks to `tasks.md`
 
