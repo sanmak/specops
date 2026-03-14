@@ -131,6 +131,16 @@ REQUIRED_MARKERS = {
         "context.md",
         "patterns.json",
     ],
+    "repo_map": [
+        "## Repo Map",
+        "### Repo Map Format",
+        "### Repo Map Generation",
+        "### Language Tier Extraction",
+        "### Staleness Detection",
+        "### Scope Control",
+        "### Map Subcommand",
+        "### Repo Map Safety",
+    ],
 }
 
 

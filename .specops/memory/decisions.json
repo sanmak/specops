@@ -50,6 +50,26 @@
       "task": "Task 1",
       "date": "2026-03-08",
       "completedAt": "2026-03-08T09:36:18Z"
+    },
+    {
+      "specId": "ast-based-repo-map",
+      "specType": "feature",
+      "number": 1,
+      "decision": "Used step 3.5 notation instead of renumbering Phase 1 steps",
+      "rationale": "Other modules (memory.md) reference step 4 by number; renumbering would break those references",
+      "task": "Task 2",
+      "date": "2026-03-14",
+      "completedAt": "2026-03-14T18:36:14Z"
+    },
+    {
+      "specId": "ast-based-repo-map",
+      "specType": "feature",
+      "number": 2,
+      "decision": "Did not add core/repo-map.md to CLAUDE.md security-sensitive files list",
+      "rationale": "Follows same non-sensitive pattern as core/steering.md and core/memory.md which are also not in that list",
+      "task": "Task 7",
+      "date": "2026-03-14",
+      "completedAt": "2026-03-14T18:36:14Z"
     }
   ]
 }
