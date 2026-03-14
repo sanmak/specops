@@ -159,14 +159,10 @@ Team-based spec review cycle between spec creation (Phase 2) and implementation 
 sequenceDiagram
     participant Author
     participant A as Agent
-    participant S as .specops/<spec>/
+    participant S as .specops/<spec-name>/
     participant Reviewer
 
-    Note over Author,Reviewer: Phase 2 completes — spec created as draft
-
-    Author->>A: Submit spec for review
-    A->>S: Set status → in-review, reviewRounds → 1
-    A->>S: Regenerate index.json
+    Note over Author,Reviewer: Phase 2 completes — spec auto-set to in-review, reviewRounds → 1
 
     Note over Reviewer: Review Mode
 
@@ -202,8 +198,12 @@ sequenceDiagram
         A->>S: Regenerate index.json
         A-->>Author: "Spec revised. Notify reviewers for re-review."
         Note over Reviewer: Another review round...
-    else Approved (approvals >= requiredApprovals)
+    else Approved (approvals >= requiredApprovals, peer review)
         A->>S: Set status → approved
+        A->>S: Regenerate index.json
+        Note over A: → Implementation gate passes, proceed to Phase 3
+    else Self-approved (approvals >= requiredApprovals, all selfApproval: true)
+        A->>S: Set status → self-approved
         A->>S: Regenerate index.json
         Note over A: → Implementation gate passes, proceed to Phase 3
     end
@@ -222,7 +222,7 @@ sequenceDiagram
     participant U as User
     participant A as Agent
     participant C as Codebase
-    participant S as .specops/<spec>/
+    participant S as .specops/<spec-name>/
 
     U->>A: "from-plan" + plan content
     alt No plan content provided (interactive)
@@ -352,12 +352,12 @@ sequenceDiagram
     participant S as .specops/
     participant G as Git History
 
-    U->>A: /specops audit [spec-name]
+    U->>A: /specops audit <spec-name>
     A->>S: Read .specops.json (get specsDir)
 
     alt Specific spec named
-        A->>S: Read <spec>/spec.json
-        A->>S: Read <spec>/tasks.md
+        A->>S: Read <spec-name>/spec.json
+        A->>S: Read <spec-name>/tasks.md
     else Audit all
         A->>S: List spec directories
         A->>S: Read each spec.json (filter: status ≠ completed)
@@ -377,7 +377,7 @@ sequenceDiagram
     and Check 2: Post-Completion Modification
         alt Status = completed
             loop Each file path
-                A->>G: git log --after="<updated>" -- "<path>"
+                A->>G: git log --after="<spec.json.updated>" -- "<path>"
                 G-->>A: Commits after completion (if any)
             end
         end
@@ -491,7 +491,9 @@ sequenceDiagram
         U->>A: Decision
         alt Keep
             A-->>U: "Keeping existing config."
-            Note over A: Done
+            Note over A: Workflow ends here — no further steps
+        else Replace
+            Note over A: Continue to Template Selection below
         end
     end
 
