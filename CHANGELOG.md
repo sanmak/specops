@@ -7,58 +7,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-03-15
+
 ### Added
 
+- **AST-based repo map**: Machine-generated structural map of the codebase stored as a steering file (`<specsDir>/steering/repo-map.md`) with `inclusion: always`. 4-tier language extraction (Python AST signatures, TS/JS exports, Go/Rust/Java declarations, other files), staleness detection (time-based 7 days + hash-based file list comparison), scope control (100 files, depth 3, ~3000 token budget)
+- **`/specops map` subcommand**: Generate or refresh the repo map on demand. Auto-detects missing or stale maps during Phase 1 step 3.5
+- **Local Memory Layer**: Persistent project memory extracted from completed specs — decisions (`decisions.json`), project context (`context.md`), and recurring patterns (`patterns.json`) stored in `<specsDir>/memory/`. Loaded automatically during Phase 1; updated during Phase 4
+- **`/specops memory` and `/specops memory seed` subcommands**: View accumulated decisions, context, and patterns. `seed` populates memory from existing completed specs' `implementation.md` decision journals
+- **`/specops from-plan` subcommand**: Convert an existing AI coding assistant plan (from plan mode or any structured outline) into a persistent SpecOps spec. Faithfully maps goals → requirements, approach → design, steps → tasks with `[To be defined]` placeholders for missing sections
 - **Drift detection & reconciliation**: New `audit` and `reconcile` subcommands (`core/reconciliation.md`). `audit` runs 5 drift checks (File Drift, Post-Completion Modification, Task Status Inconsistency, Staleness, Cross-Spec Conflicts) and produces a health report per spec. `reconcile` guides interactive repair of findings. Git-dependent checks degrade gracefully when `canAccessGit: false`; reconcile is blocked on non-interactive platforms with a clear message
-- **`/specops audit` subcommand**: Detect drift between spec artifacts and codebase. Supports single-spec (`audit <name>`) and all-active-specs (bare `audit`) modes. Trigger patterns: `audit`, `audit <name>`, `health check`, `check drift`, `spec health`
-- **`/specops reconcile` subcommand**: Interactive guided repair for drifted specs. Presents numbered findings list, applies selected repairs to `tasks.md` and `spec.json`. Trigger patterns: `reconcile <name>`, `fix <name>`, `repair <name>`, `sync <name>`
 - **Steering files system**: Persistent project context in `<specsDir>/steering/` — markdown files with YAML frontmatter loaded automatically during Phase 1. Three inclusion modes: `always` (every spec), `fileMatch` (only when affected files match globs), and `manual` (on-demand). Foundation templates: `product.md`, `tech.md`, `structure.md`
-- **`/specops steering` subcommand**: On-demand command to scaffold, view, and manage steering files. Creates foundation files if none exist; shows summary table with add/edit options if the directory already exists
-- **Self-review workflow for solo developers**: New `allowSelfApproval` config option in `team.specReview` enables solo developers to review and approve their own specs. Authors go through the full review ritual (read spec, provide feedback, self-approve) with results recorded in `reviews.md` as a self-review
-- **`self-approved` spec status**: Distinct from peer `approved` — both allow implementation, but `self-approved` provides audit trail showing no peer review was performed. Reviewer entries include `selfApproval: true` flag
-- **Init-time solo/team detection**: `/specops init` now asks "Are you working solo or with a team?" when a review-enabled template is selected, and pre-configures `allowSelfApproval` accordingly
-- **Deterministic mode detection**: Review workflow mode detection is now a fully exhaustive decision tree — every combination of inputs maps to exactly one mode with no gaps
-- **spec.json validation on read**: Invalid or corrupt `spec.json` files now fall back to legacy mode with a warning instead of undefined behavior
-- **Solo review example config**: `examples/.specops.solo-review.json` for solo developers who want the review workflow
-- **Self-approved example spec**: `examples/specs/feature-self-approved-example/spec.json`
+- **`/specops steering` subcommand**: On-demand command to scaffold, view, and manage steering files
+- **EARS notation for acceptance criteria**: Requirements templates use [EARS (Easy Approach to Requirements Syntax)](https://alistairmavin.com/ears/) with five patterns (Ubiquitous, Event-Driven, State-Driven, Optional, Unwanted) for precise, testable criteria. HTML comment annotations guide agents without affecting rendered markdown
+- **Regression risk analysis**: Severity-scaled discovery methodology for bugfix specs — Blast Radius, Behavior Inventory, Test Coverage Assessment, Risk Tier, and Scope Escalation Check
+- **Self-review workflow for solo developers**: New `allowSelfApproval` config option in `team.specReview` enables solo developers to review and approve their own specs with distinct `self-approved` audit trail
+- **Version Extraction Protocol**: Deterministic version detection via `GET_SPECOPS_VERSION` abstract operation — never guesses or invents version numbers for `spec.json` metadata
 - **Version tracking in specs**: `specopsCreatedWith` and `specopsUpdatedWith` fields in `spec.json` record which SpecOps version created and last modified each spec
-- **`/specops version` subcommand**: Display the installed SpecOps version
-- **`/specops update` subcommand**: Check for newer SpecOps versions and guide through upgrading
+- **`/specops version` and `/specops update` subcommands**: Display installed version and check for newer versions
+- **`/specops audit` and `/specops reconcile` subcommands**: Detect drift between spec artifacts and codebase; interactively repair drifted specs
+- **Task state machine**: Formal task state tracking (`core/task-tracking.md`) with Write Ordering Protocol and single-active-task rule
+- **`implementation.md` promoted to decision journal**: Always created during implementation, structured as a Decision Log with deviations and blockers
 - **`/ship-pr` slash command**: Commit changes to a new branch, push, and open a PR for review
 - **`/docs-sync` slash command**: Detect stale documentation after code changes and propose targeted updates
 - **`/full-review-gate` slash command**: Comprehensive code review gate with worktree isolation — runs bug, security, PII/privacy, and dependency risk checks with P0–P3 severity findings and go/no-go release status
-- **Regression risk analysis**: Severity-scaled discovery methodology for bugfix specs — Blast Radius, Behavior Inventory, Test Coverage Assessment, Risk Tier, and Scope Escalation Check
-- **Plan Mode vs Spec Mode comparison guide**: `docs/PLAN-VS-SPEC.md` documenting when to use plan mode (session-scoped tactical) vs spec mode (persistent, reviewable, cross-session)
-- **`/specops from-plan` subcommand**: Convert an existing AI coding assistant plan (from plan mode or any structured outline) into a persistent SpecOps spec. Faithfully maps goals → requirements, approach → design, steps → tasks with `[To be defined]` placeholders for missing sections
 - **`/core-review` slash command**: Review code changes against SpecOps project-specific patterns — tool abstraction violations, generated file drift, cross-platform consistency gaps
-- **Local Memory Layer**: Persistent project memory extracted from completed specs — decisions (`decisions.json`), project context (`context.md`), and recurring patterns (`patterns.json`) stored in `<specsDir>/memory/`. Loaded automatically during Phase 1; updated during Phase 4
-- **`/specops memory` and `/specops memory seed` subcommands**: View accumulated decisions, context, and patterns. `seed` populates memory from existing completed specs' `implementation.md` decision journals
-- **Version Extraction Protocol**: Deterministic version detection via `GET_SPECOPS_VERSION` abstract operation — never guesses or invents version numbers for `spec.json` metadata
-- **Task state machine**: Formal task state tracking (`core/task-tracking.md`) with Write Ordering Protocol and single-active-task rule
-- **`implementation.md` promoted to decision journal**: Always created during implementation, structured as a Decision Log with deviations and blockers
-- **EARS notation for acceptance criteria**: Requirements templates use [EARS (Easy Approach to Requirements Syntax)](https://alistairmavin.com/ears/) with five patterns (Ubiquitous, Event-Driven, State-Driven, Optional, Unwanted) for precise, testable criteria. HTML comment annotations guide agents without affecting rendered markdown
+- **Plan Mode vs Spec Mode comparison guide**: `docs/PLAN-VS-SPEC.md` documenting when to use plan mode vs spec mode
+- **Competitive comparison guide**: `docs/COMPARISON.md` with feature matrix comparing SpecOps to Kiro, EPIC/Reload, and GitHub Spec Kit
+- **Sequence diagrams**: `docs/DIAGRAMS.md` with 8 Mermaid sequence diagrams covering all major SpecOps workflows
 - **PII prevention in data handling**: Specs use synthetic data instead of real PII, with classification-aware handling rules
-- **Dogfood infrastructure**: `.specops/` directory and `.specops.json` config for building SpecOps using SpecOps itself
 
 ### Changed
 
-- **Init merged into main skill**: `/specops:init` is now `/specops init` — a subcommand of the main skill rather than a separate skill. No behavior change for users.
-- **Fixed install commands**: Documentation now uses the correct `/plugin marketplace add` + `/plugin install` + `/reload-plugins` flow instead of the non-existent `/install github:` command.
-- **Author waiting message improved**: Now suggests `allowSelfApproval: true` for solo developers instead of leaving them at a dead end
-- **Implementation gate updated**: Accepts both `approved` and `self-approved` statuses. Self-approved specs show a note: "This spec was self-approved without peer review."
-- **Command routing tightened**: Init and update mode patterns now require SpecOps context — bare "setup" or "update" no longer misclassify product feature requests
+- **Init merged into main skill**: `/specops:init` is now `/specops init` — a subcommand of the main skill rather than a separate skill
 - **Bugfix and refactor templates include acceptance criteria checklists**: Phase 4 checkbox verification is now uniformly executable across all spec types
 - **Deferred criteria pattern**: Task-tracking and workflow support moving deferred items to a "Deferred Criteria" subsection
 - **`spec.json` requiredApprovals defaults to 0**: When review is disabled, `requiredApprovals` defaults to 0 instead of requiring a minimum of 1
-- **Steering not in schema**: Steering file configuration is not stored in `.specops.json` — it is convention-based (files in `<specsDir>/steering/` with YAML frontmatter). The `/specops steering` command and Phase 1 loader handle discovery automatically
+- **Steering is convention-based**: Steering file configuration is not stored in `.specops.json` — it is convention-based (files in `<specsDir>/steering/` with YAML frontmatter)
+- **Command routing tightened**: Init and update mode patterns now require SpecOps context — bare "setup" or "update" no longer misclassify product feature requests
+- **README updated**: Competitive comparison with Kiro, EPIC/Reload, and Spec Kit; dogfood proof section
 
 ### Fixed
 
-- **PR review feedback**: Indentation, resilience, schema, and clarity improvements across core modules
+- **PR review feedback**: Extensive review-driven fixes across 15 PRs — indentation, resilience, schema, and clarity improvements across core modules
 - **Pre-commit hook portability**: Use POSIX case statement for symlink path check instead of bash-specific syntax
-- **Stale verify.sh reference**: Removed deleted `claude-init.j2` from verify.sh checks
-- **Marketplace plugin source path**: Fixed to use valid relative path format
+- **macOS compatibility**: Hash computation uses `shasum -a 256` with fallback for environments without `sha256sum`
+- **Worktree cleanup**: Scoped pr-fix compact state files and worktree cleanup to avoid concurrent run collisions
+- **spec.json validation**: Malformed spec.json files now fall back to legacy mode with a warning instead of undefined behavior
+- **Memory seed workflow**: Guard index.json reads, unconditional context.md writes, and self-exclusion handling
 - **Remote installer**: Include init sub-skill in Claude Code remote installer
+- **Marketplace plugin source path**: Fixed to use valid relative path format
 
 ## [1.2.0] - 2026-03-06
 
