@@ -323,19 +323,16 @@ def build_init_templates_section():
     return "\n\n".join(sections)
 
 
-def generate_claude(core, platform_config):
-    """Generate Claude Code platform files."""
-    template = load_template("claude")
+def build_common_context(core, platform_config):
+    """Build the shared render context used by all platform generators.
+
+    Each new core module only needs to be added here once, not in 4 places.
+    """
     templates_section = render_templates_section(core["_templates"])
     examples = build_example_invocations(platform_config)
-
-    # Build init content with injected config templates (Claude-only feature)
-    init_content = core["init"].replace(
-        "{{ init_templates }}", build_init_templates_section()
-    )
-
     version = platform_config.get("version", "1.0.0")
-    context = {
+
+    return {
         "workflow": core["workflow"],
         "config_handling": core["config-handling"],
         "steering": core["steering"],
@@ -345,7 +342,6 @@ def generate_claude(core, platform_config):
         "reconciliation": core["reconciliation"],
         "interview": core["interview"],
         "from_plan": core["from-plan"],
-        "init": init_content,
         "update": core["update"],
         "safety": core["safety"],
         "simplicity": core["simplicity"],
@@ -358,6 +354,20 @@ def generate_claude(core, platform_config):
         "examples": examples,
         "version": version,
     }
+
+
+def generate_claude(core, platform_config):
+    """Generate Claude Code platform files."""
+    template = load_template("claude")
+
+    # Build init content with injected config templates (Claude-only feature)
+    init_content = core["init"].replace(
+        "{{ init_templates }}", build_init_templates_section()
+    )
+
+    context = build_common_context(core, platform_config)
+    context["init"] = init_content
+    version = context["version"]
 
     output = render_template(template, context)
     output = substitute_tools(output, platform_config["toolMapping"])
@@ -448,32 +458,7 @@ def generate_plugin_manifests():
 def generate_cursor(core, platform_config):
     """Generate Cursor platform files."""
     template = load_template("cursor")
-    templates_section = render_templates_section(core["_templates"])
-    examples = build_example_invocations(platform_config)
-
-    version = platform_config.get("version", "1.0.0")
-    context = {
-        "workflow": core["workflow"],
-        "config_handling": core["config-handling"],
-        "steering": core["steering"],
-        "memory": core["memory"],
-        "review_workflow": core["review-workflow"],
-        "view": core["view"],
-        "reconciliation": core["reconciliation"],
-        "interview": core["interview"],
-        "from_plan": core["from-plan"],
-        "update": core["update"],
-        "safety": core["safety"],
-        "simplicity": core["simplicity"],
-        "data_handling": core["data-handling"],
-        "verticals": core["verticals"],
-        "custom_templates": core["custom-templates"],
-        "error_handling": core["error-handling"],
-        "task_tracking": core["task-tracking"],
-        "templates_section": templates_section,
-        "examples": examples,
-        "version": version,
-    }
+    context = build_common_context(core, platform_config)
 
     output = render_template(template, context)
     output = substitute_tools(output, platform_config["toolMapping"])
@@ -485,32 +470,8 @@ def generate_cursor(core, platform_config):
 def generate_codex(core, platform_config):
     """Generate OpenAI Codex platform files."""
     template = load_template("codex")
-    templates_section = render_templates_section(core["_templates"])
-    examples = build_example_invocations(platform_config)
-
-    version = platform_config.get("version", "1.0.0")
-    context = {
-        "workflow": core["workflow"],
-        "config_handling": core["config-handling"],
-        "steering": core["steering"],
-        "memory": core["memory"],
-        "review_workflow": core["review-workflow"],
-        "view": core["view"],
-        "reconciliation": core["reconciliation"],
-        "interview": core["interview"],
-        "from_plan": core["from-plan"],
-        "update": core["update"],
-        "safety": core["safety"],
-        "simplicity": core["simplicity"],
-        "data_handling": core["data-handling"],
-        "verticals": core["verticals"],
-        "custom_templates": core["custom-templates"],
-        "error_handling": core["error-handling"],
-        "task_tracking": core["task-tracking"],
-        "templates_section": templates_section,
-        "examples": examples,
-        "version": version,
-    }
+    context = build_common_context(core, platform_config)
+    version = context["version"]
 
     output = render_template(template, context)
     output = substitute_tools(output, platform_config["toolMapping"])
@@ -533,32 +494,8 @@ def generate_codex(core, platform_config):
 def generate_copilot(core, platform_config):
     """Generate GitHub Copilot platform files."""
     template = load_template("copilot")
-    templates_section = render_templates_section(core["_templates"])
-    examples = build_example_invocations(platform_config)
-
-    version = platform_config.get("version", "1.0.0")
-    context = {
-        "workflow": core["workflow"],
-        "config_handling": core["config-handling"],
-        "steering": core["steering"],
-        "memory": core["memory"],
-        "review_workflow": core["review-workflow"],
-        "view": core["view"],
-        "reconciliation": core["reconciliation"],
-        "interview": core["interview"],
-        "from_plan": core["from-plan"],
-        "update": core["update"],
-        "safety": core["safety"],
-        "simplicity": core["simplicity"],
-        "data_handling": core["data-handling"],
-        "verticals": core["verticals"],
-        "custom_templates": core["custom-templates"],
-        "error_handling": core["error-handling"],
-        "task_tracking": core["task-tracking"],
-        "templates_section": templates_section,
-        "examples": examples,
-        "version": version,
-    }
+    context = build_common_context(core, platform_config)
+    version = context["version"]
 
     output = render_template(template, context)
     output = substitute_tools(output, platform_config["toolMapping"])
