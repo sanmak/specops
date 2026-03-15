@@ -528,8 +528,10 @@ sequenceDiagram
 
     alt All files newly created
         A-->>U: "SpecOps initialized! Steering files created in .specops/steering/, memory scaffold created in .specops/memory/"
-    else Some or all files already existed
+    else All files already existed
         A-->>U: "SpecOps initialized! Steering files verified existing in .specops/steering/, memory scaffold verified existing in .specops/memory/"
+    else Some files created, some already existed
+        A-->>U: "SpecOps initialized! Steering files set up in .specops/steering/, memory scaffold set up in .specops/memory/"
     end
 ```
 

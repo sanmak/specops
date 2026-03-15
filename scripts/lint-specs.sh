@@ -23,7 +23,7 @@ for tasks_file in "$SPECS_DIR"/*/tasks.md; do
   task_name=""
   line_num=0
 
-  while IFS= read -r line; do
+  while IFS= read -r line || [[ -n "$line" ]]; do
     line_num=$((line_num + 1))
 
     # Detect task heading (### Task N: ...)
