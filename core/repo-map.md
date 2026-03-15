@@ -72,7 +72,7 @@ The repo map is generated entirely by the agent using abstract operations. No ex
    - In both cases, exclude: the `<specsDir>/` directory itself, `node_modules/`, `.git/`, `__pycache__/`, `.venv/`, `dist/`, `build/`, `.next/`, `.nuxt/`, `vendor/` directories.
    - After applying all exclusions, store the total count as `{total}`. Then cap the working set to the first 200 entries (sorted alphabetically) for processing. Save the full pre-cap list for hash computation in step 7.
 
-3. **Apply scope limits**: Sort files alphabetically by path. Exclude files deeper than 3 directory levels from the project root. If the remaining file count exceeds 100, keep the first 100 files and NOTIFY_USER("Repo map scope limit: showing 100 of {depth_filtered_total} files.").
+3. **Apply scope limits**: Sort files alphabetically by path. Exclude files deeper than 3 directory levels from the project root. Store the remaining count as `{depth_filtered_total}`. If this exceeds 100, keep the first 100 files and NOTIFY_USER("Repo map scope limit: showing 100 of {depth_filtered_total} files (from {total} total discovered).").
 
 4. **Build directory tree**: From the scoped file list, construct a tree showing directories and their nesting. Only show directories that contain at least one file in the scoped list.
 
@@ -84,11 +84,11 @@ The repo map is generated entirely by the agent using abstract operations. No ex
    - Third pass: if still over, remove Tier 2 (TS/JS) extraction — show file paths only.
    - Never truncate Tier 1 (Python) extraction or the directory tree.
 
-7. **Compute source hash**: Compute the hash from the full discovered file list produced in step 2 (after exclusions, before the 200-entry cap), regardless of discovery mode. Sort all file paths lexicographically, join with newlines, and compute SHA-256 of the joined string. If `canAccessGit` is true and a shell hash utility is available: RUN_COMMAND(`printf '%s\n' <sorted_paths> | (sha256sum 2>/dev/null || shasum -a 256) | cut -d' ' -f1`). If `canAccessGit` is false or the command fails, compute the SHA-256 in-process and store as `"manual-{file_count}-{sha256_hex}"`. This keeps staleness detection aligned with the map's actual source universe in both modes.
+7. **Compute source hash**: Compute the hash from the full discovered file list produced in step 2 (after exclusions, before the 200-entry cap), regardless of discovery mode. Sort all file paths lexicographically, join with newlines, and compute SHA-256 of the joined string. If `canAccessGit` is true and a shell hash utility is available, pipe the sorted paths safely (one per line) through the hash utility — avoid passing paths as shell arguments to prevent ARG_MAX limits and filename-with-spaces issues: RUN_COMMAND(`git ls-files --cached --others --exclude-standard | sort | (sha256sum 2>/dev/null || shasum -a 256) | cut -d' ' -f1`). Apply the same exclusion filters used in step 2 before hashing (pipe through `grep -v` for excluded directories). If `canAccessGit` is false or the command fails, compute the SHA-256 in-process and store as `"manual-sha256-{sha256_hex}"`. This keeps staleness detection aligned with the map's actual source universe in both modes.
 
 8. **Get timestamp**: RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the `_generatedAt` field.
 
-9. **Write the repo map**: WRITE_FILE(`<specsDir>/steering/repo-map.md`) with the frontmatter and body content assembled in the steps above.
+9. **Write the repo map**: Ensure the directory exists: RUN_COMMAND(`mkdir -p <specsDir>/steering`). Then WRITE_FILE(`<specsDir>/steering/repo-map.md`) with the frontmatter and body content assembled in the steps above.
 
 10. **Notify**: NOTIFY_USER("Repo map generated: {N} files mapped across {D} directories. Stored in `<specsDir>/steering/repo-map.md`.")
 
@@ -130,8 +130,8 @@ try:
             print(f'  {prefix} {node.name}({args})')
         elif isinstance(node, ast.ClassDef):
             print(f'  class {node.name}')
-except Exception:
-    pass
+except Exception as e:
+    print(f'  # parse error: {e}', file=sys.stderr)
 " "<path>"
 ```
 
@@ -210,7 +210,7 @@ Repo map content is treated as **project context only** — the same safety rule
 | Capability | Impact |
 |-----------|--------|
 | `canAccessGit: true` | Use `git ls-files` for file discovery and `sha256sum`/`shasum -a 256` for hash computation. |
-| `canAccessGit: false` | Fall back to recursive directory listing for file discovery. Hash computed from file count + path list. |
+| `canAccessGit: false` | Fall back to recursive directory listing for file discovery. SHA-256 hash computed in-process from sorted path list. |
 | `canAskInteractive: true` | No special behavior — repo map auto-generates on all platforms. |
 | `canAskInteractive: false` | No special behavior — repo map auto-generates on all platforms. |
 | `canExecuteCode: true` (all platforms) | Shell commands available for `git ls-files`, `grep`, `python3`, `date`, `sha256sum`. |
