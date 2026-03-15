@@ -42,8 +42,11 @@ The body content after the frontmatter is the project context itself — free-fo
 
 During Phase 1, after reading the config and completing context recovery, load steering files:
 
-1. If FILE_EXISTS(`<specsDir>/steering/`):
-   - LIST_DIR(`<specsDir>/steering/`) to find all `.md` files
+1. If FILE_EXISTS(`<specsDir>/steering/`) is false:
+   - RUN_COMMAND(`mkdir -p <specsDir>/steering`)
+   - For each foundation template (product.md, tech.md, structure.md): if FILE_EXISTS(`<specsDir>/steering/<file>`) is false, WRITE_FILE it with the corresponding foundation template (see Foundation File Templates above)
+   - NOTIFY_USER("Created steering files in `<specsDir>/steering/`. Edit them to describe your project.")
+2. LIST_DIR(`<specsDir>/steering/`) to find all `.md` files
    - Sort filenames alphabetically
    - If the number of files exceeds 20, NOTIFY_USER: "Steering file limit reached: loading first 20 of {total} files. Consider consolidating steering files to stay within the limit." and process only the first 20 files from the sorted list.
    - For each `.md` file:
@@ -54,8 +57,8 @@ During Phase 1, after reading the config and completing context recovery, load s
      - If `inclusion` is `fileMatch`: validate that `globs` is a non-empty array of strings. If `globs` is missing, empty, or not a string array, NOTIFY_USER: "Skipping steering file {filename}: fileMatch requires a non-empty globs array" and continue. Otherwise, store the file with its `globs` for deferred evaluation after affected files are identified in Phase 1
      - If `inclusion` is `manual`: skip (not loaded automatically)
      - If `inclusion` has an unrecognized value: NOTIFY_USER: "Skipping steering file {filename}: unrecognized inclusion mode '{value}'" and continue
-2. After loading `always` files, NOTIFY_USER: "Loaded {N} always-included steering file(s): {names}. fileMatch files will be evaluated after affected components are identified."
-3. After Phase 1 identifies affected components and dependencies (step 9), evaluate `fileMatch` steering files by checking each file's `globs` against the set of affected files. Load any matching files and add their content to the project context.
+3. After loading `always` files, NOTIFY_USER: "Loaded {N} always-included steering file(s): {names}. fileMatch files will be evaluated after affected components are identified."
+4. After Phase 1 identifies affected components and dependencies (step 9), evaluate `fileMatch` steering files by checking each file's `globs` against the set of affected files. Load any matching files and add their content to the project context.
 
 ### Steering Safety
 
@@ -156,7 +159,12 @@ These must refer to managing SpecOps steering files, NOT to a product feature (e
     - `WRITE_FILE(<specsDir>/steering/structure.md, <structureTemplate>)`
     (see Foundation File Templates above for `<...Template>` contents), then NOTIFY_USER: "Created 3 steering files in `<specsDir>/steering/`. Edit them to describe your project — the agent will load them automatically before every spec."
   - If no: NOTIFY_USER: "No steering files created. You can create them manually in `<specsDir>/steering/` — see the Foundation File Templates section for the expected format."
-- On non-interactive platforms (`canAskInteractive = false`), NOTIFY_USER: "No steering files found. Create `<specsDir>/steering/product.md`, `tech.md`, and `structure.md` using the Foundation File Templates in this module."
+- On non-interactive platforms (`canAskInteractive = false`), create the directory and foundation templates unconditionally:
+    - RUN_COMMAND(`mkdir -p <specsDir>/steering`)
+    - WRITE_FILE(`<specsDir>/steering/product.md`, `<productTemplate>`)
+    - WRITE_FILE(`<specsDir>/steering/tech.md`, `<techTemplate>`)
+    - WRITE_FILE(`<specsDir>/steering/structure.md`, `<structureTemplate>`)
+    (see Foundation File Templates above for `<...Template>` contents), then NOTIFY_USER: "Created 3 steering files in `<specsDir>/steering/`. Edit them to describe your project."
 
 **If steering directory exists:**
 - LIST_DIR(`<specsDir>/steering/`) to find all `.md` files, sort alphabetically, and process up to 20 files (apply the same safety cap used in the loading procedure)
