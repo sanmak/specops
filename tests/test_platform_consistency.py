@@ -140,6 +140,7 @@ REQUIRED_MARKERS = {
         "### Scope Control",
         "### Map Subcommand",
         "### Repo Map Safety",
+        "### Platform Adaptation",
     ],
 }
 

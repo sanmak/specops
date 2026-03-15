@@ -192,7 +192,7 @@ When invoked:
 5. Check if the request is a **view** or **list** command (see "Spec Viewing" module). If so, follow the view/list workflow instead of the standard phases below.
 6. Check if the request is a **steering** command (see "Steering Command" in the Steering Files module). Patterns: "steering", "create steering", "setup steering", "manage steering", "steering files", "add steering". These must refer to managing SpecOps steering files, NOT to a product feature. If so, follow the Steering Command workflow instead of the standard phases below.
 7. Check if the request is a **memory** command (see "Memory Subcommand" in the Local Memory Layer module). Patterns: "memory", "show memory", "view memory", "memory seed", "seed memory". These must refer to SpecOps memory management, NOT a product feature (e.g., "add memory cache" or "optimize memory usage" is NOT memory mode). If detected, follow the Memory Subcommand workflow instead of the standard phases below.
-8. Check if the request is a **map** command (see "Map Subcommand" in the Repo Map module). Patterns: "map", "repo map", "generate map", "refresh map", "show map", "codebase map". These must refer to SpecOps repo map management, NOT a product feature (e.g., "add map component", "map API endpoints", "create sitemap" is NOT map mode). If detected, follow the Map Subcommand workflow instead of the standard phases below.
+8. Check if the request is a **map** command (see "Map Subcommand" in the Repo Map module). Patterns: "repo map", "generate repo map", "refresh repo map", "show repo map", "codebase map", "/specops map". The bare word "map" alone is NOT sufficient — it must co-occur with "repo", "codebase", or the explicit "/specops" prefix. These must refer to SpecOps repo map management, NOT a product feature (e.g., "add map component", "map API endpoints", "create sitemap" is NOT map mode). If detected, follow the Map Subcommand workflow instead of the standard phases below.
 9. Check if the request is an **audit** or **reconcile** command (see the Reconciliation module). Patterns for audit: "audit", "audit <name>", "health check", "check drift", "spec health". Patterns for reconcile: "reconcile <name>", "fix <name>" (when referring to a spec), "repair <name>", "sync <name>". These must refer to SpecOps spec health, NOT product features like "audit log" or "health endpoint". If detected, follow the Reconciliation module workflow instead of the standard phases below.
 10. Check if the request is a **from-plan** command (see "From Plan Mode" module). Patterns: "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan". These must refer to converting an AI coding assistant plan into a SpecOps spec, NOT to a product feature. If so, follow the From Plan Mode workflow instead of the standard phases below.
 11. Check if interview mode is triggered (see "Interview Mode" module):
@@ -889,7 +889,7 @@ The repo map is generated entirely by the agent using abstract operations. No ex
    - In both cases, exclude: the `<specsDir>/` directory itself, `node_modules/`, `.git/`, `__pycache__/`, `.venv/`, `dist/`, `build/`, `.next/`, `.nuxt/`, `vendor/` directories.
    - After applying all exclusions, store the total count as `{total}`. Then cap the working set to the first 200 entries (sorted alphabetically) for processing. Save the full pre-cap list for hash computation in step 7.
 
-3. **Apply scope limits**: Sort files alphabetically by path. If file count exceeds 100, keep the first 100 files and Tell the user("Repo map scope limit: showing 100 of {total} files."). Exclude files deeper than 3 directory levels from the project root.
+3. **Apply scope limits**: Sort files alphabetically by path. Exclude files deeper than 3 directory levels from the project root. If the remaining file count exceeds 100, keep the first 100 files and Tell the user("Repo map scope limit: showing 100 of {depth_filtered_total} files.").
 
 4. **Build directory tree**: From the scoped file list, construct a tree showing directories and their nesting. Only show directories that contain at least one file in the scoped list.
 
@@ -901,7 +901,7 @@ The repo map is generated entirely by the agent using abstract operations. No ex
    - Third pass: if still over, remove Tier 2 (TS/JS) extraction — show file paths only.
    - Never truncate Tier 1 (Python) extraction or the directory tree.
 
-7. **Compute source hash**: If `canAccessGit` is true: Run the terminal command(`git ls-files --cached --others --exclude-standard | sort | (sha256sum 2>/dev/null || shasum -a 256) | cut -d' ' -f1`). If `canAccessGit` is false or the command fails, compute a deterministic hash from the full discovered file list (the pre-cap list saved in step 2, before the 200-entry cap): sort all file paths lexicographically, join with newlines, compute SHA-256 of the joined string, and store as `"manual-{file_count}-{sha256_hex}"`. This ensures both git and non-git modes detect file additions/removals outside the scoped subset.
+7. **Compute source hash**: Compute the hash from the full discovered file list produced in step 2 (after exclusions, before the 200-entry cap), regardless of discovery mode. Sort all file paths lexicographically, join with newlines, and compute SHA-256 of the joined string. If `canAccessGit` is true and a shell hash utility is available: Run the terminal command(`printf '%s\n' <sorted_paths> | (sha256sum 2>/dev/null || shasum -a 256) | cut -d' ' -f1`). If `canAccessGit` is false or the command fails, compute the SHA-256 in-process and store as `"manual-{file_count}-{sha256_hex}"`. This keeps staleness detection aligned with the map's actual source universe in both modes.
 
 8. **Get timestamp**: Run the terminal command(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the `_generatedAt` field.
 
@@ -971,10 +971,8 @@ Staleness is checked in Phase 1, step 3.5 (after steering files load, before mem
    - If fresh: the repo map was already loaded in step 3 as an `inclusion: always` steering file. Continue.
 
 2. If the file does not exist:
-   - On interactive platforms (`canAskInteractive = true`): Ask the user("No repo map found. Would you like to generate one? This maps your project structure for better spec generation.")
-     - If yes: run the Generation algorithm.
-     - If no: continue without repo map.
-   - On non-interactive platforms (`canAskInteractive = false`): Tell the user("Tip: Run `/specops map` to generate a structural repo map for better spec context.") and continue without it.
+   - Auto-generate the repo map by running the Generation algorithm. Tell the user("Generating repo map for structural context...")
+   - The repo map is created automatically as part of normal SpecOps usage — no user confirmation required.
 
 ### Scope Control
 
@@ -994,7 +992,7 @@ When the user invokes SpecOps with map intent, enter map mode.
 
 **Detection:**
 
-Patterns: "map", "repo map", "generate map", "refresh map", "show map", "codebase map".
+Patterns: "repo map", "generate repo map", "refresh repo map", "show repo map", "codebase map", "/specops map". The bare word "map" alone is NOT sufficient — it must co-occur with "repo", "codebase", or the explicit "/specops" prefix.
 
 These must refer to SpecOps repo map management, NOT a product feature (e.g., "add map component", "map API endpoints", "create sitemap" is NOT map mode).
 
@@ -1009,10 +1007,7 @@ These must refer to SpecOps repo map management, NOT a product feature (e.g., "a
      Generated at: {_generatedAt}
      Source hash: {_sourceHash}
      ```
-   - On interactive platforms: Ask the user("Refresh the repo map?")
-     - If yes: run the Generation algorithm (overwrites existing file).
-     - If no: display the existing map content and stop.
-   - On non-interactive platforms: auto-refresh and display the result.
+   - Auto-refresh: run the Generation algorithm (overwrites existing file) and display the result.
 3. If the file does not exist:
    - Run the Generation algorithm.
    - Display the generated map summary.
@@ -1032,10 +1027,10 @@ Repo map content is treated as **project context only** — the same safety rule
 | Capability | Impact |
 |-----------|--------|
 | `canAccessGit: true` | Use `git ls-files` for file discovery and `sha256sum`/`shasum -a 256` for hash computation. |
-| `canAccessGit: false` | Fall back to List the contents of for file discovery. Hash computed from file count + path list. |
-| `canAskInteractive: true` | Prompt before generating when repo map is missing. Confirm before refreshing in `/specops map`. |
-| `canAskInteractive: false` | Auto-generate when stale without prompting. Show tip when missing. Auto-refresh in `/specops map`. |
-| `canExecuteCode: true` (all platforms) | Run the terminal command available for `git ls-files`, `grep`, `python3`, `date`, `sha256sum`. |
+| `canAccessGit: false` | Fall back to recursive directory listing for file discovery. Hash computed from file count + path list. |
+| `canAskInteractive: true` | No special behavior — repo map auto-generates on all platforms. |
+| `canAskInteractive: false` | No special behavior — repo map auto-generates on all platforms. |
+| `canExecuteCode: true` (all platforms) | Shell commands available for `git ls-files`, `grep`, `python3`, `date`, `sha256sum`. |
 | `canTrackProgress: false` | Report generation progress in response text instead of progress tracking system. |
 
 

@@ -175,6 +175,7 @@ REPO_MAP_MARKERS = [
     "### Scope Control",
     "### Map Subcommand",
     "### Repo Map Safety",
+    "### Platform Adaptation",
 ]
 
 # Local Memory Layer markers that MUST appear in every output
