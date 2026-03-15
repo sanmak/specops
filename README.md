@@ -80,20 +80,22 @@ For teams, SpecOps adds a structured review cycle between spec creation and impl
 
 ## How SpecOps Compares
 
-SpecOps and [Spec Kit](https://github.com/github/spec-kit) share the same core philosophy: specs before code. We think Spec Kit is excellent — and we're building on the same principles with a different focus.
+SpecOps brings multi-platform support, domain-specific templates, team review workflows, and persistent project memory to spec-driven development. Built with 6 features dogfooded using SpecOps itself — every spec is [public in `.specops/`](.specops/).
 
-**Choose Spec Kit** if you want the broadest agent support (18+) and are exploring SDD as an individual or small team.
+| Capability | SpecOps | Kiro (Amazon) | GitHub Spec Kit |
+|---|---|---|---|
+| **Platform support** | 4 platforms | Single IDE | 18+ agents |
+| **EARS notation** | Yes | Yes | No |
+| **Steering files** | Yes (3 modes) | Yes (4 modes) | No |
+| **Local memory** | Yes (git-tracked) | No | No |
+| **Drift detection** | Yes (5 checks) | No | No |
+| **Vertical templates** | 7 project types | None | Generic |
+| **Team review** | Built-in | No | No |
+| **Agent hooks** | No | Yes | No |
+| **Security hardening** | Yes | No | No |
+| **Open source** | MIT | Proprietary | MIT |
 
-**Choose SpecOps** if you're a team shipping to production and need specs that match your project type, structured review before implementation, and security-hardened spec processing.
-
-| Capability | SpecOps | GitHub Spec Kit |
-|---|---|---|
-| **Supported platforms** | Claude Code, Cursor, OpenAI Codex, GitHub Copilot | 18+ agents |
-| **Installation** | Plugin marketplace or `curl \| bash`, no dependencies | Python 3.11+ and uv |
-| **Team review workflow** | Built-in (draft → review → revise → approve → gate) | Not available |
-| **Vertical-aware templates** | 7 project types (infra, data, library, builder, etc.) | Generic templates |
-| **Security hardening** | Prompt injection defense, schema validation, path containment | Not documented |
-| **Platform breadth** | 4 platforms | 18+ platforms |
+[Full comparison with Kiro, EPIC/Reload, and Spec Kit →](docs/COMPARISON.md)
 
 ### Plan Mode vs Spec Mode
 
