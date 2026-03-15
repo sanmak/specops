@@ -79,7 +79,7 @@ Create empty memory files so the directory structure is complete from day one. M
 
 #### Step 5: Next Steps
 
-NOTIFY_USER with:
+NOTIFY_USER with a message that reflects what actually happened in Steps 4.5 and 4.6. For each of "Steering files" and "Memory scaffold", use "created in" if all files were newly written in that step, "verified existing in" if all files already existed, or "set up in" if some files were created and some already existed. Example when all files are new:
 
 ```
 SpecOps initialized! Your config:
@@ -93,3 +93,5 @@ Edit product.md, tech.md, and structure.md to describe your project — the agen
 Next: Run `/specops <description>` to create your first spec.
 Example: /specops Add user authentication with OAuth
 ```
+
+Adjust each line to say "verified existing in" instead of "created in" if those files already existed before this run.
