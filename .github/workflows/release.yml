@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: version-bump
@@ -67,9 +68,14 @@ jobs:
             > CHECKSUMS.sha256
 
       - name: Commit and push
+        id: commit
         run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          BRANCH="release/v${VERSION}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          # -B force-creates the branch, resetting it if it already exists (safe for CI retries)
+          git checkout -B "$BRANCH"
           git add \
             skills/ \
             platforms/claude/SKILL.md \
@@ -82,6 +88,24 @@ jobs:
             platforms/copilot/platform.json \
             .claude-plugin/ \
             CHECKSUMS.sha256
-          git diff --cached --quiet && echo "No changes to commit" && exit 0
-          git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
-          git push origin main
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "chore: bump version to ${VERSION}"
+            git push origin "$BRANCH"
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create pull request
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          BRANCH="release/v${VERSION}"
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "chore: bump version to ${VERSION}" \
+            --body "Automated version bump to ${VERSION} triggered by release tag \`v${VERSION}\`."
