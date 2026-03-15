@@ -12,32 +12,48 @@
       "specs": ["ears-notation", "drift-detection"],
       "count": 2,
       "lesson": "Features split into interactive and non-interactive paths — read-only features work everywhere, destructive/interactive features require canAskInteractive"
+    },
+    {
+      "category": "step numbering",
+      "specs": ["drift-detection", "ast-based-repo-map"],
+      "count": 2,
+      "lesson": "Avoid renumbering Phase 1 steps when inserting new logic — use sub-step notation (e.g., step 3.5) to prevent breaking cross-module references"
     }
   ],
   "fileOverlaps": [
     {
       "file": "core/workflow.md",
-      "specs": ["ears-notation", "bugfix-regression-analysis", "steering-files", "drift-detection"],
-      "count": 4
+      "specs": ["ears-notation", "bugfix-regression-analysis", "steering-files", "drift-detection", "ast-based-repo-map"],
+      "count": 5
     },
     {
       "file": "generator/validate.py",
-      "specs": ["bugfix-regression-analysis", "steering-files", "drift-detection"],
-      "count": 3
+      "specs": ["bugfix-regression-analysis", "steering-files", "drift-detection", "ast-based-repo-map"],
+      "count": 4
     },
     {
       "file": "generator/generate.py",
-      "specs": ["steering-files", "drift-detection"],
-      "count": 2
+      "specs": ["steering-files", "drift-detection", "ast-based-repo-map"],
+      "count": 3
     },
     {
       "file": "tests/test_platform_consistency.py",
-      "specs": ["steering-files", "drift-detection"],
-      "count": 2
+      "specs": ["steering-files", "drift-detection", "ast-based-repo-map"],
+      "count": 3
     },
     {
       "file": "core/templates/bugfix.md",
       "specs": ["ears-notation", "bugfix-regression-analysis"],
+      "count": 2
+    },
+    {
+      "file": "core/steering.md",
+      "specs": ["steering-files", "ast-based-repo-map"],
+      "count": 2
+    },
+    {
+      "file": "docs/COMMANDS.md",
+      "specs": ["local-memory-layer", "ast-based-repo-map"],
       "count": 2
     }
   ]

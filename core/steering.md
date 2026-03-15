@@ -22,6 +22,11 @@ inclusion: always
 | `description` | Yes | string | Brief purpose description |
 | `inclusion` | Yes | enum | Loading mode: `always`, `fileMatch`, or `manual` |
 | `globs` | Only for `fileMatch` | array of strings | File patterns that trigger loading (e.g., `["*.sql", "migrations/**"]`) |
+| `_generated` | No | boolean | System-managed. Marks this as a machine-generated file (e.g., repo map). Do not edit manually. |
+| `_generatedAt` | No | ISO 8601 | System-managed. Timestamp of when the file was last generated. |
+| `_sourceHash` | No | string | System-managed. Hash for staleness comparison (used by the Repo Map module). |
+
+Fields prefixed with `_` are system-managed — they are set by the agent during generation and should not be manually edited. Files with `_generated: true` are shown as read-only in the `/specops steering` command table.
 
 The body content after the frontmatter is the project context itself — free-form markdown describing the relevant aspect of the project.
 
@@ -164,9 +169,10 @@ Steering Files (<specsDir>/steering/)
 | File | Name | Inclusion | Description |
 |------|------|-----------|-------------|
 | product.md | Product Context | always | What this project builds... |
+| repo-map.md | Repo Map | always (generated) | Machine-generated structural map |
 | tech.md | Technology Stack | always | Languages, frameworks... |
 
-{N} always-included steering file(s) loaded in every Phase 1 run. fileMatch files are loaded conditionally; manual files are never auto-loaded.
+{N} always-included steering file(s) loaded in every Phase 1 run. fileMatch files are loaded conditionally; manual files are never auto-loaded. Files marked "(generated)" are machine-managed — use `/specops map` to refresh them.
 ```
 
 - On interactive platforms (`canAskInteractive = true`), ASK_USER: "Would you like to add a new steering file, edit an existing one, or done?"

@@ -165,6 +165,19 @@ FROM_PLAN_MARKERS = [
     "Parse the plan",
 ]
 
+# Repo Map markers that MUST appear in every output
+REPO_MAP_MARKERS = [
+    "## Repo Map",
+    "### Repo Map Format",
+    "### Repo Map Generation",
+    "### Language Tier Extraction",
+    "### Staleness Detection",
+    "### Scope Control",
+    "### Map Subcommand",
+    "### Repo Map Safety",
+    "### Platform Adaptation",
+]
+
 # Local Memory Layer markers that MUST appear in every output
 MEMORY_MARKERS = [
     "## Local Memory Layer",
@@ -314,6 +327,9 @@ def validate_platform(platform, info):
 
     # Check memory layer present
     errors.extend(check_markers_present(platform, content, MEMORY_MARKERS, "memory"))
+
+    # Check repo map present
+    errors.extend(check_markers_present(platform, content, REPO_MAP_MARKERS, "repo-map"))
 
     # Platform-specific format validation
     if platform == "cursor":
@@ -532,7 +548,7 @@ def main():
     if len(generated) >= 2:
         platforms = list(generated.keys())
         consistency_errors = []
-        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS:
+        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS + REPO_MAP_MARKERS:
             present_in = [p for p in platforms if marker in generated[p]["content"]]
             if len(present_in) != len(platforms):
                 missing = set(platforms) - set(present_in)

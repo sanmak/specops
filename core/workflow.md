@@ -23,6 +23,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
    - If continuing an existing spec, READ_FILE the spec's `implementation.md` to recover session context (decision log, deviations, blockers, session log), then resume from the appropriate phase
    - If starting fresh, proceed normally
 3. **Load steering files**: If FILE_EXISTS(`<specsDir>/steering/`), load persistent project context from steering files following the Steering Files module. Always-included files are loaded now; fileMatch files are deferred until after affected components and dependencies are identified (step 9). If `<specsDir>/steering/` does not exist, NOTIFY_USER: "Tip: Create steering files in `<specsDir>/steering/` (product.md, tech.md, structure.md) to give the agent persistent project context. Run `/specops steering` to set them up, or see the Steering Files module for templates."
+3.5. **Check repo map**: After steering files are loaded, check for a repo map following the Repo Map module. If FILE_EXISTS(`<specsDir>/steering/repo-map.md`), check staleness (time-based and hash-based). If stale, auto-refresh. If the file does not exist, auto-generate it by running the Repo Map Generation algorithm. The repo map is a machine-generated steering file with `inclusion: always` — if it exists and is fresh, it was already loaded in step 3.
 4. **Load memory**: If FILE_EXISTS(`<specsDir>/memory/`), load the local memory layer following the Local Memory Layer module. Decisions, project context, and patterns from prior specs are loaded into the agent's context. If `<specsDir>/memory/` does not exist, NOTIFY_USER: "Tip: Run `/specops init` to set up SpecOps with memory, or `/specops memory seed` to populate memory from existing completed specs."
 5. **Pre-flight check**: Verify SpecOps skill availability for team collaboration:
    - READ_FILE `.gitignore` if it exists
@@ -184,17 +185,18 @@ When invoked:
 5. Check if the request is a **view** or **list** command (see "Spec Viewing" module). If so, follow the view/list workflow instead of the standard phases below.
 6. Check if the request is a **steering** command (see "Steering Command" in the Steering Files module). Patterns: "steering", "create steering", "setup steering", "manage steering", "steering files", "add steering". These must refer to managing SpecOps steering files, NOT to a product feature. If so, follow the Steering Command workflow instead of the standard phases below.
 7. Check if the request is a **memory** command (see "Memory Subcommand" in the Local Memory Layer module). Patterns: "memory", "show memory", "view memory", "memory seed", "seed memory". These must refer to SpecOps memory management, NOT a product feature (e.g., "add memory cache" or "optimize memory usage" is NOT memory mode). If detected, follow the Memory Subcommand workflow instead of the standard phases below.
-8. Check if the request is an **audit** or **reconcile** command (see the Reconciliation module). Patterns for audit: "audit", "audit <name>", "health check", "check drift", "spec health". Patterns for reconcile: "reconcile <name>", "fix <name>" (when referring to a spec), "repair <name>", "sync <name>". These must refer to SpecOps spec health, NOT product features like "audit log" or "health endpoint". If detected, follow the Reconciliation module workflow instead of the standard phases below.
-9. Check if the request is a **from-plan** command (see "From Plan Mode" module). Patterns: "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan". These must refer to converting an AI coding assistant plan into a SpecOps spec, NOT to a product feature. If so, follow the From Plan Mode workflow instead of the standard phases below.
-10. Check if interview mode is triggered (see "Interview Mode" module):
+8. Check if the request is a **map** command (see "Map Subcommand" in the Repo Map module). Patterns: "repo map", "generate repo map", "refresh repo map", "show repo map", "codebase map", "/specops map". The bare word "map" alone is NOT sufficient — it must co-occur with "repo", "codebase", or the explicit "/specops" prefix. These must refer to SpecOps repo map management, NOT a product feature (e.g., "add map component", "map API endpoints", "create sitemap" is NOT map mode). If detected, follow the Map Subcommand workflow instead of the standard phases below.
+9. Check if the request is an **audit** or **reconcile** command (see the Reconciliation module). Patterns for audit: "audit", "audit <name>", "health check", "check drift", "spec health". Patterns for reconcile: "reconcile <name>", "fix <name>" (when referring to a spec), "repair <name>", "sync <name>". These must refer to SpecOps spec health, NOT product features like "audit log" or "health endpoint". If detected, follow the Reconciliation module workflow instead of the standard phases below.
+10. Check if the request is a **from-plan** command (see "From Plan Mode" module). Patterns: "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan". These must refer to converting an AI coding assistant plan into a SpecOps spec, NOT to a product feature. If so, follow the From Plan Mode workflow instead of the standard phases below.
+11. Check if interview mode is triggered (see "Interview Mode" module):
    - Explicit: request contains "interview" keyword
    - Auto (interactive platforms only): request is vague (≤5 words, no technical keywords, no action verb)
    - If triggered: follow the Interview Mode workflow, then continue with the enriched context
-11. Confirm the request type (feature/bugfix/implement/other)
-12. Show the configuration you'll use (including detected vertical)
-13. Begin the workflow immediately (high autonomy)
-14. Provide progress updates as you work
-15. Summarize completion clearly
+12. Confirm the request type (feature/bugfix/implement/other)
+13. Show the configuration you'll use (including detected vertical)
+14. Begin the workflow immediately (high autonomy)
+15. Provide progress updates as you work
+16. Summarize completion clearly
 
 ## Version Display
 

@@ -337,6 +337,7 @@ def build_common_context(core, platform_config):
         "config_handling": core["config-handling"],
         "steering": core["steering"],
         "memory": core["memory"],
+        "repo_map": core["repo-map"],
         "review_workflow": core["review-workflow"],
         "view": core["view"],
         "reconciliation": core["reconciliation"],

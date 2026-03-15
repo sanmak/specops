@@ -6,7 +6,7 @@ Follow these steps precisely. Do NOT add a Co-Authored-By line to commits.
 
 ### Argument Parsing
 
-**Compact-state recovery pre-check**: Before detecting mode, check if `.claude/.pr-fix-compact-state.json` exists. If it does, read it and note the saved `mode`, `pr_number` (or `pr_list`), and `current_pr_index`. After detecting the current invocation's mode and PR target below, if they match the saved state, restore all state variables from the file and skip any already-completed steps. Delete `.claude/.pr-fix-compact-state.json` at the end of a successful run (see Step 9 / Step A7).
+**Compact-state recovery pre-check**: After detecting mode and PR target below, check for a matching compact state file. For fix mode, check `.claude/.pr-fix-compact-state-<PR_NUMBER>.json`. For all mode, check `.claude/.pr-fix-compact-state-all.json`. If the file exists and its saved `mode` and `pr_number` (or `pr_list`) match the current invocation, restore all state variables from the file and skip any already-completed steps. The compact state file is deleted at the end of a successful run (see Step 9 / Step A6).
 
 Parse `$ARGUMENTS` for one of three modes:
 
@@ -34,7 +34,7 @@ For fix mode, extract the PR number from `$ARGUMENTS`. If empty, try auto-detect
 1. **GitHub CLI available**: Run `gh --version`. If unavailable, tell the user "GitHub CLI (gh) is required. Install with: brew install gh" and stop.
 2. **PR exists and is open**: Run `gh pr view <PR_NUMBER> --json number,state,headRefName,baseRefName,title`. If the PR does not exist or is not open, report the error and stop. Save `headRefName` as `PR_BRANCH` and `title` as `PR_TITLE`.
 3. **Extract owner/repo**: Run `gh repo view --json owner,name -q '.owner.login + "/" + .name'`. Save as `OWNER_REPO`.
-4. **Clean stale worktrees**: Run `git worktree list`. For any entries with paths containing `.claude/worktrees/pr-fix-`, remove them with `git worktree remove --force <path>`. This handles leftovers from interrupted prior runs.
+4. **Clean stale worktree for this PR**: Run `git worktree list`. If an entry exists with path `.claude/worktrees/pr-fix-<PR_NUMBER>`, remove it with `git worktree remove --force <path>`. Only remove the worktree matching the current PR number — do NOT remove other `pr-fix-*` worktrees, as they may belong to concurrent runs.
 
 ### Step 2: Create worktree
 
@@ -63,7 +63,7 @@ If no comments are found, report "No review comments on PR #<PR_NUMBER>" and ski
 
 After fetching raw comment payloads, estimate context window usage. If the conversation is ≥60% full:
 
-1. Write `.claude/.pr-fix-compact-state.json`:
+1. Write `.claude/.pr-fix-compact-state-<PR_NUMBER>.json`:
    ```json
    {
      "mode": "fix",
@@ -75,8 +75,8 @@ After fetching raw comment payloads, estimate context window usage. If the conve
      "raw_comments": <full comments array from Step 3>
    }
    ```
-2. Run `/compact` with the hint: `"Compacting mid-execution of /pr-fix fix mode. PR #<PR_NUMBER> (<PR_TITLE>), worktree at <WORKTREE_DIR>. State saved to .claude/.pr-fix-compact-state.json. Resuming at Step 4 (group and fix comments)."`
-3. After compaction, read `.claude/.pr-fix-compact-state.json` to restore `PR_NUMBER`, `PR_BRANCH`, `PR_TITLE`, `OWNER_REPO`, `WORKTREE_DIR`, and the raw comments array, then continue to Step 4.
+2. Run `/compact` with the hint: `"Compacting mid-execution of /pr-fix fix mode. PR #<PR_NUMBER> (<PR_TITLE>), worktree at <WORKTREE_DIR>. State saved to .claude/.pr-fix-compact-state-<PR_NUMBER>.json. Resuming at Step 4 (group and fix comments)."`
+3. After compaction, read `.claude/.pr-fix-compact-state-<PR_NUMBER>.json` to restore `PR_NUMBER`, `PR_BRANCH`, `PR_TITLE`, `OWNER_REPO`, `WORKTREE_DIR`, and the raw comments array, then continue to Step 4.
 
 If context usage is below 60%, skip this checkpoint and proceed directly to Step 4.
 
@@ -245,7 +245,7 @@ git worktree remove <WORKTREE_DIR> --force
 
 If the `.claude/worktrees/` directory is empty after cleanup, remove it: `rmdir .claude/worktrees/ 2>/dev/null`.
 
-Delete the compact state file if it exists: `rm -f .claude/.pr-fix-compact-state.json`.
+Delete the compact state file if it exists: `rm -f .claude/.pr-fix-compact-state-<PR_NUMBER>.json`.
 
 ### Step 10: Confirm
 
@@ -364,14 +364,14 @@ At each designated checkpoint (FC1, AC1, AC2), estimate context window usage. If
 
 ### How to compact
 
-1. **Save state**: Write `.claude/.pr-fix-compact-state.json` with all critical runtime variables for the current mode (PR number, branch, title, owner/repo, worktree path, issue groups or PR list, progress index, and any results accumulated so far).
+1. **Save state**: Write a mode-specific compact state file with all critical runtime variables. For fix mode, use `.claude/.pr-fix-compact-state-<PR_NUMBER>.json`. For all mode, use `.claude/.pr-fix-compact-state-all.json`. This ensures concurrent fix-mode runs for different PRs do not clobber each other's state.
 2. **Compact**: Run `/compact` with a descriptive hint summarizing the current state (mode, PR number, title, worktree path, what step resumes next). This gives the compaction algorithm enough context to produce a useful summary.
-3. **Restore**: Immediately after compaction, read `.claude/.pr-fix-compact-state.json` and restore all saved variables into the current session context.
+3. **Restore**: Immediately after compaction, read the mode-specific compact state file and restore all saved variables into the current session context.
 4. **Continue**: Proceed from the step immediately after the checkpoint — do not re-execute any already-completed steps.
 
 ### State file lifecycle
 
-- **Path**: `.claude/.pr-fix-compact-state.json`
+- **Path**: `.claude/.pr-fix-compact-state-<PR_NUMBER>.json` (fix mode) or `.claude/.pr-fix-compact-state-all.json` (all mode)
 - **Created**: Written at each compact checkpoint when usage is ≥60%
 - **Updated**: Overwritten at each subsequent checkpoint with latest progress
 - **Deleted**: Removed at successful run completion (Step 9 for Fix mode, Step A7 for All mode)
@@ -396,7 +396,7 @@ Parse everything after `all` in `$ARGUMENTS` (after global `--minor` flag has be
 
 1. **GitHub CLI available**: Run `gh --version`. If unavailable, tell the user "GitHub CLI (gh) is required. Install with: brew install gh" and stop.
 2. **Extract owner/repo**: Run `gh repo view --json owner,name -q '.owner.login + "/" + .name'`. Save as `OWNER_REPO`.
-3. **Clean stale worktrees**: Run `git worktree list`. For any entries with paths containing `.claude/worktrees/pr-fix-`, remove them with `git worktree remove --force <path>`.
+3. **Clean stale worktrees for discovered PRs**: Run `git worktree list`. For each PR in `PR_LIST`, if an entry exists with path `.claude/worktrees/pr-fix-<NUMBER>`, remove it with `git worktree remove --force <path>`. Only remove worktrees matching PRs in the current `PR_LIST` — do NOT remove other `pr-fix-*` worktrees, as they may belong to concurrent runs.
 
 ### Step A2: Discover PRs with review comments
 
@@ -462,7 +462,7 @@ If `--dry-run` is active, display this dashboard and stop with message: "Dry run
 
 After displaying the discovery dashboard, estimate context window usage. If the conversation is ≥60% full:
 
-1. Write `.claude/.pr-fix-compact-state.json`:
+1. Write `.claude/.pr-fix-compact-state-all.json`:
    ```json
    {
      "mode": "all",
@@ -472,8 +472,8 @@ After displaying the discovery dashboard, estimate context window usage. If the 
      "results": []
    }
    ```
-2. Run `/compact` with the hint: `"Compacting mid-execution of /pr-fix all mode. Discovered <N> PRs: [PR numbers and titles]. State saved to .claude/.pr-fix-compact-state.json. Resuming at Step A5 (process each PR)."`
-3. After compaction, read `.claude/.pr-fix-compact-state.json` to restore `OWNER_REPO`, `PR_LIST`, and `results`, then continue to Step A5.
+2. Run `/compact` with the hint: `"Compacting mid-execution of /pr-fix all mode. Discovered <N> PRs: [PR numbers and titles]. State saved to .claude/.pr-fix-compact-state-all.json. Resuming at Step A5 (process each PR)."`
+3. After compaction, read `.claude/.pr-fix-compact-state-all.json` to restore `OWNER_REPO`, `PR_LIST`, and `results`, then continue to Step A5.
 
 If context usage is below 60%, skip this checkpoint and proceed directly to Step A5.
 
@@ -561,7 +561,7 @@ Save the result for this PR:
 
 After recording the result for this PR and before beginning the next PR, estimate context window usage. If the conversation is ≥60% full AND there are more PRs remaining:
 
-1. Update `.claude/.pr-fix-compact-state.json`:
+1. Update `.claude/.pr-fix-compact-state-all.json`:
    ```json
    {
      "mode": "all",
@@ -571,8 +571,8 @@ After recording the result for this PR and before beginning the next PR, estimat
      "results": <array of all results recorded so far>
    }
    ```
-2. Run `/compact` with the hint: `"Compacting mid-execution of /pr-fix all mode. Completed PR #<N> (<title>). <K> of <total> PRs processed so far. State saved to .claude/.pr-fix-compact-state.json. Resuming with next PR."`
-3. After compaction, read `.claude/.pr-fix-compact-state.json` to restore `OWNER_REPO`, `PR_LIST`, `current_pr_index`, and `results`, then continue with the next PR at index `current_pr_index`.
+2. Run `/compact` with the hint: `"Compacting mid-execution of /pr-fix all mode. Completed PR #<N> (<title>). <K> of <total> PRs processed so far. State saved to .claude/.pr-fix-compact-state-all.json. Resuming with next PR."`
+3. After compaction, read `.claude/.pr-fix-compact-state-all.json` to restore `OWNER_REPO`, `PR_LIST`, `current_pr_index`, and `results`, then continue with the next PR at index `current_pr_index`.
 
 If context usage is below 60% or no more PRs remain, skip this checkpoint and continue the loop normally.
 
@@ -585,7 +585,7 @@ git worktree remove .claude/worktrees/pr-fix-<NUMBER> --force
 
 If the `.claude/worktrees/` directory is empty after cleanup, remove it: `rmdir .claude/worktrees/ 2>/dev/null`.
 
-Delete the compact state file if it exists: `rm -f .claude/.pr-fix-compact-state.json`.
+Delete the compact state file if it exists: `rm -f .claude/.pr-fix-compact-state-all.json`.
 
 ### Step A7: Summary dashboard
 
