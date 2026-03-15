@@ -882,9 +882,10 @@ The repo map is generated entirely by the agent using abstract operations. No ex
 1. **Determine specsDir**: If FILE_EXISTS(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
 
 2. **Discover project files**:
-   - If `canAccessGit` is true: Run the terminal command(`git ls-files --cached --others --exclude-standard`) to get tracked and untracked-but-not-ignored files. Store the total count. Then cap the working set to the first 200 entries (sorted alphabetically) for processing. This respects `.gitignore` natively.
+   - If `canAccessGit` is true: Run the terminal command(`git ls-files --cached --others --exclude-standard`) to get tracked and untracked-but-not-ignored files. This respects `.gitignore` natively.
    - If `canAccessGit` is false: List the contents of(`.`) recursively up to depth 3. Then, if FILE_EXISTS(`.gitignore`), Read the file at(`.gitignore`) and manually exclude matching patterns.
    - In both cases, exclude: the `<specsDir>/` directory itself, `node_modules/`, `.git/`, `__pycache__/`, `.venv/`, `dist/`, `build/`, `.next/`, `.nuxt/`, `vendor/` directories.
+   - After applying all exclusions, store the total count as `{total}`. Then cap the working set to the first 200 entries (sorted alphabetically) for processing. Save the full pre-cap list for hash computation in step 7.
 
 3. **Apply scope limits**: Sort files alphabetically by path. If file count exceeds 100, keep the first 100 files and Tell the user("Repo map scope limit: showing 100 of {total} files."). Exclude files deeper than 3 directory levels from the project root.
 
@@ -898,7 +899,7 @@ The repo map is generated entirely by the agent using abstract operations. No ex
    - Third pass: if still over, remove Tier 2 (TS/JS) extraction — show file paths only.
    - Never truncate Tier 1 (Python) extraction or the directory tree.
 
-7. **Compute source hash**: If `canAccessGit` is true: Run the terminal command(`git ls-files --cached --others --exclude-standard | sort | (sha256sum 2>/dev/null || shasum -a 256) | cut -d' ' -f1`). If `canAccessGit` is false or the command fails, compute a deterministic hash from the scoped file list: sort all file paths lexicographically, join with newlines, compute SHA-256 of the joined string, and store as `"manual-{file_count}-{sha256_hex}"`.
+7. **Compute source hash**: If `canAccessGit` is true: Run the terminal command(`git ls-files --cached --others --exclude-standard | sort | (sha256sum 2>/dev/null || shasum -a 256) | cut -d' ' -f1`). If `canAccessGit` is false or the command fails, compute a deterministic hash from the full discovered file list (the pre-cap list saved in step 2, before the 200-entry cap): sort all file paths lexicographically, join with newlines, compute SHA-256 of the joined string, and store as `"manual-{file_count}-{sha256_hex}"`. This ensures both git and non-git modes detect file additions/removals outside the scoped subset.
 
 8. **Get timestamp**: Run the terminal command(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the `_generatedAt` field.
 
@@ -921,10 +922,10 @@ Files are classified into 4 tiers based on file extension. Higher tiers receive 
 
 - **Tier 1** (Python): See Tier 1 extraction command below — uses `ast.parse()` for reliable structural extraction.
 - **Tier 2** (TS/JS): Run the terminal command(`grep -nE "^[[:space:]]*export " -- "<path>" | head -10`)
-- **Tier 3** (Go/Rust/Java): Run the terminal command(`grep -nE "^[[:space:]]*(func |pub fn |fn |public class |public interface )" -- "<path>" | head -10`)
+- **Tier 3** (Go/Rust/Java): Run the terminal command(`grep -nE "^[[:space:]]*(func |pub fn |public class |public interface )" -- "<path>" | head -10`)
 - **Tier 4**: No extraction — file path only.
 
-Note: Tier 2/3 patterns allow optional leading whitespace to capture indented declarations (e.g., exports inside modules, methods inside `impl` blocks). These are best-effort heuristics — some declaration styles may not be captured.
+Note: Tier 2/3 patterns allow optional leading whitespace to capture indented declarations (e.g., exports inside modules, methods inside `impl` blocks). Rust uses `pub fn` only (not bare `fn`) to avoid capturing private helper functions. These are best-effort heuristics — some declaration styles may not be captured.
 
 **Extraction rules:**
 - Per-file extraction is capped at 10 declarations (via `head -10`) to prevent any single large file from dominating the token budget.
