@@ -46,5 +46,13 @@
     "version": 1,
     "author": "sanmak",
     "updated": "2026-03-08T06:46:57Z"
+  },
+  {
+    "id": "workflow-enforcement-gates",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-15T10:35:55Z"
   }
 ]

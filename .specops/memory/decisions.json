@@ -70,6 +70,16 @@
       "task": "Task 7",
       "date": "2026-03-14",
       "completedAt": "2026-03-14T18:36:14Z"
+    },
+    {
+      "specId": "workflow-enforcement-gates",
+      "specType": "feature",
+      "number": 1,
+      "decision": "Changed validation marker from lowercase 'implementation gate' to title-case 'Implementation gate'",
+      "rationale": "Phase 3 restructure changed 'Check the implementation gate:' to '**Implementation gates**', breaking the lowercase marker. The review module's '### Implementation Gate' still contains the title-case form.",
+      "task": "Task 6",
+      "date": "2026-03-15",
+      "completedAt": "2026-03-15T10:35:03Z"
     }
   ]
 }
