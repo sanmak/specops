@@ -30,6 +30,9 @@ for tasks_file in "$SPECS_DIR"/*/tasks.md; do
     if echo "$line" | grep -qE '^### Task [0-9]'; then
       in_completed_task=false
       task_name="$line"
+    elif echo "$line" | grep -qE '^### '; then
+      # Any other h3 section also ends the current task context
+      in_completed_task=false
     fi
 
     # Detect status line

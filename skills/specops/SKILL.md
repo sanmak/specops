@@ -2079,7 +2079,7 @@ Create empty memory files so the directory structure is complete from day one. M
 
 #### Step 5: Next Steps
 
-Display a message to the user with a message that reflects what actually happened in Steps 4.5 and 4.6. For each of "Steering files" and "Memory scaffold", use "created in" if the files were newly written in that step, or "verified existing in" if the files already existed. Example when all files are new:
+Display a message to the user with a message that reflects what actually happened in Steps 4.5 and 4.6. For each of "Steering files" and "Memory scaffold", use "created in" if all files were newly written in that step, "verified existing in" if all files already existed, or "set up in" if some files were created and some already existed. Example when all files are new:
 
 ```
 SpecOps initialized! Your config:
