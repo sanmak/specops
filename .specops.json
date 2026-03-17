@@ -8,7 +8,8 @@
       "Never edit generated platform output files directly",
       "All JSON schema objects must use additionalProperties: false"
     ],
-    "reviewRequired": false
+    "reviewRequired": false,
+    "taskTracking": "github"
   },
   "implementation": {
     "autoCommit": false,

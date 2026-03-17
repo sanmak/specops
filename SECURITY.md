@@ -4,6 +4,7 @@
 
 | Version | Supported |
 |---------|-----------|
+| 1.3.x   | Yes       |
 | 1.2.x   | Yes       |
 | 1.1.x   | Yes       |
 | 1.0.x   | Yes       |
@@ -70,6 +71,47 @@ SpecOps operates within the following trust boundaries:
 3. **Generated specs may contain sensitive architectural details**: Design documents (`design.md`) may describe security-relevant architecture. Organizations should review spec files before sharing broadly.
 
 4. **The agent respects Claude Code's permission model**: All file operations, git commands, and external actions are subject to Claude Code's built-in permission system. SpecOps does not bypass these controls.
+
+5. **Remote installation uses checksum verification**: When installing via `curl | bash` (the remote installer), downloaded files are verified against SHA-256 checksums published in `CHECKSUMS.sha256` before being placed on disk. This ensures file integrity in transit. The checksums file is fetched from the same version ref as the installed files.
+
+### Install Trust Chain
+
+The remote installer (`scripts/remote-install.sh`) uses a layered trust model:
+
+1. **Transport security**: All downloads use HTTPS via `raw.githubusercontent.com`, providing encryption and server authentication
+2. **Version pinning**: The `--version` flag pins downloads to a specific git ref (e.g., `v1.3.0`), preventing silent updates
+3. **Checksum verification**: Each downloaded file's SHA-256 hash is compared against the published `CHECKSUMS.sha256` in the same version ref
+4. **Fail-fast**: If any checksum fails, the file is removed and installation aborts
+
+**Residual risks**: If the GitHub repository itself is compromised, both files and checksums could be altered. For maximum assurance, clone the repository and verify files manually. GPG signing of releases is planned for a future version.
+
+### Manual Verification
+
+After installation (or for independent verification), check file integrity against published checksums:
+
+```bash
+# Verify all critical files (from a cloned repo)
+shasum -a 256 -c CHECKSUMS.sha256
+
+# Verify a single installed file
+shasum -a 256 ~/.claude/skills/specops/SKILL.md
+# Compare output against the hash in CHECKSUMS.sha256 for platforms/claude/SKILL.md
+```
+
+### Skipping Verification
+
+The `--no-verify` flag disables checksum verification:
+
+```bash
+curl -fsSL .../remote-install.sh | bash -s -- --platform claude --no-verify
+```
+
+Use `--no-verify` only when:
+- Installing from a custom fork or branch where CHECKSUMS.sha256 does not exist
+- Testing development builds
+- Operating in an air-gapped environment with a local mirror
+
+**Never use `--no-verify` for production installations from the official repository.**
 
 ## Security Best Practices for Users
 

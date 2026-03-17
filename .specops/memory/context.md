@@ -19,3 +19,6 @@
 
 ### ast-based-repo-map (feature) — 2026-03-14
 7 tasks completed, 0 deviations from design, 0 blockers. New core/repo-map.md module with 8 H3 sections: generation algorithm (agent-driven, 4-tier language extraction), staleness detection (time + hash), scope control (100 files, depth 3, ~3000 tokens), /specops map subcommand, and safety rules. Generator pipeline wired for all 4 platforms with 9 REPO_MAP_MARKERS. Gap 31 enforced: markers added to both per-platform and cross-platform validator checks. All 7 tests pass.
+
+### install-integrity-verification (feature) — 2026-03-17
+5 tasks completed, 0 deviations from design, 0 blockers. Added SHA-256 checksum verification to `remote-install.sh` addressing Agent Trust Hub HIGH-priority finding. Three new functions: `detect_hash_cmd()`, `fetch_checksums()`, `verify_file()`. `--no-verify` flag for development use. Security documentation updated: SECURITY.md (install trust chain, manual verification, residual risks), SBOM.md (automatic verification), SECURITY-AUDIT.md (Agent Trust Hub findings). ShellCheck clean, all 7 tests pass.

@@ -18,6 +18,12 @@
       "specs": ["drift-detection", "ast-based-repo-map"],
       "count": 2,
       "lesson": "Avoid renumbering Phase 1 steps when inserting new logic — use sub-step notation (e.g., step 3.5) to prevent breaking cross-module references"
+    },
+    {
+      "category": "shell safety",
+      "specs": ["install-integrity-verification"],
+      "count": 1,
+      "lesson": "grep returns exit code 1 when no match found — guard with || true under set -e pipefail to prevent unexpected script abort"
     }
   ],
   "fileOverlaps": [

@@ -21,6 +21,7 @@ PLATFORM=""
 SCOPE=""
 CONFIG=""
 FORCE=false
+NO_VERIFY=false
 
 usage() {
   echo "Usage: remote-install.sh [OPTIONS]"
@@ -30,6 +31,7 @@ usage() {
   echo "  --scope <scope>     Claude Code only: user or project (default: user)"
   echo "  --version <ref>     Git ref to install from (default: main)"
   echo "  --config <template> Create .specops.json: minimal, standard, full"
+  echo "  --no-verify         Skip checksum verification (not recommended)"
   echo "  --force             Overwrite existing files without prompting"
   echo "  --help              Show this help message"
   echo ""
@@ -48,6 +50,7 @@ while [[ $# -gt 0 ]]; do
     --scope)    [[ $# -ge 2 ]] || { echo "Error: $1 requires a value"; usage; exit 1; }; SCOPE="$2"; shift 2 ;;
     --version)  [[ $# -ge 2 ]] || { echo "Error: $1 requires a value"; usage; exit 1; }; SPECOPS_VERSION="$2"; shift 2 ;;
     --config)   [[ $# -ge 2 ]] || { echo "Error: $1 requires a value"; usage; exit 1; }; CONFIG="$2"; shift 2 ;;
+    --no-verify) NO_VERIFY=true; shift ;;
     --force)    FORCE=true; shift ;;
     --help)     usage; exit 0 ;;
     *)          echo "Unknown argument: $1"; usage; exit 1 ;;
@@ -105,12 +108,124 @@ is_interactive() {
   [[ -t 0 ]]
 }
 
+# --- Checksum verification ---
+HASH_CMD=""
+CHECKSUMS_FILE=""
+
+detect_hash_cmd() {
+  if command -v sha256sum &>/dev/null; then
+    HASH_CMD="sha256sum"
+  elif command -v shasum &>/dev/null; then
+    HASH_CMD="shasum -a 256"
+  else
+    echo "Warning: Neither sha256sum nor shasum found. Cannot verify checksums."
+    return 1
+  fi
+}
+
+fetch_checksums() {
+  CHECKSUMS_FILE="$(mktemp)"
+  local checksums_url="${SPECOPS_BASE_URL}/CHECKSUMS.sha256"
+
+  if [[ "$DOWNLOAD_CMD" == "curl" ]]; then
+    if ! curl -fsSL "$checksums_url" -o "$CHECKSUMS_FILE" 2>/dev/null; then
+      rm -f "$CHECKSUMS_FILE"
+      CHECKSUMS_FILE=""
+      return 1
+    fi
+  else
+    if ! wget -qO "$CHECKSUMS_FILE" "$checksums_url" 2>/dev/null; then
+      rm -f "$CHECKSUMS_FILE"
+      CHECKSUMS_FILE=""
+      return 1
+    fi
+  fi
+
+  if [[ ! -s "$CHECKSUMS_FILE" ]]; then
+    rm -f "$CHECKSUMS_FILE"
+    CHECKSUMS_FILE=""
+    return 1
+  fi
+}
+
+# verify_file <local_file> <repo_path>
+# Verifies the SHA-256 hash of a local file against the CHECKSUMS.sha256 entry
+# for the given repo path. Returns 0 on match, 1 on mismatch or missing entry.
+verify_file() {
+  local local_file="$1"
+  local repo_path="$2"
+
+  if [[ -z "$CHECKSUMS_FILE" ]] || [[ -z "$HASH_CMD" ]]; then
+    return 0  # no checksums available, skip silently
+  fi
+
+  local expected_hash
+  expected_hash="$(grep -F "  ${repo_path}" "$CHECKSUMS_FILE" | head -1 | awk '{print $1}' || true)"
+
+  if [[ -z "$expected_hash" ]]; then
+    echo "Warning: No checksum entry for ${repo_path} — skipping verification for this file"
+    return 0
+  fi
+
+  local actual_hash
+  actual_hash="$($HASH_CMD "$local_file" | awk '{print $1}')"
+
+  if [[ "$actual_hash" != "$expected_hash" ]]; then
+    echo ""
+    echo "ERROR: Checksum verification failed for ${repo_path}"
+    echo "  Expected: ${expected_hash}"
+    echo "  Actual:   ${actual_hash}"
+    echo ""
+    echo "The downloaded file may have been tampered with or corrupted."
+    echo "Removing downloaded file and aborting."
+    rm -f "$local_file"
+    return 1
+  fi
+
+  echo "  Verified: ${repo_path} (SHA-256 OK)"
+  return 0
+}
+
+cleanup_checksums() {
+  if [[ -n "$CHECKSUMS_FILE" ]] && [[ -f "$CHECKSUMS_FILE" ]]; then
+    rm -f "$CHECKSUMS_FILE"
+  fi
+}
+trap cleanup_checksums EXIT
+
 # --- Banner ---
 echo "SpecOps Remote Installer"
 echo "========================"
 echo "Version: ${SPECOPS_VERSION}"
 echo "Source:  https://github.com/${SPECOPS_REPO}"
 echo ""
+
+# --- Checksum setup ---
+if [[ "$NO_VERIFY" == true ]]; then
+  echo "Warning: Checksum verification disabled (--no-verify). File integrity will not be checked."
+  echo ""
+elif detect_hash_cmd; then
+  if fetch_checksums; then
+    echo "Checksums loaded for integrity verification."
+  else
+    echo "Warning: Could not fetch CHECKSUMS.sha256 from ${SPECOPS_BASE_URL}/CHECKSUMS.sha256"
+    if is_interactive; then
+      read -rp "Continue without checksum verification? [y/N]: " verify_choice
+      if [[ ! $verify_choice =~ ^[Yy]$ ]]; then
+        echo "Aborting. Use a release tag (--version v1.3.0) or verify files manually."
+        exit 1
+      fi
+    else
+      echo "Aborting: Cannot verify file integrity in non-interactive mode."
+      echo "Use --no-verify to skip, or use a release tag (--version v1.3.0)."
+      exit 1
+    fi
+  fi
+  echo ""
+else
+  echo "Continuing without checksum verification."
+  echo ""
+fi
 
 # --- Platform detection ---
 detect_platforms() {
@@ -236,6 +351,9 @@ install_claude() {
   echo "Installing to: $install_dir"
   mkdir -p "$install_dir"
   download_file "${SPECOPS_BASE_URL}/platforms/claude/SKILL.md" "$install_dir/SKILL.md"
+  if ! verify_file "$install_dir/SKILL.md" "platforms/claude/SKILL.md"; then
+    exit 1
+  fi
 
   if [ -f "$install_dir/SKILL.md" ]; then
     echo "Installed files verified at $install_dir"
@@ -274,6 +392,9 @@ install_cursor() {
   local rules_dir=".cursor/rules"
   echo "Installing to: $rules_dir/specops.mdc"
   download_file "${SPECOPS_BASE_URL}/platforms/cursor/specops.mdc" "$rules_dir/specops.mdc"
+  if ! verify_file "$rules_dir/specops.mdc" "platforms/cursor/specops.mdc"; then
+    exit 1
+  fi
   echo "Installed successfully!"
 
   # Update .specops.json with version metadata if it exists
@@ -307,6 +428,9 @@ install_codex() {
   local skill_dir=".codex/skills/specops"
   echo "Installing to: $skill_dir/SKILL.md"
   download_file "${SPECOPS_BASE_URL}/platforms/codex/SKILL.md" "$skill_dir/SKILL.md"
+  if ! verify_file "$skill_dir/SKILL.md" "platforms/codex/SKILL.md"; then
+    exit 1
+  fi
   echo "Installed successfully!"
 
   # Update .specops.json with version metadata if it exists
@@ -340,6 +464,9 @@ install_copilot() {
   local instructions_dir=".github/instructions"
   echo "Installing to: $instructions_dir/specops.instructions.md"
   download_file "${SPECOPS_BASE_URL}/platforms/copilot/specops.instructions.md" "$instructions_dir/specops.instructions.md"
+  if ! verify_file "$instructions_dir/specops.instructions.md" "platforms/copilot/specops.instructions.md"; then
+    exit 1
+  fi
   echo "Installed successfully!"
 
   # Update .specops.json with version metadata if it exists

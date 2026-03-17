@@ -70,6 +70,16 @@
       "task": "Task 7",
       "date": "2026-03-14",
       "completedAt": "2026-03-14T18:36:14Z"
+    },
+    {
+      "specId": "install-integrity-verification",
+      "specType": "feature",
+      "number": 1,
+      "decision": "Added || true to grep in verify_file for set -e compatibility",
+      "rationale": "grep -F returns exit code 1 when no match found, which fails under set -e pipefail. The || true ensures missing checksum entries produce a warning instead of aborting",
+      "task": "Task 5",
+      "date": "2026-03-17",
+      "completedAt": "2026-03-17T03:54:42Z"
     }
   ]
 }
