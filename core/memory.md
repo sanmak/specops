@@ -62,7 +62,9 @@ Memory uses convention-based directory discovery — the `<specsDir>/memory/` di
 
 ### Memory Loading
 
-During Phase 1, after loading steering files (step 3) and before the pre-flight check (step 5), load the memory layer. Note: `workflow.md` step 4 guards entry to this module with `FILE_EXISTS(<specsDir>/memory/)` — the directory is guaranteed to exist when this code runs.
+During Phase 1, after loading steering files (step 3) and before the pre-flight check (step 5), load the memory layer. If the memory directory does not exist, create it first:
+
+0. If FILE_EXISTS(`<specsDir>/memory/`) is false, RUN_COMMAND(`mkdir -p <specsDir>/memory`).
 
 1. If FILE_EXISTS(`<specsDir>/memory/decisions.json`):
    - READ_FILE(`<specsDir>/memory/decisions.json`)
@@ -80,7 +82,7 @@ During Phase 1, after loading steering files (step 3) and before the pre-flight 
 
 ### Memory Writing
 
-During Phase 4, after finalizing `implementation.md` (step 2) and before the documentation check (step 4), update the memory layer:
+During Phase 4, after finalizing `implementation.md` (step 2) and before the documentation check (step 4), update the memory layer. This step is mandatory — the spec MUST NOT be marked as completed until memory has been updated. Phase 4 step 5 (completion gate) will verify that `context.md` contains a section for this spec before allowing status to change to `completed`.
 
 1. READ_FILE(`<specsDir>/<spec-name>/implementation.md`) — extract Decision Log entries by parsing the markdown table under `## Decision Log`. Each table row after the header produces one decision entry. Skip rows that are empty or contain only separator characters (`|---|`).
 2. READ_FILE(`<specsDir>/<spec-name>/spec.json`) — get `id` and `type`.

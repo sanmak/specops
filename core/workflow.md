@@ -22,14 +22,19 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
    - If any specs have status `implementing` or `in-review`, NOTIFY_USER: "Found incomplete spec: <name> (status: <status>). Continue working on it?"
    - If continuing an existing spec, READ_FILE the spec's `implementation.md` to recover session context (decision log, deviations, blockers, session log), then resume from the appropriate phase
    - If starting fresh, proceed normally
-3. **Load steering files**: If FILE_EXISTS(`<specsDir>/steering/`), load persistent project context from steering files following the Steering Files module. Always-included files are loaded now; fileMatch files are deferred until after affected components and dependencies are identified (step 9). If `<specsDir>/steering/` does not exist, NOTIFY_USER: "Tip: Create steering files in `<specsDir>/steering/` (product.md, tech.md, structure.md) to give the agent persistent project context. Run `/specops steering` to set them up, or see the Steering Files module for templates."
+3. **Load steering files**: If FILE_EXISTS(`<specsDir>/steering/`) is false, create the directory and foundation templates: RUN_COMMAND(`mkdir -p <specsDir>/steering`), then for each of product.md, tech.md, structure.md — if FILE_EXISTS(`<specsDir>/steering/<file>`) is false, WRITE_FILE it with the corresponding foundation template from the Steering Files module. NOTIFY_USER("Created steering files in `<specsDir>/steering/` — edit them to describe your project. The agent loads these automatically before every spec."). Then load persistent project context from steering files following the Steering Files module. Always-included files are loaded now; fileMatch files are deferred until after affected components and dependencies are identified (step 9).
 3.5. **Check repo map**: After steering files are loaded, check for a repo map following the Repo Map module. If FILE_EXISTS(`<specsDir>/steering/repo-map.md`), check staleness (time-based and hash-based). If stale, auto-refresh. If the file does not exist, auto-generate it by running the Repo Map Generation algorithm. The repo map is a machine-generated steering file with `inclusion: always` — if it exists and is fresh, it was already loaded in step 3.
-4. **Load memory**: If FILE_EXISTS(`<specsDir>/memory/`), load the local memory layer following the Local Memory Layer module. Decisions, project context, and patterns from prior specs are loaded into the agent's context. If `<specsDir>/memory/` does not exist, NOTIFY_USER: "Tip: Run `/specops init` to set up SpecOps with memory, or `/specops memory seed` to populate memory from existing completed specs."
-5. **Pre-flight check**: Verify SpecOps skill availability for team collaboration:
-   - READ_FILE `.gitignore` if it exists
-   - If `.gitignore` contains patterns matching `.claude/` or `.claude/*`, NOTIFY_USER with warning:
-     > "⚠️ `.claude/` is excluded by your `.gitignore`. SpecOps spec files will still be created in `<specsDir>/` and tracked normally, but the SpecOps skill itself (`SKILL.md`) won't be visible to other contributors. To fix: (1) use user-level installation (`~/.claude/skills/specops/`), or (2) add `!.claude/skills/` to your `.gitignore` to selectively un-ignore just the skills directory."
-   - If no `.gitignore` exists or doesn't conflict, continue normally
+4. **Load memory**: If FILE_EXISTS(`<specsDir>/memory/`) is false, RUN_COMMAND(`mkdir -p <specsDir>/memory`). Load the local memory layer following the Local Memory Layer module. Decisions, project context, and patterns from prior specs are loaded into the agent's context.
+5. **Pre-flight check (enforcement gate)**: Verify Phase 1 setup completed before proceeding. Proceeding past Phase 1 without completing this gate is a protocol breach.
+   - FILE_EXISTS(`<specsDir>/steering/`) MUST be true. If false, go back to step 3 and execute it.
+   - LIST_DIR(`<specsDir>/steering/`) MUST contain at least one `.md` file. If the directory is empty, go back to step 3 and execute the foundation template creation.
+   - FILE_EXISTS(`<specsDir>/memory/`) MUST be true. If false, go back to step 4 and execute it.
+   - If any check above still fails after the corrective action, NOTIFY_USER with the failure and STOP — do not proceed to Phase 2.
+   - Verify SpecOps skill availability for team collaboration:
+     - READ_FILE `.gitignore` if it exists
+     - If `.gitignore` contains patterns matching `.claude/` or `.claude/*`, NOTIFY_USER with warning:
+       > "⚠️ `.claude/` is excluded by your `.gitignore`. SpecOps spec files will still be created in `<specsDir>/` and tracked normally, but the SpecOps skill itself (`SKILL.md`) won't be visible to other contributors. To fix: (1) use user-level installation (`~/.claude/skills/specops/`), or (2) add `!.claude/skills/` to your `.gitignore` to selectively un-ignore just the skills directory."
+     - If no `.gitignore` exists or doesn't conflict, continue normally
 6. Analyze the user's request to determine type (feature, bugfix, refactor)
 7. Determine the project vertical:
    - If `config.vertical` is set, use it directly
@@ -99,16 +104,20 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 
    - If no, proceed without changes
 
-6. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow.
+6. **External issue creation**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. READ_FILE `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`, create issues via the Issue Creation Protocol, and write IssueIDs back to `tasks.md`.
+7. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow.
 
 **Phase 2.5: Review Cycle** (if spec review enabled)
 See "Collaborative Spec Review" module for the full review workflow including review mode, revision mode, and approval tracking.
 
 **Phase 3: Implement**
 
-1. Check the implementation gate: if spec review is enabled, verify `spec.json` status is `approved` or `self-approved` before proceeding (see the Implementation Gate section in the Collaborative Spec Review module for interactive override behavior when the spec is not yet approved). Update status to `implementing`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`.
+1. **Implementation gates** — run these checks before any implementation begins:
+   - **Review gate**: If spec review is enabled, verify `spec.json` status is `approved` or `self-approved` before proceeding (see the Implementation Gate section in the Collaborative Spec Review module for interactive override behavior when the spec is not yet approved).
+   - **Task tracking gate**: If `config.team.taskTracking` is not `"none"`, verify external issue creation following the Task Tracking Gate in the Configuration Handling module. This gate is mandatory when task tracking is configured — skipping it is a protocol breach.
+   - After both gates pass, update status to `implementing`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`.
 2. Execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions)
-3. For each task: set `In Progress` in tasks.md FIRST, then implement, then report progress
+3. For each task: set `In Progress` in tasks.md FIRST (following Write Ordering Protocol), then if `config.team.taskTracking` is not `"none"` and the task has a valid IssueID, sync the status to the external tracker (see Status Sync in the Configuration Handling module). Then implement, then report progress.
 4. After completing each code-modifying task, update `implementation.md`:
    - Design decision made (library choice, algorithm, approach) → append to Decision Log
    - Deviated from `design.md` → append to Deviations table
@@ -116,7 +125,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - No notable decisions (mechanical/trivial task) → skip the update
 5. Follow the design and maintain consistency
 6. Run tests according to configured testing strategy
-7. Commit changes based on `autoCommit` setting
+7. Commit changes based on `autoCommit` setting. If `config.team.taskTracking` is not `"none"` and the current task has a valid IssueID, include the IssueID in the commit message (see Commit Linking in the Configuration Handling module).
 
 **Phase 4: Complete**
 
@@ -129,7 +138,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
 2. Finalize `implementation.md`:
    - Populate the Summary section with a brief synthesis: total tasks completed, key decisions made, any deviations from design, and overall implementation health
    - Remove any empty sections (tables with no rows) to keep it clean
-3. **Update memory**: Update the local memory layer following the Local Memory Layer module. Extract Decision Log entries from `implementation.md`, update `context.md` with the spec completion summary, and run pattern detection to update `patterns.json`. If the memory directory does not exist, create it.
+3. **Update memory (mandatory)**: Update the local memory layer following the Local Memory Layer module. Extract Decision Log entries from `implementation.md`, update `context.md` with the spec completion summary, and run pattern detection to update `patterns.json`. If the memory directory does not exist, create it. This step is mandatory — skipping memory update is a protocol breach. The completion gate in step 5 will verify this step executed.
 4. **Documentation check**: Identify project documentation that may need updating based on files modified during implementation:
    - Scan for documentation files (README.md, CLAUDE.md, and files in a docs/ directory if one exists)
    - For each doc file, check if it references components, features, or configurations that were modified during this spec
@@ -139,9 +148,10 @@ See "Collaborative Spec Review" module for the full review workflow including re
      - [ ] `canAskInteractive = false` fallback written for every interactive prompt in the new subcommand
      - [ ] Row added to `docs/COMMANDS.md` Quick Lookup table for the new subcommand
      - [ ] `FILE_EXISTS` guard used before reading any optional config (e.g., `.specops.json`) in the subcommand's first step
-5. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`
-6. Create PR if `createPR` is true
-7. Summarize completed work
+5. **Completion gate**: Before marking the spec as completed, verify that memory was updated. READ_FILE(`<specsDir>/memory/context.md`) and confirm it contains a section heading `### <spec-name>`. If missing, go back to step 3 and execute it — do not mark the spec as completed without memory being updated.
+6. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`
+7. Create PR if `createPR` is true
+8. Summarize completed work
 
 ## Autonomous Behavior Guidelines
 
