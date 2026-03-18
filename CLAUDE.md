@@ -63,6 +63,7 @@ Project-local Claude Code commands in `.claude/commands/` for git workflow autom
 | `/docs-sync` | Detect stale documentation after code changes, propose targeted updates for approval |
 | `/full-review-gate` | Comprehensive code review gate: bugs, security, PII/privacy, dependency risks with P0-P3 severity findings and go/no-go release status |
 | `/core-review` | Review code changes against SpecOps project-specific patterns (tool abstraction violations, generated file drift, cross-platform gaps) |
+| `/resolve-conflicts` | Resolve merge conflicts on a PR by merging base into head in an isolated worktree, with JSON/markdown-aware resolution |
 
 These commands enforce project conventions automatically: conventional commit prefixes (`feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`), sensitive file exclusion, automatic regeneration of platform outputs and checksums when source files change, and pre-commit/pre-push hook compliance (never bypasses hooks).
 
