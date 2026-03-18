@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Task delegation for Phase 3**: Context-managed task execution with three strategies — sub-agent delegation (`canDelegateTask`), session checkpoint, and enhanced sequential fallback. New `implementation.taskDelegation` config option (`auto`/`always`/`never`)
+- **`/resolve-conflicts` slash command**: Resolve merge conflicts on a GitHub PR by merging the base branch into the PR branch in an isolated worktree, with JSON/markdown-aware resolution
+- **Enforcement gates**: Deterministic enforcement for Phase 1 steering/memory setup, Phase 4 memory write, and Phase 3 task tracking — mandatory steps with verification, not optional suggestions
+- **SHA-256 checksum verification in remote installer**: Integrity verification of downloaded files during remote installation
+- **Expanded docs-sync dependency map**: Coverage for all `core/*.md` modules in the docs-sync command's change-to-docs mapping
+
+### Fixed
+
+- **Task delegation protocol gaps**: Address review feedback on delegation handoff bundles, blocked task handling, and orchestrator loop
+- **Resolve-conflicts correctness**: Fix ours/theirs semantics, fast-path handling, merge-tree order, and checksum list
+- **Resolve-conflicts resilience**: Add UNKNOWN mergeability retry, empty-commit guard, cleanup-on-failure rule, and count/specs fix
+- **Issue creation shell safety**: Harden shell quoting, fix FAILED sentinel mismatch, add blocked transition sync, reorder Phase 2 steps
+- **RUN_COMMAND noun usage**: Resolve abstract operation verb/noun inconsistency, IssueID guard, and restore reconciliation checksum
+- **Checksum verification**: Anchor grep pattern and fail-closed on missing checksum entry
+- **Merge conflict resolution**: Resolve merge conflicts with main branch across multiple PRs
+- **CHECKSUMS.sha256**: Add missing `core/task-delegation.md` entry
+
 ## [1.3.0] - 2026-03-15
 
 ### Added

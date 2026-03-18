@@ -118,7 +118,8 @@ Create `.specops.json` in your project root. Configuration is optional — SpecO
   "implementation": {
     "autoCommit": false,
     "createPR": true,
-    "testing": "auto"
+    "testing": "auto",
+    "taskDelegation": "auto"
   }
 }
 ```
