@@ -1,2 +1,0 @@
-- Knowledge Graph of the projects
-- Software Factory
