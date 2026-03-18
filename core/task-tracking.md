@@ -108,6 +108,16 @@ Sometimes an acceptance criterion is intentionally excluded from the current sco
 
 A task or spec with all main acceptance criteria checked and some items in **Deferred Criteria** is valid for completion. Deferred items should be tracked for follow-up (e.g., as future spec candidates in the Scope Boundary section).
 
+### External Tracker Sync
+
+When `config.team.taskTracking` is not `"none"` and the task has a populated `**IssueID:**` (neither `None` nor prefixed with `FAILED`):
+
+On **every status transition** (Pending → In Progress, In Progress → Completed, In Progress → Blocked, Blocked → In Progress), after updating `tasks.md` (Write Ordering Protocol), sync the status to the external tracker following the Status Sync protocol in the Configuration Handling module.
+
+**Sync failures are non-blocking**: If the command to update the external tracker fails, NOTIFY_USER with the error and continue. The `tasks.md` state machine is always the source of truth.
+
+**Completion close**: When transitioning to `Completed`, close the external issue. If the close command fails, warn but do not prevent the task from being marked complete in `tasks.md`.
+
 ### Conformance Rules
 
 - **File-chat consistency**: reported status in chat must match what is persisted in `tasks.md`

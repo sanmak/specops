@@ -29,14 +29,19 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
    - If any specs have status `implementing` or `in-review`, Tell the user: "Found incomplete spec: <name> (status: <status>). Continue working on it?"
    - If continuing an existing spec, Read the file at the spec's `implementation.md` to recover session context (decision log, deviations, blockers, session log), then resume from the appropriate phase
    - If starting fresh, proceed normally
-3. **Load steering files**: If FILE_EXISTS(`<specsDir>/steering/`), load persistent project context from steering files following the Steering Files module. Always-included files are loaded now; fileMatch files are deferred until after affected components and dependencies are identified (step 9). If `<specsDir>/steering/` does not exist, Tell the user: "Tip: Create steering files in `<specsDir>/steering/` (product.md, tech.md, structure.md) to give the agent persistent project context. Run `/specops steering` to set them up, or see the Steering Files module for templates."
+3. **Load steering files**: If FILE_EXISTS(`<specsDir>/steering/`) is false, create the directory and foundation templates: Run the terminal command(`mkdir -p <specsDir>/steering`), then for each of product.md, tech.md, structure.md — if FILE_EXISTS(`<specsDir>/steering/<file>`) is false, Create the file at it with the corresponding foundation template from the Steering Files module. Tell the user("Created steering files in `<specsDir>/steering/` — edit them to describe your project. The agent loads these automatically before every spec."). Then load persistent project context from steering files following the Steering Files module. Always-included files are loaded now; fileMatch files are deferred until after affected components and dependencies are identified (step 9).
 3.5. **Check repo map**: After steering files are loaded, check for a repo map following the Repo Map module. If FILE_EXISTS(`<specsDir>/steering/repo-map.md`), check staleness (time-based and hash-based). If stale, auto-refresh. If the file does not exist, auto-generate it by running the Repo Map Generation algorithm. The repo map is a machine-generated steering file with `inclusion: always` — if it exists and is fresh, it was already loaded in step 3.
-4. **Load memory**: If FILE_EXISTS(`<specsDir>/memory/`), load the local memory layer following the Local Memory Layer module. Decisions, project context, and patterns from prior specs are loaded into the agent's context. If `<specsDir>/memory/` does not exist, Tell the user: "Tip: Run `/specops init` to set up SpecOps with memory, or `/specops memory seed` to populate memory from existing completed specs."
-5. **Pre-flight check**: Verify SpecOps skill availability for team collaboration:
-   - Read the file at `.gitignore` if it exists
-   - If `.gitignore` contains patterns matching `.claude/` or `.claude/*`, Tell the user with warning:
-     > "⚠️ `.claude/` is excluded by your `.gitignore`. SpecOps spec files will still be created in `<specsDir>/` and tracked normally, but the SpecOps skill itself (`SKILL.md`) won't be visible to other contributors. To fix: (1) use user-level installation (`~/.claude/skills/specops/`), or (2) add `!.claude/skills/` to your `.gitignore` to selectively un-ignore just the skills directory."
-   - If no `.gitignore` exists or doesn't conflict, continue normally
+4. **Load memory**: If FILE_EXISTS(`<specsDir>/memory/`) is false, Run the terminal command(`mkdir -p <specsDir>/memory`). Load the local memory layer following the Local Memory Layer module. Decisions, project context, and patterns from prior specs are loaded into the agent's context.
+5. **Pre-flight check (enforcement gate)**: Verify Phase 1 setup completed before proceeding. Proceeding past Phase 1 without completing this gate is a protocol breach.
+   - FILE_EXISTS(`<specsDir>/steering/`) MUST be true. If false, go back to step 3 and execute it.
+   - List the contents of(`<specsDir>/steering/`) MUST contain at least one `.md` file. If the directory is empty, go back to step 3 and execute the foundation template creation.
+   - FILE_EXISTS(`<specsDir>/memory/`) MUST be true. If false, go back to step 4 and execute it.
+   - If any check above still fails after the corrective action, Tell the user with the failure and STOP — do not proceed to Phase 2.
+   - Verify SpecOps skill availability for team collaboration:
+     - Read the file at `.gitignore` if it exists
+     - If `.gitignore` contains patterns matching `.claude/` or `.claude/*`, Tell the user with warning:
+       > "⚠️ `.claude/` is excluded by your `.gitignore`. SpecOps spec files will still be created in `<specsDir>/` and tracked normally, but the SpecOps skill itself (`SKILL.md`) won't be visible to other contributors. To fix: (1) use user-level installation (`~/.claude/skills/specops/`), or (2) add `!.claude/skills/` to your `.gitignore` to selectively un-ignore just the skills directory."
+     - If no `.gitignore` exists or doesn't conflict, continue normally
 6. Analyze the user's request to determine type (feature, bugfix, refactor)
 7. Determine the project vertical:
    - If `config.vertical` is set, use it directly
@@ -106,16 +111,20 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 
    - If no, proceed without changes
 
-6. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow.
+6. **External issue creation**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. Read the file at `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`, create issues via the Issue Creation Protocol, and write IssueIDs back to `tasks.md`.
+7. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow.
 
 **Phase 2.5: Review Cycle** (if spec review enabled)
 See "Collaborative Spec Review" module for the full review workflow including review mode, revision mode, and approval tracking.
 
 **Phase 3: Implement**
 
-1. Check the implementation gate: if spec review is enabled, verify `spec.json` status is `approved` or `self-approved` before proceeding (see the Implementation Gate section in the Collaborative Spec Review module for interactive override behavior when the spec is not yet approved). Update status to `implementing`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (Run the terminal command(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`.
+1. **Implementation gates** — run these checks before any implementation begins:
+   - **Review gate**: If spec review is enabled, verify `spec.json` status is `approved` or `self-approved` before proceeding (see the Implementation Gate section in the Collaborative Spec Review module for interactive override behavior when the spec is not yet approved).
+   - **Task tracking gate**: If `config.team.taskTracking` is not `"none"`, verify external issue creation following the Task Tracking Gate in the Configuration Handling module. This gate is mandatory when task tracking is configured — skipping it is a protocol breach.
+   - After both gates pass, update status to `implementing`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (Run the terminal command(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`.
 2. **Determine execution strategy**: Check if task delegation is active (see the Task Delegation module — reads `config.implementation.taskDelegation` and platform capability `canDelegateTask`). If delegation is active, execute tasks using the delegation protocol (orchestrator dispatches each task to a fresh context). If delegation is not active, execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions).
-3. For each task: set `In Progress` in tasks.md FIRST, then implement, then report progress
+3. For each task: set `In Progress` in tasks.md FIRST (following Write Ordering Protocol), then if `config.team.taskTracking` is not `"none"` and the task has a valid IssueID, sync the status to the external tracker (see Status Sync in the Configuration Handling module). Then implement, then report progress.
 4. After completing each code-modifying task, update `implementation.md`:
    - Design decision made (library choice, algorithm, approach) → append to Decision Log
    - Deviated from `design.md` → append to Deviations table
@@ -123,7 +132,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - No notable decisions (mechanical/trivial task) → skip the update
 5. Follow the design and maintain consistency
 6. Run tests according to configured testing strategy
-7. Commit changes based on `autoCommit` setting
+7. Commit changes based on `autoCommit` setting. If `config.team.taskTracking` is not `"none"` and the current task has a valid IssueID, include the IssueID in the commit message (see Commit Linking in the Configuration Handling module).
 
 **Phase 4: Complete**
 
@@ -136,12 +145,12 @@ See "Collaborative Spec Review" module for the full review workflow including re
 2. Finalize `implementation.md`:
    - Populate the Summary section with a brief synthesis: total tasks completed, key decisions made, any deviations from design, and overall implementation health
    - Remove any empty sections (tables with no rows) to keep it clean
-3. **Update memory**: Update the local memory layer following the Local Memory Layer module. Extract Decision Log entries from `implementation.md`, update `context.md` with the spec completion summary, and run pattern detection to update `patterns.json`. If the memory directory does not exist, create it.
-4. **Documentation check** (mandatory — do not skip):
-   Identify project documentation that may need updating based on files created or modified during implementation.
-   - [ ] Scan for documentation files (README.md, CLAUDE.md, and files in a docs/ directory if one exists)
-   - [ ] For each doc file, check if it references components, features, or configurations that were changed — if stale, update the affected sections
-   - [ ] If unsure whether a doc needs updating, flag it to the user rather than skipping silently
+3. **Update memory (mandatory)**: Update the local memory layer following the Local Memory Layer module. Extract Decision Log entries from `implementation.md`, update `context.md` with the spec completion summary, and run pattern detection to update `patterns.json`. If the memory directory does not exist, create it. This step is mandatory — skipping memory update is a protocol breach. The completion gate in step 5 will verify this step executed.
+4. **Documentation check**: Identify project documentation that may need updating based on files modified during implementation:
+   - Scan for documentation files (README.md, CLAUDE.md, and files in a docs/ directory if one exists)
+   - For each doc file, check if it references components, features, or configurations that were modified during this spec
+   - If stale documentation is detected, update the affected sections
+   - If unsure whether a doc needs updating, flag it to the user rather than skipping silently
    - **New core module check**: If this spec created a new `core/*.md` module:
      - [ ] Entry added to `docs/STRUCTURE.md` (core module listing)
      - [ ] Mapping added to `.claude/commands/docs-sync.md` dependency map (if it exists)
@@ -153,9 +162,10 @@ See "Collaborative Spec Review" module for the full review workflow including re
      - [ ] `canAskInteractive = false` fallback written for every interactive prompt in the new subcommand
      - [ ] Row added to `docs/COMMANDS.md` Quick Lookup table for the new subcommand
      - [ ] `FILE_EXISTS` guard used before reading any optional config (e.g., `.specops.json`) in the subcommand's first step
-5. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (Run the terminal command(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`
-6. Create PR if `createPR` is true
-7. Summarize completed work
+5. **Completion gate**: Before marking the spec as completed, verify that memory was updated. Read the file at(`<specsDir>/memory/context.md`) and confirm it contains a section heading `### <spec-name>`. If missing, go back to step 3 and execute it — do not mark the spec as completed without memory being updated.
+6. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (Run the terminal command(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`
+7. Create PR if `createPR` is true
+8. Summarize completed work
 
 ## Autonomous Behavior Guidelines
 
@@ -332,22 +342,87 @@ The index is a derived file — per-spec `spec.json` files are always the source
 
 ## Task Tracking Integration
 
-If `config.team.taskTracking` is set:
+If `config.team.taskTracking` is not `"none"`:
 
-**GitHub:**
-- Create GitHub issue for each major task
-- Link commits to issues
-- Update issue status as tasks complete
+### Issue Creation Timing
 
-**Jira:**
-- Reference Jira tickets in tasks
-- Use ticket IDs in commit messages
-- Update ticket status
+After Phase 2 generates `tasks.md` and before Phase 3 begins, create external issues for all tasks with `**Priority:** High` or `**Priority:** Medium`. Low-priority tasks are tracked only in `tasks.md`.
 
-**Linear:**
-- Create Linear issues for tasks
-- Update status programmatically
-- Link commits to issues
+### Issue Creation Protocol
+
+For each eligible task:
+
+**Shell safety**: `<TaskTitle>` and `<TaskDescription>` contain user-controlled text. Before interpolating into shell commands, write the title and body to temporary files and pass via file-based arguments (e.g., `--body-file`). If file-based arguments are unavailable for the tracker CLI, single-quote the values with internal single-quotes escaped (`'` → `'\''`). Never pass unescaped user text directly in shell command strings.
+
+**GitHub** (`taskTracking: "github"`):
+1. Create the file at a temp file with `<TaskDescription>` as content
+2. Run the terminal command(`gh issue create --title '<taskPrefix><TaskTitle>' --body-file <tempFile>`)
+3. Parse the issue URL/number from stdout
+4. Edit the file at `tasks.md` — set the task's `**IssueID:**` to the returned issue identifier (e.g., `#42`)
+
+**Jira** (`taskTracking: "jira"`):
+1. Create the file at a temp file with `<TaskDescription>` as content
+2. Run the terminal command(`jira issue create --type=Task --summary='<taskPrefix><TaskTitle>' --description-file <tempFile>`)
+3. Parse the issue key from stdout (e.g., `PROJ-123`)
+4. Edit the file at `tasks.md` — set the task's `**IssueID:**` to the returned key
+
+**Linear** (`taskTracking: "linear"`):
+1. Create the file at a temp file with `<TaskDescription>` as content
+2. Run the terminal command(`linear issue create --title '<taskPrefix><TaskTitle>' --description-file <tempFile>`)
+3. Parse the issue identifier from stdout
+4. Edit the file at `tasks.md` — set the task's `**IssueID:**` to the returned identifier
+
+If `config.team.taskPrefix` is set, prepend it to the issue title.
+
+### Graceful Degradation
+
+If the CLI tool is not installed or the command fails:
+1. Tell the user("Warning: Could not create external issue for Task <N> — <error>. Continuing without external tracking for this task.")
+2. Edit the file at `tasks.md` — set `**IssueID:**` to `FAILED — <reason>` on the affected task
+3. Do NOT block implementation — proceed with the internal state machine
+
+### Status Sync
+
+When task status changes in `tasks.md` (as part of the Task State Machine):
+
+- **Pending → In Progress**: If IssueID exists and is neither `None` nor prefixed with `FAILED`, update the external issue:
+  - GitHub: Run the terminal command(`gh issue edit <number> --add-label "in-progress"`)
+  - Jira: Run the terminal command(`jira issue move <key> "In Progress"`)
+  - Linear: Run the terminal command(`linear issue update <id> --status "In Progress"`)
+- **In Progress → Completed**: If IssueID exists and is neither `None` nor prefixed with `FAILED`, close the external issue:
+  - GitHub: Run the terminal command(`gh issue close <number>`)
+  - Jira: Run the terminal command(`jira issue move <key> "Done"`)
+  - Linear: Run the terminal command(`linear issue update <id> --status "Done"`)
+- **In Progress → Blocked**: If IssueID exists and is neither `None` nor prefixed with `FAILED`, update the external issue to blocked state:
+  - GitHub: Run the terminal command(`gh issue edit <number> --add-label "blocked"`)
+  - Jira: Run the terminal command(`jira issue move <key> "Blocked"`)
+  - Linear: Run the terminal command(`linear issue update <id> --status "Blocked"`)
+- **Blocked → In Progress**: If IssueID exists and is neither `None` nor prefixed with `FAILED`, move the external issue back to in-progress:
+  - GitHub: Run the terminal command(`gh issue edit <number> --remove-label "blocked" --add-label "in-progress"`)
+  - Jira: Run the terminal command(`jira issue move <key> "In Progress"`)
+  - Linear: Run the terminal command(`linear issue update <id> --status "In Progress"`)
+
+Status Sync failures are warned (Tell the user), not blocking.
+
+### Commit Linking
+
+When `taskTracking` is not `"none"` and the current task has a valid IssueID (neither `None` nor prefixed with `FAILED`):
+- If `autoCommit` is true: include the IssueID in the commit message (e.g., `feat: implement login form (#42)` or `feat: implement login form (PROJ-123)`)
+- If `autoCommit` is false: suggest the commit format to the user: "Suggested commit: `<message> (<IssueID>)`"
+
+### Task Tracking Gate
+
+At the start of Phase 3, after the review gate check, verify external issue creation. Skipping this gate when `config.team.taskTracking` is not `"none"` is a protocol breach.
+
+1. Read the file at `tasks.md` — identify all tasks with `**Priority:** High` or `**Priority:** Medium`
+2. For each eligible task, require `**IssueID:**` to be either:
+   - a valid tracker identifier for the configured platform (e.g., `#42`, `PROJ-123`), or
+   - `FAILED — <reason>` produced by Graceful Degradation after an attempted creation
+   Values like `TBD`, `N/A`, or other placeholders do not satisfy the gate.
+3. If any are missing: attempt issue creation for the missing tasks using the Issue Creation Protocol above
+4. If issue creation succeeds for some tasks but fails for others (CLI tool error, network failure): Tell the user("Partial external tracking — <N>/<M> task(s) created, <F> failed") and proceed. The Graceful Degradation rules apply to individual failures.
+5. If issue creation fails for ALL eligible tasks: Tell the user("External tracking unavailable — all <N> issue creation attempts failed. Proceeding with internal task tracking only.") and proceed.
+6. The gate enforces attempted creation, not 100% success. An agent that never attempts issue creation when `taskTracking` is configured has committed a protocol breach.
 
 ## Team Conventions
 
@@ -457,8 +532,11 @@ The body content after the frontmatter is the project context itself — free-fo
 
 During Phase 1, after reading the config and completing context recovery, load steering files:
 
-1. If FILE_EXISTS(`<specsDir>/steering/`):
-   - List the contents of(`<specsDir>/steering/`) to find all `.md` files
+1. If FILE_EXISTS(`<specsDir>/steering/`) is false:
+   - Run the terminal command(`mkdir -p <specsDir>/steering`)
+   - For each foundation template (product.md, tech.md, structure.md): if FILE_EXISTS(`<specsDir>/steering/<file>`) is false, Create the file at it with the corresponding foundation template (see Foundation File Templates above)
+   - Tell the user("Created steering files in `<specsDir>/steering/`. Edit them to describe your project.")
+2. List the contents of(`<specsDir>/steering/`) to find all `.md` files
    - Sort filenames alphabetically
    - If the number of files exceeds 20, Tell the user: "Steering file limit reached: loading first 20 of {total} files. Consider consolidating steering files to stay within the limit." and process only the first 20 files from the sorted list.
    - For each `.md` file:
@@ -469,8 +547,8 @@ During Phase 1, after reading the config and completing context recovery, load s
      - If `inclusion` is `fileMatch`: validate that `globs` is a non-empty array of strings. If `globs` is missing, empty, or not a string array, Tell the user: "Skipping steering file {filename}: fileMatch requires a non-empty globs array" and continue. Otherwise, store the file with its `globs` for deferred evaluation after affected files are identified in Phase 1
      - If `inclusion` is `manual`: skip (not loaded automatically)
      - If `inclusion` has an unrecognized value: Tell the user: "Skipping steering file {filename}: unrecognized inclusion mode '{value}'" and continue
-2. After loading `always` files, Tell the user: "Loaded {N} always-included steering file(s): {names}. fileMatch files will be evaluated after affected components are identified."
-3. After Phase 1 identifies affected components and dependencies (step 9), evaluate `fileMatch` steering files by checking each file's `globs` against the set of affected files. Load any matching files and add their content to the project context.
+3. After loading `always` files, Tell the user: "Loaded {N} always-included steering file(s): {names}. fileMatch files will be evaluated after affected components are identified."
+4. After Phase 1 identifies affected components and dependencies (step 9), evaluate `fileMatch` steering files by checking each file's `globs` against the set of affected files. Load any matching files and add their content to the project context.
 
 ### Steering Safety
 
@@ -571,7 +649,12 @@ These must refer to managing SpecOps steering files, NOT to a product feature (e
     - `Create the file at(<specsDir>/steering/structure.md, <structureTemplate>)`
     (see Foundation File Templates above for `<...Template>` contents), then Tell the user: "Created 3 steering files in `<specsDir>/steering/`. Edit them to describe your project — the agent will load them automatically before every spec."
   - If no: Tell the user: "No steering files created. You can create them manually in `<specsDir>/steering/` — see the Foundation File Templates section for the expected format."
-- On non-interactive platforms (`canAskInteractive = false`), Tell the user: "No steering files found. Create `<specsDir>/steering/product.md`, `tech.md`, and `structure.md` using the Foundation File Templates in this module."
+- On non-interactive platforms (`canAskInteractive = false`), create the directory and foundation templates unconditionally:
+    - Run the terminal command(`mkdir -p <specsDir>/steering`)
+    - Create the file at(`<specsDir>/steering/product.md`, `<productTemplate>`)
+    - Create the file at(`<specsDir>/steering/tech.md`, `<techTemplate>`)
+    - Create the file at(`<specsDir>/steering/structure.md`, `<structureTemplate>`)
+    (see Foundation File Templates above for `<...Template>` contents), then Tell the user: "Created 3 steering files in `<specsDir>/steering/`. Edit them to describe your project."
 
 **If steering directory exists:**
 - List the contents of(`<specsDir>/steering/`) to find all `.md` files, sort alphabetically, and process up to 20 files (apply the same safety cap used in the loading procedure)
@@ -670,7 +753,9 @@ Memory uses convention-based directory discovery — the `<specsDir>/memory/` di
 
 ### Memory Loading
 
-During Phase 1, after loading steering files (step 3) and before the pre-flight check (step 5), load the memory layer. Note: `workflow.md` step 4 guards entry to this module with `FILE_EXISTS(<specsDir>/memory/)` — the directory is guaranteed to exist when this code runs.
+During Phase 1, after loading steering files (step 3) and before the pre-flight check (step 5), load the memory layer. If the memory directory does not exist, create it first:
+
+0. If FILE_EXISTS(`<specsDir>/memory/`) is false, Run the terminal command(`mkdir -p <specsDir>/memory`).
 
 1. If FILE_EXISTS(`<specsDir>/memory/decisions.json`):
    - Read the file at(`<specsDir>/memory/decisions.json`)
@@ -688,7 +773,7 @@ During Phase 1, after loading steering files (step 3) and before the pre-flight 
 
 ### Memory Writing
 
-During Phase 4, after finalizing `implementation.md` (step 2) and before the documentation check (step 4), update the memory layer:
+During Phase 4, after finalizing `implementation.md` (step 2) and before the documentation check (step 4), update the memory layer. This step is mandatory — the spec MUST NOT be marked as completed until memory has been updated. Phase 4 step 5 (completion gate) will verify that `context.md` contains a section for this spec before allowing status to change to `completed`.
 
 1. Read the file at(`<specsDir>/<spec-name>/implementation.md`) — extract Decision Log entries by parsing the markdown table under `## Decision Log`. Each table row after the header produces one decision entry. Skip rows that are empty or contain only separator characters (`|---|`).
 2. Read the file at(`<specsDir>/<spec-name>/spec.json`) — get `id` and `type`.
@@ -2599,6 +2684,7 @@ TableName:
 **Estimated Effort:** [S/M/L or hours]
 **Dependencies:** None | Task [IDs]
 **Priority:** High | Medium | Low
+**IssueID:** None
 **Blocker:** None
 
 **Description:**
@@ -3003,6 +3089,16 @@ Sometimes an acceptance criterion is intentionally excluded from the current sco
 3. Deferred items are NOT checked during completion gate verification — only items in the main **Acceptance Criteria** list are gates
 
 A task or spec with all main acceptance criteria checked and some items in **Deferred Criteria** is valid for completion. Deferred items should be tracked for follow-up (e.g., as future spec candidates in the Scope Boundary section).
+
+### External Tracker Sync
+
+When `config.team.taskTracking` is not `"none"` and the task has a populated `**IssueID:**` (neither `None` nor prefixed with `FAILED`):
+
+On **every status transition** (Pending → In Progress, In Progress → Completed, In Progress → Blocked, Blocked → In Progress), after updating `tasks.md` (Write Ordering Protocol), sync the status to the external tracker following the Status Sync protocol in the Configuration Handling module.
+
+**Sync failures are non-blocking**: If the command to update the external tracker fails, Tell the user with the error and continue. The `tasks.md` state machine is always the source of truth.
+
+**Completion close**: When transitioning to `Completed`, close the external issue. If the close command fails, warn but do not prevent the task from being marked complete in `tasks.md`.
 
 ### Conformance Rules
 

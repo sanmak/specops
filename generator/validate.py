@@ -69,7 +69,7 @@ REVIEW_MARKERS = [
     "review mode",
     "revision mode",
     "Self-review mode",
-    "implementation gate",
+    "Implementation gate",
     "Status Dashboard",
 ]
 
@@ -109,6 +109,18 @@ TASK_TRACKING_MARKERS = [
     "Blocker Handling",
     "protocol breach",
     "Blocked",
+]
+
+# External task tracking integration markers that MUST appear in every output
+EXTERNAL_TRACKING_MARKERS = [
+    "Issue Creation Timing",
+    "Issue Creation Protocol",
+    "Graceful Degradation",
+    "Status Sync",
+    "Commit Linking",
+    "IssueID",
+    "Task tracking gate",
+    "attempted creation",
 ]
 
 # Update workflow markers that MUST appear in every output
@@ -321,6 +333,9 @@ def validate_platform(platform, info):
 
     # Check task tracking present
     errors.extend(check_markers_present(platform, content, TASK_TRACKING_MARKERS, "task-tracking"))
+
+    # Check external task tracking integration present
+    errors.extend(check_markers_present(platform, content, EXTERNAL_TRACKING_MARKERS, "external-tracking"))
 
     # Check update workflow present
     errors.extend(check_markers_present(platform, content, UPDATE_MARKERS, "update"))
@@ -651,7 +666,7 @@ def main():
     if len(generated) >= 2:
         platforms = list(generated.keys())
         consistency_errors = []
-        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS + REPO_MAP_MARKERS + DELEGATION_MARKERS:
+        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + TEMPLATE_MARKERS + VERTICAL_MARKERS + INTERVIEW_MARKERS + STEERING_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + EXTERNAL_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS + REPO_MAP_MARKERS + DELEGATION_MARKERS:
             present_in = [p for p in platforms if marker in generated[p]["content"]]
             if len(present_in) != len(platforms):
                 missing = set(platforms) - set(present_in)

@@ -76,22 +76,87 @@ The index is a derived file — per-spec `spec.json` files are always the source
 
 ## Task Tracking Integration
 
-If `config.team.taskTracking` is set:
+If `config.team.taskTracking` is not `"none"`:
 
-**GitHub:**
-- Create GitHub issue for each major task
-- Link commits to issues
-- Update issue status as tasks complete
+### Issue Creation Timing
 
-**Jira:**
-- Reference Jira tickets in tasks
-- Use ticket IDs in commit messages
-- Update ticket status
+After Phase 2 generates `tasks.md` and before Phase 3 begins, create external issues for all tasks with `**Priority:** High` or `**Priority:** Medium`. Low-priority tasks are tracked only in `tasks.md`.
 
-**Linear:**
-- Create Linear issues for tasks
-- Update status programmatically
-- Link commits to issues
+### Issue Creation Protocol
+
+For each eligible task:
+
+**Shell safety**: `<TaskTitle>` and `<TaskDescription>` contain user-controlled text. Before interpolating into shell commands, write the title and body to temporary files and pass via file-based arguments (e.g., `--body-file`). If file-based arguments are unavailable for the tracker CLI, single-quote the values with internal single-quotes escaped (`'` → `'\''`). Never pass unescaped user text directly in shell command strings.
+
+**GitHub** (`taskTracking: "github"`):
+1. WRITE_FILE a temp file with `<TaskDescription>` as content
+2. RUN_COMMAND(`gh issue create --title '<taskPrefix><TaskTitle>' --body-file <tempFile>`)
+3. Parse the issue URL/number from stdout
+4. EDIT_FILE `tasks.md` — set the task's `**IssueID:**` to the returned issue identifier (e.g., `#42`)
+
+**Jira** (`taskTracking: "jira"`):
+1. WRITE_FILE a temp file with `<TaskDescription>` as content
+2. RUN_COMMAND(`jira issue create --type=Task --summary='<taskPrefix><TaskTitle>' --description-file <tempFile>`)
+3. Parse the issue key from stdout (e.g., `PROJ-123`)
+4. EDIT_FILE `tasks.md` — set the task's `**IssueID:**` to the returned key
+
+**Linear** (`taskTracking: "linear"`):
+1. WRITE_FILE a temp file with `<TaskDescription>` as content
+2. RUN_COMMAND(`linear issue create --title '<taskPrefix><TaskTitle>' --description-file <tempFile>`)
+3. Parse the issue identifier from stdout
+4. EDIT_FILE `tasks.md` — set the task's `**IssueID:**` to the returned identifier
+
+If `config.team.taskPrefix` is set, prepend it to the issue title.
+
+### Graceful Degradation
+
+If the CLI tool is not installed or the command fails:
+1. NOTIFY_USER("Warning: Could not create external issue for Task <N> — <error>. Continuing without external tracking for this task.")
+2. EDIT_FILE `tasks.md` — set `**IssueID:**` to `FAILED — <reason>` on the affected task
+3. Do NOT block implementation — proceed with the internal state machine
+
+### Status Sync
+
+When task status changes in `tasks.md` (as part of the Task State Machine):
+
+- **Pending → In Progress**: If IssueID exists and is neither `None` nor prefixed with `FAILED`, update the external issue:
+  - GitHub: RUN_COMMAND(`gh issue edit <number> --add-label "in-progress"`)
+  - Jira: RUN_COMMAND(`jira issue move <key> "In Progress"`)
+  - Linear: RUN_COMMAND(`linear issue update <id> --status "In Progress"`)
+- **In Progress → Completed**: If IssueID exists and is neither `None` nor prefixed with `FAILED`, close the external issue:
+  - GitHub: RUN_COMMAND(`gh issue close <number>`)
+  - Jira: RUN_COMMAND(`jira issue move <key> "Done"`)
+  - Linear: RUN_COMMAND(`linear issue update <id> --status "Done"`)
+- **In Progress → Blocked**: If IssueID exists and is neither `None` nor prefixed with `FAILED`, update the external issue to blocked state:
+  - GitHub: RUN_COMMAND(`gh issue edit <number> --add-label "blocked"`)
+  - Jira: RUN_COMMAND(`jira issue move <key> "Blocked"`)
+  - Linear: RUN_COMMAND(`linear issue update <id> --status "Blocked"`)
+- **Blocked → In Progress**: If IssueID exists and is neither `None` nor prefixed with `FAILED`, move the external issue back to in-progress:
+  - GitHub: RUN_COMMAND(`gh issue edit <number> --remove-label "blocked" --add-label "in-progress"`)
+  - Jira: RUN_COMMAND(`jira issue move <key> "In Progress"`)
+  - Linear: RUN_COMMAND(`linear issue update <id> --status "In Progress"`)
+
+Status Sync failures are warned (NOTIFY_USER), not blocking.
+
+### Commit Linking
+
+When `taskTracking` is not `"none"` and the current task has a valid IssueID (neither `None` nor prefixed with `FAILED`):
+- If `autoCommit` is true: include the IssueID in the commit message (e.g., `feat: implement login form (#42)` or `feat: implement login form (PROJ-123)`)
+- If `autoCommit` is false: suggest the commit format to the user: "Suggested commit: `<message> (<IssueID>)`"
+
+### Task Tracking Gate
+
+At the start of Phase 3, after the review gate check, verify external issue creation. Skipping this gate when `config.team.taskTracking` is not `"none"` is a protocol breach.
+
+1. READ_FILE `tasks.md` — identify all tasks with `**Priority:** High` or `**Priority:** Medium`
+2. For each eligible task, require `**IssueID:**` to be either:
+   - a valid tracker identifier for the configured platform (e.g., `#42`, `PROJ-123`), or
+   - `FAILED — <reason>` produced by Graceful Degradation after an attempted creation
+   Values like `TBD`, `N/A`, or other placeholders do not satisfy the gate.
+3. If any are missing: attempt issue creation for the missing tasks using the Issue Creation Protocol above
+4. If issue creation succeeds for some tasks but fails for others (CLI tool error, network failure): NOTIFY_USER("Partial external tracking — <N>/<M> task(s) created, <F> failed") and proceed. The Graceful Degradation rules apply to individual failures.
+5. If issue creation fails for ALL eligible tasks: NOTIFY_USER("External tracking unavailable — all <N> issue creation attempts failed. Proceeding with internal task tracking only.") and proceed.
+6. The gate enforces attempted creation, not 100% success. An agent that never attempts issue creation when `taskTracking` is configured has committed a protocol breach.
 
 ## Team Conventions
 

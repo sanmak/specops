@@ -22,3 +22,9 @@
 
 ### task-delegation (feature) — 2026-03-18
 8 tasks completed, 0 deviations from design, 0 blockers. New core/task-delegation.md module with three platform-adaptive strategies: sub-agent delegation (Claude Code via Agent tool), session checkpoint (Cursor/Copilot via user prompt), and enhanced sequential (Codex with detailed checkpointing). Added canDelegateTask capability flag and taskDelegation config option (auto/always/never). Generator pipeline wired for all 4 platforms with 7 DELEGATION_MARKERS. All 7 tests pass.
+
+### workflow-enforcement-gates (feature) — 2026-03-15
+6 tasks completed, 1 deviation from design (validation marker casing). Converted 3 weak workflow points into enforcement gates with "protocol breach" language: Phase 1 pre-flight gate (added content-level steering check + STOP consequence), Phase 4 memory write (mandatory label + forward reference), Phase 3 task tracking gate (restructured as named sub-list, removed "advisory" language, added "attempted creation" principle). Updated validator and tests with new marker. All 4 platform outputs regenerated. All 7 tests pass.
+
+### install-integrity-verification (feature) — 2026-03-17
+5 tasks completed, 0 deviations from design, 0 blockers. Added SHA-256 checksum verification to `remote-install.sh` addressing Agent Trust Hub HIGH-priority finding. Three new functions: `detect_hash_cmd()`, `fetch_checksums()`, `verify_file()`. `--no-verify` flag for development use. Security documentation updated: SECURITY.md (install trust chain, manual verification, residual risks), SBOM.md (automatic verification), SECURITY-AUDIT.md (Agent Trust Hub findings). ShellCheck clean, all 7 tests pass.
