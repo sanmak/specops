@@ -22,16 +22,16 @@ Restructure Phase 1 step 5 to use enforcement gate pattern with protocol breach 
 6. Keep .gitignore check as visually separated sub-section
 
 **Acceptance Criteria:**
-- [ ] "protocol breach" appears in Phase 1 step 5
-- [ ] LIST_DIR content check added for steering directory
-- [ ] STOP consequence added
-- [ ] .gitignore check visually separated below enforcement bullets
+- [x] "protocol breach" appears in Phase 1 step 5
+- [x] LIST_DIR content check added for steering directory
+- [x] STOP consequence added
+- [x] .gitignore check visually separated below enforcement bullets
 
 **Files to Modify:**
 - `core/workflow.md`
 
 **Tests Required:**
-- [ ] Regenerated outputs pass validation
+- [x] Regenerated outputs pass validation
 
 ---
 
@@ -51,15 +51,15 @@ Add "(mandatory)" to Phase 4 step 3 heading and add "protocol breach" language w
 2. Append enforcement sentence after existing text
 
 **Acceptance Criteria:**
-- [ ] Step 3 heading includes "(mandatory)"
-- [ ] "protocol breach" appears in step 3
-- [ ] Forward reference to step 5 verification included
+- [x] Step 3 heading includes "(mandatory)"
+- [x] "protocol breach" appears in step 3
+- [x] Forward reference to step 5 verification included
 
 **Files to Modify:**
 - `core/workflow.md`
 
 **Tests Required:**
-- [ ] Regenerated outputs pass validation
+- [x] Regenerated outputs pass validation
 
 ---
 
@@ -81,16 +81,16 @@ Break Phase 3 step 1 from a single paragraph into a structured sub-list with nam
 4. Create "After both gates pass" sub-bullet for status update logic
 
 **Acceptance Criteria:**
-- [ ] Phase 3 step 1 uses sub-list structure
-- [ ] Review gate and Task tracking gate are separate named bullets
-- [ ] "protocol breach" appears in task tracking gate bullet
-- [ ] Status update logic is in its own bullet after gates
+- [x] Phase 3 step 1 uses sub-list structure
+- [x] Review gate and Task tracking gate are separate named bullets
+- [x] "protocol breach" appears in task tracking gate bullet
+- [x] Status update logic is in its own bullet after gates
 
 **Files to Modify:**
 - `core/workflow.md`
 
 **Tests Required:**
-- [ ] Regenerated outputs pass validation
+- [x] Regenerated outputs pass validation
 
 ---
 
@@ -112,16 +112,16 @@ Remove "advisory, not blocking" language and replace with protocol breach enforc
 4. Remove old step 5 ("Do NOT block implementation — the gate is advisory, not blocking")
 
 **Acceptance Criteria:**
-- [ ] "advisory, not blocking" removed
-- [ ] "protocol breach" added to gate introduction
-- [ ] Partial and total failure scenarios specified separately
-- [ ] "attempted creation" enforcement principle documented
+- [x] "advisory, not blocking" removed
+- [x] "protocol breach" added to gate introduction
+- [x] Partial and total failure scenarios specified separately
+- [x] "attempted creation" enforcement principle documented
 
 **Files to Modify:**
 - `core/config-handling.md`
 
 **Tests Required:**
-- [ ] Regenerated outputs pass validation
+- [x] Regenerated outputs pass validation
 
 ---
 
@@ -141,16 +141,16 @@ Add "attempted creation" marker to both generator/validate.py and tests/test_pla
 2. Add `"attempted creation"` to `REQUIRED_MARKERS["external_tracking"]` in test_platform_consistency.py
 
 **Acceptance Criteria:**
-- [ ] Marker present in generator/validate.py EXTERNAL_TRACKING_MARKERS
-- [ ] Marker present in tests/test_platform_consistency.py REQUIRED_MARKERS
+- [x] Marker present in generator/validate.py EXTERNAL_TRACKING_MARKERS
+- [x] Marker present in tests/test_platform_consistency.py REQUIRED_MARKERS
 
 **Files to Modify:**
 - `generator/validate.py`
 - `tests/test_platform_consistency.py`
 
 **Tests Required:**
-- [ ] python3 generator/validate.py passes
-- [ ] python3 tests/test_platform_consistency.py passes
+- [x] python3 generator/validate.py passes
+- [x] python3 tests/test_platform_consistency.py passes
 
 ---
 
@@ -174,12 +174,12 @@ Regenerate all platform outputs from updated core files, run full validation and
 6. Spot-check: grep "attempted creation" is present
 
 **Acceptance Criteria:**
-- [ ] All platform outputs regenerated without errors
-- [ ] Validation passes (all markers present)
-- [ ] All tests pass
-- [ ] "protocol breach" count >= 5 in platforms/claude/SKILL.md
-- [ ] "advisory, not blocking" absent from all generated outputs
-- [ ] "attempted creation" present in all generated outputs
+- [x] All platform outputs regenerated without errors
+- [x] Validation passes (all markers present)
+- [x] All tests pass
+- [x] "protocol breach" count >= 5 in platforms/claude/SKILL.md
+- [x] "advisory, not blocking" absent from all generated outputs
+- [x] "attempted creation" present in all generated outputs
 
 **Files to Modify:**
 - `platforms/claude/SKILL.md` (generated)
@@ -190,7 +190,7 @@ Regenerate all platform outputs from updated core files, run full validation and
 - `.claude-plugin/` manifests (generated)
 
 **Tests Required:**
-- [ ] Full test suite passes
+- [x] Full test suite passes
 
 ---
 
