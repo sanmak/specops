@@ -351,6 +351,7 @@ def build_common_context(core, platform_config):
         "custom_templates": core["custom-templates"],
         "error_handling": core["error-handling"],
         "task_tracking": core["task-tracking"],
+        "task_delegation": core["task-delegation"],
         "templates_section": templates_section,
         "examples": examples,
         "version": version,

@@ -121,7 +121,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - **Review gate**: If spec review is enabled, verify `spec.json` status is `approved` or `self-approved` before proceeding (see the Implementation Gate section in the Collaborative Spec Review module for interactive override behavior when the spec is not yet approved).
    - **Task tracking gate**: If `config.team.taskTracking` is not `"none"`, verify external issue creation following the Task Tracking Gate in the Configuration Handling module. This gate is mandatory when task tracking is configured — skipping it is a protocol breach.
    - After both gates pass, update status to `implementing`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (Run the terminal command(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`.
-2. Execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions)
+2. **Determine execution strategy**: Check if task delegation is active (see the Task Delegation module — reads `config.implementation.taskDelegation` and platform capability `canDelegateTask`). If delegation is active, execute tasks using the delegation protocol (orchestrator dispatches each task to a fresh context). If delegation is not active, execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions).
 3. For each task: set `In Progress` in tasks.md FIRST (following Write Ordering Protocol), then if `config.team.taskTracking` is not `"none"` and the task has a valid IssueID, sync the status to the external tracker (see Status Sync in the Configuration Handling module). Then implement, then report progress.
 4. After completing each code-modifying task, update `implementation.md`:
    - Design decision made (library choice, algorithm, approach) → append to Decision Log
@@ -149,6 +149,13 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - For each doc file, check if it references components, features, or configurations that were modified during this spec
    - If stale documentation is detected, update the affected sections
    - If unsure whether a doc needs updating, flag it to the user rather than skipping silently
+   - **New core module check**: If this spec created a new `core/*.md` module:
+     - [ ] Entry added to `docs/STRUCTURE.md` (core module listing)
+     - [ ] Mapping added to `.claude/commands/docs-sync.md` dependency map (if it exists)
+     - [ ] Module listed in `CLAUDE.md` core modules list (if the project uses CLAUDE.md)
+   - **New config option check**: If this spec added a new `.specops.json` configuration property:
+     - [ ] Row added to `docs/REFERENCE.md` Configuration Options table (if it exists)
+     - [ ] Example config in `examples/` updated if applicable
    - **New subcommand check**: If this spec shipped a new `/specops` subcommand (a new command branch in Getting Started or a new module routed from there):
      - [ ] `canAskInteractive = false` fallback written for every interactive prompt in the new subcommand
      - [ ] Row added to `docs/COMMANDS.md` Quick Lookup table for the new subcommand
@@ -3022,6 +3029,14 @@ Only **one** task may be `In Progress` at any time. Before setting a new task to
 2. Verify no other task has `**Status:** In Progress`
 3. If one does, complete it or set it to `Blocked` first
 
+### Delegation Compatibility
+
+When tasks are executed via delegation (see the Task Delegation module):
+- The **Single Active Task** rule still applies — the orchestrator sets one task to In Progress before delegating it
+- The **Write Ordering Protocol** is the delegate's responsibility — the delegate updates tasks.md before and after work
+- The orchestrator **verifies** task status in tasks.md after each delegation returns (conformance gate)
+- If a delegate returns without setting Completed or Blocked, the orchestrator sets the task to Blocked with reason "Delegate did not complete task"
+
 ### Blocker Handling
 
 When a task is blocked:
@@ -3090,6 +3105,125 @@ On **every status transition** (Pending → In Progress, In Progress → Complet
 - **Deferred-item tracking**: deferred acceptance criteria must be moved to a Deferred Criteria subsection, not left unchecked in the main list
 - **Dependency enforcement**: if Task B depends on Task A, and Task A is `Blocked`, Task B cannot be set to `In Progress`
 - **Progress summary accuracy**: the Progress Tracking counts at the bottom of `tasks.md` must reflect actual statuses
+
+
+## Task Delegation
+
+Task delegation executes each Phase 3 task in a fresh context to prevent context window exhaustion. The main session acts as a lightweight orchestrator — it reads tasks.md, constructs a focused handoff bundle for each task, and delegates execution to a fresh context. Each delegate implements a single task with only the information it needs.
+
+### Delegation Decision
+
+At the start of Phase 3, after the implementation gate (step 1), determine whether to use delegation:
+
+1. Read `config.implementation.taskDelegation` (default: `"auto"`)
+2. If `"never"`: skip delegation, use standard sequential execution (Phase 3 step 2 as-is)
+3. If `"always"`: activate delegation regardless of task count
+4. If `"auto"`: Read the file at `tasks.md`, count tasks with `**Status:** Pending`. If 4 or more, activate delegation. Otherwise, use standard sequential execution.
+5. Check platform capability `canDelegateTask`:
+   - `canDelegateTask = true` → **Strategy A** (Sub-Agent Delegation)
+   - `canDelegateTask = false` and `canAskInteractive = true` → **Strategy B** (Session Checkpoint)
+   - `canDelegateTask = false` and `canAskInteractive = false` → **Strategy C** (Enhanced Sequential)
+
+### Handoff Bundle
+
+The orchestrator constructs a focused context document for each delegated task. The bundle contains only what the delegate needs — no accumulated conversation history.
+
+1. **Task details**: Full task content from tasks.md — Description, Implementation Steps, Acceptance Criteria, Files to Modify, Tests Required
+2. **Design context**: The relevant section from design.md matched by component name or task reference. If no clear match, include the Architecture Overview section.
+3. **Prior task summaries**: One-line summary per previously completed task, extracted from implementation.md Session Log entries
+4. **Conventions**: Team conventions from `.specops.json` (if any)
+5. **File paths only**: The delegate reads file contents itself. Do not include file contents in the bundle — this keeps it small.
+6. **Execution protocols**: (a) Write Ordering — update tasks.md status to `In Progress` BEFORE starting work, and to `Completed` or `Blocked` BEFORE reporting. (b) Single Active Task — only one task may be In Progress at a time. (c) Acceptance Criteria — all checkboxes under `Acceptance Criteria:` and `Tests Required:` must be verified before marking Completed. (d) Implementation Journal — if you make a non-trivial design decision or deviate from design.md, append to implementation.md Decision Log or Deviations table. (e) File scope — modify only the files listed in "Files to Modify" for this task.
+
+### Strategy A: Sub-Agent Delegation
+
+When `canDelegateTask = true`:
+
+**Orchestrator loop:**
+
+1. Read the file at `tasks.md` — identify the next task with `**Status:** Pending`
+2. Edit the file at `tasks.md` — set that task to `**Status:** In Progress` (Write Ordering Protocol)
+3. Construct the Handoff Bundle (see above)
+4. Spawn a fresh agent with the handoff bundle as its prompt
+5. When the agent returns:
+   a. Read the file at `tasks.md` — verify the task status is `Completed` or `Blocked`
+   b. Read the file at `implementation.md` — check for new Decision Log or Deviation entries
+   c. If `Blocked`: read the `**Blocker:**` line and apply the following decision tree:
+      - If the blocker is a missing dependency from another task: skip to the next task with no dependencies on the blocked task
+      - Otherwise (implementation failure, environment issue, or ambiguous blocker): Tell the user with the blocker details and pause delegation for manual intervention
+   d. If status is still `In Progress` (delegate did not update): Edit the file at `tasks.md` — set to `**Status:** Blocked` with `**Blocker:** Delegate did not complete task — manual review needed`
+6. Tell the user with a brief task completion summary: task name, final status, key changes
+7. Repeat from step 1 for the next Pending task
+8. When no Pending tasks remain: proceed to Phase 4
+
+**Delegate responsibilities:**
+
+The delegate receives the handoff bundle and executes the single assigned task:
+
+- Read the file at each file listed in "Files to Modify" to understand current state
+- Implement the changes described in Implementation Steps
+- Run tests relevant to the task (matching "Tests Required") before marking Completed. If `config.implementation.testing` is `"auto"`, run the tests. If `"skip"`, skip testing. If `"manual"`, note that tests should be run.
+- If tests fail: keep the task `In Progress` and attempt to fix. If unfixable, set to `Blocked` with the failure as the blocker reason.
+- Check off Acceptance Criteria checkboxes in tasks.md as they are satisfied: `- [ ]` → `- [x]`
+- Check off Tests Required checkboxes: `- [ ]` → `- [x]`
+- Edit the file at `tasks.md` — set `**Status:** Completed` (all criteria met) or `**Status:** Blocked` (with `**Blocker:**` reason)
+- If a non-trivial design decision was made: Edit the file at `implementation.md` — append a row to the Decision Log table
+- If implementation deviates from design.md: Edit the file at `implementation.md` — append a row to the Deviations table
+- Edit the file at `implementation.md` — append a brief Session Log entry: task name, files modified, key outcome
+- Return a brief summary of what was implemented
+
+**Delegate constraints:**
+
+- Must NOT modify spec artifacts outside the assigned task scope (no changes to requirements.md, design.md, or other tasks in tasks.md)
+  - Exception: When implementation diverges from design.md (pivot), record the deviation in implementation.md Deviations table. Do NOT update design.md — the orchestrator flags deviations for user review after delegation completes.
+- Must NOT skip Acceptance Criteria verification
+- Must follow the Write Ordering Protocol (update tasks.md status before reporting)
+- Inherits all safety rules (convention sanitization, path containment, no secrets in specs)
+
+### Strategy B: Session Checkpoint
+
+When `canDelegateTask = false` and `canAskInteractive = true`:
+
+After completing each task using standard sequential execution:
+
+1. Edit the file at `implementation.md` — append a Session Log entry:
+   ```
+   ### Session N — Task M completed (YYYY-MM-DD)
+   Task: [task name]
+   Key decisions: [any decisions made, or "none"]
+   Files modified: [list of files]
+   Next task: Task [N+1] — [title]
+   ```
+2. Ask the user: "Task [N] completed. To keep context fresh, start a new conversation and invoke SpecOps — it will automatically detect the in-progress spec and resume from Task [N+1]."
+3. If the user chooses to continue in the same session: proceed with standard sequential execution for the next task.
+
+Phase 1 context recovery handles the resume seamlessly — the next session reads implementation.md Session Log and tasks.md statuses to pick up exactly where the previous session ended.
+
+### Strategy C: Enhanced Sequential
+
+When `canDelegateTask = false` and `canAskInteractive = false`:
+
+Execute tasks sequentially (standard Phase 3 behavior) with enhanced checkpointing:
+
+1. After each task completion, Edit the file at `implementation.md` — append a detailed Session Log entry with: task name, key decisions, files modified, and a one-line summary of the outcome
+2. Note in the output that later tasks may be affected by context window limits if the spec has many tasks
+3. If context limitations are detected (degraded outputs, repeated errors), note the affected tasks in implementation.md for the user to review
+
+### Delegation Safety
+
+- Delegates inherit ALL safety rules from the Safety module (convention sanitization, template safety, path containment)
+- Delegates must NOT modify files outside the spec's scope
+- The orchestrator verifies task status in tasks.md after each delegation — this is the conformance gate
+- If a delegate introduces a regression caught by a later task's sub-agent, the later task sets itself to `Blocked` referencing the prior task. The orchestrator surfaces this to the user.
+- The Single Active Task rule still applies during delegation — the orchestrator sets one task to In Progress before delegating it
+
+### Platform Adaptation
+
+| Capability | Strategy | Behavior |
+|-----------|----------|----------|
+| `canDelegateTask = true` | A (Sub-Agent) | Fresh agent per task, orchestrator verifies |
+| `canDelegateTask = false`, `canAskInteractive = true` | B (Session Checkpoint) | Prompt user for fresh session after each task |
+| `canDelegateTask = false`, `canAskInteractive = false` | C (Enhanced Sequential) | Standard execution with detailed checkpointing |
 
 
 ## Data Handling and Sensitive Information
