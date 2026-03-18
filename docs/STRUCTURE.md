@@ -81,7 +81,9 @@ specops/
 │   ├── reconciliation.md                 # Drift detection and reconciliation
 │   ├── from-plan.md                      # Convert plan mode output to spec
 │   ├── memory.md                         # Local memory layer
+│   ├── repo-map.md                       # Agent-driven codebase structural map
 │   ├── task-tracking.md                  # Task state machine and ordering
+│   ├── task-delegation.md                # Task delegation for Phase 3 context management
 │   ├── tool-abstraction.md               # Abstract tool operations and capability flags
 │   └── templates/                        # Default spec templates
 │       ├── feature-requirements.md       # Feature requirements template

@@ -85,7 +85,7 @@ generator/      Generates platform outputs from core + platform adapters
 ```
 
 The `core/` directory defines the workflow, safety rules, templates, and vertical adaptations once. The `generator/generate.py` script assembles platform-specific instruction files by:
-1. Loading all `core/*.md` modules (workflow, safety, config-handling, steering, memory, verticals, simplicity, data-handling, error-handling, custom-templates, view, interview, init, update, review-workflow, task-tracking, reconciliation, from-plan, and spec templates from `core/templates/`)
+1. Loading all `core/*.md` modules (workflow, safety, config-handling, steering, memory, verticals, simplicity, data-handling, error-handling, custom-templates, view, interview, init, update, review-workflow, task-tracking, task-delegation, reconciliation, from-plan, and spec templates from `core/templates/`)
 2. Loading `platforms/{name}/platform.json` for tool mappings and capabilities
 3. Rendering through `generator/templates/{name}.j2` Jinja2-style templates
 4. Substituting abstract tool operations (e.g., `READ_FILE`) with platform-specific language from each platform's `toolMapping`
@@ -149,6 +149,8 @@ These files require extra scrutiny when modified — they can alter agent behavi
 | `generator/templates/*.j2` | `python3 generator/generate.py --all` then `python3 generator/validate.py` |
 | `platforms/{name}/platform.json` | `python3 generator/generate.py --platform {name}` then `python3 generator/validate.py` |
 | `schema.json` | Run `python3 tests/check_schema_sync.py` to verify schema is well-formed |
+| `schema.json` (new properties) | Update `docs/REFERENCE.md` Configuration Options table, update `examples/` configs if applicable |
+| New `core/*.md` module | Add entry to `docs/STRUCTURE.md`, add mapping to `.claude/commands/docs-sync.md`, update `CLAUDE.md` core modules list |
 | Shell scripts | Run `shellcheck` on modified scripts |
 | `hooks/*` | Run `shellcheck hooks/pre-commit hooks/pre-push` |
 | Security-sensitive files | Consider running `/security-review` before pushing |

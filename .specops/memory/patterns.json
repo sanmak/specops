@@ -9,9 +9,9 @@
     },
     {
       "category": "platform adaptation",
-      "specs": ["ears-notation", "drift-detection"],
-      "count": 2,
-      "lesson": "Features split into interactive and non-interactive paths — read-only features work everywhere, destructive/interactive features require canAskInteractive"
+      "specs": ["ears-notation", "drift-detection", "task-delegation"],
+      "count": 3,
+      "lesson": "Features split into interactive and non-interactive paths — read-only features work everywhere, destructive/interactive features require canAskInteractive. Task delegation extends this with canDelegateTask for sub-agent spawning."
     },
     {
       "category": "step numbering",
@@ -23,23 +23,33 @@
   "fileOverlaps": [
     {
       "file": "core/workflow.md",
-      "specs": ["ears-notation", "bugfix-regression-analysis", "steering-files", "drift-detection", "ast-based-repo-map"],
-      "count": 5
+      "specs": ["ears-notation", "bugfix-regression-analysis", "steering-files", "drift-detection", "ast-based-repo-map", "task-delegation"],
+      "count": 6
     },
     {
       "file": "generator/validate.py",
-      "specs": ["bugfix-regression-analysis", "steering-files", "drift-detection", "ast-based-repo-map"],
-      "count": 4
+      "specs": ["bugfix-regression-analysis", "steering-files", "drift-detection", "ast-based-repo-map", "task-delegation"],
+      "count": 5
     },
     {
       "file": "generator/generate.py",
-      "specs": ["steering-files", "drift-detection", "ast-based-repo-map"],
-      "count": 3
+      "specs": ["steering-files", "drift-detection", "ast-based-repo-map", "task-delegation"],
+      "count": 4
     },
     {
       "file": "tests/test_platform_consistency.py",
       "specs": ["steering-files", "drift-detection", "ast-based-repo-map"],
       "count": 3
+    },
+    {
+      "file": "core/tool-abstraction.md",
+      "specs": ["ast-based-repo-map", "task-delegation"],
+      "count": 2
+    },
+    {
+      "file": "core/task-tracking.md",
+      "specs": ["task-delegation"],
+      "count": 1
     },
     {
       "file": "core/templates/bugfix.md",

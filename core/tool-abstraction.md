@@ -34,6 +34,7 @@ Not all platforms support all operations. Use these flags to adapt behavior:
 | `canAskInteractive` | Can the platform ask follow-up questions? |
 | `canTrackProgress` | Does the platform have a built-in progress/todo system? |
 | `canAccessGit` | Can the platform run git commands? |
+| `canDelegateTask` | Can the platform spawn isolated fresh-context agents for task execution? |
 
 ### Capability-Based Behavior Adaptation
 
@@ -42,3 +43,4 @@ When a capability is unavailable:
 - **canEditFiles = false**: Present file changes as suggestions/diffs for the user to apply
 - **canAskInteractive = false**: Note assumptions in the spec and proceed; list any ambiguities that the user should review
 - **canTrackProgress = false**: Track progress in the response text or in `tasks.md` file updates
+- **canDelegateTask = false**: Execute tasks sequentially in the current context. If `canAskInteractive` is true, write a checkpoint after each task and prompt the user to start a fresh session. If `canAskInteractive` is also false, use enhanced checkpointing with detailed Session Log entries.

@@ -107,7 +107,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
 **Phase 3: Implement**
 
 1. Check the implementation gate: if spec review is enabled, verify `spec.json` status is `approved` or `self-approved` before proceeding (see the Implementation Gate section in the Collaborative Spec Review module for interactive override behavior when the spec is not yet approved). Update status to `implementing`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`.
-2. Execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions)
+2. **Determine execution strategy**: Check if task delegation is active (see the Task Delegation module — reads `config.implementation.taskDelegation` and platform capability `canDelegateTask`). If delegation is active, execute tasks using the delegation protocol (orchestrator dispatches each task to a fresh context). If delegation is not active, execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions).
 3. For each task: set `In Progress` in tasks.md FIRST, then implement, then report progress
 4. After completing each code-modifying task, update `implementation.md`:
    - Design decision made (library choice, algorithm, approach) → append to Decision Log
@@ -130,11 +130,18 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - Populate the Summary section with a brief synthesis: total tasks completed, key decisions made, any deviations from design, and overall implementation health
    - Remove any empty sections (tables with no rows) to keep it clean
 3. **Update memory**: Update the local memory layer following the Local Memory Layer module. Extract Decision Log entries from `implementation.md`, update `context.md` with the spec completion summary, and run pattern detection to update `patterns.json`. If the memory directory does not exist, create it.
-4. **Documentation check**: Identify project documentation that may need updating based on files modified during implementation:
-   - Scan for documentation files (README.md, CLAUDE.md, and files in a docs/ directory if one exists)
-   - For each doc file, check if it references components, features, or configurations that were modified during this spec
-   - If stale documentation is detected, update the affected sections
-   - If unsure whether a doc needs updating, flag it to the user rather than skipping silently
+4. **Documentation check** (mandatory — do not skip):
+   Identify project documentation that may need updating based on files created or modified during implementation.
+   - [ ] Scan for documentation files (README.md, CLAUDE.md, and files in a docs/ directory if one exists)
+   - [ ] For each doc file, check if it references components, features, or configurations that were changed — if stale, update the affected sections
+   - [ ] If unsure whether a doc needs updating, flag it to the user rather than skipping silently
+   - **New core module check**: If this spec created a new `core/*.md` module:
+     - [ ] Entry added to `docs/STRUCTURE.md` (core module listing)
+     - [ ] Mapping added to `.claude/commands/docs-sync.md` dependency map (if it exists)
+     - [ ] Module listed in `CLAUDE.md` core modules list (if the project uses CLAUDE.md)
+   - **New config option check**: If this spec added a new `.specops.json` configuration property:
+     - [ ] Row added to `docs/REFERENCE.md` Configuration Options table (if it exists)
+     - [ ] Example config in `examples/` updated if applicable
    - **New subcommand check**: If this spec shipped a new `/specops` subcommand (a new command branch in Getting Started or a new module routed from there):
      - [ ] `canAskInteractive = false` fallback written for every interactive prompt in the new subcommand
      - [ ] Row added to `docs/COMMANDS.md` Quick Lookup table for the new subcommand

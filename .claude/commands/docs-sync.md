@@ -44,6 +44,22 @@ For each changed file, check which documentation may be affected using this mapp
 | `core/templates/*.md` | `docs/REFERENCE.md` (Spec Templates), example specs |
 | `setup.sh`, `scripts/remote-install.sh` | `QUICKSTART.md` (Installation), `README.md` (Quick Start) |
 | `.github/workflows/*.yml` | `CLAUDE.md` (CI Notes), `CONTRIBUTING.md` |
+| `core/config-handling.md` | `docs/REFERENCE.md` (Configuration Options) |
+| `core/custom-templates.md` | `docs/REFERENCE.md` (Spec Templates) |
+| `core/data-handling.md` | `CLAUDE.md` (Security-Sensitive Files) |
+| `core/error-handling.md` | `docs/REFERENCE.md` |
+| `core/from-plan.md` | `docs/COMMANDS.md` (From Plan) |
+| `core/memory.md` | `docs/COMMANDS.md` (Local Memory), `docs/REFERENCE.md` |
+| `core/reconciliation.md` | `docs/COMMANDS.md` (Drift Detection) |
+| `core/repo-map.md` | `docs/COMMANDS.md` (Repo Map), `docs/REFERENCE.md` |
+| `core/simplicity.md` | `CLAUDE.md` (Simplicity Principle) |
+| `core/steering.md` | `docs/COMMANDS.md` (Steering Files), `docs/STEERING_GUIDE.md` |
+| `core/task-delegation.md` | `docs/REFERENCE.md` (Configuration Options) |
+| `core/task-tracking.md` | `docs/REFERENCE.md` |
+| `core/tool-abstraction.md` | `CLAUDE.md` (Tool Abstraction) |
+| `core/update.md` | `docs/COMMANDS.md` (Update) |
+| `core/view.md` | `docs/COMMANDS.md` (View/List) |
+| New `core/*.md` (not in table) | `docs/STRUCTURE.md`, determine target docs from module content |
 
 Collect all matched target docs into a deduplicated list. If no matches found, report "No documentation impact detected" and skip to Step 4.
 

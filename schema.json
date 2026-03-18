@@ -190,6 +190,13 @@
             }
           },
           "additionalProperties": false
+        },
+        "taskDelegation": {
+          "type": "string",
+          "enum": ["auto", "always", "never"],
+          "default": "auto",
+          "maxLength": 10,
+          "description": "Task delegation strategy for Phase 3. auto: delegate when 4+ tasks and platform supports it. always: always delegate. never: sequential execution."
         }
       },
       "additionalProperties": false

@@ -15,7 +15,8 @@
     "canCreateFiles": true,
     "canAskInteractive": false,
     "canTrackProgress": false,
-    "canAccessGit": true
+    "canAccessGit": true,
+    "canDelegateTask": false
   },
   "toolMapping": {
     "READ_FILE": "Read the file at",

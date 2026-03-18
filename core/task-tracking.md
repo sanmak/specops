@@ -49,6 +49,14 @@ Only **one** task may be `In Progress` at any time. Before setting a new task to
 2. Verify no other task has `**Status:** In Progress`
 3. If one does, complete it or set it to `Blocked` first
 
+### Delegation Compatibility
+
+When tasks are executed via delegation (see the Task Delegation module):
+- The **Single Active Task** rule still applies — the orchestrator sets one task to In Progress before delegating it
+- The **Write Ordering Protocol** is the delegate's responsibility — the delegate updates tasks.md before and after work
+- The orchestrator **verifies** task status in tasks.md after each delegation returns (conformance gate)
+- If a delegate returns without setting Completed or Blocked, the orchestrator sets the task to Blocked with reason "Delegate did not complete task"
+
 ### Blocker Handling
 
 When a task is blocked:

@@ -193,6 +193,18 @@ MEMORY_MARKERS = [
 ]
 
 
+# Task delegation markers that MUST appear in every output
+DELEGATION_MARKERS = [
+    "## Task Delegation",
+    "### Delegation Decision",
+    "Handoff Bundle",
+    "### Strategy A",
+    "### Strategy B",
+    "### Strategy C",
+    "### Delegation Safety",
+]
+
+
 def read_file(path):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
@@ -330,6 +342,9 @@ def validate_platform(platform, info):
 
     # Check repo map present
     errors.extend(check_markers_present(platform, content, REPO_MAP_MARKERS, "repo-map"))
+
+    # Check task delegation present
+    errors.extend(check_markers_present(platform, content, DELEGATION_MARKERS, "delegation"))
 
     # Platform-specific format validation
     if platform == "cursor":
@@ -489,6 +504,75 @@ def validate_init_skill():
     return errors
 
 
+def validate_docs_coverage():
+    """Validate that documentation files reference all core modules and config options."""
+    errors = []
+
+    # Check 1: schema.json implementation properties → docs/REFERENCE.md
+    schema_path = os.path.join(ROOT_DIR, "schema.json")
+    reference_path = os.path.join(ROOT_DIR, "docs", "REFERENCE.md")
+    if os.path.exists(schema_path) and os.path.exists(reference_path):
+        with open(schema_path, "r", encoding="utf-8") as f:
+            schema = json.load(f)
+        reference_content = read_file(reference_path)
+        impl_props = schema.get("properties", {}).get("implementation", {}).get(
+            "properties", {}
+        )
+        for prop_name in impl_props:
+            # Check for the dotted form (e.g., implementation.taskDelegation)
+            # or nested sub-properties (e.g., implementation.linting.enabled)
+            sub_props = impl_props[prop_name].get("properties")
+            if sub_props:
+                # Nested object — check each sub-property
+                for sub_name in sub_props:
+                    full_name = f"implementation.{prop_name}.{sub_name}"
+                    if full_name not in reference_content:
+                        errors.append(
+                            f"  schema.json property '{full_name}' not found"
+                            f" in docs/REFERENCE.md"
+                        )
+            else:
+                full_name = f"implementation.{prop_name}"
+                if full_name not in reference_content:
+                    errors.append(
+                        f"  schema.json property '{full_name}' not found"
+                        f" in docs/REFERENCE.md"
+                    )
+
+    # Check 2: core/*.md modules → docs/STRUCTURE.md
+    structure_path = os.path.join(ROOT_DIR, "docs", "STRUCTURE.md")
+    if os.path.exists(structure_path):
+        structure_content = read_file(structure_path)
+        for filename in sorted(os.listdir(CORE_DIR)):
+            if filename.endswith(".md") and os.path.isfile(
+                os.path.join(CORE_DIR, filename)
+            ):
+                if filename not in structure_content:
+                    errors.append(
+                        f"  core module '{filename}' not found in docs/STRUCTURE.md"
+                    )
+
+    # Check 3: core/*.md modules → .claude/commands/docs-sync.md
+    docs_sync_path = os.path.join(
+        ROOT_DIR, ".claude", "commands", "docs-sync.md"
+    )
+    if os.path.exists(docs_sync_path):
+        docs_sync_content = read_file(docs_sync_path)
+        for filename in sorted(os.listdir(CORE_DIR)):
+            if filename.endswith(".md") and os.path.isfile(
+                os.path.join(CORE_DIR, filename)
+            ):
+                # Check for core/filename in the docs-sync dependency map
+                core_ref = f"core/{filename}"
+                if core_ref not in docs_sync_content:
+                    errors.append(
+                        f"  core module '{filename}' has no mapping in"
+                        f" .claude/commands/docs-sync.md"
+                    )
+
+    return errors
+
+
 def main():
     print("SpecOps Platform Validator")
     print("=" * 40)
@@ -543,12 +627,22 @@ def main():
     else:
         print("  PASS: Init mode checks passed")
 
+    # Docs coverage validation
+    print("\nValidating: docs coverage")
+    docs_errors = validate_docs_coverage()
+    if docs_errors:
+        for err in docs_errors:
+            print(f"  FAIL: {err}")
+        all_errors.extend(docs_errors)
+    else:
+        print("  PASS: All docs coverage checks passed")
+
     # Cross-platform consistency check
     print("\nCross-platform consistency:")
     if len(generated) >= 2:
         platforms = list(generated.keys())
         consistency_errors = []
-        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS + REPO_MAP_MARKERS:
+        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS + REPO_MAP_MARKERS + DELEGATION_MARKERS:
             present_in = [p for p in platforms if marker in generated[p]["content"]]
             if len(present_in) != len(platforms):
                 missing = set(platforms) - set(present_in)

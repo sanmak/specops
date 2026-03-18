@@ -46,5 +46,13 @@
     "version": 1,
     "author": "sanmak",
     "updated": "2026-03-08T06:46:57Z"
+  },
+  {
+    "id": "task-delegation",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-18T02:34:12Z"
   }
 ]
