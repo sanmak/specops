@@ -24,6 +24,12 @@
       "specs": ["drift-detection", "workflow-enforcement-gates"],
       "count": 2,
       "lesson": "Validator markers are case-sensitive substrings — when restructuring workflow headings, verify the validator marker still matches the generated output"
+    },
+    {
+      "category": "shell safety",
+      "specs": ["install-integrity-verification"],
+      "count": 1,
+      "lesson": "grep returns exit code 1 when no match found — guard with || true under set -e pipefail to prevent unexpected script abort"
     }
   ],
   "fileOverlaps": [
