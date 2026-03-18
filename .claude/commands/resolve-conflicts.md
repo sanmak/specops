@@ -23,7 +23,7 @@ If empty, try auto-detection: `gh pr view --json number -q .number 2>/dev/null`.
 ### Step 2: Identify conflicts
 
 1. Fetch both branches: `git fetch origin <PR_BRANCH> <BASE_BRANCH>`.
-2. Run `git merge-tree --write-tree origin/<BASE_BRANCH> origin/<PR_BRANCH>` to preview conflicts without modifying any working tree.
+2. Run `git merge-tree --write-tree origin/<PR_BRANCH> origin/<BASE_BRANCH>` to preview conflicts without modifying any working tree.
 3. Parse the output to extract:
    - List of auto-merged files
    - List of conflicting files (lines containing `CONFLICT`)
@@ -33,7 +33,7 @@ Display a conflict summary:
 
 ```
 PR #<N>: <title>
-Branch: <PR_BRANCH> → <BASE_BRANCH>
+Merge: <BASE_BRANCH> → <PR_BRANCH>
 
 Conflicting files (<K>):
   1. <path1>
@@ -51,7 +51,7 @@ Proceeding to resolve conflicts in an isolated worktree.
    ```
    git worktree add -b <PR_BRANCH> .claude/worktrees/resolve-conflicts-<PR_NUMBER> origin/<PR_BRANCH>
    ```
-   If the local branch already exists, use `git worktree add .claude/worktrees/resolve-conflicts-<PR_NUMBER> <PR_BRANCH>` instead.
+   If the local branch already exists, use `git worktree add .claude/worktrees/resolve-conflicts-<PR_NUMBER> <PR_BRANCH>` instead, then sync to the remote HEAD: `git -C .claude/worktrees/resolve-conflicts-<PR_NUMBER> reset --hard origin/<PR_BRANCH>`.
 3. If worktree creation fails (e.g., branch already checked out), report the error and stop.
 
 Save `.claude/worktrees/resolve-conflicts-<PR_NUMBER>` as `WORKTREE_DIR`.
@@ -63,7 +63,7 @@ Run:
 git -C <WORKTREE_DIR> merge origin/<BASE_BRANCH> --no-commit
 ```
 
-The `--no-commit` flag leaves the merge in progress so conflicts can be resolved before committing. If the merge unexpectedly succeeds cleanly (no conflicts), finalize it with `git -C <WORKTREE_DIR> commit --no-edit` and skip to Step 7.
+The `--no-commit` flag leaves the merge in progress so conflicts can be resolved before committing. If the merge unexpectedly succeeds cleanly (no conflicts), do NOT commit yet — skip to Step 6 to run regeneration and validation, then proceed to Step 7 normally.
 
 ### Step 5: Resolve each conflicting file
 
@@ -91,13 +91,13 @@ Stage generated and checksummed files immediately: `git -C <WORKTREE_DIR> add <p
 
 Read all three versions of the conflicting file:
 - Base (merge base): `git -C <WORKTREE_DIR> show :1:<path>`
-- Ours (base branch / main): `git -C <WORKTREE_DIR> show :2:<path>`
-- Theirs (PR branch): `git -C <WORKTREE_DIR> show :3:<path>`
+- Ours (PR branch): `git -C <WORKTREE_DIR> show :2:<path>`
+- Theirs (base branch / main): `git -C <WORKTREE_DIR> show :3:<path>`
 
 Parse all three as JSON. For each key:
 
 1. **Array fields** (e.g., `decisions`, `decisionCategories`, `fileOverlaps`, entries in `index.json`):
-   - If the base array is a prefix of both the ours and theirs arrays (both sides appended new entries): concatenate. Take the base entries, then the ours-only additions, then the theirs-only additions.
+   - If the base array is a prefix of both the ours and theirs arrays (both sides appended new entries): concatenate. Take the base entries, then the PR-branch additions (ours / :2:), then the base-branch additions (theirs / :3:).
    - If both sides modified existing entries at the same position: present to user.
 
 2. **Object fields with updated scalar values**: If both sides modified the same key to different values, present to user:
@@ -131,7 +131,7 @@ Read all three versions (same stage extraction as 5b).
 
 Diff base vs ours and base vs theirs to identify what each side added/changed.
 
-1. **Additive sections at end of file**: If both sides appended new sections to the end (the most common case — e.g., new spec summaries in context.md), include both. Ours-first ordering (base branch additions before PR branch additions).
+1. **Additive sections at end of file**: If both sides appended new sections to the end (the most common case — e.g., new spec summaries in context.md), include both. PR-branch additions first (ours / :2:), then base-branch additions (theirs / :3:).
 
 2. **Non-overlapping edits**: If edits are in completely different regions of the file, combine both changes (take ours version as base, apply theirs additions).
 
@@ -139,13 +139,13 @@ Diff base vs ours and base vs theirs to identify what each side added/changed.
    ```
    Conflict in <path> at lines <N-M>:
 
-   === Main version ===
-   <main text>
-
-   === PR version ===
+   === PR version (ours) ===
    <pr text>
 
-   Which version? (main/pr/both/custom)
+   === Main version (theirs) ===
+   <main text>
+
+   Which version? (pr/main/both/custom)
    ```
 
 After resolution, write the merged content and stage it.
@@ -162,7 +162,7 @@ Resolved <path>:
 For any file that is not JSON, markdown, generated, or checksummed:
 1. Read all three versions
 2. Try to detect if the conflict is purely additive (both sides added content at the same location)
-3. If additive, include both additions (ours first)
+3. If additive, include both additions (PR branch first, then base branch)
 4. If truly conflicting (overlapping edits to existing content), present the conflict to the user with full context and ask for resolution
 5. Write the resolved content and stage it
 
@@ -174,10 +174,10 @@ Check the list of all files affected by the merge (both auto-merged and conflict
 - Run `python3 generator/generate.py --all` from `WORKTREE_DIR`
 - Stage regenerated files: `git -C <WORKTREE_DIR> add platforms/ skills/ .claude-plugin/`
 
-**If any checksummed files were affected** (`skills/specops/SKILL.md`, `schema.json`, `platforms/claude/SKILL.md`, `platforms/claude/platform.json`, `platforms/cursor/specops.mdc`, `platforms/cursor/platform.json`, `platforms/codex/SKILL.md`, `platforms/codex/platform.json`, `platforms/copilot/specops.instructions.md`, `platforms/copilot/platform.json`, `core/workflow.md`, `core/safety.md`, `hooks/pre-commit`, `hooks/pre-push`, `scripts/install-hooks.sh`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`):
+**If any checksummed files were affected** (`skills/specops/SKILL.md`, `schema.json`, `platforms/claude/SKILL.md`, `platforms/claude/platform.json`, `platforms/cursor/specops.mdc`, `platforms/cursor/platform.json`, `platforms/codex/SKILL.md`, `platforms/codex/platform.json`, `platforms/copilot/specops.instructions.md`, `platforms/copilot/platform.json`, `core/workflow.md`, `core/safety.md`, `core/reconciliation.md`, `hooks/pre-commit`, `hooks/pre-push`, `scripts/install-hooks.sh`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`):
 - Regenerate checksums from `WORKTREE_DIR`:
   ```
-  cd <WORKTREE_DIR> && shasum -a 256 skills/specops/SKILL.md schema.json platforms/claude/SKILL.md platforms/claude/platform.json platforms/cursor/specops.mdc platforms/cursor/platform.json platforms/codex/SKILL.md platforms/codex/platform.json platforms/copilot/specops.instructions.md platforms/copilot/platform.json core/workflow.md core/safety.md hooks/pre-commit hooks/pre-push scripts/install-hooks.sh .claude-plugin/plugin.json .claude-plugin/marketplace.json > CHECKSUMS.sha256
+  cd <WORKTREE_DIR> && shasum -a 256 skills/specops/SKILL.md schema.json platforms/claude/SKILL.md platforms/claude/platform.json platforms/cursor/specops.mdc platforms/cursor/platform.json platforms/codex/SKILL.md platforms/codex/platform.json platforms/copilot/specops.instructions.md platforms/copilot/platform.json core/workflow.md core/safety.md core/reconciliation.md hooks/pre-commit hooks/pre-push scripts/install-hooks.sh .claude-plugin/plugin.json .claude-plugin/marketplace.json > CHECKSUMS.sha256
   ```
 - Stage: `git -C <WORKTREE_DIR> add CHECKSUMS.sha256`
 
