@@ -34,7 +34,7 @@ Add the `canDelegateTask` capability flag to the tool abstraction layer and all 
 - `platforms/copilot/platform.json`
 
 **Tests Required:**
-- [ ] Platform consistency test passes (all platforms have same capability keys)
+- [x] Platform consistency test passes (all platforms have same capability keys)
 
 ---
 
@@ -63,8 +63,8 @@ Add `taskDelegation` property under `implementation` in schema.json and update t
 - `examples/.specops.full.json`
 
 **Tests Required:**
-- [ ] `python3 tests/check_schema_sync.py` passes
-- [ ] `python3 tests/test_schema_validation.py` passes
+- [x] `python3 tests/check_schema_sync.py` passes
+- [x] `python3 tests/test_schema_validation.py` passes
 
 ---
 
@@ -96,7 +96,7 @@ Create the core task delegation module with delegation decision logic, handoff b
 - `core/task-delegation.md` (new file)
 
 **Tests Required:**
-- [ ] File exists and is well-formed markdown
+- [x] File exists and is well-formed markdown
 
 ---
 
@@ -123,7 +123,7 @@ Update Phase 3 step 2 to include the delegation decision check before sequential
 - `core/workflow.md`
 
 **Tests Required:**
-- [ ] Workflow markers still present in generated outputs
+- [x] Workflow markers still present in generated outputs
 
 ---
 
@@ -150,7 +150,7 @@ Add a Delegation Compatibility section to task-tracking.md explaining how the ta
 - `core/task-tracking.md`
 
 **Tests Required:**
-- [ ] Task tracking markers still present in generated outputs
+- [x] Task tracking markers still present in generated outputs
 
 ---
 
@@ -185,8 +185,8 @@ Add task_delegation to the generator build context and include it in all 4 platf
 - `generator/templates/copilot.j2`
 
 **Tests Required:**
-- [ ] Generator runs without errors
-- [ ] Generated outputs contain delegation content
+- [x] Generator runs without errors
+- [x] Generated outputs contain delegation content
 
 ---
 
@@ -216,8 +216,8 @@ Add DELEGATION_MARKERS to validate.py — both the per-platform check and the cr
 - `generator/validate.py`
 
 **Tests Required:**
-- [ ] Validator passes for all 4 platforms
-- [ ] `python3 tests/test_platform_consistency.py` passes
+- [x] Validator passes for all 4 platforms
+- [x] `python3 tests/test_platform_consistency.py` passes
 
 ---
 
@@ -256,8 +256,8 @@ Regenerate all platform outputs, run validation, and run all tests to confirm ev
 - `.claude-plugin/marketplace.json` (generated)
 
 **Tests Required:**
-- [ ] `python3 generator/validate.py` — 0 errors
-- [ ] `bash scripts/run-tests.sh` — all pass
+- [x] `python3 generator/validate.py` — 0 errors
+- [x] `bash scripts/run-tests.sh` — all pass
 
 ## Implementation Order
 1. Task 1, Task 2 (independent foundations)

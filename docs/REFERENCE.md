@@ -121,6 +121,9 @@ list
 |--------|--------|---------|-------------|-------------|
 | `specsDir` | string | `.specops` | max 200 chars, no `../` or absolute paths | Where to store specs |
 | `vertical` | `backend`/`frontend`/`fullstack`/`infrastructure`/`data`/`library`/`builder` | (auto-detect) | enum | Project vertical for template adaptation |
+| `templates.feature` | string | `default` | max 100 chars | Custom template for feature specifications |
+| `templates.bugfix` | string | `default` | max 100 chars | Custom template for bugfix specifications |
+| `templates.refactor` | string | `default` | max 100 chars | Custom template for refactoring specifications |
 | `templates.design` | string | `default` | max 100 chars | Custom template for design.md |
 | `templates.tasks` | string | `default` | max 100 chars | Custom template for tasks.md |
 | `team.conventions` | string[] | `[]` | max 30 items, each max 500 chars | Team-specific development conventions |
@@ -138,11 +141,17 @@ list
 | `implementation.linting.fixOnSave` | boolean | `false` | | Auto-fix lint issues on save |
 | `implementation.formatting.enabled` | boolean | `true` | | Run formatter before commits |
 | `implementation.formatting.tool` | `prettier`/`black`/`rustfmt`/`gofmt` | (auto-detect) | enum | Formatting tool |
-| `implementation.taskDelegation` | `auto`/`always`/`never` | `auto` | enum, max 10 chars | Task delegation strategy for Phase 3. `auto`: delegate when 4+ tasks. `always`: always delegate. `never`: sequential. |
+| `implementation.taskDelegation` | `auto`/`always`/`never` | `auto` | enum | Task delegation strategy for Phase 3. `auto`: delegate when 4+ tasks. `always`: always delegate. `never`: sequential. Strategy adapts to platform capabilities. |
 | `team.codeReview.required` | boolean | `false` | | Require code review |
 | `team.codeReview.minApprovals` | integer | `1` | min 1 | Minimum approvals needed |
 | `team.codeReview.requireTests` | boolean | `true` | | Require tests in implementation |
 | `team.codeReview.requireDocs` | boolean | `false` | | Require docs for public APIs |
+| `modules` | object | | pattern-keyed | Module-specific configuration for monorepo/multi-module projects |
+| `integrations` | object | | | External tool integrations |
+| `integrations.ci` | string | | max 50 chars | CI system (github-actions, gitlab-ci, jenkins, etc.) |
+| `integrations.deployment` | string | | max 50 chars | Deployment platform (vercel, netlify, aws, etc.) |
+| `integrations.monitoring` | string | | max 50 chars | Monitoring service (sentry, datadog, newrelic, etc.) |
+| `integrations.analytics` | string | | max 50 chars | Analytics service (mixpanel, amplitude, etc.) |
 
 > **Note:** All configuration objects enforce `additionalProperties: false` — unknown keys will be rejected during schema validation.
 >

@@ -508,40 +508,44 @@ def validate_docs_coverage():
     """Validate that documentation files reference all core modules and config options."""
     errors = []
 
-    # Check 1: schema.json implementation properties → docs/REFERENCE.md
+    # Check 1: all schema.json properties → docs/REFERENCE.md
     schema_path = os.path.join(ROOT_DIR, "schema.json")
     reference_path = os.path.join(ROOT_DIR, "docs", "REFERENCE.md")
-    if os.path.exists(schema_path) and os.path.exists(reference_path):
+    if not os.path.exists(reference_path):
+        errors.append(
+            "  docs/REFERENCE.md is missing — cannot verify schema property coverage"
+        )
+    elif os.path.exists(schema_path):
         with open(schema_path, "r", encoding="utf-8") as f:
             schema = json.load(f)
         reference_content = read_file(reference_path)
-        impl_props = schema.get("properties", {}).get("implementation", {}).get(
-            "properties", {}
-        )
-        for prop_name in impl_props:
-            # Check for the dotted form (e.g., implementation.taskDelegation)
-            # or nested sub-properties (e.g., implementation.linting.enabled)
-            sub_props = impl_props[prop_name].get("properties")
-            if sub_props:
-                # Nested object — check each sub-property
-                for sub_name in sub_props:
-                    full_name = f"implementation.{prop_name}.{sub_name}"
-                    if full_name not in reference_content:
-                        errors.append(
-                            f"  schema.json property '{full_name}' not found"
-                            f" in docs/REFERENCE.md"
-                        )
-            else:
-                full_name = f"implementation.{prop_name}"
+
+        def check_props(props, prefix):
+            """Recursively check schema properties against REFERENCE.md."""
+            for prop_name in props:
+                # Skip $schema and private properties
+                if prop_name.startswith("$") or prop_name.startswith("_"):
+                    continue
+                full_name = f"{prefix}.{prop_name}" if prefix else prop_name
                 if full_name not in reference_content:
                     errors.append(
                         f"  schema.json property '{full_name}' not found"
                         f" in docs/REFERENCE.md"
                     )
+                sub_props = props[prop_name].get("properties")
+                if sub_props:
+                    check_props(sub_props, full_name)
+
+        top_props = schema.get("properties", {})
+        check_props(top_props, "")
 
     # Check 2: core/*.md modules → docs/STRUCTURE.md
     structure_path = os.path.join(ROOT_DIR, "docs", "STRUCTURE.md")
-    if os.path.exists(structure_path):
+    if not os.path.exists(structure_path):
+        errors.append(
+            "  docs/STRUCTURE.md is missing — cannot verify core module coverage"
+        )
+    else:
         structure_content = read_file(structure_path)
         for filename in sorted(os.listdir(CORE_DIR)):
             if filename.endswith(".md") and os.path.isfile(
@@ -556,7 +560,12 @@ def validate_docs_coverage():
     docs_sync_path = os.path.join(
         ROOT_DIR, ".claude", "commands", "docs-sync.md"
     )
-    if os.path.exists(docs_sync_path):
+    if not os.path.exists(docs_sync_path):
+        errors.append(
+            "  .claude/commands/docs-sync.md is missing —"
+            " cannot verify docs-sync mappings"
+        )
+    else:
         docs_sync_content = read_file(docs_sync_path)
         for filename in sorted(os.listdir(CORE_DIR)):
             if filename.endswith(".md") and os.path.isfile(
