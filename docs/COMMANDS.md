@@ -520,6 +520,20 @@ implement login-page
 
 **Output:** Executes each task in `tasks.md`, updates task statuses, commits changes, runs tests, updates `implementation.md`, sets status to `completed`.
 
+**Task delegation:**
+
+When `implementation.taskDelegation` is configured in `.specops.json`, Phase 3 execution adapts:
+
+| Value | Behavior |
+|-------|----------|
+| `"auto"` (default) | Delegates to fresh contexts when 4+ pending tasks (prevents context exhaustion) |
+| `"always"` | Always delegates regardless of task count |
+| `"never"` | Sequential execution in the current context |
+
+Delegation strategy depends on platform capabilities:
+- **Claude Code / Codex**: Sub-agent delegation (fresh agent per task)
+- **Cursor / Copilot**: Session checkpoint (prompts to continue in new session after each task)
+
 ---
 
 ## Section Names (for View Commands)
@@ -616,4 +630,5 @@ These are the valid states a spec can be in, usable as filters with the status c
 | I want to check my SpecOps version | `/specops version` |
 | I want to see project decisions and patterns | `/specops memory` |
 | I want to populate memory from existing specs | `/specops memory seed` |
+| I want to control how Phase 3 executes tasks | Set `implementation.taskDelegation` in `.specops.json` (`auto`/`always`/`never`) |
 | I want to update SpecOps | `/specops update` |

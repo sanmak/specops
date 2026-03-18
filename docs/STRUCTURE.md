@@ -24,6 +24,7 @@ specops/
 │   ├── DIAGRAMS.md                       # Mermaid sequence diagrams for all workflows
 │   ├── PLAN-VS-SPEC.md                   # Plan Mode vs Spec Mode comparison
 │   ├── SECURITY-AUDIT.md                 # Security audit results
+│   ├── COMPARISON.md                     # Competitive comparison (vs Kiro, EPIC/Reload, Spec Kit)
 │   └── MARKETPLACE_SUBMISSIONS.md        # Marketplace submission content
 │
 ├── assets/                               # Visual assets (SVG diagrams)
@@ -61,7 +62,8 @@ specops/
 │       ├── monitor.md                    # /monitor command
 │       ├── docs-sync.md                  # /docs-sync command
 │       ├── full-review-gate.md           # /full-review-gate command
-│       └── core-review.md               # /core-review command
+│       ├── core-review.md               # /core-review command
+│       └── resolve-conflicts.md         # /resolve-conflicts command
 │
 ├── core/                                 # Platform-agnostic source of truth
 │   ├── workflow.md                       # 4-phase workflow specification
@@ -214,5 +216,5 @@ Generated files are checked into git so end users never need to run the build.
 
 ## Version
 
-**Version**: 1.2.0
-**Last Updated**: 2026-03-07
+**Version**: 1.3.0
+**Last Updated**: 2026-03-19
