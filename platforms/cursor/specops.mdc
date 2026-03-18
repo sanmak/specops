@@ -215,7 +215,13 @@ When invoked:
 7. Check if the request is a **memory** command (see "Memory Subcommand" in the Local Memory Layer module). Patterns: "memory", "show memory", "view memory", "memory seed", "seed memory". These must refer to SpecOps memory management, NOT a product feature (e.g., "add memory cache" or "optimize memory usage" is NOT memory mode). If detected, follow the Memory Subcommand workflow instead of the standard phases below.
 8. Check if the request is a **map** command (see "Map Subcommand" in the Repo Map module). Patterns: "repo map", "generate repo map", "refresh repo map", "show repo map", "codebase map", "/specops map". The bare word "map" alone is NOT sufficient — it must co-occur with "repo", "codebase", or the explicit "/specops" prefix. These must refer to SpecOps repo map management, NOT a product feature (e.g., "add map component", "map API endpoints", "create sitemap" is NOT map mode). If detected, follow the Map Subcommand workflow instead of the standard phases below.
 9. Check if the request is an **audit** or **reconcile** command (see the Reconciliation module). Patterns for audit: "audit", "audit <name>", "health check", "check drift", "spec health". Patterns for reconcile: "reconcile <name>", "fix <name>" (when referring to a spec), "repair <name>", "sync <name>". These must refer to SpecOps spec health, NOT product features like "audit log" or "health endpoint". If detected, follow the Reconciliation module workflow instead of the standard phases below.
-10. Check if the request is a **from-plan** command (see "From Plan Mode" module). Patterns: "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan". These must refer to converting an AI coding assistant plan into a SpecOps spec, NOT to a product feature. If so, follow the From Plan Mode workflow instead of the standard phases below.
+10. Check if the request is a **from-plan** command (see "From Plan Mode" module). Patterns: "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan", "implement the plan", "implement my plan", "go ahead with the plan", "proceed with plan". These must refer to converting an AI coding assistant plan into a SpecOps spec, NOT to a product feature. If so, follow the From Plan Mode workflow instead of the standard phases below.
+10.5. **Post-plan acceptance gate**: If ALL of the following conditions are true, this is a plan acceptance that MUST route through From Plan Mode:
+   - The user's request is a short acceptance or implementation phrase ("go ahead", "do it", "proceed", "implement this", "looks good", "yes, implement", "let's build it", "yes", "approved, implement", or similar brief confirmation)
+   - The conversation context contains a structured plan (plan mode content visible in earlier messages, numbered implementation steps, a "Files to Modify" or "Execution Order" section, or a plan file was recently discussed)
+   - FILE_EXISTS(`.specops.json`) is true (SpecOps is configured for this project)
+   If all three conditions are met: extract the plan content from the conversation context and follow the From Plan Mode workflow. Implementing a plan without converting it to a SpecOps spec first in a SpecOps-configured project is a **protocol breach**.
+   If any condition is false: continue to step 11.
 11. Check if interview mode is triggered (see "Interview Mode" module):
    - Explicit: request contains "interview" keyword
    - Auto (interactive platforms only): request is vague (≤5 words, no technical keywords, no action verb)
@@ -2105,15 +2111,34 @@ From Plan mode converts an existing AI coding assistant plan (from plan mode, a 
 
 ## Detection
 
-Patterns that trigger From Plan mode: "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan".
+Patterns that trigger From Plan mode: "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan", "implement the plan", "implement my plan", "go ahead with the plan", "proceed with plan".
 
 These must refer to converting an AI coding assistant plan into a SpecOps spec — NOT for product features like "import plan data from external system" or "convert pricing plan".
 
-On non-interactive platforms (`canAskInteractive = false`), the plan content must be provided inline. If not provided, Tell the user: "From Plan mode requires the plan to be pasted inline. Re-invoke with your plan content included in the request." and stop.
+On non-interactive platforms (`canAskInteractive = false`), the plan content must be provided inline or as a file path. If neither is provided, Tell the user: "From Plan mode requires the plan to be pasted inline or provided as a file path. Re-invoke with your plan content or path included in the request." and stop.
 
 ## Workflow
 
-1. **Receive plan content**: If plan content was provided inline with the invocation, use it directly. Otherwise, if `canAskInteractive`, Ask the user: "Please paste your plan below." If `canAskInteractive` is false and no inline content was provided, Tell the user: "From Plan mode requires the plan to be pasted inline. Re-invoke with your plan content included in the request." and stop.
+1. **Receive plan content**: Resolve plan content using the first matching branch:
+
+   **Branch A — Inline content**: If plan content was provided inline with the invocation, use it directly.
+
+   **Branch B — File path**: If a file path was provided with the invocation (e.g., `from-plan <path>`), validate the path before reading:
+   - Reject paths containing `../` traversal sequences
+   - Reject paths that do not end in `.md`
+   - Check FILE_EXISTS(`<path>`). If the file does not exist, Tell the user: "Plan file not found: `<path>`" and stop.
+   - Read the file at(`<path>`) to obtain plan content.
+
+   **Branch C — Platform auto-discovery**: If no content and no path were provided, and the platform configuration includes a `planFileDirectory` field:
+   - Run the terminal command(`ls -t <planFileDirectory>/*.md 2>/dev/null | head -5`) to find the 5 most recently modified plan files.
+   - If no files found, fall through to Branch D.
+   - If `canAskInteractive`: present the file list to the user with modification dates and Ask the user: "Which plan would you like to convert? Enter a number, or paste a plan below."
+   - If `canAskInteractive` is false: Tell the user with the list of discovered plan files and stop ("From Plan mode found these recent plans but requires interactive input to select one.").
+   - Once the user selects a file, validate the path (no `../`, must be `.md`, FILE_EXISTS check) and Read the file at it.
+
+   **Branch D — Interactive paste (fallback)**: If `canAskInteractive`, Ask the user: "Please paste your plan below."
+
+   If none of the branches produced plan content (non-interactive platform, no inline content, no file path, no `planFileDirectory`): Tell the user: "From Plan mode requires the plan to be pasted inline or provided as a file path. Re-invoke with your plan content or path included in the request." and stop.
 
 2. **Parse the plan**: Read through the plan content and identify sections using these keyword heuristics:
 

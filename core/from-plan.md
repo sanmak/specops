@@ -4,15 +4,34 @@ From Plan mode converts an existing AI coding assistant plan (from plan mode, a 
 
 ## Detection
 
-Patterns that trigger From Plan mode: "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan".
+Patterns that trigger From Plan mode: "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan", "implement the plan", "implement my plan", "go ahead with the plan", "proceed with plan".
 
 These must refer to converting an AI coding assistant plan into a SpecOps spec — NOT for product features like "import plan data from external system" or "convert pricing plan".
 
-On non-interactive platforms (`canAskInteractive = false`), the plan content must be provided inline. If not provided, NOTIFY_USER: "From Plan mode requires the plan to be pasted inline. Re-invoke with your plan content included in the request." and stop.
+On non-interactive platforms (`canAskInteractive = false`), the plan content must be provided inline or as a file path. If neither is provided, NOTIFY_USER: "From Plan mode requires the plan to be pasted inline or provided as a file path. Re-invoke with your plan content or path included in the request." and stop.
 
 ## Workflow
 
-1. **Receive plan content**: If plan content was provided inline with the invocation, use it directly. Otherwise, if `canAskInteractive`, ASK_USER: "Please paste your plan below." If `canAskInteractive` is false and no inline content was provided, NOTIFY_USER: "From Plan mode requires the plan to be pasted inline. Re-invoke with your plan content included in the request." and stop.
+1. **Receive plan content**: Resolve plan content using the first matching branch:
+
+   **Branch A — Inline content**: If plan content was provided inline with the invocation, use it directly.
+
+   **Branch B — File path**: If a file path was provided with the invocation (e.g., `from-plan <path>`), validate the path before reading:
+   - Reject paths containing `../` traversal sequences
+   - Reject paths that do not end in `.md`
+   - Check FILE_EXISTS(`<path>`). If the file does not exist, NOTIFY_USER: "Plan file not found: `<path>`" and stop.
+   - READ_FILE(`<path>`) to obtain plan content.
+
+   **Branch C — Platform auto-discovery**: If no content and no path were provided, and the platform configuration includes a `planFileDirectory` field:
+   - RUN_COMMAND(`ls -t <planFileDirectory>/*.md 2>/dev/null | head -5`) to find the 5 most recently modified plan files.
+   - If no files found, fall through to Branch D.
+   - If `canAskInteractive`: present the file list to the user with modification dates and ASK_USER: "Which plan would you like to convert? Enter a number, or paste a plan below."
+   - If `canAskInteractive` is false: NOTIFY_USER with the list of discovered plan files and stop ("From Plan mode found these recent plans but requires interactive input to select one.").
+   - Once the user selects a file, validate the path (no `../`, must be `.md`, FILE_EXISTS check) and READ_FILE it.
+
+   **Branch D — Interactive paste (fallback)**: If `canAskInteractive`, ASK_USER: "Please paste your plan below."
+
+   If none of the branches produced plan content (non-interactive platform, no inline content, no file path, no `planFileDirectory`): NOTIFY_USER: "From Plan mode requires the plan to be pasted inline or provided as a file path. Re-invoke with your plan content or path included in the request." and stop.
 
 2. **Parse the plan**: Read through the plan content and identify sections using these keyword heuristics:
 

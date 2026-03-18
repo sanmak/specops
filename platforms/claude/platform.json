@@ -19,6 +19,7 @@
     "canAccessGit": true,
     "canDelegateTask": true
   },
+  "planFileDirectory": "~/.claude/plans",
   "toolMapping": {
     "READ_FILE": "Use the Read tool to read",
     "WRITE_FILE": "Use the Write tool to create",

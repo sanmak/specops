@@ -175,6 +175,8 @@ FROM_PLAN_MARKERS = [
     "Faithful Conversion",
     "from-plan",
     "Parse the plan",
+    "auto-discovery",
+    "planFileDirectory",
 ]
 
 # Repo Map markers that MUST appear in every output

@@ -116,4 +116,18 @@ Display the full plan with context:
 <PLAN_CONTENT>
 ```
 
-Report: "Plan loaded and codebase synced. Ready for implementation."
+Report: "Plan loaded and codebase synced."
+
+### Step 8: SpecOps handoff
+
+After presenting the plan, check if the project uses SpecOps:
+
+1. Check if `.specops.json` exists in the project root.
+
+2. **If `.specops.json` exists:**
+   - Report: "SpecOps detected — converting plan to structured spec before implementation."
+   - Invoke `/specops from-plan` with `PLAN_CONTENT` as the plan input. This routes through the full SpecOps lifecycle: spec creation (From Plan Mode) → implementation (Phase 3) → completion (Phase 4).
+   - Do NOT proceed with direct implementation. The SpecOps workflow handles implementation after spec conversion.
+
+3. **If `.specops.json` does NOT exist:**
+   - Report: "No SpecOps configuration found. Ready for direct implementation from the plan above."

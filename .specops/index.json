@@ -56,6 +56,14 @@
     "updated": "2026-03-14T09:28:58Z"
   },
   {
+    "id": "plan-to-specops-automation",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-18T21:04:29Z"
+  },
+  {
     "id": "steering-files",
     "type": "feature",
     "status": "completed",

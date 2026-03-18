@@ -5,7 +5,8 @@ SpecOps Spec Artifact Linter
 Validates spec artifacts in <specsDir>/ for:
 1. Checkbox staleness: completed tasks with unchecked items (excluding Deferred Criteria)
 2. Documentation Review: completed specs must have ## Documentation Review in implementation.md
-3. Version validation: specopsCreatedWith/specopsUpdatedWith must be valid semver, absent, or "unknown"
+3. Task tracking: when taskTracking is configured, High/Medium tasks must have valid IssueIDs
+4. Version validation: specopsCreatedWith/specopsUpdatedWith must be valid semver, absent, or "unknown"
 
 Usage:
     python3 scripts/lint-spec-artifacts.py [specsDir]
@@ -219,6 +220,125 @@ def lint_version_fields(specs_dir):
     return warnings
 
 
+def load_specops_config(specs_dir):
+    """Load .specops.json from the project root (parent of specsDir) or cwd."""
+    # Try project root (assume specsDir is relative to project root)
+    for candidate in [".specops.json", os.path.join(os.path.dirname(specs_dir) or ".", ".specops.json")]:
+        if os.path.exists(candidate):
+            try:
+                with open(candidate, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except (json.JSONDecodeError, OSError):
+                pass
+    return {}
+
+
+def lint_task_tracking(specs_dir):
+    """Check that completed specs with taskTracking configured have valid IssueIDs.
+
+    When taskTracking is not "none", High/Medium priority tasks in completed
+    specs must have IssueID set to a valid tracker identifier (e.g., #42,
+    PROJ-123) or FAILED — <reason>. Values like None, TBD, or N/A indicate
+    the task tracking gate was skipped — a protocol breach.
+
+    Specs created before 1.3.0 (or with no specopsCreatedWith) are skipped
+    since task tracking enforcement was introduced at 1.3.0.
+    """
+    config = load_specops_config(specs_dir)
+    task_tracking = config.get("team", {}).get("taskTracking", "none")
+
+    if task_tracking == "none":
+        return []
+
+    errors = []
+    valid_issue_re = re.compile(r"^(#\d+|[A-Z]+-\d+|FAILED\s*[—–-])")
+
+    for spec_name in sorted(os.listdir(specs_dir)):
+        spec_dir = os.path.join(specs_dir, spec_name)
+        if not os.path.isdir(spec_dir):
+            continue
+
+        spec_json_path = os.path.join(spec_dir, "spec.json")
+        if not os.path.exists(spec_json_path):
+            continue
+
+        try:
+            with open(spec_json_path, "r", encoding="utf-8") as f:
+                spec = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            continue
+
+        if spec.get("status") != "completed":
+            continue
+
+        # Skip specs with no version info (legacy)
+        created_with = spec.get("specopsCreatedWith", "")
+        if not created_with or created_with == "unknown":
+            continue
+
+        tasks_path = os.path.join(spec_dir, "tasks.md")
+        if not os.path.exists(tasks_path):
+            continue
+
+        with open(tasks_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # First pass: collect all tasks with their priority and IssueID
+        task_entries = []
+        current_task_name = None
+        current_priority = None
+        current_issue_id = None
+
+        for line in content.split("\n"):
+            task_match = re.match(r"^### Task \d+:\s*(.+)", line)
+            if task_match:
+                if current_task_name:
+                    task_entries.append((current_task_name, current_priority, current_issue_id))
+                current_task_name = task_match.group(1).strip()
+                current_priority = None
+                current_issue_id = None
+                continue
+
+            priority_match = re.match(r"\*\*Priority:\*\*\s*(.+)", line)
+            if priority_match:
+                current_priority = priority_match.group(1).strip()
+                continue
+
+            issue_match = re.match(r"\*\*IssueID:\*\*\s*(.+)", line)
+            if issue_match:
+                current_issue_id = issue_match.group(1).strip()
+                continue
+
+        if current_task_name:
+            task_entries.append((current_task_name, current_priority, current_issue_id))
+
+        # Filter to eligible tasks (High/Medium priority)
+        eligible = [(n, p, i) for n, p, i in task_entries if p in ("High", "Medium")]
+        if not eligible:
+            continue
+
+        # Check if ANY eligible task has a valid IssueID
+        has_any_valid = any(
+            i and valid_issue_re.match(i) for _, _, i in eligible
+        )
+
+        # Skip specs where no tasks have valid IssueIDs (pre-enforcement legacy)
+        if not has_any_valid:
+            continue
+
+        # Flag tasks with missing/invalid IssueIDs
+        for task_name, priority, issue_id in eligible:
+            if not issue_id or not valid_issue_re.match(issue_id):
+                errors.append(
+                    f"  {spec_name} > {task_name}: "
+                    f"{priority}-priority task missing valid IssueID "
+                    f"(got '{issue_id or 'None'}', "
+                    f"taskTracking={task_tracking})"
+                )
+
+    return errors
+
+
 def main():
     specs_dir = sys.argv[1] if len(sys.argv) > 1 else ".specops"
 
@@ -253,8 +373,18 @@ def main():
     else:
         print("  PASS: All applicable completed specs have Documentation Review")
 
-    # Check 3: Version field validation
-    print("\nCheck 3: Version field validation")
+    # Check 3: Task tracking IssueID validation
+    print("\nCheck 3: Task tracking IssueID validation")
+    tracking_errors = lint_task_tracking(specs_dir)
+    if tracking_errors:
+        for err in tracking_errors:
+            print(f"  FAIL: {err}")
+        all_errors.extend(tracking_errors)
+    else:
+        print("  PASS: All eligible tasks have valid IssueIDs (or taskTracking is none)")
+
+    # Check 4: Version field validation
+    print("\nCheck 4: Version field validation")
     version_warnings = lint_version_fields(specs_dir)
     if version_warnings:
         for warn in version_warnings:
