@@ -118,7 +118,7 @@ When task status changes in `tasks.md` (as part of the Task State Machine):
   - GitHub: RUN_COMMAND(`gh issue edit <number> --add-label "in-progress"`)
   - Jira: RUN_COMMAND(`jira issue move <key> "In Progress"`)
   - Linear: RUN_COMMAND(`linear issue update <id> --status "In Progress"`)
-- **In Progress → Completed**: If IssueID exists, close the external issue:
+- **In Progress → Completed**: If IssueID exists and is not `None` or `FAILED`, close the external issue:
   - GitHub: RUN_COMMAND(`gh issue close <number>`)
   - Jira: RUN_COMMAND(`jira issue move <key> "Done"`)
   - Linear: RUN_COMMAND(`linear issue update <id> --status "Done"`)

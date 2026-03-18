@@ -376,7 +376,7 @@ When task status changes in `tasks.md` (as part of the Task State Machine):
   - GitHub: Execute the command(`gh issue edit <number> --add-label "in-progress"`)
   - Jira: Execute the command(`jira issue move <key> "In Progress"`)
   - Linear: Execute the command(`linear issue update <id> --status "In Progress"`)
-- **In Progress → Completed**: If IssueID exists, close the external issue:
+- **In Progress → Completed**: If IssueID exists and is not `None` or `FAILED`, close the external issue:
   - GitHub: Execute the command(`gh issue close <number>`)
   - Jira: Execute the command(`jira issue move <key> "Done"`)
   - Linear: Execute the command(`linear issue update <id> --status "Done"`)
@@ -3064,7 +3064,7 @@ When `config.team.taskTracking` is not `"none"` and the task has a populated `**
 
 On **every status transition** (Pending → In Progress, In Progress → Completed, In Progress → Blocked, Blocked → In Progress), after updating `tasks.md` (Write Ordering Protocol), sync the status to the external tracker following the Status Sync protocol in the Configuration Handling module.
 
-**Sync failures are non-blocking**: If the Execute the command to update the external tracker fails, Print to stdout with the error and continue. The `tasks.md` state machine is always the source of truth.
+**Sync failures are non-blocking**: If the command to update the external tracker fails, Print to stdout with the error and continue. The `tasks.md` state machine is always the source of truth.
 
 **Completion close**: When transitioning to `Completed`, close the external issue. If the close command fails, warn but do not prevent the task from being marked complete in `tasks.md`.
 

@@ -106,7 +106,7 @@ When `config.team.taskTracking` is not `"none"` and the task has a populated `**
 
 On **every status transition** (Pending → In Progress, In Progress → Completed, In Progress → Blocked, Blocked → In Progress), after updating `tasks.md` (Write Ordering Protocol), sync the status to the external tracker following the Status Sync protocol in the Configuration Handling module.
 
-**Sync failures are non-blocking**: If the RUN_COMMAND to update the external tracker fails, NOTIFY_USER with the error and continue. The `tasks.md` state machine is always the source of truth.
+**Sync failures are non-blocking**: If the command to update the external tracker fails, NOTIFY_USER with the error and continue. The `tasks.md` state machine is always the source of truth.
 
 **Completion close**: When transitioning to `Completed`, close the external issue. If the close command fails, warn but do not prevent the task from being marked complete in `tasks.md`.
 
