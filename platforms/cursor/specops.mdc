@@ -3039,6 +3039,7 @@ The orchestrator constructs a focused context document for each delegated task. 
 3. **Prior task summaries**: One-line summary per previously completed task, extracted from implementation.md Session Log entries
 4. **Conventions**: Team conventions from `.specops.json` (if any)
 5. **File paths only**: The delegate reads file contents itself. Do not include file contents in the bundle — this keeps it small.
+6. **Execution protocols**: (a) Write Ordering — update tasks.md status to `In Progress` BEFORE starting work, and to `Completed` or `Blocked` BEFORE reporting. (b) Single Active Task — only one task may be In Progress at a time. (c) Acceptance Criteria — all checkboxes under `Acceptance Criteria:` and `Tests Required:` must be verified before marking Completed. (d) Implementation Journal — if you make a non-trivial design decision or deviate from design.md, append to implementation.md Decision Log or Deviations table. (e) File scope — modify only the files listed in "Files to Modify" for this task.
 
 ### Strategy A: Sub-Agent Delegation
 
@@ -3053,7 +3054,9 @@ When `canDelegateTask = true`:
 5. When the agent returns:
    a. Read the file at `tasks.md` — verify the task status is `Completed` or `Blocked`
    b. Read the file at `implementation.md` — check for new Decision Log or Deviation entries
-   c. If `Blocked`: read the `**Blocker:**` line, decide whether to skip to the next task or attempt resolution
+   c. If `Blocked`: read the `**Blocker:**` line and apply the following decision tree:
+      - If the blocker is a missing dependency from another task: skip to the next task with no dependencies on the blocked task
+      - Otherwise (implementation failure, environment issue, or ambiguous blocker): Tell the user with the blocker details and pause delegation for manual intervention
    d. If status is still `In Progress` (delegate did not update): Edit the file at `tasks.md` — set to `**Status:** Blocked` with `**Blocker:** Delegate did not complete task — manual review needed`
 6. Tell the user with a brief task completion summary: task name, final status, key changes
 7. Repeat from step 1 for the next Pending task
@@ -3078,6 +3081,7 @@ The delegate receives the handoff bundle and executes the single assigned task:
 **Delegate constraints:**
 
 - Must NOT modify spec artifacts outside the assigned task scope (no changes to requirements.md, design.md, or other tasks in tasks.md)
+  - Exception: When implementation diverges from design.md (pivot), record the deviation in implementation.md Deviations table. Do NOT update design.md — the orchestrator flags deviations for user review after delegation completes.
 - Must NOT skip Acceptance Criteria verification
 - Must follow the Write Ordering Protocol (update tasks.md status before reporting)
 - Inherits all safety rules (convention sanitization, path containment, no secrets in specs)
