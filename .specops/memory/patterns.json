@@ -8,7 +8,7 @@
         "drift-detection"
       ],
       "count": 2,
-      "lesson": "Template and module structure decisions (HTML comments, heading levels) have downstream validator implications \u2014 heading text must match marker strings exactly"
+      "lesson": "Template and module structure decisions (HTML comments, heading levels) have downstream validator implications — heading text must match marker strings exactly"
     },
     {
       "category": "platform adaptation",
@@ -18,25 +18,27 @@
         "task-delegation"
       ],
       "count": 3,
-      "lesson": "Features split into interactive and non-interactive paths \u2014 read-only features work everywhere, destructive/interactive features require canAskInteractive. Task delegation extends this with canDelegateTask for sub-agent spawning."
+      "lesson": "Features split into interactive and non-interactive paths — read-only features work everywhere, destructive/interactive features require canAskInteractive. Task delegation extends this with canDelegateTask for sub-agent spawning."
     },
     {
       "category": "step numbering",
       "specs": [
         "drift-detection",
-        "ast-based-repo-map"
+        "ast-based-repo-map",
+        "enforcement-roadmap"
       ],
-      "count": 2,
-      "lesson": "Avoid renumbering Phase 1 steps when inserting new logic \u2014 use sub-step notation (e.g., step 3.5) to prevent breaking cross-module references"
+      "count": 3,
+      "lesson": "Avoid renumbering Phase steps when inserting new logic — use sub-step notation (e.g., step 5.5, 5.6) to prevent breaking cross-module references"
     },
     {
       "category": "marker alignment",
       "specs": [
         "drift-detection",
-        "workflow-enforcement-gates"
+        "workflow-enforcement-gates",
+        "enforcement-roadmap"
       ],
-      "count": 2,
-      "lesson": "Validator markers are case-sensitive substrings \u2014 when restructuring workflow headings, verify the validator marker still matches the generated output"
+      "count": 3,
+      "lesson": "Validator markers are case-sensitive substrings — when adding new marker constants, add to BOTH per-platform validation AND the cross-platform consistency loop in the same commit"
     },
     {
       "category": "shell safety",
@@ -44,7 +46,7 @@
         "install-integrity-verification"
       ],
       "count": 1,
-      "lesson": "grep returns exit code 1 when no match found \u2014 guard with || true under set -e pipefail to prevent unexpected script abort"
+      "lesson": "grep returns exit code 1 when no match found — guard with || true under set -e pipefail to prevent unexpected script abort"
     }
   ],
   "fileOverlaps": [
@@ -57,9 +59,10 @@
         "drift-detection",
         "ast-based-repo-map",
         "task-delegation",
-        "workflow-enforcement-gates"
+        "workflow-enforcement-gates",
+        "enforcement-roadmap"
       ],
-      "count": 7
+      "count": 8
     },
     {
       "file": "generator/validate.py",
@@ -69,9 +72,10 @@
         "drift-detection",
         "ast-based-repo-map",
         "task-delegation",
-        "workflow-enforcement-gates"
+        "workflow-enforcement-gates",
+        "enforcement-roadmap"
       ],
-      "count": 6
+      "count": 7
     },
     {
       "file": "generator/generate.py",
@@ -94,26 +98,42 @@
       "count": 4
     },
     {
-      "file": "core/tool-abstraction.md",
+      "file": "core/config-handling.md",
       "specs": [
-        "ast-based-repo-map",
-        "task-delegation"
+        "workflow-enforcement-gates",
+        "enforcement-roadmap"
       ],
       "count": 2
     },
     {
       "file": "core/task-tracking.md",
       "specs": [
-        "task-delegation"
+        "task-delegation",
+        "enforcement-roadmap"
+      ],
+      "count": 2
+    },
+    {
+      "file": "core/verticals.md",
+      "specs": [
+        "enforcement-roadmap"
       ],
       "count": 1
     },
     {
-      "file": "core/config-handling.md",
+      "file": "core/templates/implementation.md",
       "specs": [
-        "workflow-enforcement-gates"
+        "enforcement-roadmap"
       ],
       "count": 1
+    },
+    {
+      "file": "core/tool-abstraction.md",
+      "specs": [
+        "ast-based-repo-map",
+        "task-delegation"
+      ],
+      "count": 2
     },
     {
       "file": "core/templates/bugfix.md",

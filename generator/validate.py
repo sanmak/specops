@@ -205,6 +205,14 @@ MEMORY_MARKERS = [
 ]
 
 
+# Coherence verification markers that MUST appear in every output
+COHERENCE_MARKERS = [
+    "Coherence Verification",
+    "cross-check",
+    "contradictions",
+]
+
+
 # Task delegation markers that MUST appear in every output
 DELEGATION_MARKERS = [
     "## Task Delegation",
@@ -360,6 +368,9 @@ def validate_platform(platform, info):
 
     # Check task delegation present
     errors.extend(check_markers_present(platform, content, DELEGATION_MARKERS, "delegation"))
+
+    # Check coherence verification present
+    errors.extend(check_markers_present(platform, content, COHERENCE_MARKERS, "coherence"))
 
     # Platform-specific format validation
     if platform == "cursor":
@@ -666,7 +677,7 @@ def main():
     if len(generated) >= 2:
         platforms = list(generated.keys())
         consistency_errors = []
-        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + TEMPLATE_MARKERS + VERTICAL_MARKERS + INTERVIEW_MARKERS + STEERING_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + EXTERNAL_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS + REPO_MAP_MARKERS + DELEGATION_MARKERS:
+        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + TEMPLATE_MARKERS + VERTICAL_MARKERS + INTERVIEW_MARKERS + STEERING_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + EXTERNAL_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS + REPO_MAP_MARKERS + DELEGATION_MARKERS + COHERENCE_MARKERS:
             present_in = [p for p in platforms if marker in generated[p]["content"]]
             if len(present_in) != len(platforms):
                 missing = set(platforms) - set(present_in)

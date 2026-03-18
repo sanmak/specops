@@ -40,6 +40,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
      - If `.gitignore` contains patterns matching `.claude/` or `.claude/*`, Tell the user with warning:
        > "⚠️ `.claude/` is excluded by your `.gitignore`. SpecOps spec files will still be created in `<specsDir>/` and tracked normally, but the SpecOps skill itself (`SKILL.md`) won't be visible to other contributors. To fix: (1) use user-level installation (`~/.claude/skills/specops/`), or (2) add `!.claude/skills/` to your `.gitignore` to selectively un-ignore just the skills directory."
      - If no `.gitignore` exists or doesn't conflict, continue normally
+5.5. **Context Summary (enforcement gate)**: Create the file at `implementation.md` with a `## Phase 1 Context Summary` section recording: config status, context recovery result, steering files loaded, repo map status, memory loaded, detected vertical, and affected files. This section is mandatory — proceeding to Phase 2 without writing it is a protocol breach. Use the template from `core/templates/implementation.md`.
 6. Analyze the user's request to determine type (feature, bugfix, refactor)
 7. Determine the project vertical:
    - If `config.vertical` is set, use it directly
@@ -58,6 +59,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 
 **Phase 2: Create Specification**
 
+0. **Phase 2 entry gate**: Read the file at `implementation.md` and verify it contains `## Phase 1 Context Summary`. If missing, STOP — return to Phase 1 step 5.5 and write it. Proceeding without the Context Summary is a protocol breach.
 1. Generate a structured spec directory in the configured `specsDir`
 2. Create four core files:
    - `requirements.md` (or `bugfix.md` for bugs, `refactor.md` for refactors) - User stories with EARS acceptance criteria, bug analysis, or refactoring rationale
@@ -109,6 +111,8 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 
    - If no, proceed without changes
 
+5.5. **Coherence Verification**: After generating all spec files, cross-check for contradictions between spec sections. Read the file at the requirements/bugfix/refactor file and design.md. Extract numeric constraints from NFRs (performance targets, SLAs, limits) and verify they do not contradict functional requirements or design decisions. Record the result in implementation.md under `## Phase 1 Context Summary` as a `- Coherence check: [pass / N contradiction(s) found — details]` entry. If contradictions are found, Tell the user with the specifics before proceeding.
+5.6. **Vocabulary Verification**: If the detected vertical is not `backend`, `fullstack`, or `frontend`, and no custom template is used, scan generated spec files for prohibited default terms (see the Vocabulary Verification subsection in the Vertical Adaptation Rules module). Replace any found terms with vertical-specific vocabulary. Record the result in implementation.md Phase 1 Context Summary.
 6. **External issue creation**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. Read the file at `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`, create issues via the Issue Creation Protocol, and write IssueIDs back to `tasks.md`.
 7. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow.
 
@@ -144,7 +148,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - Populate the Summary section with a brief synthesis: total tasks completed, key decisions made, any deviations from design, and overall implementation health
    - Remove any empty sections (tables with no rows) to keep it clean
 3. **Update memory (mandatory)**: Update the local memory layer following the Local Memory Layer module. Extract Decision Log entries from `implementation.md`, update `context.md` with the spec completion summary, and run pattern detection to update `patterns.json`. If the memory directory does not exist, create it. This step is mandatory — skipping memory update is a protocol breach. The completion gate in step 5 will verify this step executed.
-4. **Documentation check**: Identify project documentation that may need updating based on files modified during implementation:
+4. **Documentation check (enforcement gate)**: Identify project documentation that may need updating based on files modified during implementation. After completing the check, WRITE to `implementation.md` a `## Documentation Review` section listing each doc file checked, its status (up-to-date / updated / flagged), and any changes made. This section is mandatory for spec completion — the spec artifact linter validates its presence for completed specs.
    - Scan for documentation files (README.md, CLAUDE.md, and files in a docs/ directory if one exists)
    - For each doc file, check if it references components, features, or configurations that were modified during this spec
    - If stale documentation is detected, update the affected sections
@@ -329,6 +333,11 @@ If `specReview` is not configured, fall back to `reviewRequired`:
 
 When both `specReview.enabled` and `reviewRequired` are set, `specReview.enabled` takes precedence.
 
+### Workflow Impact: specReview / reviewRequired
+- **Phase 2 step 7**: If enabled, set status to `in-review` and pause for review cycle.
+- **Phase 2.5**: Full review/revision/self-review workflow activates.
+- **Phase 3 step 1 (review gate)**: Blocks implementation until `approved` or `self-approved` status.
+
 ## Index Regeneration
 
 The agent rebuilds `<specsDir>/index.json` after every `spec.json` creation or update:
@@ -408,6 +417,12 @@ When `taskTracking` is not `"none"` and the current task has a valid IssueID (ne
 - If `autoCommit` is true: include the IssueID in the commit message (e.g., `feat: implement login form (#42)` or `feat: implement login form (PROJ-123)`)
 - If `autoCommit` is false: suggest the commit format to the user: "Suggested commit: `<message> (<IssueID>)`"
 
+### Workflow Impact: taskTracking
+- **Phase 2 step 6**: If not `"none"`, create external issues for High/Medium tasks via Issue Creation Protocol.
+- **Phase 3 step 1 (task tracking gate)**: Verifies issue creation was attempted — skipping is a protocol breach.
+- **Phase 3 step 3**: On every task status transition, sync to external tracker via Status Sync.
+- **Phase 3 step 7**: If `autoCommit` and valid IssueID, include IssueID in commit message via Commit Linking.
+
 ### Task Tracking Gate
 
 At the start of Phase 3, after the review gate check, verify external issue creation. Skipping this gate when `config.team.taskTracking` is not `"none"` is a protocol breach.
@@ -438,6 +453,10 @@ If `config.team.codeReview` is configured:
 - **`requireTests: true`**: Ensure all tasks include tests; block completion if test coverage is insufficient
 - **`requireDocs: true`**: Ensure public APIs have documentation; add JSDoc/docstrings as part of implementation
 
+### Workflow Impact: codeReview
+- **Phase 3 step 6**: If `requireTests`, run tests for every task; block completion on insufficient coverage.
+- **Phase 4 step 7**: If `required`, include review requirement and `minApprovals` count in PR description.
+
 ## Linting & Formatting
 
 If `config.implementation.linting` is configured:
@@ -448,6 +467,10 @@ If `config.implementation.formatting` is configured:
 - **`enabled: true`**: Run the configured formatting tool (`prettier`, `black`, `rustfmt`, `gofmt`) before committing.
 - **`tool`**: Use the specified formatter. If not specified, detect from project config files (e.g., `.prettierrc`, `pyproject.toml`).
 
+### Workflow Impact: linting / formatting
+- **Phase 3 step 6**: If `linting.enabled`, run linter after each task and fix violations before marking complete.
+- **Phase 3 step 7**: If `formatting.enabled`, run formatter before committing.
+
 ## Test Framework
 
 If `config.implementation.testFramework` is set (e.g., `jest`, `mocha`, `pytest`, `vitest`):
@@ -456,6 +479,17 @@ If `config.implementation.testFramework` is set (e.g., `jest`, `mocha`, `pytest`
 - Run tests with the appropriate command (e.g., `npx jest`, `pytest`, `npx vitest`)
 
 If not set, detect the test framework from the project's existing test files and `package.json`/`pyproject.toml`.
+
+### Workflow Impact: testing / testFramework
+- **Phase 3 step 6**: If `testing` is `"auto"`, run tests after each task. If `"skip"`, skip testing (with safety warning). If `"manual"`, note that tests should be run.
+- **Phase 3 step 6**: If `testFramework` is set, use that framework for test generation and execution.
+
+### Workflow Impact: autoCommit / createPR
+- **Phase 3 step 7**: If `autoCommit`, commit changes after each task. If false, suggest commit format.
+- **Phase 4 step 7**: If `createPR`, create a pull request after implementation completes.
+
+### Workflow Impact: taskDelegation
+- **Phase 3 step 2**: If `"auto"` and 4+ pending tasks, activate delegation. If `"always"`, activate regardless. If `"never"`, use sequential execution.
 
 ## Module-Specific Configuration
 
@@ -475,6 +509,9 @@ If `config.integrations` is configured, use these as **contextual information**:
 - **`analytics`**: Include analytics tracking in acceptance criteria when relevant
 
 These are informational — the agent uses them to generate more accurate specs, not to directly invoke the tools.
+
+### Workflow Impact: integrations
+- **Informational only**: Referenced in Phase 2 spec generation (rollout plans, risk mitigations, acceptance criteria). No workflow conditionals — context enrichment only.
 
 ## System-Managed Fields
 
@@ -2732,6 +2769,16 @@ Detailed description of what needs to be done.
 ## Summary
 <!-- Populated at completion (Phase 4). Leave blank during implementation. -->
 
+## Phase 1 Context Summary
+<!-- Populated during Phase 1. Proceeding to Phase 2 without this section is a protocol breach. -->
+- Config: [loaded from `.specops.json` or defaults — vertical, specsDir, taskTracking]
+- Context recovery: [none / resuming <spec-name>]
+- Steering files: [loaded N files (names)]
+- Repo map: [loaded / generated / stale-refreshed / not available]
+- Memory: [loaded N decisions from M specs, P patterns / no memory files]
+- Vertical: [detected or configured vertical]
+- Affected files: [list of affected file paths]
+
 ## Decision Log
 | # | Decision | Rationale | Task | Timestamp |
 |---|----------|-----------|------|-----------|
@@ -2743,6 +2790,10 @@ Detailed description of what needs to be done.
 ## Blockers Encountered
 | Blocker | Resolution | Impact | Task |
 |---------|------------|--------|------|
+
+## Documentation Review
+<!-- Populated during Phase 4. Lists each doc file checked and its status. -->
+<!-- This section is mandatory for completed specs — the linter validates its presence. -->
 
 ## Session Log
 <!-- Each implementation session appends a brief entry here. -->
@@ -2823,6 +2874,23 @@ No other adaptations — frontend is well-served by default templates.
 ### backend / fullstack
 
 No adaptations needed — default templates are designed for these verticals.
+
+### Vocabulary Verification
+
+After generating spec files in Phase 2, verify that vertical-specific vocabulary was applied. For each non-default vertical, check that prohibited default terms do not remain in the generated spec files:
+
+| Vertical | Prohibited Default Terms |
+|----------|------------------------|
+| infrastructure | "User Stories", "API Endpoints", "Components" (when "Resources" applies), "Sequence Diagrams", "Data Model" |
+| data | "User Stories", "API Endpoints", "Components" (when "Pipeline Stages" applies), "Sequence Diagrams", "Data Model" |
+| library | "User Stories" (when "Developer Use Cases" applies), "API Endpoints" (when "Public API Surface" applies) |
+| builder | "User Stories" (when "Product Requirements" applies), "API Endpoints" (when "Integration Points" applies), "Rollout Plan" (when "Ship Plan" applies) |
+
+Scan each generated spec file (requirements.md/bugfix.md/refactor.md, design.md, tasks.md) for prohibited terms. If any are found, replace with the vertical-specific term. Record the result in implementation.md Phase 1 Context Summary as `- Vocabulary check: [pass / N term(s) replaced]`.
+
+This check does NOT apply when:
+- The vertical is `backend`, `fullstack`, or `frontend` (default vocabulary is correct)
+- A custom template is used (custom templates define their own structure)
 
 ### Applying Adaptation Rules
 
@@ -3007,6 +3075,16 @@ Blocked ──────► In Progress
 - Blocked → Completed (must unblock first)
 - Blocked → Pending (cannot regress)
 
+### Pre-Task Anchoring
+
+Before setting a task to `In Progress`, anchor the task's expected scope in `implementation.md`:
+
+1. Read the file at the task's **Acceptance Criteria** and **Tests Required** sections from `tasks.md`
+2. Read the file at the relevant requirements from `requirements.md`/`bugfix.md`/`refactor.md` and the matching design section from `design.md`
+3. Edit the file at `implementation.md` — append a brief Task Scope note to the Session Log: `Task N scope: [1-2 sentence summary of expected changes and acceptance criteria]`
+
+This anchored scope is used by the Pivot Check (below) to detect drift between planned and actual changes. Without the anchor, pivot detection has nothing to compare against.
+
 ### Write Ordering Protocol
 
 When changing task status, follow this strict sequence:
@@ -3065,7 +3143,7 @@ When resuming implementation in a new session, Read the file at `implementation.
 
 ### Pivot Check
 
-Before marking a task `Completed`, compare the actual output against what was planned in `design.md` and `requirements.md`. If the implementation diverged from the plan (different approach, different data format, different API, scope change), update the affected spec artifact **before** closing the task. Spec artifacts that still describe the old approach after a pivot are a recurring drift class — Phase 4 checkbox verification cannot catch it because the outdated spec text has no checkboxes to fail.
+Before marking a task `Completed`, compare the actual output against the anchored Task Scope note in `implementation.md` (written during Pre-Task Anchoring) and the planned approach in `design.md` and `requirements.md`. If the implementation diverged from the anchored scope (different approach, different data format, different API, scope change), update the affected spec artifact **before** closing the task. Spec artifacts that still describe the old approach after a pivot are a recurring drift class — Phase 4 checkbox verification cannot catch it because the outdated spec text has no checkboxes to fail.
 
 ### Acceptance Criteria Verification
 

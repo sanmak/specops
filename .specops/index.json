@@ -32,6 +32,14 @@
     "updated": "2026-03-07T12:30:00Z"
   },
   {
+    "id": "enforcement-roadmap",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-18T20:22:30Z"
+  },
+  {
     "id": "install-integrity-verification",
     "type": "feature",
     "status": "completed",

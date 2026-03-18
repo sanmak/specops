@@ -28,3 +28,6 @@
 
 ### install-integrity-verification (feature) — 2026-03-17
 5 tasks completed, 0 deviations from design, 0 blockers. Added SHA-256 checksum verification to `remote-install.sh` addressing Agent Trust Hub HIGH-priority finding. Three new functions: `detect_hash_cmd()`, `fetch_checksums()`, `verify_file()`. `--no-verify` flag for development use. Security documentation updated: SECURITY.md (install trust chain, manual verification, residual risks), SBOM.md (automatic verification), SECURITY-AUDIT.md (Agent Trust Hub findings). ShellCheck clean, all 7 tests pass.
+
+### enforcement-roadmap (feature) — 2026-03-18
+8 tasks completed, 0 deviations from design, 0 blockers. Created `scripts/lint-spec-artifacts.py` with 3 validation checks (checkbox staleness, documentation review, version validation) integrated into test suite. Added Phase 1 Context Summary gate and Phase 4 Documentation Review gate to `core/workflow.md`. Added Workflow Impact annotations for all behavioral config values in `core/config-handling.md`. Added COHERENCE_MARKERS to `generator/validate.py` with cross-platform consistency. Added pre-task anchoring to `core/task-tracking.md` and vertical vocabulary verification to `core/verticals.md`. All 4 platform outputs regenerated, all 8 tests pass.
