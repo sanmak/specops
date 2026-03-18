@@ -64,7 +64,7 @@ Add an "Install Verification" subsection to the Trust Model section of SECURITY.
 - `SECURITY.md`
 
 **Tests Required:**
-- [ ] No broken markdown links
+- [x] No broken markdown links
 
 ---
 
@@ -91,7 +91,7 @@ Update the "Integrity Verification" section in `docs/SBOM.md` to reflect that th
 - `docs/SBOM.md`
 
 **Tests Required:**
-- [ ] No broken markdown links
+- [x] No broken markdown links
 
 ---
 
@@ -117,7 +117,7 @@ Update the security audit report to reflect that finding #2 (checksum verificati
 - `docs/SECURITY-AUDIT.md`
 
 **Tests Required:**
-- [ ] No broken markdown links
+- [x] No broken markdown links
 
 ---
 
