@@ -20,6 +20,12 @@
       "lesson": "Avoid renumbering Phase 1 steps when inserting new logic — use sub-step notation (e.g., step 3.5) to prevent breaking cross-module references"
     },
     {
+      "category": "marker alignment",
+      "specs": ["drift-detection", "workflow-enforcement-gates"],
+      "count": 2,
+      "lesson": "Validator markers are case-sensitive substrings — when restructuring workflow headings, verify the validator marker still matches the generated output"
+    },
+    {
       "category": "shell safety",
       "specs": ["install-integrity-verification"],
       "count": 1,
@@ -29,12 +35,17 @@
   "fileOverlaps": [
     {
       "file": "core/workflow.md",
-      "specs": ["ears-notation", "bugfix-regression-analysis", "steering-files", "drift-detection", "ast-based-repo-map"],
-      "count": 5
+      "specs": ["ears-notation", "bugfix-regression-analysis", "steering-files", "drift-detection", "ast-based-repo-map", "workflow-enforcement-gates"],
+      "count": 6
     },
     {
       "file": "generator/validate.py",
-      "specs": ["bugfix-regression-analysis", "steering-files", "drift-detection", "ast-based-repo-map"],
+      "specs": ["bugfix-regression-analysis", "steering-files", "drift-detection", "ast-based-repo-map", "workflow-enforcement-gates"],
+      "count": 5
+    },
+    {
+      "file": "tests/test_platform_consistency.py",
+      "specs": ["steering-files", "drift-detection", "ast-based-repo-map", "workflow-enforcement-gates"],
       "count": 4
     },
     {
@@ -43,9 +54,9 @@
       "count": 3
     },
     {
-      "file": "tests/test_platform_consistency.py",
-      "specs": ["steering-files", "drift-detection", "ast-based-repo-map"],
-      "count": 3
+      "file": "core/config-handling.md",
+      "specs": ["workflow-enforcement-gates"],
+      "count": 1
     },
     {
       "file": "core/templates/bugfix.md",

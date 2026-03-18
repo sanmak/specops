@@ -71,7 +71,7 @@ REQUIRED_MARKERS = {
         "review mode",
         "revision mode",
         "Self-review mode",
-        "implementation gate",
+        "Implementation gate",
         "Status Dashboard",
     ],
     "view": [
@@ -130,6 +130,16 @@ REQUIRED_MARKERS = {
         "decisions.json",
         "context.md",
         "patterns.json",
+    ],
+    "external_tracking": [
+        "Issue Creation Timing",
+        "Issue Creation Protocol",
+        "Graceful Degradation",
+        "Status Sync",
+        "Commit Linking",
+        "IssueID",
+        "Task tracking gate",
+        "attempted creation",
     ],
     "repo_map": [
         "## Repo Map",
