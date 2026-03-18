@@ -30,7 +30,7 @@ When SpecOps is installed, only these files are copied to the target directory:
 
 ## Integrity Verification
 
-**Automatic (remote installer):** The remote installer (`scripts/remote-install.sh`) automatically verifies downloaded files against `CHECKSUMS.sha256` using SHA-256 hashes before placing them on disk. No manual action required.
+**Automatic (remote installer):** The remote installer (`scripts/remote-install.sh`) automatically verifies downloaded files against `CHECKSUMS.sha256` using SHA-256 hashes after download and before proceeding with installation. Files that fail verification are removed. No manual action required.
 
 **Manual (after installation):**
 

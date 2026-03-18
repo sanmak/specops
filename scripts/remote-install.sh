@@ -109,14 +109,14 @@ is_interactive() {
 }
 
 # --- Checksum verification ---
-HASH_CMD=""
+HASH_CMD=()
 CHECKSUMS_FILE=""
 
 detect_hash_cmd() {
   if command -v sha256sum &>/dev/null; then
-    HASH_CMD="sha256sum"
+    HASH_CMD=(sha256sum)
   elif command -v shasum &>/dev/null; then
-    HASH_CMD="shasum -a 256"
+    HASH_CMD=(shasum -a 256)
   else
     echo "Warning: Neither sha256sum nor shasum found. Cannot verify checksums."
     return 1
@@ -150,12 +150,13 @@ fetch_checksums() {
 
 # verify_file <local_file> <repo_path>
 # Verifies the SHA-256 hash of a local file against the CHECKSUMS.sha256 entry
-# for the given repo path. Returns 0 on match, 1 on mismatch or missing entry.
+# for the given repo path. Returns 0 on match or missing entry (with warning),
+# 1 on mismatch (file is removed).
 verify_file() {
   local local_file="$1"
   local repo_path="$2"
 
-  if [[ -z "$CHECKSUMS_FILE" ]] || [[ -z "$HASH_CMD" ]]; then
+  if [[ -z "$CHECKSUMS_FILE" ]] || [[ ${#HASH_CMD[@]} -eq 0 ]]; then
     return 0  # no checksums available, skip silently
   fi
 
@@ -168,7 +169,7 @@ verify_file() {
   fi
 
   local actual_hash
-  actual_hash="$($HASH_CMD "$local_file" | awk '{print $1}')"
+  actual_hash="$("${HASH_CMD[@]}" "$local_file" | awk '{print $1}')"
 
   if [[ "$actual_hash" != "$expected_hash" ]]; then
     echo ""
@@ -223,7 +224,18 @@ elif detect_hash_cmd; then
   fi
   echo ""
 else
-  echo "Continuing without checksum verification."
+  echo "Warning: No SHA-256 hash command available (sha256sum or shasum)."
+  if is_interactive; then
+    read -rp "Continue without checksum verification? [y/N]: " hash_choice
+    if [[ ! $hash_choice =~ ^[Yy]$ ]]; then
+      echo "Aborting. Install sha256sum or shasum and try again."
+      exit 1
+    fi
+  else
+    echo "Aborting: Cannot verify file integrity in non-interactive mode (no hash command)."
+    echo "Use --no-verify to skip, or install sha256sum/shasum."
+    exit 1
+  fi
   echo ""
 fi
 

@@ -72,7 +72,7 @@ SpecOps operates within the following trust boundaries:
 
 4. **The agent respects Claude Code's permission model**: All file operations, git commands, and external actions are subject to Claude Code's built-in permission system. SpecOps does not bypass these controls.
 
-5. **Remote installation uses checksum verification**: When installing via `curl | bash` (the remote installer), downloaded files are verified against SHA-256 checksums published in `CHECKSUMS.sha256` before being placed on disk. This ensures file integrity in transit. The checksums file is fetched from the same version ref as the installed files.
+5. **Remote installation uses checksum verification**: When installing via `curl | bash` (the remote installer), downloaded files are verified against SHA-256 checksums published in `CHECKSUMS.sha256` after download and before proceeding with installation. Files that fail verification are removed and installation aborts. The checksums file is fetched from the same version ref as the installed files.
 
 ### Install Trust Chain
 
