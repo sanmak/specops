@@ -15,7 +15,7 @@ If empty, try auto-detection: `gh pr view --json number -q .number 2>/dev/null`.
 ### Step 1: Pre-flight checks
 
 1. **GitHub CLI available**: Run `gh --version`. If unavailable, tell the user "GitHub CLI (gh) is required. Install with: brew install gh" and stop.
-2. **PR exists, is open, and is conflicting**: Run `gh pr view <PR_NUMBER> --json number,state,headRefName,baseRefName,title,mergeable`. If the PR does not exist or is not open, report the error and stop. If `mergeable` is not `CONFLICTING`, report "PR #<N> has no merge conflicts (mergeable: <status>)" and stop. Save `headRefName` as `PR_BRANCH`, `baseRefName` as `BASE_BRANCH`, `title` as `PR_TITLE`.
+2. **PR exists, is open, and is conflicting**: Run `gh pr view <PR_NUMBER> --json number,state,headRefName,baseRefName,title,mergeable`. If the PR does not exist or is not open, report the error and stop. If `mergeable` is `UNKNOWN`, retry up to 5 times with 3-second waits — GitHub may still be computing the merge state. If `mergeable` remains `UNKNOWN` after retries, report "PR #<N> mergeability is UNKNOWN after retries — try again shortly" and stop. If `mergeable` is not `CONFLICTING` (i.e., `MERGEABLE`), report "PR #<N> has no merge conflicts (mergeable: <status>)" and stop. Save `headRefName` as `PR_BRANCH`, `baseRefName` as `BASE_BRANCH`, `title` as `PR_TITLE`.
 3. **Extract owner/repo**: Run `gh repo view --json owner,name -q '.owner.login + "/" + .name'`. Save as `OWNER_REPO`.
 4. **Working tree is clean**: Run `git status --porcelain`. If there are uncommitted changes, tell the user "Working tree has uncommitted changes. Please commit or stash them first." and stop.
 5. **Clean stale worktree**: Run `git worktree list`. If an entry exists with path `.claude/worktrees/resolve-conflicts-<PR_NUMBER>`, remove it with `git worktree remove --force <path>`. Only remove the worktree matching the current PR number — do NOT remove other worktrees, as they may belong to concurrent runs.
@@ -75,6 +75,7 @@ Classify each conflicting file:
 
 - **Generated files**: `platforms/claude/SKILL.md`, `platforms/cursor/specops.mdc`, `platforms/codex/SKILL.md`, `platforms/copilot/specops.instructions.md`, `skills/specops/SKILL.md`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`
   Resolution: Accept the base branch version (`git -C <WORKTREE_DIR> checkout --theirs <path>`) — these will be fully regenerated in Step 6.
+  Note: If generated files conflict but no source files (`core/`, `generator/templates/`, `platforms/*/platform.json`) appear in the merge diff, Step 6 will not trigger regeneration. In this case the base-branch version is accepted as-is. This scenario only arises if a generated file was directly edited (a convention violation per CLAUDE.md).
 
 - **Checksummed artifact**: `CHECKSUMS.sha256`
   Resolution: Accept the base branch version (`git -C <WORKTREE_DIR> checkout --theirs <path>`) — this will be regenerated in Step 6.
@@ -112,8 +113,8 @@ Parse all three as JSON. For each key:
 3. **Object fields where only one side changed**: Take the changed side.
 
 4. **Nested objects with `count` + `specs` pattern** (e.g., patterns.json fileOverlaps):
-   - `count`: Take the higher value
    - `specs` array: Union (combine both, deduplicate)
+   - `count`: Set to the length of the merged `specs` array (do NOT use max, as the union may exceed either side's count)
 
 After resolution, write the merged JSON (pretty-printed with 2-space indent) and stage it:
 `git -C <WORKTREE_DIR> add <path>`.
@@ -191,6 +192,7 @@ If any validation fails, attempt to fix (up to 2 retries). If still failing, rep
 ### Step 7: Commit and push
 
 1. Stage all remaining files: `git -C <WORKTREE_DIR> add -A`
+1b. **Check for staged changes**: Run `git -C <WORKTREE_DIR> diff --cached --name-only`. If empty (no changes staged), the merge produced no net diff — skip to Step 8 (cleanup) and report "Merge resolved to no-op — no changes to commit" in Step 9.
 2. Un-stage sensitive files if any are present:
    - `.env`, `.env.*`
    - `credentials.json`, `secrets.json`, `*.pem`, `*.key`
@@ -223,6 +225,8 @@ git worktree remove <WORKTREE_DIR> --force
 ```
 
 If the `.claude/worktrees/` directory is empty after cleanup, remove it: `rmdir .claude/worktrees/ 2>/dev/null`.
+
+If any step after Step 3 fails and the command must stop, run this cleanup step before exiting.
 
 ### Step 9: Confirm
 
