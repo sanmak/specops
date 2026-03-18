@@ -141,7 +141,7 @@ list
 | `implementation.linting.fixOnSave` | boolean | `false` | | Auto-fix lint issues on save |
 | `implementation.formatting.enabled` | boolean | `true` | | Run formatter before commits |
 | `implementation.formatting.tool` | `prettier`/`black`/`rustfmt`/`gofmt` | (auto-detect) | enum | Formatting tool |
-| `implementation.taskDelegation` | `auto`/`always`/`never` | `auto` | enum | Task delegation strategy for Phase 3. `auto`: delegate when 4+ tasks. `always`: always delegate. `never`: sequential. Strategy adapts to platform capabilities. |
+| `implementation.taskDelegation` | `auto`/`always`/`never` | `auto` | enum | Task delegation strategy for Phase 3. `auto`: delegate when complexity score reaches threshold (based on effort sizing and file breadth). `always`: always delegate. `never`: sequential. Strategy adapts to platform capabilities. |
 | `team.codeReview.required` | boolean | `false` | | Require code review |
 | `team.codeReview.minApprovals` | integer | `1` | min 1 | Minimum approvals needed |
 | `team.codeReview.requireTests` | boolean | `true` | | Require tests in implementation |
