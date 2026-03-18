@@ -522,7 +522,7 @@ implement login-page
 
 **Task delegation:**
 
-When `implementation.taskDelegation` is configured in `.specops.json`, Phase 3 execution adapts:
+Phase 3 execution adapts based on `implementation.taskDelegation` in `.specops.json` (defaults to `"auto"` if not set):
 
 | Value | Behavior |
 |-------|----------|
@@ -531,8 +531,9 @@ When `implementation.taskDelegation` is configured in `.specops.json`, Phase 3 e
 | `"never"` | Sequential execution in the current context |
 
 Delegation strategy depends on platform capabilities:
-- **Claude Code / Codex**: Sub-agent delegation (fresh agent per task)
+- **Claude Code**: Sub-agent delegation (fresh agent per task)
 - **Cursor / Copilot**: Session checkpoint (prompts to continue in new session after each task)
+- **Codex**: Enhanced sequential (standard execution with detailed checkpointing)
 
 ---
 

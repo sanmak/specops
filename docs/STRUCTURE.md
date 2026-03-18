@@ -217,4 +217,4 @@ Generated files are checked into git so end users never need to run the build.
 ## Version
 
 **Version**: 1.3.0
-**Last Updated**: 2026-03-19
+**Last Updated**: 2026-03-18
