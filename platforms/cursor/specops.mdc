@@ -111,8 +111,8 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 
    - If no, proceed without changes
 
-6. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow.
-7. **External issue creation**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. Read the file at `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`, create issues via the Issue Creation Protocol, and write IssueIDs back to `tasks.md`.
+6. **External issue creation**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. Read the file at `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`, create issues via the Issue Creation Protocol, and write IssueIDs back to `tasks.md`.
+7. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow.
 
 **Phase 2.5: Review Cycle** (if spec review enabled)
 See "Collaborative Spec Review" module for the full review workflow including review mode, revision mode, and approval tracking.
@@ -345,20 +345,25 @@ After Phase 2 generates `tasks.md` and before Phase 3 begins, create external is
 
 For each eligible task:
 
+**Shell safety**: `<TaskTitle>` and `<TaskDescription>` contain user-controlled text. Before interpolating into shell commands, write the title and body to temporary files and pass via file-based arguments (e.g., `--body-file`). If file-based arguments are unavailable for the tracker CLI, single-quote the values with internal single-quotes escaped (`'` → `'\''`). Never pass unescaped user text directly in shell command strings.
+
 **GitHub** (`taskTracking: "github"`):
-1. Run the terminal command(`gh issue create --title "<taskPrefix><TaskTitle>" --body "<TaskDescription>"`)
-2. Parse the issue URL/number from stdout
-3. Edit the file at `tasks.md` — set the task's `**IssueID:**` to the returned issue identifier (e.g., `#42`)
+1. Create the file at a temp file with `<TaskDescription>` as content
+2. Run the terminal command(`gh issue create --title '<taskPrefix><TaskTitle>' --body-file <tempFile>`)
+3. Parse the issue URL/number from stdout
+4. Edit the file at `tasks.md` — set the task's `**IssueID:**` to the returned issue identifier (e.g., `#42`)
 
 **Jira** (`taskTracking: "jira"`):
-1. Run the terminal command(`jira issue create --type=Task --summary="<taskPrefix><TaskTitle>" --description="<TaskDescription>"`)
-2. Parse the issue key from stdout (e.g., `PROJ-123`)
-3. Edit the file at `tasks.md` — set the task's `**IssueID:**` to the returned key
+1. Create the file at a temp file with `<TaskDescription>` as content
+2. Run the terminal command(`jira issue create --type=Task --summary='<taskPrefix><TaskTitle>' --description-file <tempFile>`)
+3. Parse the issue key from stdout (e.g., `PROJ-123`)
+4. Edit the file at `tasks.md` — set the task's `**IssueID:**` to the returned key
 
 **Linear** (`taskTracking: "linear"`):
-1. Run the terminal command(`linear issue create --title "<taskPrefix><TaskTitle>" --description "<TaskDescription>"`)
-2. Parse the issue identifier from stdout
-3. Edit the file at `tasks.md` — set the task's `**IssueID:**` to the returned identifier
+1. Create the file at a temp file with `<TaskDescription>` as content
+2. Run the terminal command(`linear issue create --title '<taskPrefix><TaskTitle>' --description-file <tempFile>`)
+3. Parse the issue identifier from stdout
+4. Edit the file at `tasks.md` — set the task's `**IssueID:**` to the returned identifier
 
 If `config.team.taskPrefix` is set, prepend it to the issue title.
 
@@ -373,20 +378,28 @@ If the CLI tool is not installed or the command fails:
 
 When task status changes in `tasks.md` (as part of the Task State Machine):
 
-- **Pending → In Progress**: If IssueID exists and is not `None` or `FAILED`, update the external issue:
+- **Pending → In Progress**: If IssueID exists and is neither `None` nor prefixed with `FAILED`, update the external issue:
   - GitHub: Run the terminal command(`gh issue edit <number> --add-label "in-progress"`)
   - Jira: Run the terminal command(`jira issue move <key> "In Progress"`)
   - Linear: Run the terminal command(`linear issue update <id> --status "In Progress"`)
-- **In Progress → Completed**: If IssueID exists and is not `None` or `FAILED`, close the external issue:
+- **In Progress → Completed**: If IssueID exists and is neither `None` nor prefixed with `FAILED`, close the external issue:
   - GitHub: Run the terminal command(`gh issue close <number>`)
   - Jira: Run the terminal command(`jira issue move <key> "Done"`)
   - Linear: Run the terminal command(`linear issue update <id> --status "Done"`)
+- **In Progress → Blocked**: If IssueID exists and is neither `None` nor prefixed with `FAILED`, update the external issue to blocked state:
+  - GitHub: Run the terminal command(`gh issue edit <number> --add-label "blocked"`)
+  - Jira: Run the terminal command(`jira issue move <key> "Blocked"`)
+  - Linear: Run the terminal command(`linear issue update <id> --status "Blocked"`)
+- **Blocked → In Progress**: If IssueID exists and is neither `None` nor prefixed with `FAILED`, move the external issue back to in-progress:
+  - GitHub: Run the terminal command(`gh issue edit <number> --remove-label "blocked" --add-label "in-progress"`)
+  - Jira: Run the terminal command(`jira issue move <key> "In Progress"`)
+  - Linear: Run the terminal command(`linear issue update <id> --status "In Progress"`)
 
 Status Sync failures are warned (Tell the user), not blocking.
 
 ### Commit Linking
 
-When `taskTracking` is not `"none"` and the current task has a valid IssueID (not `None` or `FAILED`):
+When `taskTracking` is not `"none"` and the current task has a valid IssueID (neither `None` nor prefixed with `FAILED`):
 - If `autoCommit` is true: include the IssueID in the commit message (e.g., `feat: implement login form (#42)` or `feat: implement login form (PROJ-123)`)
 - If `autoCommit` is false: suggest the commit format to the user: "Suggested commit: `<message> (<IssueID>)`"
 
@@ -395,7 +408,10 @@ When `taskTracking` is not `"none"` and the current task has a valid IssueID (no
 At the start of Phase 3, after the review gate check, verify external issue creation. Skipping this gate when `config.team.taskTracking` is not `"none"` is a protocol breach.
 
 1. Read the file at `tasks.md` — identify all tasks with `**Priority:** High` or `**Priority:** Medium`
-2. For each eligible task, check that `**IssueID:**` is populated (not `None` or absent)
+2. For each eligible task, require `**IssueID:**` to be either:
+   - a valid tracker identifier for the configured platform (e.g., `#42`, `PROJ-123`), or
+   - `FAILED — <reason>` produced by Graceful Degradation after an attempted creation
+   Values like `TBD`, `N/A`, or other placeholders do not satisfy the gate.
 3. If any are missing: attempt issue creation for the missing tasks using the Issue Creation Protocol above
 4. If issue creation succeeds for some tasks but fails for others (CLI tool error, network failure): Tell the user("Partial external tracking — <N>/<M> task(s) created, <F> failed") and proceed. The Graceful Degradation rules apply to individual failures.
 5. If issue creation fails for ALL eligible tasks: Tell the user("External tracking unavailable — all <N> issue creation attempts failed. Proceeding with internal task tracking only.") and proceed.
@@ -3061,7 +3077,7 @@ A task or spec with all main acceptance criteria checked and some items in **Def
 
 ### External Tracker Sync
 
-When `config.team.taskTracking` is not `"none"` and the task has a populated `**IssueID:**` (not `None` or `FAILED`):
+When `config.team.taskTracking` is not `"none"` and the task has a populated `**IssueID:**` (neither `None` nor prefixed with `FAILED`):
 
 On **every status transition** (Pending → In Progress, In Progress → Completed, In Progress → Blocked, Blocked → In Progress), after updating `tasks.md` (Write Ordering Protocol), sync the status to the external tracker following the Status Sync protocol in the Configuration Handling module.
 

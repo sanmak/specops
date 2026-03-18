@@ -104,8 +104,8 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 
    - If no, proceed without changes
 
-6. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow.
-7. **External issue creation**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. READ_FILE `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`, create issues via the Issue Creation Protocol, and write IssueIDs back to `tasks.md`.
+6. **External issue creation**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. READ_FILE `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`, create issues via the Issue Creation Protocol, and write IssueIDs back to `tasks.md`.
+7. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow.
 
 **Phase 2.5: Review Cycle** (if spec review enabled)
 See "Collaborative Spec Review" module for the full review workflow including review mode, revision mode, and approval tracking.

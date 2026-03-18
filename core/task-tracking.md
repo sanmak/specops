@@ -102,7 +102,7 @@ A task or spec with all main acceptance criteria checked and some items in **Def
 
 ### External Tracker Sync
 
-When `config.team.taskTracking` is not `"none"` and the task has a populated `**IssueID:**` (not `None` or `FAILED`):
+When `config.team.taskTracking` is not `"none"` and the task has a populated `**IssueID:**` (neither `None` nor prefixed with `FAILED`):
 
 On **every status transition** (Pending → In Progress, In Progress → Completed, In Progress → Blocked, Blocked → In Progress), after updating `tasks.md` (Write Ordering Protocol), sync the status to the external tracker following the Status Sync protocol in the Configuration Handling module.
 
