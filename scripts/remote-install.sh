@@ -161,11 +161,13 @@ verify_file() {
   fi
 
   local expected_hash
-  expected_hash="$(grep -F "  ${repo_path}" "$CHECKSUMS_FILE" | head -1 | awk '{print $1}' || true)"
+  expected_hash="$(grep -E "  ${repo_path}$" "$CHECKSUMS_FILE" | head -1 | awk '{print $1}' || true)"
 
   if [[ -z "$expected_hash" ]]; then
-    echo "Warning: No checksum entry for ${repo_path} — skipping verification for this file"
-    return 0
+    echo "ERROR: No checksum entry for ${repo_path} in CHECKSUMS.sha256"
+    echo "Cannot verify file integrity — aborting."
+    rm -f "$local_file"
+    return 1
   fi
 
   local actual_hash
