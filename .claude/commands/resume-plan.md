@@ -35,7 +35,10 @@ Available plans (most recent first):
 
 **If `$ARGUMENTS` is non-empty:**
 
-1. If `$ARGUMENTS` is a full path and the file exists, use it directly. Save as `PLAN_PATH`.
+1. If `$ARGUMENTS` is a full path:
+   - Reject if it is outside `~/.claude/plans/` unless the user explicitly confirms.
+   - Require `.md` extension.
+   - If valid and the file exists, save as `PLAN_PATH`; otherwise report an error and stop.
 2. If `$ARGUMENTS` is a filename (with or without `.md`), look for it in `~/.claude/plans/`. Append `.md` if not already present. If found, save as `PLAN_PATH`.
 3. If the file is not found, report "Plan file not found: `$ARGUMENTS`. Run `/resume-plan` without arguments to list available plans." and stop.
 
@@ -48,15 +51,15 @@ Available plans (most recent first):
 
 ### Step 3: Check git state
 
-1. Run `git status` to check the working tree. If there are uncommitted changes (modified, staged, or untracked files — excluding untracked files under `.claude/`), warn the user:
+1. Check for detached HEAD: run `git symbolic-ref -q HEAD`. If this fails (exit code non-zero), report: "You are in a detached HEAD state. Please checkout a branch before resuming a plan (`git checkout main` or `git checkout -b <branch-name>`)." and stop.
+
+2. Run `git status` to check the working tree. If there are uncommitted changes (modified, staged, or untracked files — excluding untracked files under `.claude/`), warn the user:
 
    "There are uncommitted changes in the working tree. These should be committed or stashed before resuming a plan to avoid conflicts."
 
    Suggest: "Commit with `/commit`, stash with `git stash`, or continue at your own risk."
 
    Ask: "Continue with uncommitted changes? (yes/no)". If the user says no, stop.
-
-2. Check for detached HEAD: run `git symbolic-ref -q HEAD`. If this fails (exit code non-zero), report: "You are in a detached HEAD state. Please checkout a branch before resuming a plan (`git checkout main` or `git checkout -b <branch-name>`)." and stop.
 
 3. Save the current branch name: `git rev-parse --abbrev-ref HEAD` as `CURRENT_BRANCH`.
 

@@ -111,8 +111,12 @@ def lint_checkbox_staleness(specs_dir):
         if not os.path.exists(tasks_path):
             continue
 
-        with open(tasks_path, "r", encoding="utf-8") as f:
-            content = f.read()
+        try:
+            with open(tasks_path, "r", encoding="utf-8") as f:
+                content = f.read()
+        except OSError as e:
+            errors.append(f"  {spec_name}: cannot read tasks.md: {e}")
+            continue
 
         tasks = parse_tasks(content)
         for task in tasks:
@@ -129,7 +133,8 @@ def lint_docs_review(specs_dir):
     """Check that completed specs have Documentation Review in implementation.md.
 
     Legacy specs (completed before this gate was introduced, identified by
-    specopsCreatedWith < 1.4.0 or absent) are skipped.
+    specopsCreatedWith <= 1.3.0 or absent) are skipped. The gate was introduced
+    at 1.3.0 but specs created at that version predate enforcement.
     """
     errors = []
 
@@ -155,11 +160,14 @@ def lint_docs_review(specs_dir):
         created_with = spec.get("specopsCreatedWith", "")
         if not created_with or created_with == "unknown":
             continue
-        # Parse version — skip if < 1.4.0
+        # Parse version — skip if <= 1.3.0 (gate introduced at 1.3.0, specs at
+        # that version predate enforcement)
         try:
             parts = [int(x) for x in created_with.split(".")]
             if len(parts) == 3 and (
-                parts[0] < 1 or (parts[0] == 1 and parts[1] < 4)
+                parts[0] < 1
+                or (parts[0] == 1 and parts[1] < 3)
+                or (parts[0] == 1 and parts[1] == 3 and parts[2] == 0)
             ):
                 continue
         except (ValueError, IndexError):
@@ -172,8 +180,12 @@ def lint_docs_review(specs_dir):
             )
             continue
 
-        with open(impl_path, "r", encoding="utf-8") as f:
-            impl_content = f.read()
+        try:
+            with open(impl_path, "r", encoding="utf-8") as f:
+                impl_content = f.read()
+        except OSError as e:
+            errors.append(f"  {spec_name}: cannot read implementation.md: {e}")
+            continue
 
         if "## Documentation Review" not in impl_content:
             errors.append(
@@ -186,7 +198,7 @@ def lint_docs_review(specs_dir):
 def lint_version_fields(specs_dir):
     """Validate specopsCreatedWith and specopsUpdatedWith in spec.json."""
     semver_re = re.compile(r"^\d+\.\d+\.\d+$")
-    warnings = []
+    errors = []
 
     for spec_name in sorted(os.listdir(specs_dir)):
         spec_dir = os.path.join(specs_dir, spec_name)
@@ -201,7 +213,7 @@ def lint_version_fields(specs_dir):
             with open(spec_json_path, "r", encoding="utf-8") as f:
                 spec = json.load(f)
         except (json.JSONDecodeError, OSError):
-            warnings.append(f"  {spec_name}: spec.json is not valid JSON")
+            errors.append(f"  {spec_name}: spec.json is not valid JSON")
             continue
 
         for field in ["specopsCreatedWith", "specopsUpdatedWith"]:
@@ -213,11 +225,11 @@ def lint_version_fields(specs_dir):
                 # Acceptable fallback
                 continue
             if not semver_re.match(value):
-                warnings.append(
+                errors.append(
                     f"  {spec_name}: {field} has invalid version format: '{value}'"
                 )
 
-    return warnings
+    return errors
 
 
 def load_specops_config(specs_dir):
@@ -241,8 +253,9 @@ def lint_task_tracking(specs_dir):
     PROJ-123) or FAILED — <reason>. Values like None, TBD, or N/A indicate
     the task tracking gate was skipped — a protocol breach.
 
-    Specs created before 1.3.0 (or with no specopsCreatedWith) are skipped
-    since task tracking enforcement was introduced at 1.3.0.
+    Specs created at or before 1.3.0 (or with no specopsCreatedWith) are
+    skipped since task tracking enforcement was introduced at 1.3.0 but specs
+    at that version predate enforcement.
     """
     config = load_specops_config(specs_dir)
     task_tracking = config.get("team", {}).get("taskTracking", "none")
@@ -271,17 +284,32 @@ def lint_task_tracking(specs_dir):
         if spec.get("status") != "completed":
             continue
 
-        # Skip specs with no version info (legacy)
+        # Skip legacy specs (created at or before 1.3.0, when task tracking
+        # enforcement was introduced but specs at that version predate it)
         created_with = spec.get("specopsCreatedWith", "")
         if not created_with or created_with == "unknown":
+            continue
+        try:
+            parts = [int(x) for x in created_with.split(".")]
+            if len(parts) == 3 and (
+                parts[0] < 1
+                or (parts[0] == 1 and parts[1] < 3)
+                or (parts[0] == 1 and parts[1] == 3 and parts[2] == 0)
+            ):
+                continue
+        except (ValueError, IndexError):
             continue
 
         tasks_path = os.path.join(spec_dir, "tasks.md")
         if not os.path.exists(tasks_path):
             continue
 
-        with open(tasks_path, "r", encoding="utf-8") as f:
-            content = f.read()
+        try:
+            with open(tasks_path, "r", encoding="utf-8") as f:
+                content = f.read()
+        except OSError as e:
+            errors.append(f"  {spec_name}: cannot read tasks.md: {e}")
+            continue
 
         # First pass: collect all tasks with their priority and IssueID
         task_entries = []
@@ -315,15 +343,6 @@ def lint_task_tracking(specs_dir):
         # Filter to eligible tasks (High/Medium priority)
         eligible = [(n, p, i) for n, p, i in task_entries if p in ("High", "Medium")]
         if not eligible:
-            continue
-
-        # Check if ANY eligible task has a valid IssueID
-        has_any_valid = any(
-            i and valid_issue_re.match(i) for _, _, i in eligible
-        )
-
-        # Skip specs where no tasks have valid IssueIDs (pre-enforcement legacy)
-        if not has_any_valid:
             continue
 
         # Flag tasks with missing/invalid IssueIDs
@@ -385,11 +404,11 @@ def main():
 
     # Check 4: Version field validation
     print("\nCheck 4: Version field validation")
-    version_warnings = lint_version_fields(specs_dir)
-    if version_warnings:
-        for warn in version_warnings:
-            print(f"  WARN: {warn}")
-        # Version issues are warnings, not errors
+    version_errors = lint_version_fields(specs_dir)
+    if version_errors:
+        for err in version_errors:
+            print(f"  FAIL: {err}")
+        all_errors.extend(version_errors)
     else:
         print("  PASS: All version fields are valid")
 
@@ -398,10 +417,7 @@ def main():
         print(f"FAILED: {len(all_errors)} error(s) found")
         return 1
     else:
-        if version_warnings:
-            print(f"PASSED with {len(version_warnings)} warning(s)")
-        else:
-            print("PASSED: All checks clean")
+        print("PASSED: All checks clean")
         return 0
 
 

@@ -38,7 +38,7 @@ When `canDelegateTask = true`:
 
 **Orchestrator loop:**
 
-1. **Select next task (dependency-aware)**: READ_FILE `tasks.md` — parse all tasks with their statuses and `**Dependencies:**` fields. Build a ready set: tasks with `**Status:** Pending` whose dependencies are all `Completed` or `None`. From the ready set, select by priority (`High` > `Medium` > `Low`), then by document order (lower task number first). If the ready set is empty but Pending tasks remain, NOTIFY_USER with a dependency deadlock warning and pause for manual intervention.
+1. **Select next task (dependency-aware)**: READ_FILE `tasks.md` — parse all tasks with their statuses and `**Dependencies:**` fields. Build a ready set: tasks with `**Status:** Pending` or `**Status:** In Progress` (quality-gate downgrades) whose dependencies are all `Completed` or `None`. Prioritize `In Progress` tasks first (they were downgraded by a quality gate and need re-dispatch), then select by priority (`High` > `Medium` > `Low`), then by document order (lower task number first). If the ready set is empty but Pending tasks remain, NOTIFY_USER with a dependency deadlock warning and pause for manual intervention.
 2. EDIT_FILE `tasks.md` — set the selected task to `**Status:** In Progress` (Write Ordering Protocol)
 3. Construct the Handoff Bundle (see above)
 4. Spawn a fresh agent with the handoff bundle as its prompt
@@ -48,6 +48,7 @@ When `canDelegateTask = true`:
       - **File existence**: For each path in the task's "Files to Modify", FILE_EXISTS the path. If any file was supposed to be created but does not exist, NOTIFY_USER with warning and set the task back to `In Progress` for re-evaluation.
       - **Checkbox consistency**: Verify all Acceptance Criteria and Tests Required checkboxes are checked (`[x]`) for the Completed task. If any are unchecked, NOTIFY_USER with warning and keep the task as `In Progress`.
       - **Session Log presence**: READ_FILE `implementation.md`, verify a Session Log entry exists for this task. If missing, EDIT_FILE `implementation.md` to append a fallback entry: `Task N: completed by delegate (no session log written — quality gate backfill)`.
+      - If any quality check fails, immediately re-dispatch the same task (do not continue to next ready task). The orchestrator must re-select this task on the next loop iteration rather than leaving it stranded as `In Progress`.
    b. READ_FILE `implementation.md` — check for new Decision Log or Deviation entries
    c. If `Blocked`: read the `**Blocker:**` line and apply the following decision tree:
       - If the blocker is a missing dependency from another task: skip to the next task with no dependencies on the blocked task

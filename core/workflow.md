@@ -35,7 +35,10 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
      - If `.gitignore` contains patterns matching `.claude/` or `.claude/*`, NOTIFY_USER with warning:
        > "⚠️ `.claude/` is excluded by your `.gitignore`. SpecOps spec files will still be created in `<specsDir>/` and tracked normally, but the SpecOps skill itself (`SKILL.md`) won't be visible to other contributors. To fix: (1) use user-level installation (`~/.claude/skills/specops/`), or (2) add `!.claude/skills/` to your `.gitignore` to selectively un-ignore just the skills directory."
      - If no `.gitignore` exists or doesn't conflict, continue normally
-5.5. **Context Summary (enforcement gate)**: WRITE_FILE `implementation.md` with a `## Phase 1 Context Summary` section recording: config status, context recovery result, steering files loaded, repo map status, memory loaded, detected vertical, and affected files. This section is mandatory — proceeding to Phase 2 without writing it is a protocol breach. Use the template from `core/templates/implementation.md`.
+5.5. **Context Summary (enforcement gate)**: Capture Phase 1 context summary data for persistence.
+   - If continuing an existing spec (context recovery found an incomplete spec), EDIT_FILE `<specsDir>/<spec-name>/implementation.md` to upsert the `## Phase 1 Context Summary` section with: config status, context recovery result, steering files loaded, repo map status, memory loaded, detected vertical, and affected files. Use the template from `core/templates/implementation.md`.
+   - If creating a new spec, persist the context summary immediately after the spec directory and `implementation.md` are created in Phase 2 step 2.
+   - This section is mandatory — proceeding to Phase 2 without it is a protocol breach.
 6. Analyze the user's request to determine type (feature, bugfix, refactor)
 7. Determine the project vertical:
    - If `config.vertical` is set, use it directly
@@ -54,7 +57,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 
 **Phase 2: Create Specification**
 
-0. **Phase 2 entry gate**: READ_FILE `implementation.md` and verify it contains `## Phase 1 Context Summary`. If missing, STOP — return to Phase 1 step 5.5 and write it. Proceeding without the Context Summary is a protocol breach.
+0. **Phase 2 entry gate**: After creating `<specsDir>/<spec-name>/` and `implementation.md` (step 2 below), READ_FILE `<specsDir>/<spec-name>/implementation.md` and verify it contains `## Phase 1 Context Summary`. If missing (new spec), write the context summary now using the data captured in Phase 1 step 5.5. If the section still cannot be written, STOP — return to Phase 1 step 5.5. Proceeding without the Context Summary is a protocol breach.
 1. Generate a structured spec directory in the configured `specsDir`
 2. Create four core files:
    - `requirements.md` (or `bugfix.md` for bugs, `refactor.md` for refactors) - User stories with EARS acceptance criteria, bug analysis, or refactoring rationale
@@ -143,7 +146,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - Populate the Summary section with a brief synthesis: total tasks completed, key decisions made, any deviations from design, and overall implementation health
    - Remove any empty sections (tables with no rows) to keep it clean
 3. **Update memory (mandatory)**: Update the local memory layer following the Local Memory Layer module. Extract Decision Log entries from `implementation.md`, update `context.md` with the spec completion summary, and run pattern detection to update `patterns.json`. If the memory directory does not exist, create it. This step is mandatory — skipping memory update is a protocol breach. The completion gate in step 5 will verify this step executed.
-4. **Documentation check (enforcement gate)**: Identify project documentation that may need updating based on files modified during implementation. After completing the check, WRITE to `implementation.md` a `## Documentation Review` section listing each doc file checked, its status (up-to-date / updated / flagged), and any changes made. This section is mandatory for spec completion — the spec artifact linter validates its presence for completed specs.
+4. **Documentation check (enforcement gate)**: Identify project documentation that may need updating based on files modified during implementation. After completing the check, EDIT_FILE `<specsDir>/<spec-name>/implementation.md` to append or update a `## Documentation Review` section listing each doc file checked, its status (up-to-date / updated / flagged), and any changes made. This section is mandatory for spec completion — the spec artifact linter validates its presence for completed specs.
    - Scan for documentation files (README.md, CLAUDE.md, and files in a docs/ directory if one exists)
    - For each doc file, check if it references components, features, or configurations that were modified during this spec
    - If stale documentation is detected, update the affected sections

@@ -40,7 +40,10 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
      - If `.gitignore` contains patterns matching `.claude/` or `.claude/*`, Tell the user with warning:
        > "⚠️ `.claude/` is excluded by your `.gitignore`. SpecOps spec files will still be created in `<specsDir>/` and tracked normally, but the SpecOps skill itself (`SKILL.md`) won't be visible to other contributors. To fix: (1) use user-level installation (`~/.claude/skills/specops/`), or (2) add `!.claude/skills/` to your `.gitignore` to selectively un-ignore just the skills directory."
      - If no `.gitignore` exists or doesn't conflict, continue normally
-5.5. **Context Summary (enforcement gate)**: Create the file at `implementation.md` with a `## Phase 1 Context Summary` section recording: config status, context recovery result, steering files loaded, repo map status, memory loaded, detected vertical, and affected files. This section is mandatory — proceeding to Phase 2 without writing it is a protocol breach. Use the template from `core/templates/implementation.md`.
+5.5. **Context Summary (enforcement gate)**: Capture Phase 1 context summary data for persistence.
+   - If continuing an existing spec (context recovery found an incomplete spec), Edit the file at `<specsDir>/<spec-name>/implementation.md` to upsert the `## Phase 1 Context Summary` section with: config status, context recovery result, steering files loaded, repo map status, memory loaded, detected vertical, and affected files. Use the template from `core/templates/implementation.md`.
+   - If creating a new spec, persist the context summary immediately after the spec directory and `implementation.md` are created in Phase 2 step 2.
+   - This section is mandatory — proceeding to Phase 2 without it is a protocol breach.
 6. Analyze the user's request to determine type (feature, bugfix, refactor)
 7. Determine the project vertical:
    - If `config.vertical` is set, use it directly
@@ -59,7 +62,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 
 **Phase 2: Create Specification**
 
-0. **Phase 2 entry gate**: Read the file at `implementation.md` and verify it contains `## Phase 1 Context Summary`. If missing, STOP — return to Phase 1 step 5.5 and write it. Proceeding without the Context Summary is a protocol breach.
+0. **Phase 2 entry gate**: After creating `<specsDir>/<spec-name>/` and `implementation.md` (step 2 below), Read the file at `<specsDir>/<spec-name>/implementation.md` and verify it contains `## Phase 1 Context Summary`. If missing (new spec), write the context summary now using the data captured in Phase 1 step 5.5. If the section still cannot be written, STOP — return to Phase 1 step 5.5. Proceeding without the Context Summary is a protocol breach.
 1. Generate a structured spec directory in the configured `specsDir`
 2. Create four core files:
    - `requirements.md` (or `bugfix.md` for bugs, `refactor.md` for refactors) - User stories with EARS acceptance criteria, bug analysis, or refactoring rationale
@@ -148,7 +151,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - Populate the Summary section with a brief synthesis: total tasks completed, key decisions made, any deviations from design, and overall implementation health
    - Remove any empty sections (tables with no rows) to keep it clean
 3. **Update memory (mandatory)**: Update the local memory layer following the Local Memory Layer module. Extract Decision Log entries from `implementation.md`, update `context.md` with the spec completion summary, and run pattern detection to update `patterns.json`. If the memory directory does not exist, create it. This step is mandatory — skipping memory update is a protocol breach. The completion gate in step 5 will verify this step executed.
-4. **Documentation check (enforcement gate)**: Identify project documentation that may need updating based on files modified during implementation. After completing the check, WRITE to `implementation.md` a `## Documentation Review` section listing each doc file checked, its status (up-to-date / updated / flagged), and any changes made. This section is mandatory for spec completion — the spec artifact linter validates its presence for completed specs.
+4. **Documentation check (enforcement gate)**: Identify project documentation that may need updating based on files modified during implementation. After completing the check, Edit the file at `<specsDir>/<spec-name>/implementation.md` to append or update a `## Documentation Review` section listing each doc file checked, its status (up-to-date / updated / flagged), and any changes made. This section is mandatory for spec completion — the spec artifact linter validates its presence for completed specs.
    - Scan for documentation files (README.md, CLAUDE.md, and files in a docs/ directory if one exists)
    - For each doc file, check if it references components, features, or configurations that were modified during this spec
    - If stale documentation is detected, update the affected sections
@@ -495,7 +498,7 @@ If not set, detect the test framework from the project's existing test files and
 - **Phase 4 step 7**: If `createPR`, create a pull request after implementation completes.
 
 ### Workflow Impact: taskDelegation
-- **Phase 3 step 2**: If `"auto"` and 4+ pending tasks, activate delegation. If `"always"`, activate regardless. If `"never"`, use sequential execution.
+- **Phase 3 step 2**: If `"auto"`, compute a complexity score from pending tasks (effort weights + file count) and activate delegation when score >= 6. If `"always"`, activate regardless. If `"never"`, use sequential execution.
 
 ## Module-Specific Configuration
 
@@ -2122,17 +2125,19 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
    **Branch A — Inline content**: If plan content was provided inline with the invocation, use it directly.
 
    **Branch B — File path**: If a file path was provided with the invocation (e.g., `from-plan <path>`), validate the path before reading:
+   - Reject absolute paths (starting with `/`)
    - Reject paths containing `../` traversal sequences
    - Reject paths that do not end in `.md`
+   - Reject paths outside the project root
    - Check FILE_EXISTS(`<path>`). If the file does not exist, Tell the user: "Plan file not found: `<path>`" and stop.
    - Read the file at(`<path>`) to obtain plan content.
 
    **Branch C — Platform auto-discovery**: If no content and no path were provided, and the platform configuration includes a `planFileDirectory` field:
-   - Run the terminal command(`ls -t <planFileDirectory>/*.md 2>/dev/null | head -5`) to find the 5 most recently modified plan files.
+   - Run the terminal command(`ls -t "<planFileDirectory>"/*.md 2>/dev/null | head -5`) to find the 5 most recently modified plan files.
    - If no files found, fall through to Branch D.
    - If `canAskInteractive`: present the file list to the user with modification dates and Ask the user: "Which plan would you like to convert? Enter a number, or paste a plan below."
    - If `canAskInteractive` is false: Tell the user with the list of discovered plan files and stop ("From Plan mode found these recent plans but requires interactive input to select one.").
-   - Once the user selects a file, validate the path (no `../`, must be `.md`, FILE_EXISTS check) and Read the file at it.
+   - Once the user selects a file, validate the path (must remain within `<planFileDirectory>`, no absolute path, no `../`, must be `.md`, FILE_EXISTS check) and Read the file at it.
 
    **Branch D — Interactive paste (fallback)**: If `canAskInteractive`, Ask the user: "Please paste your plan below."
 
@@ -3250,7 +3255,7 @@ When `canDelegateTask = true`:
 
 **Orchestrator loop:**
 
-1. **Select next task (dependency-aware)**: Read the file at `tasks.md` — parse all tasks with their statuses and `**Dependencies:**` fields. Build a ready set: tasks with `**Status:** Pending` whose dependencies are all `Completed` or `None`. From the ready set, select by priority (`High` > `Medium` > `Low`), then by document order (lower task number first). If the ready set is empty but Pending tasks remain, Tell the user with a dependency deadlock warning and pause for manual intervention.
+1. **Select next task (dependency-aware)**: Read the file at `tasks.md` — parse all tasks with their statuses and `**Dependencies:**` fields. Build a ready set: tasks with `**Status:** Pending` or `**Status:** In Progress` (quality-gate downgrades) whose dependencies are all `Completed` or `None`. Prioritize `In Progress` tasks first (they were downgraded by a quality gate and need re-dispatch), then select by priority (`High` > `Medium` > `Low`), then by document order (lower task number first). If the ready set is empty but Pending tasks remain, Tell the user with a dependency deadlock warning and pause for manual intervention.
 2. Edit the file at `tasks.md` — set the selected task to `**Status:** In Progress` (Write Ordering Protocol)
 3. Construct the Handoff Bundle (see above)
 4. Spawn a fresh agent with the handoff bundle as its prompt
@@ -3260,6 +3265,7 @@ When `canDelegateTask = true`:
       - **File existence**: For each path in the task's "Files to Modify", FILE_EXISTS the path. If any file was supposed to be created but does not exist, Tell the user with warning and set the task back to `In Progress` for re-evaluation.
       - **Checkbox consistency**: Verify all Acceptance Criteria and Tests Required checkboxes are checked (`[x]`) for the Completed task. If any are unchecked, Tell the user with warning and keep the task as `In Progress`.
       - **Session Log presence**: Read the file at `implementation.md`, verify a Session Log entry exists for this task. If missing, Edit the file at `implementation.md` to append a fallback entry: `Task N: completed by delegate (no session log written — quality gate backfill)`.
+      - If any quality check fails, immediately re-dispatch the same task (do not continue to next ready task). The orchestrator must re-select this task on the next loop iteration rather than leaving it stranded as `In Progress`.
    b. Read the file at `implementation.md` — check for new Decision Log or Deviation entries
    c. If `Blocked`: read the `**Blocker:**` line and apply the following decision tree:
       - If the blocker is a missing dependency from another task: skip to the next task with no dependencies on the blocked task

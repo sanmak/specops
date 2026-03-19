@@ -210,8 +210,8 @@ MEMORY_MARKERS = [
 # Coherence verification markers that MUST appear in every output
 COHERENCE_MARKERS = [
     "Coherence Verification",
-    "cross-check",
-    "contradictions",
+    "cross-check for contradictions",
+    "contradictions between spec sections",
 ]
 
 

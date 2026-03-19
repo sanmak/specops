@@ -221,7 +221,7 @@ If not set, detect the test framework from the project's existing test files and
 - **Phase 4 step 7**: If `createPR`, create a pull request after implementation completes.
 
 ### Workflow Impact: taskDelegation
-- **Phase 3 step 2**: If `"auto"` and 4+ pending tasks, activate delegation. If `"always"`, activate regardless. If `"never"`, use sequential execution.
+- **Phase 3 step 2**: If `"auto"`, compute a complexity score from pending tasks (effort weights + file count) and activate delegation when score >= 6. If `"always"`, activate regardless. If `"never"`, use sequential execution.
 
 ## Module-Specific Configuration
 
