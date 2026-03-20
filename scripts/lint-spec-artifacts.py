@@ -160,6 +160,8 @@ def lint_docs_review(specs_dir):
         created_with = spec.get("specopsCreatedWith", "")
         if not created_with or created_with == "unknown":
             continue
+        if not isinstance(created_with, str):
+            continue
         # Parse version — skip if <= 1.3.0 (gate introduced at 1.3.0, specs at
         # that version predate enforcement)
         try:
@@ -289,6 +291,8 @@ def lint_task_tracking(specs_dir):
         created_with = spec.get("specopsCreatedWith", "")
         if not created_with or created_with == "unknown":
             continue
+        if not isinstance(created_with, str):
+            continue
         try:
             parts = [int(x) for x in created_with.split(".")]
             if len(parts) == 3 and (
@@ -311,20 +315,27 @@ def lint_task_tracking(specs_dir):
             errors.append(f"  {spec_name}: cannot read tasks.md: {e}")
             continue
 
-        # First pass: collect all tasks with their priority and IssueID
+        # First pass: collect all tasks with their priority, status, and IssueID
         task_entries = []
         current_task_name = None
         current_priority = None
         current_issue_id = None
+        current_status = None
 
         for line in content.split("\n"):
             task_match = re.match(r"^### Task \d+:\s*(.+)", line)
             if task_match:
                 if current_task_name:
-                    task_entries.append((current_task_name, current_priority, current_issue_id))
+                    task_entries.append((current_task_name, current_priority, current_issue_id, current_status))
                 current_task_name = task_match.group(1).strip()
                 current_priority = None
                 current_issue_id = None
+                current_status = None
+                continue
+
+            status_match = re.match(r"\*\*Status:\*\*\s*(.+)", line)
+            if status_match:
+                current_status = status_match.group(1).strip()
                 continue
 
             priority_match = re.match(r"\*\*Priority:\*\*\s*(.+)", line)
@@ -338,10 +349,14 @@ def lint_task_tracking(specs_dir):
                 continue
 
         if current_task_name:
-            task_entries.append((current_task_name, current_priority, current_issue_id))
+            task_entries.append((current_task_name, current_priority, current_issue_id, current_status))
 
-        # Filter to eligible tasks (High/Medium priority)
-        eligible = [(n, p, i) for n, p, i in task_entries if p in ("High", "Medium")]
+        # Filter to eligible tasks (High/Medium priority, completed status)
+        eligible = [
+            (n, p, i)
+            for n, p, i, s in task_entries
+            if p in ("High", "Medium") and (s or "").lower() == "completed"
+        ]
         if not eligible:
             continue
 

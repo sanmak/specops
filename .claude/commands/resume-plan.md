@@ -79,12 +79,16 @@ Available plans (most recent first):
    - If the pull fails, report the error and stop.
 
 3. **If `CURRENT_BRANCH` does not equal `MAIN_BRANCH`:**
+   - If the working tree has uncommitted changes (detected in Step 3), stash them first: `git stash --include-untracked`. Save a flag `DID_STASH=true`.
    - Merge latest main into the current branch: `git merge origin/<MAIN_BRANCH> --no-edit`
    - If the merge fails with conflicts:
      - Report: "Merge conflicts detected while syncing with `<MAIN_BRANCH>`. Resolve conflicts first (consider `/resolve-conflicts`) or start from a clean branch."
      - Run `git merge --abort` to restore the working tree.
+     - If `DID_STASH`, run `git stash pop` to restore the user's changes.
      - Stop.
-   - If the merge succeeds, report: "Merged latest `origin/<MAIN_BRANCH>` into `<CURRENT_BRANCH>`."
+   - If the merge succeeds:
+     - If `DID_STASH`, run `git stash pop`. If stash pop fails with conflicts, report: "Merge succeeded but your stashed changes conflict with the merged code. Run `git stash show` to review and `git stash drop` after resolving." and stop.
+     - Report: "Merged latest `origin/<MAIN_BRANCH>` into `<CURRENT_BRANCH>`."
 
 ### Step 6: Validate plan file references
 
