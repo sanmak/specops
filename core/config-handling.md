@@ -65,6 +65,11 @@ If `specReview` is not configured, fall back to `reviewRequired`:
 
 When both `specReview.enabled` and `reviewRequired` are set, `specReview.enabled` takes precedence.
 
+### Workflow Impact: specReview / reviewRequired
+- **Phase 2 step 7**: If enabled, set status to `in-review` and pause for review cycle.
+- **Phase 2.5**: Full review/revision/self-review workflow activates.
+- **Phase 3 step 1 (review gate)**: Blocks implementation until `approved` or `self-approved` status.
+
 ## Index Regeneration
 
 The agent rebuilds `<specsDir>/index.json` after every `spec.json` creation or update:
@@ -144,6 +149,12 @@ When `taskTracking` is not `"none"` and the current task has a valid IssueID (ne
 - If `autoCommit` is true: include the IssueID in the commit message (e.g., `feat: implement login form (#42)` or `feat: implement login form (PROJ-123)`)
 - If `autoCommit` is false: suggest the commit format to the user: "Suggested commit: `<message> (<IssueID>)`"
 
+### Workflow Impact: taskTracking
+- **Phase 2 step 6**: If not `"none"`, create external issues for High/Medium tasks via Issue Creation Protocol.
+- **Phase 3 step 1 (task tracking gate)**: Verifies issue creation was attempted — skipping is a protocol breach.
+- **Phase 3 step 3**: On every task status transition, sync to external tracker via Status Sync.
+- **Phase 3 step 7**: If `autoCommit` and valid IssueID, include IssueID in commit message via Commit Linking.
+
 ### Task Tracking Gate
 
 At the start of Phase 3, after the review gate check, verify external issue creation. Skipping this gate when `config.team.taskTracking` is not `"none"` is a protocol breach.
@@ -174,6 +185,10 @@ If `config.team.codeReview` is configured:
 - **`requireTests: true`**: Ensure all tasks include tests; block completion if test coverage is insufficient
 - **`requireDocs: true`**: Ensure public APIs have documentation; add JSDoc/docstrings as part of implementation
 
+### Workflow Impact: codeReview
+- **Phase 3 step 6**: If `requireTests`, run tests for every task; block completion on insufficient coverage.
+- **Phase 4 step 7**: If `required`, include review requirement and `minApprovals` count in PR description.
+
 ## Linting & Formatting
 
 If `config.implementation.linting` is configured:
@@ -184,6 +199,10 @@ If `config.implementation.formatting` is configured:
 - **`enabled: true`**: Run the configured formatting tool (`prettier`, `black`, `rustfmt`, `gofmt`) before committing.
 - **`tool`**: Use the specified formatter. If not specified, detect from project config files (e.g., `.prettierrc`, `pyproject.toml`).
 
+### Workflow Impact: linting / formatting
+- **Phase 3 step 6**: If `linting.enabled`, run linter after each task and fix violations before marking complete.
+- **Phase 3 step 7**: If `formatting.enabled`, run formatter before committing.
+
 ## Test Framework
 
 If `config.implementation.testFramework` is set (e.g., `jest`, `mocha`, `pytest`, `vitest`):
@@ -192,6 +211,17 @@ If `config.implementation.testFramework` is set (e.g., `jest`, `mocha`, `pytest`
 - Run tests with the appropriate command (e.g., `npx jest`, `pytest`, `npx vitest`)
 
 If not set, detect the test framework from the project's existing test files and `package.json`/`pyproject.toml`.
+
+### Workflow Impact: testing / testFramework
+- **Phase 3 step 6**: If `testing` is `"auto"`, run tests after each task. If `"skip"`, skip testing (with safety warning). If `"manual"`, note that tests should be run.
+- **Phase 3 step 6**: If `testFramework` is set, use that framework for test generation and execution.
+
+### Workflow Impact: autoCommit / createPR
+- **Phase 3 step 7**: If `autoCommit`, commit changes after each task. If false, suggest commit format.
+- **Phase 4 step 7**: If `createPR`, create a pull request after implementation completes.
+
+### Workflow Impact: taskDelegation
+- **Phase 3 step 2**: If `"auto"`, compute a complexity score from pending tasks (effort weights + file count) and activate delegation when score >= 6. If `"always"`, activate regardless. If `"never"`, use sequential execution.
 
 ## Module-Specific Configuration
 
@@ -211,6 +241,9 @@ If `config.integrations` is configured, use these as **contextual information**:
 - **`analytics`**: Include analytics tracking in acceptance criteria when relevant
 
 These are informational — the agent uses them to generate more accurate specs, not to directly invoke the tools.
+
+### Workflow Impact: integrations
+- **Informational only**: Referenced in Phase 2 spec generation (rollout plans, risk mitigations, acceptance criteria). No workflow conditionals — context enrichment only.
 
 ## System-Managed Fields
 

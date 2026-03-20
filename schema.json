@@ -195,7 +195,7 @@
           "type": "string",
           "enum": ["auto", "always", "never"],
           "default": "auto",
-          "description": "Task delegation strategy for Phase 3. auto: delegate when 4+ tasks. always: always delegate. never: sequential execution. Strategy adapts to platform capabilities (sub-agents, checkpoints, or sequential fallback)."
+          "description": "Task delegation strategy for Phase 3. auto: delegate when complexity score reaches threshold (based on effort sizing and file breadth). always: always delegate. never: sequential execution. Strategy adapts to platform capabilities (sub-agents, checkpoints, or sequential fallback)."
         }
       },
       "additionalProperties": false

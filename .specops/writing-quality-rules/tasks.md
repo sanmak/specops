@@ -65,7 +65,7 @@ Add writing_quality to build_common_context() and all 4 Jinja2 templates.
 - `generator/templates/copilot.j2`
 
 **Tests Required:**
-- [ ] `python3 generator/generate.py --all` succeeds
+- [x] `python3 generator/generate.py --all` succeeds
 
 ---
 
@@ -97,8 +97,8 @@ Add WRITING_QUALITY_MARKERS to validate.py (both per-platform and cross-platform
 - `tests/test_platform_consistency.py`
 
 **Tests Required:**
-- [ ] `python3 generator/validate.py` passes
-- [ ] `python3 tests/test_platform_consistency.py` passes
+- [x] `python3 generator/validate.py` passes
+- [x] `python3 tests/test_platform_consistency.py` passes
 
 ---
 
@@ -135,8 +135,8 @@ Regenerate all 4 platform outputs and run full validation + test suite.
 - `.claude-plugin/marketplace.json` (regenerated)
 
 **Tests Required:**
-- [ ] `python3 generator/validate.py` — 0 errors
-- [ ] `bash scripts/run-tests.sh` — all pass
+- [x] `python3 generator/validate.py` — 0 errors
+- [x] `bash scripts/run-tests.sh` — all pass
 
 ---
 
@@ -169,7 +169,7 @@ Add Writing Philosophy section to README.md and update STRUCTURE.md, CLAUDE.md.
 - `.claude/commands/docs-sync.md`
 
 **Tests Required:**
-- [ ] Manual review of README attribution accuracy
+- [x] Manual review of README attribution accuracy
 
 ## Implementation Order
 1. Task 1 (foundation — the core module)

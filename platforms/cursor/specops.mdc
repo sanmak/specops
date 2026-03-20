@@ -42,6 +42,10 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
      - If `.gitignore` contains patterns matching `.claude/` or `.claude/*`, Tell the user with warning:
        > "⚠️ `.claude/` is excluded by your `.gitignore`. SpecOps spec files will still be created in `<specsDir>/` and tracked normally, but the SpecOps skill itself (`SKILL.md`) won't be visible to other contributors. To fix: (1) use user-level installation (`~/.claude/skills/specops/`), or (2) add `!.claude/skills/` to your `.gitignore` to selectively un-ignore just the skills directory."
      - If no `.gitignore` exists or doesn't conflict, continue normally
+5.5. **Context Summary (enforcement gate)**: Capture Phase 1 context summary data for persistence.
+   - If continuing an existing spec (context recovery found an incomplete spec), Edit the file at `<specsDir>/<spec-name>/implementation.md` to upsert the `## Phase 1 Context Summary` section with: config status, context recovery result, steering files loaded, repo map status, memory loaded, detected vertical, and affected files. Use the template from `core/templates/implementation.md`.
+   - If creating a new spec, persist the context summary immediately after the spec directory and `implementation.md` are created in Phase 2 step 2.
+   - This section is mandatory — proceeding to Phase 2 without it is a protocol breach.
 6. Analyze the user's request to determine type (feature, bugfix, refactor)
 7. Determine the project vertical:
    - If `config.vertical` is set, use it directly
@@ -60,6 +64,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 
 **Phase 2: Create Specification**
 
+0. **Phase 2 entry gate**: After creating `<specsDir>/<spec-name>/` and `implementation.md` (step 2 below), Read the file at `<specsDir>/<spec-name>/implementation.md` and verify it contains `## Phase 1 Context Summary`. If missing (new spec), write the context summary now using the data captured in Phase 1 step 5.5. If the section still cannot be written, STOP — return to Phase 1 step 5.5. Proceeding without the Context Summary is a protocol breach.
 1. Generate a structured spec directory in the configured `specsDir`
 2. Create four core files:
    - `requirements.md` (or `bugfix.md` for bugs, `refactor.md` for refactors) - User stories with EARS acceptance criteria, bug analysis, or refactoring rationale
@@ -111,6 +116,8 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 
    - If no, proceed without changes
 
+5.5. **Coherence Verification**: After generating all spec files, cross-check for contradictions between spec sections. Read the file at the requirements/bugfix/refactor file and design.md. Extract numeric constraints from NFRs (performance targets, SLAs, limits) and verify they do not contradict functional requirements or design decisions. Record the result in implementation.md under `## Phase 1 Context Summary` as a `- Coherence check: [pass / N contradiction(s) found — details]` entry. If contradictions are found, Tell the user with the specifics before proceeding.
+5.6. **Vocabulary Verification**: If the detected vertical is not `backend`, `fullstack`, or `frontend`, and no custom template is used, scan generated spec files for prohibited default terms (see the Vocabulary Verification subsection in the Vertical Adaptation Rules module). Replace any found terms with vertical-specific vocabulary. Record the result in implementation.md Phase 1 Context Summary.
 6. **External issue creation**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. Read the file at `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`, create issues via the Issue Creation Protocol, and write IssueIDs back to `tasks.md`.
 7. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow.
 
@@ -146,7 +153,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - Populate the Summary section with a brief synthesis: total tasks completed, key decisions made, any deviations from design, and overall implementation health
    - Remove any empty sections (tables with no rows) to keep it clean
 3. **Update memory (mandatory)**: Update the local memory layer following the Local Memory Layer module. Extract Decision Log entries from `implementation.md`, update `context.md` with the spec completion summary, and run pattern detection to update `patterns.json`. If the memory directory does not exist, create it. This step is mandatory — skipping memory update is a protocol breach. The completion gate in step 5 will verify this step executed.
-4. **Documentation check**: Identify project documentation that may need updating based on files modified during implementation:
+4. **Documentation check (enforcement gate)**: Identify project documentation that may need updating based on files modified during implementation. After completing the check, Edit the file at `<specsDir>/<spec-name>/implementation.md` to append or update a `## Documentation Review` section listing each doc file checked, its status (up-to-date / updated / flagged), and any changes made. This section is mandatory for spec completion — the spec artifact linter validates its presence for completed specs.
    - Scan for documentation files (README.md, CLAUDE.md, and files in a docs/ directory if one exists)
    - For each doc file, check if it references components, features, or configurations that were modified during this spec
    - If stale documentation is detected, update the affected sections
@@ -212,7 +219,13 @@ When invoked:
 8. Check if the request is a **feedback** command (see "Feedback Mode" module). Patterns: "feedback", "send feedback", "report bug", "report issue", "suggest improvement", "feature request for specops", "specops friction". These must refer to sending feedback about SpecOps itself, NOT about a product feature (e.g., "add feedback form", "implement user feedback system", "collect user feedback" is NOT feedback mode). If detected, follow the Feedback Mode workflow instead of the standard phases below.
 9. Check if the request is a **map** command (see "Map Subcommand" in the Repo Map module). Patterns: "repo map", "generate repo map", "refresh repo map", "show repo map", "codebase map", "/specops map". The bare word "map" alone is NOT sufficient — it must co-occur with "repo", "codebase", or the explicit "/specops" prefix. These must refer to SpecOps repo map management, NOT a product feature (e.g., "add map component", "map API endpoints", "create sitemap" is NOT map mode). If detected, follow the Map Subcommand workflow instead of the standard phases below.
 10. Check if the request is an **audit** or **reconcile** command (see the Reconciliation module). Patterns for audit: "audit", "audit <name>", "health check", "check drift", "spec health". Patterns for reconcile: "reconcile <name>", "fix <name>" (when referring to a spec), "repair <name>", "sync <name>". These must refer to SpecOps spec health, NOT product features like "audit log" or "health endpoint". If detected, follow the Reconciliation module workflow instead of the standard phases below.
-11. Check if the request is a **from-plan** command (see "From Plan Mode" module). Patterns: "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan". These must refer to converting an AI coding assistant plan into a SpecOps spec, NOT to a product feature. If so, follow the From Plan Mode workflow instead of the standard phases below.
+11. Check if the request is a **from-plan** command (see "From Plan Mode" module). Patterns: "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan", "implement the plan", "implement my plan", "go ahead with the plan", "proceed with plan". These must refer to converting an AI coding assistant plan into a SpecOps spec, NOT to a product feature. If so, follow the From Plan Mode workflow instead of the standard phases below.
+11.5. **Post-plan acceptance gate**: If ALL of the following conditions are true, this is a plan acceptance that MUST route through From Plan Mode:
+   - The user's request is a short acceptance or implementation phrase ("go ahead", "do it", "proceed", "implement this", "looks good", "yes, implement", "let's build it", "yes", "approved, implement", or similar brief confirmation)
+   - The conversation context contains a structured plan (plan mode content visible in earlier messages, numbered implementation steps, a "Files to Modify" or "Execution Order" section, or a plan file was recently discussed)
+   - FILE_EXISTS(`.specops.json`) is true (SpecOps is configured for this project)
+   If all three conditions are met: extract the plan content from the conversation context and follow the From Plan Mode workflow. Implementing a plan without converting it to a SpecOps spec first in a SpecOps-configured project is a **protocol breach**.
+   If any condition is false: continue to step 12.
 12. Check if interview mode is triggered (see "Interview Mode" module):
    - Explicit: request contains "interview" keyword
    - Auto (interactive platforms only): request is vague (≤5 words, no technical keywords, no action verb)
@@ -332,6 +345,11 @@ If `specReview` is not configured, fall back to `reviewRequired`:
 
 When both `specReview.enabled` and `reviewRequired` are set, `specReview.enabled` takes precedence.
 
+### Workflow Impact: specReview / reviewRequired
+- **Phase 2 step 7**: If enabled, set status to `in-review` and pause for review cycle.
+- **Phase 2.5**: Full review/revision/self-review workflow activates.
+- **Phase 3 step 1 (review gate)**: Blocks implementation until `approved` or `self-approved` status.
+
 ## Index Regeneration
 
 The agent rebuilds `<specsDir>/index.json` after every `spec.json` creation or update:
@@ -411,6 +429,12 @@ When `taskTracking` is not `"none"` and the current task has a valid IssueID (ne
 - If `autoCommit` is true: include the IssueID in the commit message (e.g., `feat: implement login form (#42)` or `feat: implement login form (PROJ-123)`)
 - If `autoCommit` is false: suggest the commit format to the user: "Suggested commit: `<message> (<IssueID>)`"
 
+### Workflow Impact: taskTracking
+- **Phase 2 step 6**: If not `"none"`, create external issues for High/Medium tasks via Issue Creation Protocol.
+- **Phase 3 step 1 (task tracking gate)**: Verifies issue creation was attempted — skipping is a protocol breach.
+- **Phase 3 step 3**: On every task status transition, sync to external tracker via Status Sync.
+- **Phase 3 step 7**: If `autoCommit` and valid IssueID, include IssueID in commit message via Commit Linking.
+
 ### Task Tracking Gate
 
 At the start of Phase 3, after the review gate check, verify external issue creation. Skipping this gate when `config.team.taskTracking` is not `"none"` is a protocol breach.
@@ -441,6 +465,10 @@ If `config.team.codeReview` is configured:
 - **`requireTests: true`**: Ensure all tasks include tests; block completion if test coverage is insufficient
 - **`requireDocs: true`**: Ensure public APIs have documentation; add JSDoc/docstrings as part of implementation
 
+### Workflow Impact: codeReview
+- **Phase 3 step 6**: If `requireTests`, run tests for every task; block completion on insufficient coverage.
+- **Phase 4 step 7**: If `required`, include review requirement and `minApprovals` count in PR description.
+
 ## Linting & Formatting
 
 If `config.implementation.linting` is configured:
@@ -451,6 +479,10 @@ If `config.implementation.formatting` is configured:
 - **`enabled: true`**: Run the configured formatting tool (`prettier`, `black`, `rustfmt`, `gofmt`) before committing.
 - **`tool`**: Use the specified formatter. If not specified, detect from project config files (e.g., `.prettierrc`, `pyproject.toml`).
 
+### Workflow Impact: linting / formatting
+- **Phase 3 step 6**: If `linting.enabled`, run linter after each task and fix violations before marking complete.
+- **Phase 3 step 7**: If `formatting.enabled`, run formatter before committing.
+
 ## Test Framework
 
 If `config.implementation.testFramework` is set (e.g., `jest`, `mocha`, `pytest`, `vitest`):
@@ -459,6 +491,17 @@ If `config.implementation.testFramework` is set (e.g., `jest`, `mocha`, `pytest`
 - Run tests with the appropriate command (e.g., `npx jest`, `pytest`, `npx vitest`)
 
 If not set, detect the test framework from the project's existing test files and `package.json`/`pyproject.toml`.
+
+### Workflow Impact: testing / testFramework
+- **Phase 3 step 6**: If `testing` is `"auto"`, run tests after each task. If `"skip"`, skip testing (with safety warning). If `"manual"`, note that tests should be run.
+- **Phase 3 step 6**: If `testFramework` is set, use that framework for test generation and execution.
+
+### Workflow Impact: autoCommit / createPR
+- **Phase 3 step 7**: If `autoCommit`, commit changes after each task. If false, suggest commit format.
+- **Phase 4 step 7**: If `createPR`, create a pull request after implementation completes.
+
+### Workflow Impact: taskDelegation
+- **Phase 3 step 2**: If `"auto"`, compute a complexity score from pending tasks (effort weights + file count) and activate delegation when score >= 6. If `"always"`, activate regardless. If `"never"`, use sequential execution.
 
 ## Module-Specific Configuration
 
@@ -478,6 +521,9 @@ If `config.integrations` is configured, use these as **contextual information**:
 - **`analytics`**: Include analytics tracking in acceptance criteria when relevant
 
 These are informational — the agent uses them to generate more accurate specs, not to directly invoke the tools.
+
+### Workflow Impact: integrations
+- **Informational only**: Referenced in Phase 2 spec generation (rollout plans, risk mitigations, acceptance criteria). No workflow conditionals — context enrichment only.
 
 ## System-Managed Fields
 
@@ -2069,15 +2115,36 @@ From Plan mode converts an existing AI coding assistant plan (from plan mode, a 
 
 ## Detection
 
-Patterns that trigger From Plan mode: "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan".
+Patterns that trigger From Plan mode: "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan", "implement the plan", "implement my plan", "go ahead with the plan", "proceed with plan".
 
 These must refer to converting an AI coding assistant plan into a SpecOps spec — NOT for product features like "import plan data from external system" or "convert pricing plan".
 
-On non-interactive platforms (`canAskInteractive = false`), the plan content must be provided inline. If not provided, Tell the user: "From Plan mode requires the plan to be pasted inline. Re-invoke with your plan content included in the request." and stop.
+On non-interactive platforms (`canAskInteractive = false`), the plan content must be provided inline or as a file path. If neither is provided, Tell the user: "From Plan mode requires the plan to be pasted inline or provided as a file path. Re-invoke with your plan content or path included in the request." and stop.
 
 ## Workflow
 
-1. **Receive plan content**: If plan content was provided inline with the invocation, use it directly. Otherwise, if `canAskInteractive`, Ask the user: "Please paste your plan below." If `canAskInteractive` is false and no inline content was provided, Tell the user: "From Plan mode requires the plan to be pasted inline. Re-invoke with your plan content included in the request." and stop.
+1. **Receive plan content**: Resolve plan content using the first matching branch:
+
+   **Branch A — Inline content**: If plan content was provided inline with the invocation, use it directly.
+
+   **Branch B — File path**: If a file path was provided with the invocation (e.g., `from-plan <path>`), validate the path before reading:
+   - Reject absolute paths (starting with `/`)
+   - Reject paths containing `../` traversal sequences
+   - Reject paths that do not end in `.md`
+   - Reject paths outside the project root
+   - Check FILE_EXISTS(`<path>`). If the file does not exist, Tell the user: "Plan file not found: `<path>`" and stop.
+   - Read the file at(`<path>`) to obtain plan content.
+
+   **Branch C — Platform auto-discovery**: If no content and no path were provided, and the platform configuration includes a `planFileDirectory` field:
+   - Run the terminal command(`ls -t "<planFileDirectory>"/*.md 2>/dev/null | head -5`) to find the 5 most recently modified plan files.
+   - If no files found, fall through to Branch D.
+   - If `canAskInteractive`: present the file list to the user with modification dates and Ask the user: "Which plan would you like to convert? Enter a number, or paste a plan below."
+   - If `canAskInteractive` is false: Tell the user with the list of discovered plan files and stop ("From Plan mode found these recent plans but requires interactive input to select one.").
+   - Once the user selects a file, validate the path (must remain within `<planFileDirectory>`, no absolute path, no `../`, must be `.md`, FILE_EXISTS check) and Read the file at it.
+
+   **Branch D — Interactive paste (fallback)**: If `canAskInteractive`, Ask the user: "Please paste your plan below."
+
+   If none of the branches produced plan content (non-interactive platform, no inline content, no file path, no `planFileDirectory`): Tell the user: "From Plan mode requires the plan to be pasted inline or provided as a file path. Re-invoke with your plan content or path included in the request." and stop.
 
 2. **Parse the plan**: Read through the plan content and identify sections using these keyword heuristics:
 
@@ -2904,6 +2971,16 @@ Detailed description of what needs to be done.
 ## Summary
 <!-- Populated at completion (Phase 4). Leave blank during implementation. -->
 
+## Phase 1 Context Summary
+<!-- Populated during Phase 1. Proceeding to Phase 2 without this section is a protocol breach. -->
+- Config: [loaded from `.specops.json` or defaults — vertical, specsDir, taskTracking]
+- Context recovery: [none / resuming <spec-name>]
+- Steering files: [loaded N files (names)]
+- Repo map: [loaded / generated / stale-refreshed / not available]
+- Memory: [loaded N decisions from M specs, P patterns / no memory files]
+- Vertical: [detected or configured vertical]
+- Affected files: [list of affected file paths]
+
 ## Decision Log
 | # | Decision | Rationale | Task | Timestamp |
 |---|----------|-----------|------|-----------|
@@ -2915,6 +2992,10 @@ Detailed description of what needs to be done.
 ## Blockers Encountered
 | Blocker | Resolution | Impact | Task |
 |---------|------------|--------|------|
+
+## Documentation Review
+<!-- Populated during Phase 4. Lists each doc file checked and its status. -->
+<!-- This section is mandatory for completed specs — the linter validates its presence. -->
 
 ## Session Log
 <!-- Each implementation session appends a brief entry here. -->
@@ -2995,6 +3076,23 @@ No other adaptations — frontend is well-served by default templates.
 ### backend / fullstack
 
 No adaptations needed — default templates are designed for these verticals.
+
+### Vocabulary Verification
+
+After generating spec files in Phase 2, verify that vertical-specific vocabulary was applied. For each non-default vertical, check that prohibited default terms do not remain in the generated spec files:
+
+| Vertical | Prohibited Default Terms |
+|----------|------------------------|
+| infrastructure | "User Stories", "API Endpoints", "Components" (when "Resources" applies), "Sequence Diagrams", "Data Model" |
+| data | "User Stories", "API Endpoints", "Components" (when "Pipeline Stages" applies), "Sequence Diagrams", "Data Model" |
+| library | "User Stories" (when "Developer Use Cases" applies), "API Endpoints" (when "Public API Surface" applies) |
+| builder | "User Stories" (when "Product Requirements" applies), "API Endpoints" (when "Integration Points" applies), "Rollout Plan" (when "Ship Plan" applies) |
+
+Scan each generated spec file (requirements.md/bugfix.md/refactor.md, design.md, tasks.md) for prohibited terms. If any are found, replace with the vertical-specific term. Record the result in implementation.md Phase 1 Context Summary as `- Vocabulary check: [pass / N term(s) replaced]`.
+
+This check does NOT apply when:
+- The vertical is `backend`, `fullstack`, or `frontend` (default vocabulary is correct)
+- A custom template is used (custom templates define their own structure)
 
 ### Applying Adaptation Rules
 
@@ -3229,6 +3327,16 @@ Blocked ──────► In Progress
 - Blocked → Completed (must unblock first)
 - Blocked → Pending (cannot regress)
 
+### Pre-Task Anchoring
+
+Before setting a task to `In Progress`, anchor the task's expected scope in `implementation.md`:
+
+1. Read the file at the task's **Acceptance Criteria** and **Tests Required** sections from `tasks.md`
+2. Read the file at the relevant requirements from `requirements.md`/`bugfix.md`/`refactor.md` and the matching design section from `design.md`
+3. Edit the file at `implementation.md` — append a brief Task Scope note to the Session Log: `Task N scope: [1-2 sentence summary of expected changes and acceptance criteria]`
+
+This anchored scope is used by the Pivot Check (below) to detect drift between planned and actual changes. Without the anchor, pivot detection has nothing to compare against.
+
 ### Write Ordering Protocol
 
 When changing task status, follow this strict sequence:
@@ -3287,7 +3395,7 @@ When resuming implementation in a new session, Read the file at `implementation.
 
 ### Pivot Check
 
-Before marking a task `Completed`, compare the actual output against what was planned in `design.md` and `requirements.md`. If the implementation diverged from the plan (different approach, different data format, different API, scope change), update the affected spec artifact **before** closing the task. Spec artifacts that still describe the old approach after a pivot are a recurring drift class — Phase 4 checkbox verification cannot catch it because the outdated spec text has no checkboxes to fail.
+Before marking a task `Completed`, compare the actual output against the anchored Task Scope note in `implementation.md` (written during Pre-Task Anchoring) and the planned approach in `design.md` and `requirements.md`. If the implementation diverged from the anchored scope (different approach, different data format, different API, scope change), update the affected spec artifact **before** closing the task. Spec artifacts that still describe the old approach after a pivot are a recurring drift class — Phase 4 checkbox verification cannot catch it because the outdated spec text has no checkboxes to fail.
 
 ### Acceptance Criteria Verification
 
@@ -3340,7 +3448,13 @@ At the start of Phase 3, after the implementation gate (step 1), determine wheth
 1. Read `config.implementation.taskDelegation` (default: `"auto"`)
 2. If `"never"`: skip delegation, use standard sequential execution (Phase 3 step 2 as-is)
 3. If `"always"`: activate delegation regardless of task count
-4. If `"auto"`: Read the file at `tasks.md`, count tasks with `**Status:** Pending`. If 4 or more, activate delegation. Otherwise, use standard sequential execution.
+4. If `"auto"`: Read the file at `tasks.md` and compute a complexity score for pending tasks:
+   - Parse each task with `**Status:** Pending`
+   - For each pending task, read its `**Estimated Effort:**` field and convert to a weight: S=1, M=2, L=3 (if missing, default to M=2)
+   - Count distinct file paths across all pending tasks' `**Files to Modify:**` sections
+   - Compute: `score = sum(effort_weights) + floor(distinct_files / 5)`
+   - If score >= 6, activate delegation. Otherwise, use standard sequential execution.
+   Examples: 6 small tasks (score 6), 3 medium tasks (score 6), 2 large tasks (score 6), 4 medium tasks touching 12 files (8+2=10).
 5. Check platform capability `canDelegateTask`:
    - `canDelegateTask = true` → **Strategy A** (Sub-Agent Delegation)
    - `canDelegateTask = false` and `canAskInteractive = true` → **Strategy B** (Session Checkpoint)
@@ -3363,18 +3477,24 @@ When `canDelegateTask = true`:
 
 **Orchestrator loop:**
 
-1. Read the file at `tasks.md` — identify the next task with `**Status:** Pending`
-2. Edit the file at `tasks.md` — set that task to `**Status:** In Progress` (Write Ordering Protocol)
+1. **Select next task (dependency-aware)**: Read the file at `tasks.md` — parse all tasks with their statuses and `**Dependencies:**` fields. Build a ready set: tasks with `**Status:** Pending` or `**Status:** In Progress` (quality-gate downgrades) whose dependencies are all `Completed` or `None`. Prioritize `In Progress` tasks first (they were downgraded by a quality gate and need re-dispatch), then select by priority (`High` > `Medium` > `Low`), then by document order (lower task number first). If the ready set is empty but Pending tasks remain, Tell the user with a dependency deadlock warning and pause for manual intervention.
+2. Edit the file at `tasks.md` — set the selected task to `**Status:** In Progress` (Write Ordering Protocol)
 3. Construct the Handoff Bundle (see above)
 4. Spawn a fresh agent with the handoff bundle as its prompt
 5. When the agent returns:
    a. Read the file at `tasks.md` — verify the task status is `Completed` or `Blocked`
+   a.5. **Quality gate** (if status is `Completed`): Check for degradation signals before accepting the result:
+      - **File existence**: For each path in the task's "Files to Modify", FILE_EXISTS the path. If any file was supposed to be created but does not exist, Tell the user with warning and set the task back to `In Progress` for re-evaluation.
+      - **Checkbox consistency**: Verify all Acceptance Criteria and Tests Required checkboxes are checked (`[x]`) for the Completed task. If any are unchecked, Tell the user with warning and keep the task as `In Progress`.
+      - **Session Log presence**: Read the file at `implementation.md`, verify a Session Log entry exists for this task. If missing, Edit the file at `implementation.md` to append a fallback entry: `Task N: completed by delegate (no session log written — quality gate backfill)`.
+      - If any quality check fails, immediately re-dispatch the same task (do not continue to next ready task). The orchestrator must re-select this task on the next loop iteration rather than leaving it stranded as `In Progress`.
    b. Read the file at `implementation.md` — check for new Decision Log or Deviation entries
    c. If `Blocked`: read the `**Blocker:**` line and apply the following decision tree:
       - If the blocker is a missing dependency from another task: skip to the next task with no dependencies on the blocked task
       - Otherwise (implementation failure, environment issue, or ambiguous blocker): Tell the user with the blocker details and pause delegation for manual intervention
    d. If status is still `In Progress` (delegate did not update): Edit the file at `tasks.md` — set to `**Status:** Blocked` with `**Blocker:** Delegate did not complete task — manual review needed`
 6. Tell the user with a brief task completion summary: task name, final status, key changes
+6.5. **Refresh handoff context**: Read the file at `implementation.md` to capture new Decision Log entries, Deviations, and Session Log entries from the just-completed task. The refreshed content replaces "Prior task summaries" in the next delegate's handoff bundle — do not reuse stale context from a previous iteration.
 7. Repeat from step 1 for the next Pending task
 8. When no Pending tasks remain: proceed to Phase 4
 
@@ -3438,6 +3558,7 @@ Execute tasks sequentially (standard Phase 3 behavior) with enhanced checkpointi
 - The orchestrator verifies task status in tasks.md after each delegation — this is the conformance gate
 - If a delegate introduces a regression caught by a later task's sub-agent, the later task sets itself to `Blocked` referencing the prior task. The orchestrator surfaces this to the user.
 - The Single Active Task rule still applies during delegation — the orchestrator sets one task to In Progress before delegating it
+- The orchestrator runs a post-delegation quality gate after each delegate returns — verifying file existence, checkbox consistency, and session log presence before dispatching the next task
 
 ### Platform Adaptation
 

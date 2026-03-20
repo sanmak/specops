@@ -27,6 +27,16 @@ Blocked ──────► In Progress
 - Blocked → Completed (must unblock first)
 - Blocked → Pending (cannot regress)
 
+### Pre-Task Anchoring
+
+Before setting a task to `In Progress`, anchor the task's expected scope in `implementation.md`:
+
+1. READ_FILE the task's **Acceptance Criteria** and **Tests Required** sections from `tasks.md`
+2. READ_FILE the relevant requirements from `requirements.md`/`bugfix.md`/`refactor.md` and the matching design section from `design.md`
+3. EDIT_FILE `implementation.md` — append a brief Task Scope note to the Session Log: `Task N scope: [1-2 sentence summary of expected changes and acceptance criteria]`
+
+This anchored scope is used by the Pivot Check (below) to detect drift between planned and actual changes. Without the anchor, pivot detection has nothing to compare against.
+
 ### Write Ordering Protocol
 
 When changing task status, follow this strict sequence:
@@ -85,7 +95,7 @@ When resuming implementation in a new session, READ_FILE `implementation.md` bef
 
 ### Pivot Check
 
-Before marking a task `Completed`, compare the actual output against what was planned in `design.md` and `requirements.md`. If the implementation diverged from the plan (different approach, different data format, different API, scope change), update the affected spec artifact **before** closing the task. Spec artifacts that still describe the old approach after a pivot are a recurring drift class — Phase 4 checkbox verification cannot catch it because the outdated spec text has no checkboxes to fail.
+Before marking a task `Completed`, compare the actual output against the anchored Task Scope note in `implementation.md` (written during Pre-Task Anchoring) and the planned approach in `design.md` and `requirements.md`. If the implementation diverged from the anchored scope (different approach, different data format, different API, scope change), update the affected spec artifact **before** closing the task. Spec artifacts that still describe the old approach after a pivot are a recurring drift class — Phase 4 checkbox verification cannot catch it because the outdated spec text has no checkboxes to fail.
 
 ### Acceptance Criteria Verification
 

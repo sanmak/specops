@@ -9,7 +9,13 @@ At the start of Phase 3, after the implementation gate (step 1), determine wheth
 1. Read `config.implementation.taskDelegation` (default: `"auto"`)
 2. If `"never"`: skip delegation, use standard sequential execution (Phase 3 step 2 as-is)
 3. If `"always"`: activate delegation regardless of task count
-4. If `"auto"`: READ_FILE `tasks.md`, count tasks with `**Status:** Pending`. If 4 or more, activate delegation. Otherwise, use standard sequential execution.
+4. If `"auto"`: READ_FILE `tasks.md` and compute a complexity score for pending tasks:
+   - Parse each task with `**Status:** Pending`
+   - For each pending task, read its `**Estimated Effort:**` field and convert to a weight: S=1, M=2, L=3 (if missing, default to M=2)
+   - Count distinct file paths across all pending tasks' `**Files to Modify:**` sections
+   - Compute: `score = sum(effort_weights) + floor(distinct_files / 5)`
+   - If score >= 6, activate delegation. Otherwise, use standard sequential execution.
+   Examples: 6 small tasks (score 6), 3 medium tasks (score 6), 2 large tasks (score 6), 4 medium tasks touching 12 files (8+2=10).
 5. Check platform capability `canDelegateTask`:
    - `canDelegateTask = true` → **Strategy A** (Sub-Agent Delegation)
    - `canDelegateTask = false` and `canAskInteractive = true` → **Strategy B** (Session Checkpoint)
@@ -32,18 +38,24 @@ When `canDelegateTask = true`:
 
 **Orchestrator loop:**
 
-1. READ_FILE `tasks.md` — identify the next task with `**Status:** Pending`
-2. EDIT_FILE `tasks.md` — set that task to `**Status:** In Progress` (Write Ordering Protocol)
+1. **Select next task (dependency-aware)**: READ_FILE `tasks.md` — parse all tasks with their statuses and `**Dependencies:**` fields. Build a ready set: tasks with `**Status:** Pending` or `**Status:** In Progress` (quality-gate downgrades) whose dependencies are all `Completed` or `None`. Prioritize `In Progress` tasks first (they were downgraded by a quality gate and need re-dispatch), then select by priority (`High` > `Medium` > `Low`), then by document order (lower task number first). If the ready set is empty but Pending tasks remain, NOTIFY_USER with a dependency deadlock warning and pause for manual intervention.
+2. EDIT_FILE `tasks.md` — set the selected task to `**Status:** In Progress` (Write Ordering Protocol)
 3. Construct the Handoff Bundle (see above)
 4. Spawn a fresh agent with the handoff bundle as its prompt
 5. When the agent returns:
    a. READ_FILE `tasks.md` — verify the task status is `Completed` or `Blocked`
+   a.5. **Quality gate** (if status is `Completed`): Check for degradation signals before accepting the result:
+      - **File existence**: For each path in the task's "Files to Modify", FILE_EXISTS the path. If any file was supposed to be created but does not exist, NOTIFY_USER with warning and set the task back to `In Progress` for re-evaluation.
+      - **Checkbox consistency**: Verify all Acceptance Criteria and Tests Required checkboxes are checked (`[x]`) for the Completed task. If any are unchecked, NOTIFY_USER with warning and keep the task as `In Progress`.
+      - **Session Log presence**: READ_FILE `implementation.md`, verify a Session Log entry exists for this task. If missing, EDIT_FILE `implementation.md` to append a fallback entry: `Task N: completed by delegate (no session log written — quality gate backfill)`.
+      - If any quality check fails, immediately re-dispatch the same task (do not continue to next ready task). The orchestrator must re-select this task on the next loop iteration rather than leaving it stranded as `In Progress`.
    b. READ_FILE `implementation.md` — check for new Decision Log or Deviation entries
    c. If `Blocked`: read the `**Blocker:**` line and apply the following decision tree:
       - If the blocker is a missing dependency from another task: skip to the next task with no dependencies on the blocked task
       - Otherwise (implementation failure, environment issue, or ambiguous blocker): NOTIFY_USER with the blocker details and pause delegation for manual intervention
    d. If status is still `In Progress` (delegate did not update): EDIT_FILE `tasks.md` — set to `**Status:** Blocked` with `**Blocker:** Delegate did not complete task — manual review needed`
 6. NOTIFY_USER with a brief task completion summary: task name, final status, key changes
+6.5. **Refresh handoff context**: READ_FILE `implementation.md` to capture new Decision Log entries, Deviations, and Session Log entries from the just-completed task. The refreshed content replaces "Prior task summaries" in the next delegate's handoff bundle — do not reuse stale context from a previous iteration.
 7. Repeat from step 1 for the next Pending task
 8. When no Pending tasks remain: proceed to Phase 4
 
@@ -107,6 +119,7 @@ Execute tasks sequentially (standard Phase 3 behavior) with enhanced checkpointi
 - The orchestrator verifies task status in tasks.md after each delegation — this is the conformance gate
 - If a delegate introduces a regression caught by a later task's sub-agent, the later task sets itself to `Blocked` referencing the prior task. The orchestrator surfaces this to the user.
 - The Single Active Task rule still applies during delegation — the orchestrator sets one task to In Progress before delegating it
+- The orchestrator runs a post-delegation quality gate after each delegate returns — verifying file existence, checkbox consistency, and session log presence before dispatching the next task
 
 ### Platform Adaptation
 
