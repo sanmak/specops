@@ -6,6 +6,8 @@ body:
     attributes:
       value: |
         Thank you for your feedback! If submitting manually (not via `/specops feedback`), please fill in the fields below.
+
+        **Note**: After submitting, a maintainer will add the appropriate category label (bug, enhancement, friction, improvement, documentation, or other) to match the `/specops feedback` labeling convention.
   - type: dropdown
     id: category
     attributes:

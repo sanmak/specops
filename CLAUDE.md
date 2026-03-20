@@ -193,6 +193,7 @@ CI verifies generated files aren't stale — after regenerating, the diff of `pl
 - **Steering markers present** — steering file format, inclusion modes, loading procedure, foundation templates
 - **Memory markers present** — local memory layer storage format, loading, writing, pattern detection, and safety rules
 - **Writing quality markers present** — structure/order, precision/testability, clarity/conciseness, audience awareness, self-check, sources
+- **Feedback markers present** — feedback mode detection, interactive/non-interactive workflows, issue composition, privacy safety rules, submission, graceful degradation
 
 ## Configuration
 

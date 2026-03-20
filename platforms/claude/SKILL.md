@@ -2355,11 +2355,11 @@ If sensitive content is detected:
 
 **Tier 1 — `gh` CLI**:
 1. Create a unique temporary file: Use the Bash tool to run(`mktemp /tmp/specops-feedback-XXXXXX.md`) and capture the output as `{tmpfile}`.
-2. Use the Write tool to create `{tmpfile}` with the composed issue body.
+2. Use the Write tool to create({tmpfile}, composed issue body).
 3. Set the sanitized title in an environment variable: `SPECOPS_TITLE="[{category}] {sanitized_title}"`
-4. Use the Bash tool to run(`SPECOPS_TITLE="[{category}] {sanitized_title}" gh issue create --repo sanmak/specops --title "$SPECOPS_TITLE" --label "{label}" --body-file {tmpfile}`)
-5. Use the Bash tool to run(`rm -f {tmpfile}`) to clean up — always run this regardless of whether step 4 succeeded or failed.
-6. If step 4 failed, fall through to Tier 2 (the temp file is already cleaned up).
+4. Use the Bash tool to run(`SPECOPS_TITLE="[{category}] {sanitized_title}" gh issue create --repo sanmak/specops --title "$SPECOPS_TITLE" --label "{label}" --body-file "{tmpfile}"`)
+5. Use the Bash tool to run(`rm -f "{tmpfile}"`) to clean up — always run this regardless of whether step 4 succeeded or failed.
+6. If step 4 failed and the error message indicates the label does not exist, retry without the `--label` flag (non-default labels like `friction`, `improvement`, `other` may not exist on the target repo). If it still fails, fall through to Tier 2 (the temp file is already cleaned up).
 7. If step 4 succeeded, parse the issue URL from stdout.
 8. Display a message to the user("Feedback submitted: {issue URL}\n\nThank you for helping improve SpecOps!")
 9. Stop.
@@ -2367,10 +2367,10 @@ If sensitive content is detected:
 **Tier 2 — Pre-filled browser URL** (if `gh` CLI is not installed, not authenticated, or fails):
 1. URL-encode the title, label, and body.
 2. Compose the URL: `https://github.com/sanmak/specops/issues/new?title={encoded_title}&labels={encoded_label}&body={encoded_body}`
-3. Display a message to the user("Could not submit via `gh` CLI. Open this URL to submit your feedback:\n\n{url}")
-4. Note: GitHub URL length limits may truncate long feedback bodies. If the composed URL exceeds 8000 characters, skip to Tier 3 instead.
+3. If the composed URL exceeds 8000 characters, skip to Tier 3 instead (GitHub truncates long URLs).
+4. Display a message to the user("Could not submit via `gh` CLI. Open this URL to submit your feedback:\n\n{url}")
 
-### Graceful Degradation
+### Feedback Graceful Degradation
 
 **Tier 3 — Local draft file** (if both Tier 1 and Tier 2 fail, or if the URL would be too long):
 1. Determine the save path:

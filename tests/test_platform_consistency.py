@@ -172,7 +172,7 @@ REQUIRED_MARKERS = {
         "Issue Composition",
         "Privacy Safety Rules",
         "Submission",
-        "Graceful Degradation",
+        "Feedback Graceful Degradation",
         "sanmak/specops",
     ],
 }

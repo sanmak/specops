@@ -348,7 +348,7 @@ Use specops feedback bug The interview mode skips my follow-up answers
 ```
 
 **Workflow (interactive):**
-1. Select category (bug, feature, friction, improvement)
+1. Select category (bug, feature, friction, improvement, docs gap, other)
 2. Describe the feedback
 3. Review the draft issue
 4. Confirm submission
@@ -357,7 +357,7 @@ Use specops feedback bug The interview mode skips my follow-up answers
 - Provide category and description inline
 - Issue is composed and submitted automatically
 
-**Requirements:** `gh` CLI installed and authenticated. If unavailable, SpecOps provides a pre-filled browser URL as fallback, or saves the feedback locally with manual submission instructions.
+**Submission tiers:** (1) `gh` CLI creates a GitHub issue directly. (2) If `gh` is unavailable, a pre-filled browser URL is provided. (3) If the URL is too long or both tiers fail, feedback is saved as a local draft with manual submission instructions.
 
 **Notes:** Only triggers when referring to SpecOps feedback, not product features like "add feedback form". Privacy-safe: only SpecOps version, platform, and vertical are included — no project code, paths, or configuration.
 
