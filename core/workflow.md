@@ -16,7 +16,10 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 
 **Phase 1: Understand Context**
 
-1. Read `.specops.json` config if it exists, use defaults otherwise
+1. Read `.specops.json` config if it exists, use defaults otherwise.
+   - If `.specops.json` does not exist: ASK_USER("No `.specops.json` found. SpecOps works best with a project configuration that sets up steering files (persistent project context) and memory (cross-spec learning). Would you like to run `/specops init` first (recommended), or continue with defaults?")
+     - If the user chooses init → redirect to Init Mode workflow
+     - If the user chooses defaults → proceed with step 2 using default configuration
 2. **Context recovery**: Check for prior work that may inform this session:
    - If FILE_EXISTS(`<specsDir>/index.json`), READ_FILE it
    - If any specs have status `implementing` or `in-review`, NOTIFY_USER: "Found incomplete spec: <name> (status: <status>). Continue working on it?"
@@ -49,11 +52,24 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
      - **frontend**: component, UI, UX, page, form, layout, CSS, React, Vue, Angular, responsive, accessibility
      - **backend**: endpoint, API, service, database, migration, REST, GraphQL, middleware, authentication
      - **builder**: product, MVP, launch, ship end-to-end, full product, SaaS, marketplace, platform build, solo build, build from scratch, greenfield, v1, prototype, side project, startup
+     - **migration**: migrate, re-platform, modernize, strangler, cutover, legacy replacement, rewrite, sunset, decommission, lift-and-shift, dual-run, parallel-run
      - **fullstack**: request spans both frontend and backend concerns
    - Default to `fullstack` if unclear
    - Display the detected vertical in configuration summary
-8. Explore codebase to understand existing patterns and architecture
-9. Identify affected files, components, and dependencies — produce a concrete list of affected file paths for `fileMatch` steering file evaluation
+7.5. **Greenfield detection**: Determine if this is a greenfield project:
+   - Prefer version control metadata when available: RUN_COMMAND(`git ls-files`) from the project root to list tracked files. Exclude files under `.specops/`, `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`. If `git ls-files` is not available or fails, fall back to LIST_DIR(`.`) the project root (exclude `.specops/`, `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`). From the resulting file list, count source code files. Config-only files (`.gitignore`, `LICENSE`, `README.md`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `tsconfig.json`, `Makefile`, `Dockerfile`) do not count as source code files.
+   - If source code file count ≤ 5 (only config/scaffold files present), this is a greenfield project.
+   - If greenfield is detected, skip steps 8-9 and instead execute:
+     - **8g. Define initial project structure**: Based on the user's request, the detected vertical, and any loaded steering file context, propose the initial directory layout and key files the project will need. Record in Phase 1 Context Summary as `- Project state: greenfield — proposed initial structure`.
+     - **9g. Auto-populate steering files**: If the steering files (`product.md`, `tech.md`, `structure.md`) still contain only placeholder text (bracket-enclosed placeholders like `[One-sentence description...]`), extract context from the user's request to fill them:
+       - `product.md`: Product overview, target users, and differentiators from the user's description
+       - `tech.md`: Technology stack if the user mentioned specific languages, frameworks, or tools
+       - `structure.md`: Proposed directory layout from step 8g
+       EDIT_FILE each steering file only for sections where the user provided relevant information. Leave sections as placeholders if no information is available.
+       NOTIFY_USER("Auto-populated steering files from your request. Review and edit `<specsDir>/steering/` for accuracy.")
+   - If not greenfield, proceed with the original steps 8 and 9 below.
+8. **(Brownfield/migration only)** Explore codebase to understand existing patterns and architecture
+9. **(Brownfield/migration only)** Identify affected files, components, and dependencies — produce a concrete list of affected file paths for `fileMatch` steering file evaluation
 
 **Phase 2: Create Specification**
 
@@ -111,7 +127,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 
 5.5. **Coherence Verification**: After generating all spec files, cross-check for contradictions between spec sections. READ_FILE the requirements/bugfix/refactor file and design.md. Extract numeric constraints from NFRs (performance targets, SLAs, limits) and verify they do not contradict functional requirements or design decisions. Record the result in implementation.md under `## Phase 1 Context Summary` as a `- Coherence check: [pass / N contradiction(s) found — details]` entry. If contradictions are found, NOTIFY_USER with the specifics before proceeding.
 5.6. **Vocabulary Verification**: If the detected vertical is not `backend`, `fullstack`, or `frontend`, and no custom template is used, scan generated spec files for prohibited default terms (see the Vocabulary Verification subsection in the Vertical Adaptation Rules module). Replace any found terms with vertical-specific vocabulary. Record the result in implementation.md Phase 1 Context Summary.
-6. **External issue creation**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. READ_FILE `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`, create issues via the Issue Creation Protocol, and write IssueIDs back to `tasks.md`.
+6. **External issue creation (mandatory when taskTracking configured)**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. READ_FILE `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`, create issues via the Issue Creation Protocol, and write IssueIDs back to `tasks.md`. If issue creation is skipped or all IssueIDs remain `None`, the Phase 3 task tracking gate will catch the omission — the spec artifact linter validates IssueIDs on completed specs and fails CI when they are missing.
 7. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow.
 
 **Phase 2.5: Review Cycle** (if spec review enabled)
@@ -145,6 +161,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
 2. Finalize `implementation.md`:
    - Populate the Summary section with a brief synthesis: total tasks completed, key decisions made, any deviations from design, and overall implementation health
    - Remove any empty sections (tables with no rows) to keep it clean
+2.5. **Capture proxy metrics**: Collect proxy metrics following the Proxy Metrics module. READ_FILE spec artifacts to estimate token counts, RUN_COMMAND `git diff --stat` to collect code change stats, count completed tasks and verified acceptance criteria from `tasks.md` content, calculate duration from timestamps. EDIT_FILE `spec.json` to add the `metrics` object. If any metric collection substep fails, set that metric to 0 and continue — do not block completion on metrics failures.
 3. **Update memory (mandatory)**: Update the local memory layer following the Local Memory Layer module. Extract Decision Log entries from `implementation.md`, update `context.md` with the spec completion summary, and run pattern detection to update `patterns.json`. If the memory directory does not exist, create it. This step is mandatory — skipping memory update is a protocol breach. The completion gate in step 5 will verify this step executed.
 4. **Documentation check (enforcement gate)**: Identify project documentation that may need updating based on files modified during implementation. After completing the check, EDIT_FILE `<specsDir>/<spec-name>/implementation.md` to append or update a `## Documentation Review` section listing each doc file checked, its status (up-to-date / updated / flagged), and any changes made. This section is mandatory for spec completion — the spec artifact linter validates its presence for completed specs.
    - Scan for documentation files (README.md, CLAUDE.md, and files in a docs/ directory if one exists)

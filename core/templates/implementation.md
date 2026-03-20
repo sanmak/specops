@@ -12,6 +12,7 @@
 - Memory: [loaded N decisions from M specs, P patterns / no memory files]
 - Vertical: [detected or configured vertical]
 - Affected files: [list of affected file paths]
+- Project state: [greenfield / brownfield / migration]
 
 ## Decision Log
 | # | Decision | Rationale | Task | Timestamp |

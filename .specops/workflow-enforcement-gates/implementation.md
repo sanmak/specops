@@ -17,5 +17,8 @@ Completed 6 tasks across 4 source files. Added "protocol breach" enforcement lan
 | Blocker | Resolution | Impact | Task |
 |---------|------------|--------|------|
 
+## Documentation Review
+- Retroactively added — spec predates Documentation Review enforcement gate
+
 ## Session Log
 <!-- Each implementation session appends a brief entry here. -->

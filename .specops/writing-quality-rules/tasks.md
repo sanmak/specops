@@ -7,7 +7,7 @@
 **Estimated Effort:** M
 **Dependencies:** None
 **Priority:** High
-**IssueID:** None
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 
 **Description:**
@@ -40,7 +40,7 @@ Create the writing quality rules module with 6 sections distilled from 9 technic
 **Estimated Effort:** S
 **Dependencies:** Task 1
 **Priority:** High
-**IssueID:** None
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 
 **Description:**
@@ -74,7 +74,7 @@ Add writing_quality to build_common_context() and all 4 Jinja2 templates.
 **Estimated Effort:** S
 **Dependencies:** Task 2
 **Priority:** High
-**IssueID:** None
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 
 **Description:**
@@ -107,7 +107,7 @@ Add WRITING_QUALITY_MARKERS to validate.py (both per-platform and cross-platform
 **Estimated Effort:** S
 **Dependencies:** Task 3
 **Priority:** High
-**IssueID:** None
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 
 **Description:**
@@ -145,7 +145,7 @@ Regenerate all 4 platform outputs and run full validation + test suite.
 **Estimated Effort:** S
 **Dependencies:** Task 1
 **Priority:** Medium
-**IssueID:** None
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 
 **Description:**

@@ -99,6 +99,22 @@ list
     reviews.md           # (optional) Review feedback
 ```
 
+## Usage Metrics
+
+Completed specs include an optional `metrics` object in `spec.json` with proxy productivity data:
+
+| Field | Description |
+|-------|-------------|
+| `specArtifactTokensEstimate` | Estimated tokens of spec artifacts (total chars / 4) |
+| `filesChanged` | Files changed during implementation |
+| `linesAdded` | Lines added during implementation |
+| `linesRemoved` | Lines removed during implementation |
+| `tasksCompleted` | Count of completed tasks |
+| `acceptanceCriteriaVerified` | Count of checked acceptance criteria |
+| `specDurationMinutes` | Wall-clock minutes from creation to completion |
+
+Metrics are captured automatically at Phase 4 completion. See [TOKEN-USAGE.md](TOKEN-USAGE.md) for benchmark data and ROI analysis guidance.
+
 ## Workflow Phases
 
 **Optional pre-phase:**
@@ -120,7 +136,7 @@ list
 | Option | Values | Default | Constraints | Description |
 |--------|--------|---------|-------------|-------------|
 | `specsDir` | string | `.specops` | max 200 chars, no `../` or absolute paths | Where to store specs |
-| `vertical` | `backend`/`frontend`/`fullstack`/`infrastructure`/`data`/`library`/`builder` | (auto-detect) | enum | Project vertical for template adaptation |
+| `vertical` | `backend`/`frontend`/`fullstack`/`infrastructure`/`data`/`library`/`builder`/`migration` | (auto-detect) | enum | Project vertical for template adaptation |
 | `templates.feature` | string | `default` | max 100 chars | Custom template for feature specifications |
 | `templates.bugfix` | string | `default` | max 100 chars | Custom template for bugfix specifications |
 | `templates.refactor` | string | `default` | max 100 chars | Custom template for refactoring specifications |

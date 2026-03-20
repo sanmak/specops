@@ -7,6 +7,7 @@
 **Estimated Effort:** S
 **Dependencies:** None
 **Priority:** High
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 **Domain:** backend
 
@@ -43,6 +44,7 @@ Add the `canDelegateTask` capability flag to the tool abstraction layer and all 
 **Estimated Effort:** S
 **Dependencies:** None
 **Priority:** High
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 **Domain:** backend
 
@@ -73,6 +75,7 @@ Add `taskDelegation` property under `implementation` in schema.json and update t
 **Estimated Effort:** L
 **Dependencies:** Task 1
 **Priority:** High
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 **Domain:** backend
 
@@ -105,6 +108,7 @@ Create the core task delegation module with delegation decision logic, handoff b
 **Estimated Effort:** S
 **Dependencies:** Task 3
 **Priority:** High
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 **Domain:** backend
 
@@ -132,6 +136,7 @@ Update Phase 3 step 2 to include the delegation decision check before sequential
 **Estimated Effort:** S
 **Dependencies:** Task 3
 **Priority:** Medium
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 **Domain:** backend
 
@@ -159,6 +164,7 @@ Add a Delegation Compatibility section to task-tracking.md explaining how the ta
 **Estimated Effort:** M
 **Dependencies:** Task 3
 **Priority:** High
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 **Domain:** backend
 
@@ -195,6 +201,7 @@ Add task_delegation to the generator build context and include it in all 4 platf
 **Estimated Effort:** M
 **Dependencies:** Task 6
 **Priority:** High
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 **Domain:** backend
 
@@ -226,6 +233,7 @@ Add DELEGATION_MARKERS to validate.py — both the per-platform check and the cr
 **Estimated Effort:** S
 **Dependencies:** Task 7
 **Priority:** High
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 **Domain:** devops
 **Ship Blocking:** Yes

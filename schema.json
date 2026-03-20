@@ -17,7 +17,7 @@
     },
     "vertical": {
       "type": "string",
-      "enum": ["backend", "frontend", "fullstack", "infrastructure", "data", "library", "builder"],
+      "enum": ["backend", "frontend", "fullstack", "infrastructure", "data", "library", "builder", "migration"],
       "description": "Project vertical that influences spec template adaptation. Auto-detected when not set."
     },
     "templates": {

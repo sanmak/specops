@@ -162,14 +162,12 @@ def lint_docs_review(specs_dir):
             continue
         if not isinstance(created_with, str):
             continue
-        # Parse version — skip if <= 1.3.0 (gate introduced at 1.3.0, specs at
-        # that version predate enforcement)
+        # Parse version — skip if < 1.3.0 (gate introduced at 1.3.0)
         try:
             parts = [int(x) for x in created_with.split(".")]
             if len(parts) == 3 and (
                 parts[0] < 1
                 or (parts[0] == 1 and parts[1] < 3)
-                or (parts[0] == 1 and parts[1] == 3 and parts[2] == 0)
             ):
                 continue
         except (ValueError, IndexError):
@@ -255,9 +253,8 @@ def lint_task_tracking(specs_dir):
     PROJ-123) or FAILED — <reason>. Values like None, TBD, or N/A indicate
     the task tracking gate was skipped — a protocol breach.
 
-    Specs created at or before 1.3.0 (or with no specopsCreatedWith) are
-    skipped since task tracking enforcement was introduced at 1.3.0 but specs
-    at that version predate enforcement.
+    Specs created before 1.3.0 (or with no specopsCreatedWith) are
+    skipped since task tracking enforcement was introduced at 1.3.0.
     """
     config = load_specops_config(specs_dir)
     task_tracking = config.get("team", {}).get("taskTracking", "none")
@@ -286,8 +283,8 @@ def lint_task_tracking(specs_dir):
         if spec.get("status") != "completed":
             continue
 
-        # Skip legacy specs (created at or before 1.3.0, when task tracking
-        # enforcement was introduced but specs at that version predate it)
+        # Skip legacy specs (created before 1.3.0, when task tracking
+        # enforcement was introduced)
         created_with = spec.get("specopsCreatedWith", "")
         if not created_with or created_with == "unknown":
             continue
@@ -298,7 +295,6 @@ def lint_task_tracking(specs_dir):
             if len(parts) == 3 and (
                 parts[0] < 1
                 or (parts[0] == 1 and parts[1] < 3)
-                or (parts[0] == 1 and parts[1] == 3 and parts[2] == 0)
             ):
                 continue
         except (ValueError, IndexError):

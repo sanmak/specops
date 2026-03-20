@@ -84,6 +84,7 @@ specops/
 │   ├── from-plan.md                      # Convert plan mode output to spec
 │   ├── feedback.md                       # User feedback submission to SpecOps repo
 │   ├── memory.md                         # Local memory layer
+│   ├── metrics.md                        # Proxy metrics collection at completion
 │   ├── repo-map.md                       # Agent-driven codebase structural map
 │   ├── task-tracking.md                  # Task state machine and ordering
 │   ├── task-delegation.md                # Task delegation for Phase 3 context management

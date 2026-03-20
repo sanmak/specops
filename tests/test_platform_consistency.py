@@ -54,6 +54,7 @@ REQUIRED_MARKERS = {
         "### library",
         "### frontend",
         "### builder",
+        "### migration",
     ],
     "simplicity": [
         "Simplicity Principle",
@@ -174,6 +175,18 @@ REQUIRED_MARKERS = {
         "### Submission",
         "Feedback Graceful Degradation",
         "sanmak/specops",
+    ],
+    "metrics": [
+        "## Proxy Metrics",
+        "### Metrics Capture Procedure",
+        "### Metrics Safety",
+        "specArtifactTokensEstimate",
+        "filesChanged",
+        "linesAdded",
+        "linesRemoved",
+        "tasksCompleted",
+        "acceptanceCriteriaVerified",
+        "specDurationMinutes",
     ],
 }
 
