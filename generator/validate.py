@@ -224,6 +224,7 @@ WRITING_QUALITY_MARKERS = [
     "### Precision and Testability",
     "### Clarity and Conciseness",
     "### Audience Awareness",
+    "### Collaborative Voice",
     "### Self-Check",
     "### Sources",
     "ANT test",

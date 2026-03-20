@@ -158,10 +158,22 @@ REQUIRED_MARKERS = {
         "### Precision and Testability",
         "### Clarity and Conciseness",
         "### Audience Awareness",
+        "### Collaborative Voice",
         "### Self-Check",
         "### Sources",
         "ANT test",
         "active voice",
+    ],
+    "feedback": [
+        "## Feedback Mode",
+        "Feedback Mode Detection",
+        "Interactive Feedback Workflow",
+        "Non-Interactive Feedback Workflow",
+        "Issue Composition",
+        "Privacy Safety Rules",
+        "Submission",
+        "Graceful Degradation",
+        "sanmak/specops",
     ],
 }
 

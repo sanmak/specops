@@ -2167,7 +2167,7 @@ When the user invokes SpecOps, check for feedback intent:
 
 ### Feedback Categories
 
-Four categories, each mapping to a GitHub issue label:
+Six categories, each mapping to a GitHub issue label:
 
 | Category | Label | When to use |
 |----------|-------|-------------|
@@ -2175,6 +2175,8 @@ Four categories, each mapping to a GitHub issue label:
 | `feature` | `enhancement` | A new capability or behavior |
 | `friction` | `friction` | UX issue, workflow annoyance, or confusing behavior |
 | `improvement` | `improvement` | Enhancement to existing functionality |
+| `docs gap` | `documentation` | Missing, unclear, or outdated documentation |
+| `other` | `other` | Anything that does not fit the above categories |
 
 ### Interactive Feedback Workflow
 
@@ -2182,7 +2184,7 @@ On platforms where `canAskInteractive = true`:
 
 1. Use the Bash tool to run `grep -h '^version:' .claude/skills/specops/SKILL.md ~/.claude/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the running version.
 2. If FILE_EXISTS(`.specops.json`), Use the Read tool to read(`.specops.json`) to extract the `vertical` value only. Do NOT include any other config fields.
-3. Use the AskUserQuestion tool("What type of feedback would you like to send?\n\n1. Bug report — something is broken\n2. Feature request — a new capability\n3. Friction / UX issue — confusing or annoying workflow\n4. Improvement — enhance existing functionality")
+3. Use the AskUserQuestion tool("What type of feedback would you like to send?\n\n1. Bug report — something is broken\n2. Feature request — a new capability\n3. Friction / UX issue — confusing or annoying workflow\n4. Improvement — enhance existing functionality\n5. Docs gap — missing or unclear documentation\n6. Other — anything else")
 4. Parse the category from the response (accept number or keyword).
 5. Use the AskUserQuestion tool("Describe your feedback:")
 6. Collect the description text.
@@ -2203,8 +2205,10 @@ On platforms where `canAskInteractive = false`, the feedback content must be pro
    - Keywords: "feature", "request", "add", "new" → `feature`
    - Keywords: "friction", "ux", "confusing", "annoying" → `friction`
    - Keywords: "improve", "enhance", "better" → `improvement`
+   - Keywords: "docs", "documentation", "doc gap" → `docs gap`
+   - Keywords: "other", "misc", "miscellaneous" → `other`
 2. Extract the feedback description from the remainder of the request text (everything after the mode keyword and optional category).
-3. If no description could be extracted: print "Feedback mode requires a description. Usage: specops feedback [bug|feature|friction|improvement] <description>" and stop.
+3. If no description could be extracted: Display a message to the user("Feedback mode requires a description. Usage: specops feedback [bug|feature|friction|improvement|docs gap|other] <description>") and stop.
 4. Use the Bash tool to run `grep -h '^version:' .claude/skills/specops/SKILL.md ~/.claude/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the running version.
 5. If FILE_EXISTS(`.specops.json`), Use the Read tool to read(`.specops.json`) to extract the `vertical` value only.
 6. Apply the Privacy Safety Rules (see below) to scan the description.
@@ -2217,6 +2221,11 @@ On platforms where `canAskInteractive = false`, the feedback content must be pro
 Compose the GitHub issue with these fields:
 
 **Title**: `[{category}] {first 70 characters of description}`
+
+**Title sanitization**: Before using the title in any shell command or URL, sanitize it:
+1. Generate the title from the *redacted* description (after Privacy Safety Rules scanning), not the raw input.
+2. Strip characters that are unsafe in shell contexts: remove `"`, `` ` ``, `$`, `\`, `!`, `(`, `)`, `{`, `}`, `|`, `;`, `&`, `<`, `>`, and newlines.
+3. Truncate to 70 characters after sanitization.
 
 **Label**: The label from the Feedback Categories table corresponding to the selected category.
 
@@ -2264,20 +2273,29 @@ The issue body MUST NOT contain:
 - Code blocks containing what appears to be project-specific code (function definitions, class declarations with project-specific names)
 
 If sensitive content is detected:
-- On interactive platforms: Use the AskUserQuestion tool("Your feedback appears to contain {file paths / credentials / code}. This will be submitted publicly to GitHub. Would you like to redact these before submitting?")
-- On non-interactive platforms: Display a message to the user("Warning: feedback may contain project-specific content that will be publicly visible. Review the draft above before it is submitted.")
+
+**Credential patterns (hard block)**: If credential patterns (API keys, tokens, connection strings, bearer tokens) are found, block submission on all platforms:
+- Display a message to the user("Credentials detected in feedback. Submission blocked for security. Please remove sensitive data and retry.")
+- Stop. Do not proceed to Submission.
+
+**File paths / code (redaction required)**:
+- On interactive platforms: Use the AskUserQuestion tool("Your feedback appears to contain {file paths / code}. This will be submitted publicly to GitHub. Would you like to redact these before submitting?"). If the user declines redaction, cancel submission and save as local draft only (Tier 3).
+- On non-interactive platforms: Do not auto-submit. Save as local draft (Tier 3) and Display a message to the user("Feedback may contain project-specific content. Saved as local draft for manual review before submission. Review and redact sensitive content, then submit manually.")
 
 ### Submission
 
-**Shell safety**: The feedback description contains user-controlled text. Never interpolate unescaped user text directly in shell command strings. Write the issue body to a temporary file and use `--body-file`.
+**Shell safety**: The feedback description contains user-controlled text. Never interpolate unescaped user text directly in shell command strings. Write the issue body to a temporary file and use `--body-file`. Pass the title via an environment variable to prevent shell injection.
 
 **Tier 1 — `gh` CLI**:
-1. Use the Write tool to create a temporary file (e.g., `/tmp/specops-feedback-body.md`) with the composed issue body.
-2. Use the Bash tool to run(`gh issue create --repo sanmak/specops --title "[{category}] {title}" --label "{label}" --body-file /tmp/specops-feedback-body.md`)
-3. If the command succeeds, parse the issue URL from stdout.
-4. Display a message to the user("Feedback submitted: {issue URL}\n\nThank you for helping improve SpecOps!")
-5. Use the Bash tool to run(`rm /tmp/specops-feedback-body.md`) to clean up.
-6. Stop.
+1. Create a unique temporary file: Use the Bash tool to run(`mktemp /tmp/specops-feedback-XXXXXX.md`) and capture the output as `{tmpfile}`.
+2. Use the Write tool to create `{tmpfile}` with the composed issue body.
+3. Set the sanitized title in an environment variable: `SPECOPS_TITLE="[{category}] {sanitized_title}"`
+4. Use the Bash tool to run(`SPECOPS_TITLE="[{category}] {sanitized_title}" gh issue create --repo sanmak/specops --title "$SPECOPS_TITLE" --label "{label}" --body-file {tmpfile}`)
+5. Use the Bash tool to run(`rm -f {tmpfile}`) to clean up — always run this regardless of whether step 4 succeeded or failed.
+6. If step 4 failed, fall through to Tier 2 (the temp file is already cleaned up).
+7. If step 4 succeeded, parse the issue URL from stdout.
+8. Display a message to the user("Feedback submitted: {issue URL}\n\nThank you for helping improve SpecOps!")
+9. Stop.
 
 **Tier 2 — Pre-filled browser URL** (if `gh` CLI is not installed, not authenticated, or fails):
 1. URL-encode the title, label, and body.

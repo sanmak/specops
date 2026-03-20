@@ -11,10 +11,12 @@ body:
     attributes:
       label: Category
       options:
-        - Bug report
-        - Feature request
-        - Friction / UX issue
+        - Bug
+        - Feature
+        - Workflow friction
         - Improvement
+        - Docs gap
+        - Other
     validations:
       required: true
   - type: textarea
