@@ -49,6 +49,11 @@ run_test "Platform consistency"             "python3 tests/test_platform_consist
 run_test "Spec schema validation"           "python3 tests/test_spec_schema.py"
 run_test "Build system"                     "python3 tests/test_build.py"
 
+# Conditional: spec artifact linting (only if specsDir exists)
+if [ -d "$ROOT_DIR/.specops" ]; then
+  run_test "Spec artifact lint"              "python3 scripts/lint-spec-artifacts.py .specops"
+fi
+
 echo ""
 echo "=================="
 echo "Results: $PASS passed, $FAIL failed"
