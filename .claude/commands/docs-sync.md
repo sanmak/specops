@@ -48,6 +48,7 @@ For each changed file, check which documentation may be affected using this mapp
 | `core/custom-templates.md` | `docs/REFERENCE.md` (Spec Templates) |
 | `core/data-handling.md` | `CLAUDE.md` (Security-Sensitive Files) |
 | `core/error-handling.md` | `docs/REFERENCE.md` |
+| `core/feedback.md` | `docs/COMMANDS.md` (Send Feedback) |
 | `core/from-plan.md` | `docs/COMMANDS.md` (From Plan) |
 | `core/memory.md` | `docs/COMMANDS.md` (Local Memory), `docs/REFERENCE.md` |
 | `core/reconciliation.md` | `docs/COMMANDS.md` (Drift Detection) |
@@ -57,6 +58,7 @@ For each changed file, check which documentation may be affected using this mapp
 | `core/task-delegation.md` | `docs/REFERENCE.md` (Configuration Options) |
 | `core/task-tracking.md` | `docs/REFERENCE.md` |
 | `core/tool-abstraction.md` | `CLAUDE.md` (Tool Abstraction) |
+| `core/writing-quality.md` | `CLAUDE.md` (Writing Quality), `README.md` (Writing Philosophy) |
 | `core/update.md` | `docs/COMMANDS.md` (Update) |
 | `core/view.md` | `docs/COMMANDS.md` (View/List) |
 | New `core/*.md` (not in table) | `docs/STRUCTURE.md`, determine target docs from module content |

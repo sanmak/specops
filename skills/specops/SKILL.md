@@ -216,24 +216,25 @@ When invoked:
 5. Check if the request is a **view** or **list** command (see "Spec Viewing" module). If so, follow the view/list workflow instead of the standard phases below.
 6. Check if the request is a **steering** command (see "Steering Command" in the Steering Files module). Patterns: "steering", "create steering", "setup steering", "manage steering", "steering files", "add steering". These must refer to managing SpecOps steering files, NOT to a product feature. If so, follow the Steering Command workflow instead of the standard phases below.
 7. Check if the request is a **memory** command (see "Memory Subcommand" in the Local Memory Layer module). Patterns: "memory", "show memory", "view memory", "memory seed", "seed memory". These must refer to SpecOps memory management, NOT a product feature (e.g., "add memory cache" or "optimize memory usage" is NOT memory mode). If detected, follow the Memory Subcommand workflow instead of the standard phases below.
-8. Check if the request is a **map** command (see "Map Subcommand" in the Repo Map module). Patterns: "repo map", "generate repo map", "refresh repo map", "show repo map", "codebase map", "/specops map". The bare word "map" alone is NOT sufficient — it must co-occur with "repo", "codebase", or the explicit "/specops" prefix. These must refer to SpecOps repo map management, NOT a product feature (e.g., "add map component", "map API endpoints", "create sitemap" is NOT map mode). If detected, follow the Map Subcommand workflow instead of the standard phases below.
-9. Check if the request is an **audit** or **reconcile** command (see the Reconciliation module). Patterns for audit: "audit", "audit <name>", "health check", "check drift", "spec health". Patterns for reconcile: "reconcile <name>", "fix <name>" (when referring to a spec), "repair <name>", "sync <name>". These must refer to SpecOps spec health, NOT product features like "audit log" or "health endpoint". If detected, follow the Reconciliation module workflow instead of the standard phases below.
-10. Check if the request is a **from-plan** command (see "From Plan Mode" module). Patterns: "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan", "implement the plan", "implement my plan", "go ahead with the plan", "proceed with plan". These must refer to converting an AI coding assistant plan into a SpecOps spec, NOT to a product feature. If so, follow the From Plan Mode workflow instead of the standard phases below.
-10.5. **Post-plan acceptance gate**: If ALL of the following conditions are true, this is a plan acceptance that MUST route through From Plan Mode:
+8. Check if the request is a **feedback** command (see "Feedback Mode" module). Patterns: "feedback", "send feedback", "report bug", "report issue", "suggest improvement", "feature request for specops", "specops friction". These must refer to sending feedback about SpecOps itself, NOT about a product feature (e.g., "add feedback form", "implement user feedback system", "collect user feedback" is NOT feedback mode). If detected, follow the Feedback Mode workflow instead of the standard phases below.
+9. Check if the request is a **map** command (see "Map Subcommand" in the Repo Map module). Patterns: "repo map", "generate repo map", "refresh repo map", "show repo map", "codebase map", "/specops map". The bare word "map" alone is NOT sufficient — it must co-occur with "repo", "codebase", or the explicit "/specops" prefix. These must refer to SpecOps repo map management, NOT a product feature (e.g., "add map component", "map API endpoints", "create sitemap" is NOT map mode). If detected, follow the Map Subcommand workflow instead of the standard phases below.
+10. Check if the request is an **audit** or **reconcile** command (see the Reconciliation module). Patterns for audit: "audit", "audit <name>", "health check", "check drift", "spec health". Patterns for reconcile: "reconcile <name>", "fix <name>" (when referring to a spec), "repair <name>", "sync <name>". These must refer to SpecOps spec health, NOT product features like "audit log" or "health endpoint". If detected, follow the Reconciliation module workflow instead of the standard phases below.
+11. Check if the request is a **from-plan** command (see "From Plan Mode" module). Patterns: "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan", "implement the plan", "implement my plan", "go ahead with the plan", "proceed with plan". These must refer to converting an AI coding assistant plan into a SpecOps spec, NOT to a product feature. If so, follow the From Plan Mode workflow instead of the standard phases below.
+11.5. **Post-plan acceptance gate**: If ALL of the following conditions are true, this is a plan acceptance that MUST route through From Plan Mode:
    - The user's request is a short acceptance or implementation phrase ("go ahead", "do it", "proceed", "implement this", "looks good", "yes, implement", "let's build it", "yes", "approved, implement", or similar brief confirmation)
    - The conversation context contains a structured plan (plan mode content visible in earlier messages, numbered implementation steps, a "Files to Modify" or "Execution Order" section, or a plan file was recently discussed)
    - FILE_EXISTS(`.specops.json`) is true (SpecOps is configured for this project)
    If all three conditions are met: extract the plan content from the conversation context and follow the From Plan Mode workflow. Implementing a plan without converting it to a SpecOps spec first in a SpecOps-configured project is a **protocol breach**.
-   If any condition is false: continue to step 11.
-11. Check if interview mode is triggered (see "Interview Mode" module):
+   If any condition is false: continue to step 12.
+12. Check if interview mode is triggered (see "Interview Mode" module):
    - Explicit: request contains "interview" keyword
    - Auto (interactive platforms only): request is vague (≤5 words, no technical keywords, no action verb)
    - If triggered: follow the Interview Mode workflow, then continue with the enriched context
-12. Confirm the request type (feature/bugfix/implement/other)
-13. Show the configuration you'll use (including detected vertical)
-14. Begin the workflow immediately (high autonomy)
-15. Provide progress updates as you work
-16. Summarize completion clearly
+13. Confirm the request type (feature/bugfix/implement/other)
+14. Show the configuration you'll use (including detected vertical)
+15. Begin the workflow immediately (high autonomy)
+16. Provide progress updates as you work
+17. Summarize completion clearly
 
 ## Version Display
 
@@ -2219,6 +2220,174 @@ From Plan mode and Interview mode serve opposite needs:
 If a user invokes From Plan mode but provides no plan content on a non-interactive platform, Display a message to the user and stop. Do not fall back to Interview mode.
 
 
+## Feedback Mode
+
+The Feedback Mode allows users to submit feedback about SpecOps (bugs, feature requests, friction, improvements) directly as a GitHub issue on the `sanmak/specops` repository. Submission uses a 3-tier strategy: `gh` CLI → pre-filled browser URL → local draft file.
+
+### Feedback Mode Detection
+
+When the user invokes SpecOps, check for feedback intent:
+
+- **Feedback mode**: Patterns: "feedback", "send feedback", "report bug", "report issue", "suggest improvement", "feature request for specops", "specops friction".
+- These must refer to providing feedback about SpecOps itself, NOT about a product feature (e.g., "add feedback form", "implement user feedback system", "collect user feedback" is NOT feedback mode).
+- If detected, follow the Feedback Mode workflow instead of the standard phases below.
+
+### Feedback Categories
+
+Six categories, each mapping to a GitHub issue label:
+
+| Category | Label | When to use |
+|----------|-------|-------------|
+| `bug` | `bug` | Something is broken or behaving incorrectly |
+| `feature` | `enhancement` | A new capability or behavior |
+| `friction` | `friction` | UX issue, workflow annoyance, or confusing behavior |
+| `improvement` | `improvement` | Enhancement to existing functionality |
+| `docs gap` | `documentation` | Missing, unclear, or outdated documentation |
+| `other` | `other` | Anything that does not fit the above categories |
+
+### Interactive Feedback Workflow
+
+On platforms where `canAskInteractive = true`:
+
+1. Use the Bash tool to run `grep -h '^version:' .claude/skills/specops/SKILL.md ~/.claude/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the running version.
+2. If FILE_EXISTS(`.specops.json`), Use the Read tool to read(`.specops.json`) to extract the `vertical` value only. Do NOT include any other config fields.
+3. Use the AskUserQuestion tool("What type of feedback would you like to send?\n\n1. Bug report — something is broken\n2. Feature request — a new capability\n3. Friction / UX issue — confusing or annoying workflow\n4. Improvement — enhance existing functionality\n5. Docs gap — missing or unclear documentation\n6. Other — anything else")
+4. Parse the category from the response (accept number or keyword).
+5. Use the AskUserQuestion tool("Describe your feedback:")
+6. Collect the description text.
+7. Apply the Privacy Safety Rules (see below) to scan the description.
+8. Compose the issue draft (see Issue Composition below).
+9. Display the full issue draft to the user for review.
+10. Use the AskUserQuestion tool("This will be submitted as a GitHub issue on sanmak/specops. Confirm? (yes/no/edit)")
+    - If "edit": Use the AskUserQuestion tool("What would you like to change?"), apply edits, re-display, and re-confirm.
+    - If "no": Display a message to the user("Feedback cancelled. No issue created.") and stop.
+    - If "yes": Proceed to Submission.
+
+### Non-Interactive Feedback Workflow
+
+On platforms where `canAskInteractive = false`, the feedback content must be provided inline in the initial request.
+
+1. Parse the request for a category keyword. If absent, default to `improvement`.
+   - Keywords: "bug", "broken", "error" → `bug`
+   - Keywords: "feature", "request", "add", "new" → `feature`
+   - Keywords: "friction", "ux", "confusing", "annoying" → `friction`
+   - Keywords: "improve", "enhance", "better" → `improvement`
+   - Keywords: "docs", "documentation", "doc gap" → `docs gap`
+   - Keywords: "other", "misc", "miscellaneous" → `other`
+2. Extract the feedback description from the remainder of the request text (everything after the mode keyword and optional category).
+3. If no description could be extracted: Display a message to the user("Feedback mode requires a description. Usage: specops feedback [bug|feature|friction|improvement|docs gap|other] <description>") and stop.
+4. Use the Bash tool to run `grep -h '^version:' .claude/skills/specops/SKILL.md ~/.claude/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the running version.
+5. If FILE_EXISTS(`.specops.json`), Use the Read tool to read(`.specops.json`) to extract the `vertical` value only.
+6. Apply the Privacy Safety Rules (see below) to scan the description.
+7. Compose the issue draft (see Issue Composition below).
+8. Display the composed issue to the user for review.
+9. Proceed to Submission.
+
+### Issue Composition
+
+Compose the GitHub issue with these fields:
+
+**Title**: `[{category}] {first 70 characters of description}`
+
+**Title sanitization**: Before using the title in any shell command or URL, sanitize it:
+1. Generate the title from the *redacted* description (after Privacy Safety Rules scanning), not the raw input.
+2. Strip characters that are unsafe in shell contexts: remove `"`, `` ` ``, `$`, `\`, `!`, `(`, `)`, `{`, `}`, `|`, `;`, `&`, `<`, `>`, and newlines.
+3. Truncate to 70 characters after sanitization.
+
+**Label**: The label from the Feedback Categories table corresponding to the selected category.
+
+**Body**:
+
+```markdown
+## Feedback
+
+{user's description text}
+
+## Context
+
+| Field | Value |
+|-------|-------|
+| SpecOps Version | {version} |
+| Platform | {platform name} |
+| Vertical | {vertical or "default"} |
+
+---
+*Submitted via `/specops feedback` from a user project.*
+```
+
+### Privacy Safety Rules
+
+**These rules are mandatory and must not be circumvented.**
+
+The issue body MUST contain ONLY:
+- The user's typed feedback description
+- SpecOps version string
+- Platform name (claude, cursor, codex, copilot)
+- Vertical name (from config, or "default")
+
+The issue body MUST NOT contain:
+- File paths from the user's project
+- File contents or code snippets from the user's project
+- The user's `.specops.json` configuration beyond the vertical field
+- Spec names, spec content, or any spec artifacts
+- Git repository URLs, branch names, or commit hashes from the user's project
+- Environment variables, API keys, tokens, or credentials
+- The user's name, email, or other PII (unless they explicitly typed it in the feedback)
+
+**Sensitive content scan**: Before composing the issue body, scan the user's description for:
+- File paths (starting with `/`, `./`, or containing directory separators with structure like `src/components/`)
+- Credential patterns (strings matching API key formats, connection strings, bearer tokens)
+- Code blocks containing what appears to be project-specific code (function definitions, class declarations with project-specific names)
+
+If sensitive content is detected:
+
+**Credential patterns (hard block)**: If credential patterns (API keys, tokens, connection strings, bearer tokens) are found, block submission on all platforms:
+- Display a message to the user("Credentials detected in feedback. Submission blocked for security. Please remove sensitive data and retry.")
+- Stop. Do not proceed to Submission.
+
+**File paths / code (redaction required)**:
+- On interactive platforms: Use the AskUserQuestion tool("Your feedback appears to contain {file paths / code}. This will be submitted publicly to GitHub. Would you like to redact these before submitting?"). If the user declines redaction, cancel submission and save as local draft only (Tier 3).
+- On non-interactive platforms: Do not auto-submit. Save as local draft (Tier 3) and Display a message to the user("Feedback may contain project-specific content. Saved as local draft for manual review before submission. Review and redact sensitive content, then submit manually.")
+
+### Submission
+
+**Shell safety**: The feedback description contains user-controlled text. Never interpolate unescaped user text directly in shell command strings. Write the issue body to a temporary file and use `--body-file`. Pass the title via an environment variable to prevent shell injection.
+
+**Tier 1 — `gh` CLI**:
+1. Create a unique temporary file: Use the Bash tool to run(`mktemp /tmp/specops-feedback-XXXXXX.md`) and capture the output as `{tmpfile}`.
+2. Use the Write tool to create({tmpfile}, composed issue body).
+3. Use the Bash tool to run(`SPECOPS_TITLE="[{category}] {sanitized_title}" gh issue create --repo sanmak/specops --title "$SPECOPS_TITLE" --label "{label}" --body-file "{tmpfile}"`)
+4. If step 3 failed and the error message indicates the label does not exist, retry without the `--label` flag (non-default labels like `friction`, `improvement`, `other` may not exist on the target repo). If it still fails, fall through to Tier 2.
+5. Use the Bash tool to run(`rm -f "{tmpfile}"`) to clean up — always run this regardless of whether step 3 succeeded, step 4 retried, or the flow falls through to Tier 2.
+6. If step 3 (or step 4 retry) succeeded, parse the issue URL from stdout.
+7. Display a message to the user("Feedback submitted: {issue URL}\n\nThank you for helping improve SpecOps!")
+8. Stop.
+
+**Tier 2 — Pre-filled browser URL** (if `gh` CLI is not installed, not authenticated, or fails):
+1. URL-encode the title, label, and body.
+2. Compose the URL: `https://github.com/sanmak/specops/issues/new?title={encoded_title}&labels={encoded_label}&body={encoded_body}`
+3. If the composed URL exceeds 8000 characters, skip to Tier 3 instead (GitHub truncates long URLs).
+4. Display a message to the user("Could not submit via `gh` CLI. Open this URL to submit your feedback:\n\n{url}")
+
+### Feedback Graceful Degradation
+
+**Tier 3 — Local draft file** (if both Tier 1 and Tier 2 fail, or if the URL would be too long):
+1. Determine the save path:
+   - If FILE_EXISTS(`.specops.json`), Use the Read tool to read(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
+   - Save to `<specsDir>/feedback-draft.md`. If `<specsDir>` does not exist, save to `.specops-feedback-draft.md` in the project root.
+2. Use the Write tool to create the save path with the composed issue content.
+3. Display a message to the user("Your feedback has been saved to `{path}`. You can submit it manually:\n\n1. Go to https://github.com/sanmak/specops/issues/new\n2. Copy the content from `{path}`\n3. Select the '{category}' label\n4. Submit the issue")
+
+### Platform Adaptation
+
+| Capability | Impact |
+|-----------|--------|
+| `canAskInteractive: false` | Feedback must be provided inline. No category prompt, no edit/confirm cycle. Draft displayed to stdout, then submitted. |
+| `canAskInteractive: true` | Full interactive flow: category selection, description prompt, draft review, edit/confirm. |
+| `canExecuteCode: true` (all platforms) | Use the Bash tool to run available for `gh issue create` on all platforms. |
+| `canCreateFiles: true` (all platforms) | Can save local feedback draft on all platforms. |
+
+
 ## Init Mode
 
 Init mode creates a `.specops.json` configuration file in the user's project. It is triggered when the user's request matches init-related patterns.
@@ -3290,6 +3459,56 @@ Watch for these patterns and actively avoid them:
 - Building configuration for values that won't change
 - Designing for hypothetical future requirements not in the spec
 - Adding layers of indirection that don't serve a current need
+
+
+## Writing Quality
+
+Apply these writing rules when generating spec artifacts (requirements.md, bugfix.md, refactor.md, design.md, tasks.md) during Phase 2. These rules govern how to express content — not what to include (see the Simplicity Principle for scope guidance). These are mandatory, not suggestions.
+
+### Structure and Order
+
+- Lead every section with the most important information first. State the core idea or problem in the first sentence — do not bury it after context-setting paragraphs.
+- Open each spec's Overview with one sentence answering "what problem does this solve and why does it matter now." Do not start with a feature description.
+- Use causal narrative in Architecture Overview and design rationale sections: state what exists, why it is insufficient, what the change does, and what outcome it produces. Do not present disconnected bullet points where a causal thread exists.
+- Place the conclusion or decision before the supporting evidence. Readers scan top-down — put the answer first, then the reasoning.
+
+### Precision and Testability
+
+- Apply the ANT test (Arguably Not True) to every requirement and acceptance criterion. If a statement cannot be false, it carries no information — rewrite it to make a specific, falsifiable claim. Example: "The system handles errors gracefully" fails the ANT test. "The API returns a 4xx status with a JSON body containing an `error` field" passes.
+- Apply the OAT test (Opposite Also True) to design rationales. If the opposite statement is equally defensible, the rationale is vacuous — make it specific. Example: "We chose this for simplicity" fails if the alternative is also simple.
+- Write fewer, precise requirements rather than many vague ones. Remove any requirement that hedges with "should ideally", "where possible", or "as appropriate" — either it is required or it is not.
+- Use concrete nouns and measurable values. Replace adjectives ("fast", "secure", "robust") with specifications ("completes within 200ms at p95", "validates JWT signatures using RS256").
+
+### Clarity and Conciseness
+
+- Cut every word that does not change the meaning. Eliminate filler phrases: "It is worth noting that", "In order to", "It should be noted that", "As a matter of fact", "Essentially", "Basically."
+- Use active voice. Write "The API validates the token" not "The token is validated by the API." Passive voice is permitted only when the actor is genuinely unknown or irrelevant.
+- Choose short, common words over long ones. Write "use" not "utilize", "start" not "initialize", "end" not "terminate", "show" not "facilitate the display of" — unless the technical term carries precision the plain word lacks.
+- Use declarative language in rationales. Write "requires", "creates", "prevents" — not "would need", "could potentially", "might cause." Modal hedging (would, could, might, should) weakens rationales — state trade-offs as facts.
+- Use present tense for system behavior and design concepts. Use past tense for decisions already made. Reserve future tense for actions that have not yet occurred.
+- Do not restate what the section heading already implies. If the heading says "Design: Feature X", do not open with "This section describes the design for Feature X."
+
+### Audience Awareness
+
+- Write for two audiences: the implementing agent (needs precise, unambiguous instructions) and the human reviewer (needs to understand intent and rationale). When these needs conflict, add a brief rationale parenthetical rather than making the instruction vague.
+- Define domain-specific terms at first use in each spec. Do not assume the reader knows project-internal jargon, acronyms, or shorthand from prior specs. Budget jargon: introduce at most 3 new terms per spec section; beyond that, simplify or use plain language.
+- Prefer concrete examples over abstract descriptions. When describing a data flow, API contract, or configuration format, include one representative example with realistic (but synthetic) values.
+
+### Collaborative Voice
+
+- Use "we" when describing collaborative design decisions and trade-offs ("We chose X because..."). Use imperative mood for task instructions ("Create the file...", "Add validation for...").
+- Attribute constraints to their source. Write "The database schema requires a unique index on email" not "There needs to be a unique index." Name the actor or system imposing the constraint.
+
+### Self-Check
+
+Before finalizing any spec artifact in Phase 2, silently verify:
+1. Read the Overview or Summary — does it sound like natural speech? If it reads like a legal document, simplify.
+2. Read the first sentence of each section. Those sentences alone should convey the spec's key insights. If they are generic or descriptive ("This section covers..."), rewrite them as topic sentences.
+3. Confirm no section is a wall of bullet points without at least one connecting narrative sentence explaining how the points relate.
+
+### Sources
+
+Distilled from: Rich Sutton (ordering, precision, ANT/OAT test, jargon budget, topic sentences), George Orwell ("Politics and the English Language" — cut words, active voice, plain language), Simon Peyton Jones (identify the one key idea, tell a story), Jeff Bezos (narrative structure over bullet-point catalogs), Leslie Lamport (precision over completeness in specifications), Donald Knuth (tense conventions, collaborative "we" voice), Paul Graham ("Write Like You Talk"), Steven Pinker ("The Sense of Style" — curse of knowledge, concrete over abstract), William Zinsser ("On Writing Well" — clarity, simplicity, brevity, humanity).
 
 
 ## Error Handling

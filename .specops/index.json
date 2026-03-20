@@ -86,5 +86,13 @@
     "version": 1,
     "author": "sanmak",
     "updated": "2026-03-18T19:25:39Z"
+  },
+  {
+    "id": "writing-quality-rules",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-20T17:09:13Z"
   }
 ]
