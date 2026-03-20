@@ -162,6 +162,22 @@ Three layers, strict separation:
 
 See [STRUCTURE.md](docs/STRUCTURE.md) for the full repository layout.
 
+## Writing Philosophy
+
+SpecOps spec generation is informed by principles from respected technical writers and leaders:
+
+- **Rich Sutton** — ordering (important first), precision (ANT/OAT test), jargon budget
+- **George Orwell** — cut unnecessary words, active voice, plain language
+- **Simon Peyton Jones** — identify the one key idea, tell a story
+- **Jeff Bezos** — narrative structure over bullet-point catalogs
+- **Leslie Lamport** — precision over completeness in specifications
+- **Donald Knuth** — tense conventions, collaborative "we" voice
+- **Paul Graham** — write like you talk
+- **Steven Pinker** — curse of knowledge, concrete over abstract
+- **William Zinsser** — clarity, simplicity, brevity, humanity
+
+These principles are codified in `core/writing-quality.md` and enforced during spec generation.
+
 ## Contributing
 
 Contributions welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.

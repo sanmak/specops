@@ -1,0 +1,52 @@
+name: User Feedback
+description: Feedback submitted via /specops feedback or manually
+labels: ["user-feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for your feedback! If submitting manually (not via `/specops feedback`), please fill in the fields below.
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - Bug report
+        - Feature request
+        - Friction / UX issue
+        - Improvement
+    validations:
+      required: true
+  - type: textarea
+    id: feedback
+    attributes:
+      label: Feedback
+      description: Describe your feedback in detail.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: SpecOps Version
+      placeholder: "e.g., 1.3.0"
+    validations:
+      required: false
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Claude Code
+        - Cursor
+        - OpenAI Codex
+        - GitHub Copilot
+    validations:
+      required: false
+  - type: input
+    id: vertical
+    attributes:
+      label: Vertical
+      description: "Your configured vertical (default, infrastructure, data, library, frontend, builder)"
+      placeholder: "default"
+    validations:
+      required: false

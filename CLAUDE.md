@@ -86,7 +86,7 @@ generator/      Generates platform outputs from core + platform adapters
 ```
 
 The `core/` directory defines the workflow, safety rules, templates, and vertical adaptations once. The `generator/generate.py` script assembles platform-specific instruction files by:
-1. Loading all `core/*.md` modules (workflow, safety, config-handling, steering, memory, verticals, simplicity, data-handling, error-handling, custom-templates, view, interview, init, update, review-workflow, task-tracking, task-delegation, reconciliation, from-plan, and spec templates from `core/templates/`)
+1. Loading all `core/*.md` modules (workflow, safety, config-handling, steering, memory, verticals, simplicity, writing-quality, data-handling, error-handling, custom-templates, view, interview, init, update, review-workflow, task-tracking, task-delegation, reconciliation, from-plan, feedback, and spec templates from `core/templates/`)
 2. Loading `platforms/{name}/platform.json` for tool mappings and capabilities
 3. Rendering through `generator/templates/{name}.j2` Jinja2-style templates
 4. Substituting abstract tool operations (e.g., `READ_FILE`) with platform-specific language from each platform's `toolMapping`
@@ -120,7 +120,7 @@ SpecOps is distributed as a Claude Code plugin via `.claude-plugin/` at the repo
 ```
 
 The plugin provides one skill:
-- `/specops` — spec-driven development workflow with subcommands: `init`, `view`, `list`, `interview`, `update`, `steering`, `audit`, `reconcile`, `from-plan`, `memory`, `version`, `status` (from `skills/specops/SKILL.md`)
+- `/specops` — spec-driven development workflow with subcommands: `init`, `view`, `list`, `interview`, `update`, `steering`, `audit`, `reconcile`, `from-plan`, `feedback`, `memory`, `version`, `status` (from `skills/specops/SKILL.md`)
 
 Plugin manifests (`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`) are **generated** by `generator/generate.py` — do not edit directly. Version is synced from `platforms/claude/platform.json`.
 
@@ -140,7 +140,7 @@ Plugin manifests (`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json
 
 ### Security-Sensitive Files
 
-These files require extra scrutiny when modified — they can alter agent behavior, security guardrails, or configuration validation: `core/workflow.md`, `core/safety.md`, `core/review-workflow.md`, `schema.json`, `spec-schema.json`, `platforms/claude/SKILL.md`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `setup.sh`, `scripts/remote-install.sh`, `generator/generate.py`, `hooks/pre-commit`, `hooks/pre-push`.
+These files require extra scrutiny when modified — they can alter agent behavior, security guardrails, or configuration validation: `core/workflow.md`, `core/safety.md`, `core/review-workflow.md`, `core/feedback.md`, `schema.json`, `spec-schema.json`, `platforms/claude/SKILL.md`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `setup.sh`, `scripts/remote-install.sh`, `generator/generate.py`, `hooks/pre-commit`, `hooks/pre-push`.
 
 ## What to Do After Changes
 
@@ -188,6 +188,7 @@ CI verifies generated files aren't stale — after regenerating, the diff of `pl
 - **Reconciliation markers present** — drift detection audit and reconcile rules included
 - **Steering markers present** — steering file format, inclusion modes, loading procedure, foundation templates
 - **Memory markers present** — local memory layer storage format, loading, writing, pattern detection, and safety rules
+- **Writing quality markers present** — structure/order, precision/testability, clarity/conciseness, audience awareness, self-check, sources
 
 ## Configuration
 

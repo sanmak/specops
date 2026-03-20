@@ -55,7 +55,8 @@
       "/specops view auth-feature walkthrough",
       "/specops view auth-feature requirements design",
       "/specops list",
-      "/specops update"
+      "/specops update",
+      "/specops feedback"
     ]
   }
 }

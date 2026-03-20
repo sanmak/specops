@@ -332,6 +332,37 @@ Use specops from-plan
 
 ---
 
+## Send Feedback
+
+Submit feedback about SpecOps (bugs, feature requests, friction, improvements) directly as a GitHub issue on the SpecOps repository.
+
+**Claude Code:**
+```text
+/specops feedback
+```
+
+**Other platforms:**
+```text
+Use specops feedback
+Use specops feedback bug The interview mode skips my follow-up answers
+```
+
+**Workflow (interactive):**
+1. Select category (bug, feature, friction, improvement)
+2. Describe the feedback
+3. Review the draft issue
+4. Confirm submission
+
+**Workflow (non-interactive):**
+- Provide category and description inline
+- Issue is composed and submitted automatically
+
+**Requirements:** `gh` CLI installed and authenticated. If unavailable, SpecOps provides a pre-filled browser URL as fallback, or saves the feedback locally with manual submission instructions.
+
+**Notes:** Only triggers when referring to SpecOps feedback, not product features like "add feedback form". Privacy-safe: only SpecOps version, platform, and vertical are included — no project code, paths, or configuration.
+
+---
+
 ## View a Spec
 
 Display an existing spec in a structured, readable format.
@@ -632,4 +663,5 @@ These are the valid states a spec can be in, usable as filters with the status c
 | I want to see project decisions and patterns | `/specops memory` |
 | I want to populate memory from existing specs | `/specops memory seed` |
 | I want to control how Phase 3 executes tasks | Set `implementation.taskDelegation` in `.specops.json` (`auto`/`always`/`never`) |
+| I want to report a bug or suggest a SpecOps improvement | `/specops feedback` |
 | I want to update SpecOps | `/specops update` |

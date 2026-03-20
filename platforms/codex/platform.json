@@ -53,7 +53,8 @@
       "Walk me through the auth-feature spec",
       "View auth-feature requirements and design sections",
       "List all specops specs",
-      "Use specops update to check for updates"
+      "Use specops update to check for updates",
+      "Use specops feedback to report an issue"
     ]
   }
 }

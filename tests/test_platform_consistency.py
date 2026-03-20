@@ -152,6 +152,17 @@ REQUIRED_MARKERS = {
         "### Repo Map Safety",
         "### Platform Adaptation",
     ],
+    "writing_quality": [
+        "## Writing Quality",
+        "### Structure and Order",
+        "### Precision and Testability",
+        "### Clarity and Conciseness",
+        "### Audience Awareness",
+        "### Self-Check",
+        "### Sources",
+        "ANT test",
+        "active voice",
+    ],
 }
 
 

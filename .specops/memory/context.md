@@ -28,3 +28,6 @@
 
 ### install-integrity-verification (feature) — 2026-03-17
 5 tasks completed, 0 deviations from design, 0 blockers. Added SHA-256 checksum verification to `remote-install.sh` addressing Agent Trust Hub HIGH-priority finding. Three new functions: `detect_hash_cmd()`, `fetch_checksums()`, `verify_file()`. `--no-verify` flag for development use. Security documentation updated: SECURITY.md (install trust chain, manual verification, residual risks), SBOM.md (automatic verification), SECURITY-AUDIT.md (Agent Trust Hub findings). ShellCheck clean, all 7 tests pass.
+
+### writing-quality-rules (feature) — 2026-03-20
+5 tasks completed, 0 deviations from design, 0 blockers. New `core/writing-quality.md` module (48 lines) with 6 imperative writing rule sections distilled from 9 vetted technical writing references (Rich Sutton, George Orwell, Simon Peyton Jones, Jeff Bezos, Leslie Lamport, Donald Knuth, Paul Graham, Steven Pinker, William Zinsser). Generator pipeline wired for all 4 platforms with 9 WRITING_QUALITY_MARKERS. README "Writing Philosophy" section adds public attribution. All 7 tests pass, validator passes with 0 errors.

@@ -217,6 +217,34 @@ DELEGATION_MARKERS = [
 ]
 
 
+# Writing quality markers that MUST appear in every output
+WRITING_QUALITY_MARKERS = [
+    "## Writing Quality",
+    "### Structure and Order",
+    "### Precision and Testability",
+    "### Clarity and Conciseness",
+    "### Audience Awareness",
+    "### Self-Check",
+    "### Sources",
+    "ANT test",
+    "active voice",
+]
+
+
+# Feedback mode markers that MUST appear in every output
+FEEDBACK_MARKERS = [
+    "## Feedback Mode",
+    "Feedback Mode Detection",
+    "Interactive Feedback Workflow",
+    "Non-Interactive Feedback Workflow",
+    "Issue Composition",
+    "Privacy Safety Rules",
+    "Submission",
+    "Graceful Degradation",
+    "sanmak/specops",
+]
+
+
 def read_file(path):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
@@ -360,6 +388,12 @@ def validate_platform(platform, info):
 
     # Check task delegation present
     errors.extend(check_markers_present(platform, content, DELEGATION_MARKERS, "delegation"))
+
+    # Check writing quality present
+    errors.extend(check_markers_present(platform, content, WRITING_QUALITY_MARKERS, "writing-quality"))
+
+    # Check feedback mode present
+    errors.extend(check_markers_present(platform, content, FEEDBACK_MARKERS, "feedback"))
 
     # Platform-specific format validation
     if platform == "cursor":
@@ -666,7 +700,7 @@ def main():
     if len(generated) >= 2:
         platforms = list(generated.keys())
         consistency_errors = []
-        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + TEMPLATE_MARKERS + VERTICAL_MARKERS + INTERVIEW_MARKERS + STEERING_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + EXTERNAL_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS + REPO_MAP_MARKERS + DELEGATION_MARKERS:
+        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + TEMPLATE_MARKERS + VERTICAL_MARKERS + INTERVIEW_MARKERS + STEERING_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + EXTERNAL_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS + REPO_MAP_MARKERS + DELEGATION_MARKERS + WRITING_QUALITY_MARKERS + FEEDBACK_MARKERS:
             present_in = [p for p in platforms if marker in generated[p]["content"]]
             if len(present_in) != len(platforms):
                 missing = set(platforms) - set(present_in)

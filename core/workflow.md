@@ -202,18 +202,19 @@ When invoked:
 5. Check if the request is a **view** or **list** command (see "Spec Viewing" module). If so, follow the view/list workflow instead of the standard phases below.
 6. Check if the request is a **steering** command (see "Steering Command" in the Steering Files module). Patterns: "steering", "create steering", "setup steering", "manage steering", "steering files", "add steering". These must refer to managing SpecOps steering files, NOT to a product feature. If so, follow the Steering Command workflow instead of the standard phases below.
 7. Check if the request is a **memory** command (see "Memory Subcommand" in the Local Memory Layer module). Patterns: "memory", "show memory", "view memory", "memory seed", "seed memory". These must refer to SpecOps memory management, NOT a product feature (e.g., "add memory cache" or "optimize memory usage" is NOT memory mode). If detected, follow the Memory Subcommand workflow instead of the standard phases below.
-8. Check if the request is a **map** command (see "Map Subcommand" in the Repo Map module). Patterns: "repo map", "generate repo map", "refresh repo map", "show repo map", "codebase map", "/specops map". The bare word "map" alone is NOT sufficient — it must co-occur with "repo", "codebase", or the explicit "/specops" prefix. These must refer to SpecOps repo map management, NOT a product feature (e.g., "add map component", "map API endpoints", "create sitemap" is NOT map mode). If detected, follow the Map Subcommand workflow instead of the standard phases below.
-9. Check if the request is an **audit** or **reconcile** command (see the Reconciliation module). Patterns for audit: "audit", "audit <name>", "health check", "check drift", "spec health". Patterns for reconcile: "reconcile <name>", "fix <name>" (when referring to a spec), "repair <name>", "sync <name>". These must refer to SpecOps spec health, NOT product features like "audit log" or "health endpoint". If detected, follow the Reconciliation module workflow instead of the standard phases below.
-10. Check if the request is a **from-plan** command (see "From Plan Mode" module). Patterns: "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan". These must refer to converting an AI coding assistant plan into a SpecOps spec, NOT to a product feature. If so, follow the From Plan Mode workflow instead of the standard phases below.
-11. Check if interview mode is triggered (see "Interview Mode" module):
+8. Check if the request is a **feedback** command (see "Feedback Mode" module). Patterns: "feedback", "send feedback", "report bug", "report issue", "suggest improvement", "feature request for specops", "specops friction". These must refer to sending feedback about SpecOps itself, NOT about a product feature (e.g., "add feedback form", "implement user feedback system", "collect user feedback" is NOT feedback mode). If detected, follow the Feedback Mode workflow instead of the standard phases below.
+9. Check if the request is a **map** command (see "Map Subcommand" in the Repo Map module). Patterns: "repo map", "generate repo map", "refresh repo map", "show repo map", "codebase map", "/specops map". The bare word "map" alone is NOT sufficient — it must co-occur with "repo", "codebase", or the explicit "/specops" prefix. These must refer to SpecOps repo map management, NOT a product feature (e.g., "add map component", "map API endpoints", "create sitemap" is NOT map mode). If detected, follow the Map Subcommand workflow instead of the standard phases below.
+10. Check if the request is an **audit** or **reconcile** command (see the Reconciliation module). Patterns for audit: "audit", "audit <name>", "health check", "check drift", "spec health". Patterns for reconcile: "reconcile <name>", "fix <name>" (when referring to a spec), "repair <name>", "sync <name>". These must refer to SpecOps spec health, NOT product features like "audit log" or "health endpoint". If detected, follow the Reconciliation module workflow instead of the standard phases below.
+11. Check if the request is a **from-plan** command (see "From Plan Mode" module). Patterns: "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan". These must refer to converting an AI coding assistant plan into a SpecOps spec, NOT to a product feature. If so, follow the From Plan Mode workflow instead of the standard phases below.
+12. Check if interview mode is triggered (see "Interview Mode" module):
    - Explicit: request contains "interview" keyword
    - Auto (interactive platforms only): request is vague (≤5 words, no technical keywords, no action verb)
    - If triggered: follow the Interview Mode workflow, then continue with the enriched context
-12. Confirm the request type (feature/bugfix/implement/other)
-13. Show the configuration you'll use (including detected vertical)
-14. Begin the workflow immediately (high autonomy)
-15. Provide progress updates as you work
-16. Summarize completion clearly
+13. Confirm the request type (feature/bugfix/implement/other)
+14. Show the configuration you'll use (including detected vertical)
+15. Begin the workflow immediately (high autonomy)
+16. Provide progress updates as you work
+17. Summarize completion clearly
 
 ## Version Display
 

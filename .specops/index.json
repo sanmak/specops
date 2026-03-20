@@ -1,11 +1,11 @@
 [
   {
-    "id": "ast-based-repo-map",
+    "id": "ears-notation",
     "type": "feature",
     "status": "completed",
     "version": 1,
     "author": "sanmak",
-    "updated": "2026-03-14T18:37:08Z"
+    "updated": "2026-03-07T12:30:00Z"
   },
   {
     "id": "bugfix-regression-analysis",
@@ -16,28 +16,20 @@
     "updated": "2026-03-08T03:12:30Z"
   },
   {
+    "id": "steering-files",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-08T06:46:57Z"
+  },
+  {
     "id": "drift-detection",
     "type": "feature",
     "status": "completed",
     "version": 1,
     "author": "sanmak",
     "updated": "2026-03-08T09:36:18Z"
-  },
-  {
-    "id": "ears-notation",
-    "type": "feature",
-    "status": "completed",
-    "version": 1,
-    "author": "sanmak",
-    "updated": "2026-03-07T12:30:00Z"
-  },
-  {
-    "id": "install-integrity-verification",
-    "type": "feature",
-    "status": "completed",
-    "version": 1,
-    "author": "sanmak",
-    "updated": "2026-03-18T19:25:39Z"
   },
   {
     "id": "local-memory-layer",
@@ -48,12 +40,12 @@
     "updated": "2026-03-14T09:28:58Z"
   },
   {
-    "id": "steering-files",
+    "id": "ast-based-repo-map",
     "type": "feature",
     "status": "completed",
     "version": 1,
     "author": "sanmak",
-    "updated": "2026-03-08T06:46:57Z"
+    "updated": "2026-03-14T18:37:08Z"
   },
   {
     "id": "task-delegation",
@@ -64,11 +56,27 @@
     "updated": "2026-03-18T02:34:12Z"
   },
   {
+    "id": "install-integrity-verification",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-18T19:25:39Z"
+  },
+  {
     "id": "workflow-enforcement-gates",
     "type": "feature",
     "status": "completed",
     "version": 1,
     "author": "sanmak",
     "updated": "2026-03-18T19:25:39Z"
+  },
+  {
+    "id": "writing-quality-rules",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-20T17:09:13Z"
   }
 ]
