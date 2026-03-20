@@ -1,7 +1,7 @@
 # Feature: Project-Type-Aware Workflow
 
 ## Overview
-SpecOps currently assumes a brownfield (existing codebase) context for every project. Phase 1 steps 8-9 are hollow on empty repos, init creates empty steering files regardless of existing docs, and there is no vertical for migration/re-platforming. This feature makes SpecOps project-type-aware across greenfield, brownfield, and bluefield projects with five targeted changes.
+SpecOps currently assumes a brownfield (existing codebase) context for every project. Phase 1 steps 8-9 are hollow on empty repos, init creates empty steering files regardless of existing docs, and there is no vertical for migration/re-platforming. This feature makes SpecOps project-type-aware across greenfield, brownfield, and migration projects with five targeted changes.
 
 ## Product Requirements
 

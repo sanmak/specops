@@ -24,14 +24,15 @@ READ_FILE(`.specops.json`) in the current working directory.
 Determine the project type by scanning the repository. This step adapts init behavior for greenfield, brownfield, and migration projects.
 
 1. **Scan repository state:**
-   - LIST_DIR(`.`) the project root (exclude `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`, `.specops/`)
-   - Count source code files — files that are NOT config-only files (`.gitignore`, `LICENSE`, `README.md`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `pom.xml`, `build.gradle`, `Gemfile`, `composer.json`, `tsconfig.json`, `Makefile`, `Dockerfile`, `.editorconfig`, `.prettierrc`, `.eslintrc.*`)
+   - Prefer version control metadata when available: RUN_COMMAND(`git ls-files`) from the project root to list tracked files. Exclude files under `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`, `.specops/`.
+   - If `git ls-files` is not available or fails (e.g., not a git repo), fall back to LIST_DIR(`.`) the project root (exclude `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`, `.specops/`).
+   - From the resulting file list, count source code files — files that are NOT config-only files (`.gitignore`, `LICENSE`, `README.md`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `pom.xml`, `build.gradle`, `Gemfile`, `composer.json`, `tsconfig.json`, `Makefile`, `Dockerfile`, `.editorconfig`, `.prettierrc`, `.eslintrc.*`)
    - Check FILE_EXISTS for documentation: `README.md`, `CONTRIBUTING.md`, `docs/`, `architecture.md`
    - Check FILE_EXISTS for dependency manifests: `package.json`, `pyproject.toml`, `requirements.txt`, `Cargo.toml`, `go.mod`, `pom.xml`, `build.gradle`, `Gemfile`, `composer.json`
 
 2. **Classify project type:**
    - **Greenfield**: Source code file count ≤ 5 (only scaffolding/config files present)
-   - **Brownfield**: Source code file count > 5 AND dependency manifests or documentation exist
+   - **Brownfield**: Source code file count > 5 (dependency manifests or documentation strengthen confidence but are not required for classification)
    - **Migration**: Cannot be auto-detected reliably — only set if the user overrides
 
 3. **Present detection result:**
@@ -115,7 +116,7 @@ Create empty memory files so the directory structure is complete from day one. M
 
 #### Step 4.7: Assisted Steering Population (Brownfield)
 
-If the confirmed project type from Step 1.5 is **brownfield**, check for existing documentation to pre-populate the steering file templates. Only populate files that still contain placeholder text (bracket-enclosed placeholders like `[One-sentence description`, `[Who uses this`, `[What makes this`, `[Primary language`). Skip this step entirely if all three steering files already have non-placeholder content or if the project type is not brownfield.
+If the confirmed project type from Step 1.5 is **brownfield**, check for existing documentation to pre-populate the steering file templates. Only populate files that still contain placeholder text (bracket-enclosed placeholders like `[One-sentence description`, `[Who uses this`, `[What makes this`, `[Primary language`). Skip this step entirely if all three steering files already have non-placeholder content or if the project type is not Brownfield.
 
 1. READ_FILE(`<specsDir>/steering/product.md`). If the body contains only foundation template placeholders:
    - If FILE_EXISTS(`README.md`), READ_FILE(`README.md`). Extract:

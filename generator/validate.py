@@ -243,7 +243,6 @@ WRITING_QUALITY_MARKERS = [
 ]
 
 
-# Feedback mode markers that MUST appear in every output
 # Proxy metrics markers that MUST appear in every output
 METRICS_MARKERS = [
     "## Proxy Metrics",
@@ -252,8 +251,10 @@ METRICS_MARKERS = [
     "specArtifactTokensEstimate",
     "filesChanged",
     "linesAdded",
+    "linesRemoved",
     "tasksCompleted",
     "acceptanceCriteriaVerified",
+    "specDurationMinutes",
 ]
 
 

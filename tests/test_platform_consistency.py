@@ -183,8 +183,10 @@ REQUIRED_MARKERS = {
         "specArtifactTokensEstimate",
         "filesChanged",
         "linesAdded",
+        "linesRemoved",
         "tasksCompleted",
         "acceptanceCriteriaVerified",
+        "specDurationMinutes",
     ],
 }
 

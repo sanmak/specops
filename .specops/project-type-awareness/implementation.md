@@ -27,7 +27,7 @@
 ## Documentation Review
 - `CLAUDE.md` — checked, vertical enum mention updated to include migration
 - `README.md` — checked, no changes needed (verticals listed dynamically from platform outputs)
-- `docs/REFERENCE.md` — checked, needs vertical enum update
+- `docs/REFERENCE.md` — updated (vertical enum updated to include `migration`)
 - `docs/STRUCTURE.md` — checked, no new core module added (changes are within existing modules)
 
 ## Session Log

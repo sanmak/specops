@@ -16,8 +16,9 @@ During Phase 4, after finalizing `implementation.md` (step 2) and before the mem
 
 2. **Collect git diff stats:**
    - READ_FILE(`<specsDir>/<spec-name>/spec.json`) to get the `created` timestamp
-   - RUN_COMMAND(`git log --oneline --after="<created>" -- . | wc -l`) to check for commits in the spec timeframe
-   - RUN_COMMAND(`git diff --stat HEAD~$(git log --oneline --after="<created>" -- . | wc -l) 2>/dev/null || echo "0 files changed"`) to get the diff summary
+   - Validate `<created>` is strict ISO-8601 (`YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DD`). If the value contains characters outside `[0-9TZ:.+-]` or does not match the expected format, set `filesChanged`, `linesAdded`, and `linesRemoved` to 0 and skip the git commands below.
+   - RUN_COMMAND(`git log --oneline --after="<created>" -- . | wc -l | tr -d ' '`) to check for commits in the spec timeframe
+   - RUN_COMMAND(`git diff --stat HEAD~$(git log --oneline --after="<created>" -- . | wc -l | tr -d ' ') 2>/dev/null || echo "0 files changed"`) to get the diff summary
    - Parse the summary line for `filesChanged`, `linesAdded`, `linesRemoved`
    - If the git command fails or returns no output, set all three values to 0 and NOTIFY_USER("Could not compute git diff stats — metrics will show 0 for code changes.")
 

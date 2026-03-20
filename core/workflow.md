@@ -57,7 +57,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
    - Default to `fullstack` if unclear
    - Display the detected vertical in configuration summary
 7.5. **Greenfield detection**: Determine if this is a greenfield project:
-   - LIST_DIR(`.`) the project root. Count source code files (exclude `.specops/`, `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`). Config-only files (`.gitignore`, `LICENSE`, `README.md`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `tsconfig.json`, `Makefile`, `Dockerfile`) do not count as source code files.
+   - Prefer version control metadata when available: RUN_COMMAND(`git ls-files`) from the project root to list tracked files. Exclude files under `.specops/`, `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`. If `git ls-files` is not available or fails, fall back to LIST_DIR(`.`) the project root (exclude `.specops/`, `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`). From the resulting file list, count source code files. Config-only files (`.gitignore`, `LICENSE`, `README.md`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `tsconfig.json`, `Makefile`, `Dockerfile`) do not count as source code files.
    - If source code file count ≤ 5 (only config/scaffold files present), this is a greenfield project.
    - If greenfield is detected, skip steps 8-9 and instead execute:
      - **8g. Define initial project structure**: Based on the user's request, the detected vertical, and any loaded steering file context, propose the initial directory layout and key files the project will need. Record in Phase 1 Context Summary as `- Project state: greenfield — proposed initial structure`.

@@ -64,7 +64,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
    - Default to `fullstack` if unclear
    - Display the detected vertical in configuration summary
 7.5. **Greenfield detection**: Determine if this is a greenfield project:
-   - List the contents of(`.`) the project root. Count source code files (exclude `.specops/`, `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`). Config-only files (`.gitignore`, `LICENSE`, `README.md`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `tsconfig.json`, `Makefile`, `Dockerfile`) do not count as source code files.
+   - Prefer version control metadata when available: Run the terminal command(`git ls-files`) from the project root to list tracked files. Exclude files under `.specops/`, `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`. If `git ls-files` is not available or fails, fall back to List the contents of(`.`) the project root (exclude `.specops/`, `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`). From the resulting file list, count source code files. Config-only files (`.gitignore`, `LICENSE`, `README.md`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `tsconfig.json`, `Makefile`, `Dockerfile`) do not count as source code files.
    - If source code file count ≤ 5 (only config/scaffold files present), this is a greenfield project.
    - If greenfield is detected, skip steps 8-9 and instead execute:
      - **8g. Define initial project structure**: Based on the user's request, the detected vertical, and any loaded steering file context, propose the initial directory layout and key files the project will need. Record in Phase 1 Context Summary as `- Project state: greenfield — proposed initial structure`.
@@ -3615,8 +3615,9 @@ During Phase 4, after finalizing `implementation.md` (step 2) and before the mem
 
 2. **Collect git diff stats:**
    - Read the file at(`<specsDir>/<spec-name>/spec.json`) to get the `created` timestamp
-   - Run the terminal command(`git log --oneline --after="<created>" -- . | wc -l`) to check for commits in the spec timeframe
-   - Run the terminal command(`git diff --stat HEAD~$(git log --oneline --after="<created>" -- . | wc -l) 2>/dev/null || echo "0 files changed"`) to get the diff summary
+   - Validate `<created>` is strict ISO-8601 (`YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DD`). If the value contains characters outside `[0-9TZ:.+-]` or does not match the expected format, set `filesChanged`, `linesAdded`, and `linesRemoved` to 0 and skip the git commands below.
+   - Run the terminal command(`git log --oneline --after="<created>" -- . | wc -l | tr -d ' '`) to check for commits in the spec timeframe
+   - Run the terminal command(`git diff --stat HEAD~$(git log --oneline --after="<created>" -- . | wc -l | tr -d ' ') 2>/dev/null || echo "0 files changed"`) to get the diff summary
    - Parse the summary line for `filesChanged`, `linesAdded`, `linesRemoved`
    - If the git command fails or returns no output, set all three values to 0 and Tell the user("Could not compute git diff stats — metrics will show 0 for code changes.")
 

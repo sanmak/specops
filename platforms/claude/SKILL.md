@@ -64,7 +64,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
    - Default to `fullstack` if unclear
    - Display the detected vertical in configuration summary
 7.5. **Greenfield detection**: Determine if this is a greenfield project:
-   - Use the Glob tool to list(`.`) the project root. Count source code files (exclude `.specops/`, `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`). Config-only files (`.gitignore`, `LICENSE`, `README.md`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `tsconfig.json`, `Makefile`, `Dockerfile`) do not count as source code files.
+   - Prefer version control metadata when available: Use the Bash tool to run(`git ls-files`) from the project root to list tracked files. Exclude files under `.specops/`, `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`. If `git ls-files` is not available or fails, fall back to Use the Glob tool to list(`.`) the project root (exclude `.specops/`, `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`). From the resulting file list, count source code files. Config-only files (`.gitignore`, `LICENSE`, `README.md`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `tsconfig.json`, `Makefile`, `Dockerfile`) do not count as source code files.
    - If source code file count ≤ 5 (only config/scaffold files present), this is a greenfield project.
    - If greenfield is detected, skip steps 8-9 and instead execute:
      - **8g. Define initial project structure**: Based on the user's request, the detected vertical, and any loaded steering file context, propose the initial directory layout and key files the project will need. Record in Phase 1 Context Summary as `- Project state: greenfield — proposed initial structure`.
@@ -2431,14 +2431,15 @@ Use the Read tool to read(`.specops.json`) in the current working directory.
 Determine the project type by scanning the repository. This step adapts init behavior for greenfield, brownfield, and migration projects.
 
 1. **Scan repository state:**
-   - Use the Glob tool to list(`.`) the project root (exclude `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`, `.specops/`)
-   - Count source code files — files that are NOT config-only files (`.gitignore`, `LICENSE`, `README.md`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `pom.xml`, `build.gradle`, `Gemfile`, `composer.json`, `tsconfig.json`, `Makefile`, `Dockerfile`, `.editorconfig`, `.prettierrc`, `.eslintrc.*`)
+   - Prefer version control metadata when available: Use the Bash tool to run(`git ls-files`) from the project root to list tracked files. Exclude files under `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`, `.specops/`.
+   - If `git ls-files` is not available or fails (e.g., not a git repo), fall back to Use the Glob tool to list(`.`) the project root (exclude `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`, `.specops/`).
+   - From the resulting file list, count source code files — files that are NOT config-only files (`.gitignore`, `LICENSE`, `README.md`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `pom.xml`, `build.gradle`, `Gemfile`, `composer.json`, `tsconfig.json`, `Makefile`, `Dockerfile`, `.editorconfig`, `.prettierrc`, `.eslintrc.*`)
    - Check FILE_EXISTS for documentation: `README.md`, `CONTRIBUTING.md`, `docs/`, `architecture.md`
    - Check FILE_EXISTS for dependency manifests: `package.json`, `pyproject.toml`, `requirements.txt`, `Cargo.toml`, `go.mod`, `pom.xml`, `build.gradle`, `Gemfile`, `composer.json`
 
 2. **Classify project type:**
    - **Greenfield**: Source code file count ≤ 5 (only scaffolding/config files present)
-   - **Brownfield**: Source code file count > 5 AND dependency manifests or documentation exist
+   - **Brownfield**: Source code file count > 5 (dependency manifests or documentation strengthen confidence but are not required for classification)
    - **Migration**: Cannot be auto-detected reliably — only set if the user overrides
 
 3. **Present detection result:**
@@ -2689,7 +2690,7 @@ Create empty memory files so the directory structure is complete from day one. M
 
 #### Step 4.7: Assisted Steering Population (Brownfield)
 
-If the confirmed project type from Step 1.5 is **brownfield**, check for existing documentation to pre-populate the steering file templates. Only populate files that still contain placeholder text (bracket-enclosed placeholders like `[One-sentence description`, `[Who uses this`, `[What makes this`, `[Primary language`). Skip this step entirely if all three steering files already have non-placeholder content or if the project type is not brownfield.
+If the confirmed project type from Step 1.5 is **brownfield**, check for existing documentation to pre-populate the steering file templates. Only populate files that still contain placeholder text (bracket-enclosed placeholders like `[One-sentence description`, `[Who uses this`, `[What makes this`, `[Primary language`). Skip this step entirely if all three steering files already have non-placeholder content or if the project type is not Brownfield.
 
 1. Use the Read tool to read(`<specsDir>/steering/product.md`). If the body contains only foundation template placeholders:
    - If FILE_EXISTS(`README.md`), Use the Read tool to read(`README.md`). Extract:
@@ -3950,8 +3951,9 @@ During Phase 4, after finalizing `implementation.md` (step 2) and before the mem
 
 2. **Collect git diff stats:**
    - Use the Read tool to read(`<specsDir>/<spec-name>/spec.json`) to get the `created` timestamp
-   - Use the Bash tool to run(`git log --oneline --after="<created>" -- . | wc -l`) to check for commits in the spec timeframe
-   - Use the Bash tool to run(`git diff --stat HEAD~$(git log --oneline --after="<created>" -- . | wc -l) 2>/dev/null || echo "0 files changed"`) to get the diff summary
+   - Validate `<created>` is strict ISO-8601 (`YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DD`). If the value contains characters outside `[0-9TZ:.+-]` or does not match the expected format, set `filesChanged`, `linesAdded`, and `linesRemoved` to 0 and skip the git commands below.
+   - Use the Bash tool to run(`git log --oneline --after="<created>" -- . | wc -l | tr -d ' '`) to check for commits in the spec timeframe
+   - Use the Bash tool to run(`git diff --stat HEAD~$(git log --oneline --after="<created>" -- . | wc -l | tr -d ' ') 2>/dev/null || echo "0 files changed"`) to get the diff summary
    - Parse the summary line for `filesChanged`, `linesAdded`, `linesRemoved`
    - If the git command fails or returns no output, set all three values to 0 and Display a message to the user("Could not compute git diff stats — metrics will show 0 for code changes.")
 
