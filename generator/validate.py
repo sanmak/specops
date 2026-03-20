@@ -250,7 +250,7 @@ FEEDBACK_MARKERS = [
     "Non-Interactive Feedback Workflow",
     "Issue Composition",
     "Privacy Safety Rules",
-    "Submission",
+    "### Submission",
     "Feedback Graceful Degradation",
     "sanmak/specops",
 ]

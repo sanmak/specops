@@ -2354,13 +2354,12 @@ If sensitive content is detected:
 **Tier 1 — `gh` CLI**:
 1. Create a unique temporary file: Run the terminal command(`mktemp /tmp/specops-feedback-XXXXXX.md`) and capture the output as `{tmpfile}`.
 2. Create the file at({tmpfile}, composed issue body).
-3. Set the sanitized title in an environment variable: `SPECOPS_TITLE="[{category}] {sanitized_title}"`
-4. Run the terminal command(`SPECOPS_TITLE="[{category}] {sanitized_title}" gh issue create --repo sanmak/specops --title "$SPECOPS_TITLE" --label "{label}" --body-file "{tmpfile}"`)
-5. Run the terminal command(`rm -f "{tmpfile}"`) to clean up — always run this regardless of whether step 4 succeeded or failed.
-6. If step 4 failed and the error message indicates the label does not exist, retry without the `--label` flag (non-default labels like `friction`, `improvement`, `other` may not exist on the target repo). If it still fails, fall through to Tier 2 (the temp file is already cleaned up).
-7. If step 4 succeeded, parse the issue URL from stdout.
-8. Tell the user("Feedback submitted: {issue URL}\n\nThank you for helping improve SpecOps!")
-9. Stop.
+3. Run the terminal command(`SPECOPS_TITLE="[{category}] {sanitized_title}" gh issue create --repo sanmak/specops --title "$SPECOPS_TITLE" --label "{label}" --body-file "{tmpfile}"`)
+4. If step 3 failed and the error message indicates the label does not exist, retry without the `--label` flag (non-default labels like `friction`, `improvement`, `other` may not exist on the target repo). If it still fails, fall through to Tier 2.
+5. Run the terminal command(`rm -f "{tmpfile}"`) to clean up — always run this regardless of whether step 3 succeeded, step 4 retried, or the flow falls through to Tier 2.
+6. If step 3 (or step 4 retry) succeeded, parse the issue URL from stdout.
+7. Tell the user("Feedback submitted: {issue URL}\n\nThank you for helping improve SpecOps!")
+8. Stop.
 
 **Tier 2 — Pre-filled browser URL** (if `gh` CLI is not installed, not authenticated, or fails):
 1. URL-encode the title, label, and body.
