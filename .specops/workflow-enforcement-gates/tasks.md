@@ -7,7 +7,7 @@
 **Estimated Effort:** M
 **Dependencies:** None
 **Priority:** High
-**IssueID:** None
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 
 **Description:**
@@ -40,7 +40,7 @@ Restructure Phase 1 step 5 to use enforcement gate pattern with protocol breach 
 **Estimated Effort:** S
 **Dependencies:** None
 **Priority:** High
-**IssueID:** None
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 
 **Description:**
@@ -68,7 +68,7 @@ Add "(mandatory)" to Phase 4 step 3 heading and add "protocol breach" language w
 **Estimated Effort:** M
 **Dependencies:** None
 **Priority:** High
-**IssueID:** None
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 
 **Description:**
@@ -99,7 +99,7 @@ Break Phase 3 step 1 from a single paragraph into a structured sub-list with nam
 **Estimated Effort:** M
 **Dependencies:** None
 **Priority:** High
-**IssueID:** None
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 
 **Description:**
@@ -130,7 +130,7 @@ Remove "advisory, not blocking" language and replace with protocol breach enforc
 **Estimated Effort:** S
 **Dependencies:** Task 4
 **Priority:** High
-**IssueID:** None
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 
 **Description:**
@@ -159,7 +159,7 @@ Add "attempted creation" marker to both generator/validate.py and tests/test_pla
 **Estimated Effort:** S
 **Dependencies:** Task 1, Task 2, Task 3, Task 4, Task 5
 **Priority:** High
-**IssueID:** None
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 
 **Description:**

@@ -110,6 +110,48 @@
       "type": "integer",
       "minimum": 0,
       "description": "Number of approvals needed. Set to 0 when review is disabled, otherwise copied from config at creation time."
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Proxy productivity metrics captured at spec completion (Phase 4)",
+      "properties": {
+        "specArtifactTokensEstimate": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Estimated tokens of spec artifacts (total chars / 4)"
+        },
+        "filesChanged": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of files changed during implementation"
+        },
+        "linesAdded": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Lines added during implementation"
+        },
+        "linesRemoved": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Lines removed during implementation"
+        },
+        "tasksCompleted": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of tasks with Completed status"
+        },
+        "acceptanceCriteriaVerified": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of checked acceptance criteria checkboxes"
+        },
+        "specDurationMinutes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Elapsed minutes from spec creation to completion"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "required": ["id", "type", "status", "version", "created", "updated", "author"],

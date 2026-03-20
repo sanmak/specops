@@ -1,0 +1,17 @@
+{
+  "id": "proxy-metrics",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "created": "2026-03-20T19:50:01Z",
+  "updated": "2026-03-20T20:03:10Z",
+  "specopsCreatedWith": "1.3.0",
+  "specopsUpdatedWith": "1.3.0",
+  "author": {
+    "name": "sanmak"
+  },
+  "reviewers": [],
+  "reviewRounds": 0,
+  "approvals": 0,
+  "requiredApprovals": 0
+}

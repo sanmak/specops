@@ -406,6 +406,77 @@ def main():
         "author": {"name": "Alice"}
     }, "Valid timestamps with timezone offsets"))
 
+    # --- Metrics object tests ---
+    print("\n--- Metrics Object Validation ---")
+
+    # Valid: spec with full metrics object
+    check(expect_valid(spec_schema, {
+        "id": "metrics-full",
+        "type": "feature",
+        "status": "completed",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T12:00:00Z",
+        "author": {"name": "Alice"},
+        "reviewers": [],
+        "reviewRounds": 0,
+        "approvals": 0,
+        "requiredApprovals": 0,
+        "metrics": {
+            "specArtifactTokensEstimate": 4200,
+            "filesChanged": 12,
+            "linesAdded": 340,
+            "linesRemoved": 45,
+            "tasksCompleted": 5,
+            "acceptanceCriteriaVerified": 18,
+            "specDurationMinutes": 120
+        }
+    }, "Valid spec.json with full metrics object"))
+
+    # Valid: spec without metrics (backward compat)
+    check(expect_valid(spec_schema, {
+        "id": "no-metrics",
+        "type": "feature",
+        "status": "completed",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T12:00:00Z",
+        "author": {"name": "Alice"},
+        "reviewers": [],
+        "reviewRounds": 0,
+        "approvals": 0,
+        "requiredApprovals": 0
+    }, "Valid spec.json without metrics (backward compat)"))
+
+    # Invalid: extra property in metrics object
+    check(expect_invalid(spec_schema, {
+        "id": "metrics-extra",
+        "type": "feature",
+        "status": "completed",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T12:00:00Z",
+        "author": {"name": "Alice"},
+        "metrics": {
+            "specArtifactTokensEstimate": 4200,
+            "unknownMetric": 99
+        }
+    }, "Rejects additional properties in metrics object"))
+
+    # Invalid: negative metric value
+    check(expect_invalid(spec_schema, {
+        "id": "metrics-negative",
+        "type": "feature",
+        "status": "completed",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T12:00:00Z",
+        "author": {"name": "Alice"},
+        "metrics": {
+            "filesChanged": -1
+        }
+    }, "Rejects negative metric value"))
+
     # --- Timestamp ordering tests ---
     print("\n--- Timestamp Ordering Validation ---")
 

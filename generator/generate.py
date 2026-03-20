@@ -354,6 +354,7 @@ def build_common_context(core, platform_config):
         "task_tracking": core["task-tracking"],
         "feedback": core["feedback"],
         "task_delegation": core["task-delegation"],
+        "metrics": core["metrics"],
         "templates_section": templates_section,
         "examples": examples,
         "version": version,

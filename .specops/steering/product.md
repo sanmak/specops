@@ -13,7 +13,7 @@ Developers and teams using AI coding assistants (Claude Code, Cursor, Codex, Git
 ## Key Differentiators
 - **Multi-platform**: Single source of truth generates output for 4 AI platforms from one codebase
 - **Open source and file-based**: All specs are plain markdown files tracked in git — no cloud dependency, no vendor lock-in
-- **Vertical adaptations**: Templates adapt vocabulary and structure for 6 domains (backend, frontend, infrastructure, data, library, builder)
+- **Vertical adaptations**: Templates adapt vocabulary and structure for 7 domains (backend, frontend, infrastructure, data, library, builder, migration)
 - **Safety mechanisms**: Convention sanitization, path containment, template safety — defends against prompt injection in spec content
 - **EARS notation**: Acceptance criteria use Easy Approach to Requirements Syntax for precision and testability
 

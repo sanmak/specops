@@ -23,7 +23,10 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 
 **Phase 1: Understand Context**
 
-1. Read `.specops.json` config if it exists, use defaults otherwise
+1. Read `.specops.json` config if it exists, use defaults otherwise.
+   - If `.specops.json` does not exist: Use the AskUserQuestion tool("No `.specops.json` found. SpecOps works best with a project configuration that sets up steering files (persistent project context) and memory (cross-spec learning). Would you like to run `/specops init` first (recommended), or continue with defaults?")
+     - If the user chooses init → redirect to Init Mode workflow
+     - If the user chooses defaults → proceed with step 2 using default configuration
 2. **Context recovery**: Check for prior work that may inform this session:
    - If FILE_EXISTS(`<specsDir>/index.json`), Use the Read tool to read it
    - If any specs have status `implementing` or `in-review`, Display a message to the user: "Found incomplete spec: <name> (status: <status>). Continue working on it?"
@@ -56,11 +59,24 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
      - **frontend**: component, UI, UX, page, form, layout, CSS, React, Vue, Angular, responsive, accessibility
      - **backend**: endpoint, API, service, database, migration, REST, GraphQL, middleware, authentication
      - **builder**: product, MVP, launch, ship end-to-end, full product, SaaS, marketplace, platform build, solo build, build from scratch, greenfield, v1, prototype, side project, startup
+     - **migration**: migrate, re-platform, modernize, strangler, cutover, legacy replacement, rewrite, sunset, decommission, lift-and-shift, dual-run, parallel-run
      - **fullstack**: request spans both frontend and backend concerns
    - Default to `fullstack` if unclear
    - Display the detected vertical in configuration summary
-8. Explore codebase to understand existing patterns and architecture
-9. Identify affected files, components, and dependencies — produce a concrete list of affected file paths for `fileMatch` steering file evaluation
+7.5. **Greenfield detection**: Determine if this is a greenfield project:
+   - Use the Glob tool to list(`.`) the project root. Count source code files (exclude `.specops/`, `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`). Config-only files (`.gitignore`, `LICENSE`, `README.md`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `tsconfig.json`, `Makefile`, `Dockerfile`) do not count as source code files.
+   - If source code file count ≤ 5 (only config/scaffold files present), this is a greenfield project.
+   - If greenfield is detected, skip steps 8-9 and instead execute:
+     - **8g. Define initial project structure**: Based on the user's request, the detected vertical, and any loaded steering file context, propose the initial directory layout and key files the project will need. Record in Phase 1 Context Summary as `- Project state: greenfield — proposed initial structure`.
+     - **9g. Auto-populate steering files**: If the steering files (`product.md`, `tech.md`, `structure.md`) still contain only placeholder text (bracket-enclosed placeholders like `[One-sentence description...]`), extract context from the user's request to fill them:
+       - `product.md`: Product overview, target users, and differentiators from the user's description
+       - `tech.md`: Technology stack if the user mentioned specific languages, frameworks, or tools
+       - `structure.md`: Proposed directory layout from step 8g
+       Use the Edit tool to modify each steering file only for sections where the user provided relevant information. Leave sections as placeholders if no information is available.
+       Display a message to the user("Auto-populated steering files from your request. Review and edit `<specsDir>/steering/` for accuracy.")
+   - If not greenfield, proceed with the original steps 8 and 9 below.
+8. **(Brownfield/migration only)** Explore codebase to understand existing patterns and architecture
+9. **(Brownfield/migration only)** Identify affected files, components, and dependencies — produce a concrete list of affected file paths for `fileMatch` steering file evaluation
 
 **Phase 2: Create Specification**
 
@@ -118,7 +134,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 
 5.5. **Coherence Verification**: After generating all spec files, cross-check for contradictions between spec sections. Use the Read tool to read the requirements/bugfix/refactor file and design.md. Extract numeric constraints from NFRs (performance targets, SLAs, limits) and verify they do not contradict functional requirements or design decisions. Record the result in implementation.md under `## Phase 1 Context Summary` as a `- Coherence check: [pass / N contradiction(s) found — details]` entry. If contradictions are found, Display a message to the user with the specifics before proceeding.
 5.6. **Vocabulary Verification**: If the detected vertical is not `backend`, `fullstack`, or `frontend`, and no custom template is used, scan generated spec files for prohibited default terms (see the Vocabulary Verification subsection in the Vertical Adaptation Rules module). Replace any found terms with vertical-specific vocabulary. Record the result in implementation.md Phase 1 Context Summary.
-6. **External issue creation**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. Use the Read tool to read `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`, create issues via the Issue Creation Protocol, and write IssueIDs back to `tasks.md`.
+6. **External issue creation (mandatory when taskTracking configured)**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. Use the Read tool to read `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`, create issues via the Issue Creation Protocol, and write IssueIDs back to `tasks.md`. If issue creation is skipped or all IssueIDs remain `None`, the Phase 3 task tracking gate will catch the omission — the spec artifact linter validates IssueIDs on completed specs and fails CI when they are missing.
 7. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow.
 
 **Phase 2.5: Review Cycle** (if spec review enabled)
@@ -152,6 +168,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
 2. Finalize `implementation.md`:
    - Populate the Summary section with a brief synthesis: total tasks completed, key decisions made, any deviations from design, and overall implementation health
    - Remove any empty sections (tables with no rows) to keep it clean
+2.5. **Capture proxy metrics**: Collect proxy metrics following the Proxy Metrics module. Use the Read tool to read spec artifacts to estimate token counts, Use the Bash tool to run `git diff --stat` to collect code change stats, count completed tasks and verified acceptance criteria from `tasks.md` content, calculate duration from timestamps. Use the Edit tool to modify `spec.json` to add the `metrics` object. If any metric collection substep fails, set that metric to 0 and continue — do not block completion on metrics failures.
 3. **Update memory (mandatory)**: Update the local memory layer following the Local Memory Layer module. Extract Decision Log entries from `implementation.md`, update `context.md` with the spec completion summary, and run pattern detection to update `patterns.json`. If the memory directory does not exist, create it. This step is mandatory — skipping memory update is a protocol breach. The completion gate in step 5 will verify this step executed.
 4. **Documentation check (enforcement gate)**: Identify project documentation that may need updating based on files modified during implementation. After completing the check, Use the Edit tool to modify `<specsDir>/<spec-name>/implementation.md` to append or update a `## Documentation Review` section listing each doc file checked, its status (up-to-date / updated / flagged), and any changes made. This section is mandatory for spec completion — the spec artifact linter validates its presence for completed specs.
    - Scan for documentation files (README.md, CLAUDE.md, and files in a docs/ directory if one exists)
@@ -2407,7 +2424,41 @@ Use the Read tool to read(`.specops.json`) in the current working directory.
 
 - If the file exists, display its contents and Use the AskUserQuestion tool: "A `.specops.json` already exists. Would you like to replace it or keep the current one?"
 - If the user wants to keep it, stop here with a message: "Keeping existing config. Run `/specops <description>` to start spec-driven development."
-- If the file does not exist, continue to Step 2.
+- If the file does not exist, continue to Step 1.5.
+
+#### Step 1.5: Detect Project Type
+
+Determine the project type by scanning the repository. This step adapts init behavior for greenfield, brownfield, and migration projects.
+
+1. **Scan repository state:**
+   - Use the Glob tool to list(`.`) the project root (exclude `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`, `.specops/`)
+   - Count source code files — files that are NOT config-only files (`.gitignore`, `LICENSE`, `README.md`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `pom.xml`, `build.gradle`, `Gemfile`, `composer.json`, `tsconfig.json`, `Makefile`, `Dockerfile`, `.editorconfig`, `.prettierrc`, `.eslintrc.*`)
+   - Check FILE_EXISTS for documentation: `README.md`, `CONTRIBUTING.md`, `docs/`, `architecture.md`
+   - Check FILE_EXISTS for dependency manifests: `package.json`, `pyproject.toml`, `requirements.txt`, `Cargo.toml`, `go.mod`, `pom.xml`, `build.gradle`, `Gemfile`, `composer.json`
+
+2. **Classify project type:**
+   - **Greenfield**: Source code file count ≤ 5 (only scaffolding/config files present)
+   - **Brownfield**: Source code file count > 5 AND dependency manifests or documentation exist
+   - **Migration**: Cannot be auto-detected reliably — only set if the user overrides
+
+3. **Present detection result:**
+   - On interactive platforms (`canAskInteractive = true`):
+     Use the AskUserQuestion tool: "Detected project type: **[Greenfield / Brownfield]** ([reason: e.g., 'found 3 source files' / 'found 47 source files, package.json, README.md']). Is this correct?"
+
+     Options:
+     - **Greenfield** — New project, building from scratch. Recommends: Builder template, adaptive Phase 1 (skips codebase exploration, proposes initial structure)
+     - **Brownfield** — Existing project, adding SpecOps. Recommends: Standard template, auto-populated steering files from existing documentation
+     - **Migration** — Re-platforming or modernizing an existing system. Recommends: Standard template with migration vertical
+
+   - On non-interactive platforms (`canAskInteractive = false`):
+     Display a message to the user: "Detected project type: **[Greenfield / Brownfield]** ([reason]). Using recommended defaults."
+     Use the detected type without confirmation.
+
+4. **Apply project type:**
+   - Store the confirmed project type for use in subsequent init steps
+   - If **Greenfield**: pre-select Builder template in Step 2, note that Phase 1 will adapt for empty repos
+   - If **Brownfield**: pre-select Standard template in Step 2, enable assisted steering population in Step 4.7
+   - If **Migration**: pre-select Standard template in Step 2 with `vertical: "migration"` customization prompt in Step 4
 
 #### Step 2: Present Template Options
 
@@ -2611,7 +2662,9 @@ Use the AskUserQuestion tool: "Are you working solo or with a team?"
 
 #### Step 4: Customize (Optional)
 
-After writing the config, Use the AskUserQuestion tool: "Would you like to customize any fields? Common customizations: `specsDir` path, `vertical` (backend/frontend/fullstack/infrastructure/data/library/builder), or team `conventions`."
+After writing the config, Use the AskUserQuestion tool: "Would you like to customize any fields? Common customizations: `specsDir` path, `vertical` (backend/frontend/fullstack/infrastructure/data/library/builder/migration), or team `conventions`."
+
+If the confirmed project type from Step 1.5 is **Migration** and the user has not yet set the vertical, suggest: "Since this is a migration project, would you like to set the vertical to `migration`? This adapts spec templates with migration-specific sections (Source System Analysis, Cutover Plan, Coexistence Strategy)."
 
 If the user wants to customize, Use the Edit tool to modify(`.specops.json`) to modify the specific fields they request.
 
@@ -2633,6 +2686,39 @@ Create empty memory files so the directory structure is complete from day one. M
 2. If FILE_EXISTS(`<specsDir>/memory/decisions.json`) is false, Use the Write tool to create(`<specsDir>/memory/decisions.json`) with: `{"version": 1, "decisions": []}`
 3. If FILE_EXISTS(`<specsDir>/memory/context.md`) is false, Use the Write tool to create(`<specsDir>/memory/context.md`) with: `# Project Memory\n\n## Completed Specs\n`
 4. If FILE_EXISTS(`<specsDir>/memory/patterns.json`) is false, Use the Write tool to create(`<specsDir>/memory/patterns.json`) with: `{"version": 1, "decisionCategories": [], "fileOverlaps": []}`
+
+#### Step 4.7: Assisted Steering Population (Brownfield)
+
+If the confirmed project type from Step 1.5 is **brownfield**, check for existing documentation to pre-populate the steering file templates. Only populate files that still contain placeholder text (bracket-enclosed placeholders like `[One-sentence description`, `[Who uses this`, `[What makes this`, `[Primary language`). Skip this step entirely if all three steering files already have non-placeholder content or if the project type is not brownfield.
+
+1. Use the Read tool to read(`<specsDir>/steering/product.md`). If the body contains only foundation template placeholders:
+   - If FILE_EXISTS(`README.md`), Use the Read tool to read(`README.md`). Extract:
+     - First paragraph or section after the title → Product Overview
+     - Any "Features", "About", or "Description" section content → populate relevant fields
+   - If useful content was found, Use the Edit tool to modify(`<specsDir>/steering/product.md`) to replace the placeholder lines with the extracted content. Preserve the YAML frontmatter unchanged.
+
+2. Use the Read tool to read(`<specsDir>/steering/tech.md`). If the body contains only foundation template placeholders:
+   - Scan for dependency/config files in this priority order (stop at first found):
+     - `package.json` → extract `dependencies`, `devDependencies` keys for framework/library detection
+     - `pyproject.toml` or `requirements.txt` → extract dependencies
+     - `Cargo.toml` → extract `[dependencies]`
+     - `go.mod` → extract module path and requires
+     - `pom.xml` or `build.gradle` → note Java/Kotlin + build tool
+     - `Gemfile` → extract gems
+     - `composer.json` → extract PHP dependencies
+   - If a dependency file was found, Use the Read tool to read it and Use the Edit tool to modify(`<specsDir>/steering/tech.md`) to populate:
+     - Core Stack: primary language + framework (inferred from dependencies)
+     - Development Tools: build system, package manager (inferred from config file type)
+     - Quality & Testing: test framework (inferred from test dependencies like jest, pytest, mocha, rspec, etc.)
+
+3. Use the Read tool to read(`<specsDir>/steering/structure.md`). If the body contains only foundation template placeholders:
+   - Use the Glob tool to list(`.`) to get the top-level directory listing
+   - Use the Edit tool to modify(`<specsDir>/steering/structure.md`) to populate:
+     - Directory Layout: list top-level directories with brief purpose descriptions inferred from conventional names (src/, lib/, tests/, docs/, app/, public/, scripts/, etc.)
+     - Key Files: list notable root files (README.md, config files, entry points)
+
+4. If any steering files were populated:
+   Display a message to the user("Pre-populated steering files from existing project documentation. Review `<specsDir>/steering/` and refine as needed.")
 
 #### Step 5: Next Steps
 
@@ -3245,6 +3331,7 @@ Detailed description of what needs to be done.
 - Memory: [loaded N decisions from M specs, P patterns / no memory files]
 - Vertical: [detected or configured vertical]
 - Affected files: [list of affected file paths]
+- Project state: [greenfield / brownfield / migration]
 
 ## Decision Log
 | # | Decision | Rationale | Task | Timestamp |
@@ -3338,6 +3425,16 @@ No other adaptations — frontend is well-served by default templates.
 
 **Builder simplicity guardrail:** The Builder vertical covers the broadest possible scope. To prevent spec bloat: (1) Only include design.md sections for domains the specific request actually touches — do NOT speculatively add infrastructure, data, or frontend sections "because a builder might need them." (2) The Scope Boundary section in requirements.md is mandatory — it forces explicit deferral of non-essential work. (3) Tasks should target the shortest path to a shippable product; optimization, observability, and polish tasks should be flagged as non-ship-blocking unless the request specifically demands them.
 
+### migration
+
+**Domain vocabulary:** "Components" → "Systems"; "API Endpoints" → "Integration Boundaries"; "User Stories" → "Migration Requirements"; "Sequence Diagrams" → "Migration Flow"; "Data Model" → "Data Migration Design"; "Rollout Plan" → "Cutover Plan"
+
+**requirements.md:** Replace "User Stories" with "Migration Requirements" (As a [role], I need [capability] migrated from [source] to [target] so that [benefit]). Replace "Non-Functional Requirements" with "Migration Constraints" (downtime tolerance, data integrity requirements, performance parity, backward compatibility period). Add "Source System Analysis" section (current system capabilities being migrated, known limitations, dependencies). Add "Compatibility Requirements" section (coexistence period, backward compatibility, rollback window).
+
+**design.md:** Replace "Component Design" with "Migration Architecture". Add "Source System" section (current architecture being migrated from). Add "Target System" section (architecture being migrated to). Replace "Sequence Diagrams" with "Migration Flow" (data migration sequence, traffic cutover sequence). Replace "Data Model Changes" with "Data Migration Design" (schema mapping, transformation rules, validation). Replace "API Changes" with "Integration Boundaries" (APIs that must remain stable during migration, adapter/facade interfaces). Replace "Rollout Plan" with "Cutover Plan" (migration phases, coexistence strategy, traffic shifting, rollback triggers, success criteria per phase). Add "Coexistence Strategy" section (how source and target systems run simultaneously — routing rules, feature flags, data sync). Skip "Future Enhancements" (migrations have a defined end state).
+
+**tasks.md:** Add "Migration Phase" tag per task (values: `prepare`, `migrate`, `validate`, `cutover`). Add "Rollback Steps" per task (what to undo if this task's migration fails). Add "Validation Steps" per task (how to verify this step completed correctly before proceeding).
+
 ### backend / fullstack
 
 No adaptations needed — default templates are designed for these verticals.
@@ -3352,6 +3449,7 @@ After generating spec files in Phase 2, verify that vertical-specific vocabulary
 | data | "User Stories", "API Endpoints", "Components" (when "Pipeline Stages" applies), "Sequence Diagrams", "Data Model" |
 | library | "User Stories" (when "Developer Use Cases" applies), "API Endpoints" (when "Public API Surface" applies) |
 | builder | "User Stories" (when "Product Requirements" applies), "API Endpoints" (when "Integration Points" applies), "Rollout Plan" (when "Ship Plan" applies) |
+| migration | "User Stories" (when "Migration Requirements" applies), "API Endpoints" (when "Integration Boundaries" applies), "Rollout Plan" (when "Cutover Plan" applies), "Components" (when "Systems" applies) |
 
 Scan each generated spec file (requirements.md/bugfix.md/refactor.md, design.md, tasks.md) for prohibited terms. If any are found, replace with the vertical-specific term. Record the result in implementation.md Phase 1 Context Summary as `- Vocabulary check: [pass / N term(s) replaced]`.
 
@@ -3832,6 +3930,81 @@ Execute tasks sequentially (standard Phase 3 behavior) with enhanced checkpointi
 | `canDelegateTask = true` | A (Sub-Agent) | Fresh agent per task, orchestrator verifies |
 | `canDelegateTask = false`, `canAskInteractive = true` | B (Session Checkpoint) | Prompt user for fresh session after each task |
 | `canDelegateTask = false`, `canAskInteractive = false` | C (Enhanced Sequential) | Standard execution with detailed checkpointing |
+
+
+## Proxy Metrics
+
+Proxy metrics measure spec output and implementation productivity without requiring platform token APIs. Metrics are captured deterministically at Phase 4 (completion) and stored in `spec.json` as an optional `metrics` object. They provide data points for ROI analysis: how much was specified, how much code changed, how many tasks completed, and how long the workflow took.
+
+### Metrics Capture Procedure
+
+During Phase 4, after finalizing `implementation.md` (step 2) and before the memory update (step 3), capture proxy metrics. This step is mandatory when the spec status transitions to `completed`.
+
+1. **Collect spec artifact sizes:**
+   - Use the Read tool to read(`<specsDir>/<spec-name>/requirements.md`) (or `bugfix.md` / `refactor.md` depending on spec type in `spec.json`)
+   - Use the Read tool to read(`<specsDir>/<spec-name>/design.md`)
+   - Use the Read tool to read(`<specsDir>/<spec-name>/tasks.md`)
+   - Use the Read tool to read(`<specsDir>/<spec-name>/implementation.md`)
+   - For each file that exists, count the total characters. If a file does not exist, treat its character count as 0.
+   - Calculate `specArtifactTokensEstimate` = total characters across all artifacts / 4 (integer division, round down)
+
+2. **Collect git diff stats:**
+   - Use the Read tool to read(`<specsDir>/<spec-name>/spec.json`) to get the `created` timestamp
+   - Use the Bash tool to run(`git log --oneline --after="<created>" -- . | wc -l`) to check for commits in the spec timeframe
+   - Use the Bash tool to run(`git diff --stat HEAD~$(git log --oneline --after="<created>" -- . | wc -l) 2>/dev/null || echo "0 files changed"`) to get the diff summary
+   - Parse the summary line for `filesChanged`, `linesAdded`, `linesRemoved`
+   - If the git command fails or returns no output, set all three values to 0 and Display a message to the user("Could not compute git diff stats — metrics will show 0 for code changes.")
+
+3. **Count completed tasks:**
+   - From the `tasks.md` content already loaded in step 1, count occurrences of `**Status:** Completed` (case-sensitive match)
+   - Store as `tasksCompleted`
+
+4. **Count verified acceptance criteria:**
+   - From the requirements/bugfix/refactor artifact already loaded in step 1, count occurrences of `- [x]` (checked checkboxes)
+   - From the `tasks.md` content, also count `- [x]` under **Acceptance Criteria:** and **Tests Required:** sections
+   - Store total as `acceptanceCriteriaVerified`
+
+5. **Calculate spec duration:**
+   - Use the Read tool to read(`<specsDir>/<spec-name>/spec.json`) to get the `created` timestamp (already available from step 2)
+   - Use the Bash tool to run(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current completion time
+   - Parse both ISO 8601 timestamps and compute the difference in minutes
+   - Store as `specDurationMinutes`
+   - This value measures wall-clock elapsed time and may be inaccurate if work was paused between sessions
+
+6. **Write metrics to spec.json:**
+   - Assemble the `metrics` object:
+     ```json
+     {
+       "specArtifactTokensEstimate": <integer>,
+       "filesChanged": <integer>,
+       "linesAdded": <integer>,
+       "linesRemoved": <integer>,
+       "tasksCompleted": <integer>,
+       "acceptanceCriteriaVerified": <integer>,
+       "specDurationMinutes": <integer>
+     }
+     ```
+   - Use the Edit tool to modify(`<specsDir>/<spec-name>/spec.json`) to add or update the `metrics` field
+   - If any individual metric could not be computed, set its value to 0 rather than omitting it
+
+### Platform Adaptation
+
+All 4 supported platforms have the capabilities required for metrics capture:
+
+| Capability | Claude Code | Cursor | Codex | Copilot | Impact |
+|-----------|-------------|--------|-------|---------|--------|
+| `canAccessGit` | true | true | true | true | Git diff stats available on all platforms |
+| `canExecuteCode` | true | true | true | true | Use the Bash tool to run available for git and date commands |
+
+No platform-specific fallbacks are needed — the metrics capture procedure is identical across all platforms.
+
+### Metrics Safety
+
+- **Token estimates are approximate**: The `specArtifactTokensEstimate` uses characters/4 as a rough proxy for tokens. Actual tokenization varies by model and encoding. This metric measures spec artifact size, not API token consumption.
+- **Duration includes idle time**: `specDurationMinutes` is wall-clock elapsed time from spec creation to completion. If work was paused between sessions, the duration will overcount active time.
+- **Git diff scope**: `filesChanged`, `linesAdded`, and `linesRemoved` reflect repository changes during the spec timeframe. If the spec was implemented on a shared branch with other concurrent work, these numbers may include unrelated changes.
+- **Metrics are non-blocking**: If any metric collection substep fails, the affected metric is set to 0 and completion proceeds. Metrics failures never block spec completion.
+- **No sensitive data**: Metrics contain only aggregate numerical values — no file contents, no PII, no secrets.
 
 
 ## Data Handling and Sensitive Information

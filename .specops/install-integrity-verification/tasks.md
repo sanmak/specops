@@ -7,6 +7,7 @@
 **Estimated Effort:** M
 **Dependencies:** None
 **Priority:** High
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 
 **Description:**
@@ -42,6 +43,7 @@ Add `detect_hash_cmd()`, `fetch_checksums()`, and `verify_file()` functions to `
 **Estimated Effort:** S
 **Dependencies:** Task 1
 **Priority:** High
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 
 **Description:**
@@ -73,6 +75,7 @@ Add an "Install Verification" subsection to the Trust Model section of SECURITY.
 **Estimated Effort:** S
 **Dependencies:** Task 1
 **Priority:** Medium
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 
 **Description:**
@@ -100,6 +103,7 @@ Update the "Integrity Verification" section in `docs/SBOM.md` to reflect that th
 **Estimated Effort:** S
 **Dependencies:** Task 1
 **Priority:** Medium
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 
 **Description:**
@@ -126,6 +130,7 @@ Update the security audit report to reflect that finding #2 (checksum verificati
 **Estimated Effort:** S
 **Dependencies:** Task 1, Task 2, Task 3, Task 4
 **Priority:** High
+**IssueID:** FAILED — created before task tracking enforcement
 **Blocker:** None
 
 **Description:**

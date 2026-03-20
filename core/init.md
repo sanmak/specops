@@ -17,7 +17,41 @@ READ_FILE(`.specops.json`) in the current working directory.
 
 - If the file exists, display its contents and ASK_USER: "A `.specops.json` already exists. Would you like to replace it or keep the current one?"
 - If the user wants to keep it, stop here with a message: "Keeping existing config. Run `/specops <description>` to start spec-driven development."
-- If the file does not exist, continue to Step 2.
+- If the file does not exist, continue to Step 1.5.
+
+#### Step 1.5: Detect Project Type
+
+Determine the project type by scanning the repository. This step adapts init behavior for greenfield, brownfield, and migration projects.
+
+1. **Scan repository state:**
+   - LIST_DIR(`.`) the project root (exclude `.git/`, `node_modules/`, `__pycache__/`, `.venv/`, `vendor/`, `.specops/`)
+   - Count source code files — files that are NOT config-only files (`.gitignore`, `LICENSE`, `README.md`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `pom.xml`, `build.gradle`, `Gemfile`, `composer.json`, `tsconfig.json`, `Makefile`, `Dockerfile`, `.editorconfig`, `.prettierrc`, `.eslintrc.*`)
+   - Check FILE_EXISTS for documentation: `README.md`, `CONTRIBUTING.md`, `docs/`, `architecture.md`
+   - Check FILE_EXISTS for dependency manifests: `package.json`, `pyproject.toml`, `requirements.txt`, `Cargo.toml`, `go.mod`, `pom.xml`, `build.gradle`, `Gemfile`, `composer.json`
+
+2. **Classify project type:**
+   - **Greenfield**: Source code file count ≤ 5 (only scaffolding/config files present)
+   - **Brownfield**: Source code file count > 5 AND dependency manifests or documentation exist
+   - **Migration**: Cannot be auto-detected reliably — only set if the user overrides
+
+3. **Present detection result:**
+   - On interactive platforms (`canAskInteractive = true`):
+     ASK_USER: "Detected project type: **[Greenfield / Brownfield]** ([reason: e.g., 'found 3 source files' / 'found 47 source files, package.json, README.md']). Is this correct?"
+
+     Options:
+     - **Greenfield** — New project, building from scratch. Recommends: Builder template, adaptive Phase 1 (skips codebase exploration, proposes initial structure)
+     - **Brownfield** — Existing project, adding SpecOps. Recommends: Standard template, auto-populated steering files from existing documentation
+     - **Migration** — Re-platforming or modernizing an existing system. Recommends: Standard template with migration vertical
+
+   - On non-interactive platforms (`canAskInteractive = false`):
+     NOTIFY_USER: "Detected project type: **[Greenfield / Brownfield]** ([reason]). Using recommended defaults."
+     Use the detected type without confirmation.
+
+4. **Apply project type:**
+   - Store the confirmed project type for use in subsequent init steps
+   - If **Greenfield**: pre-select Builder template in Step 2, note that Phase 1 will adapt for empty repos
+   - If **Brownfield**: pre-select Standard template in Step 2, enable assisted steering population in Step 4.7
+   - If **Migration**: pre-select Standard template in Step 2 with `vertical: "migration"` customization prompt in Step 4
 
 #### Step 2: Present Template Options
 
@@ -54,7 +88,9 @@ ASK_USER: "Are you working solo or with a team?"
 
 #### Step 4: Customize (Optional)
 
-After writing the config, ASK_USER: "Would you like to customize any fields? Common customizations: `specsDir` path, `vertical` (backend/frontend/fullstack/infrastructure/data/library/builder), or team `conventions`."
+After writing the config, ASK_USER: "Would you like to customize any fields? Common customizations: `specsDir` path, `vertical` (backend/frontend/fullstack/infrastructure/data/library/builder/migration), or team `conventions`."
+
+If the confirmed project type from Step 1.5 is **Migration** and the user has not yet set the vertical, suggest: "Since this is a migration project, would you like to set the vertical to `migration`? This adapts spec templates with migration-specific sections (Source System Analysis, Cutover Plan, Coexistence Strategy)."
 
 If the user wants to customize, EDIT_FILE(`.specops.json`) to modify the specific fields they request.
 
@@ -76,6 +112,39 @@ Create empty memory files so the directory structure is complete from day one. M
 2. If FILE_EXISTS(`<specsDir>/memory/decisions.json`) is false, WRITE_FILE(`<specsDir>/memory/decisions.json`) with: `{"version": 1, "decisions": []}`
 3. If FILE_EXISTS(`<specsDir>/memory/context.md`) is false, WRITE_FILE(`<specsDir>/memory/context.md`) with: `# Project Memory\n\n## Completed Specs\n`
 4. If FILE_EXISTS(`<specsDir>/memory/patterns.json`) is false, WRITE_FILE(`<specsDir>/memory/patterns.json`) with: `{"version": 1, "decisionCategories": [], "fileOverlaps": []}`
+
+#### Step 4.7: Assisted Steering Population (Brownfield)
+
+If the confirmed project type from Step 1.5 is **brownfield**, check for existing documentation to pre-populate the steering file templates. Only populate files that still contain placeholder text (bracket-enclosed placeholders like `[One-sentence description`, `[Who uses this`, `[What makes this`, `[Primary language`). Skip this step entirely if all three steering files already have non-placeholder content or if the project type is not brownfield.
+
+1. READ_FILE(`<specsDir>/steering/product.md`). If the body contains only foundation template placeholders:
+   - If FILE_EXISTS(`README.md`), READ_FILE(`README.md`). Extract:
+     - First paragraph or section after the title → Product Overview
+     - Any "Features", "About", or "Description" section content → populate relevant fields
+   - If useful content was found, EDIT_FILE(`<specsDir>/steering/product.md`) to replace the placeholder lines with the extracted content. Preserve the YAML frontmatter unchanged.
+
+2. READ_FILE(`<specsDir>/steering/tech.md`). If the body contains only foundation template placeholders:
+   - Scan for dependency/config files in this priority order (stop at first found):
+     - `package.json` → extract `dependencies`, `devDependencies` keys for framework/library detection
+     - `pyproject.toml` or `requirements.txt` → extract dependencies
+     - `Cargo.toml` → extract `[dependencies]`
+     - `go.mod` → extract module path and requires
+     - `pom.xml` or `build.gradle` → note Java/Kotlin + build tool
+     - `Gemfile` → extract gems
+     - `composer.json` → extract PHP dependencies
+   - If a dependency file was found, READ_FILE it and EDIT_FILE(`<specsDir>/steering/tech.md`) to populate:
+     - Core Stack: primary language + framework (inferred from dependencies)
+     - Development Tools: build system, package manager (inferred from config file type)
+     - Quality & Testing: test framework (inferred from test dependencies like jest, pytest, mocha, rspec, etc.)
+
+3. READ_FILE(`<specsDir>/steering/structure.md`). If the body contains only foundation template placeholders:
+   - LIST_DIR(`.`) to get the top-level directory listing
+   - EDIT_FILE(`<specsDir>/steering/structure.md`) to populate:
+     - Directory Layout: list top-level directories with brief purpose descriptions inferred from conventional names (src/, lib/, tests/, docs/, app/, public/, scripts/, etc.)
+     - Key Files: list notable root files (README.md, config files, entry points)
+
+4. If any steering files were populated:
+   NOTIFY_USER("Pre-populated steering files from existing project documentation. Review `<specsDir>/steering/` and refine as needed.")
 
 #### Step 5: Next Steps
 

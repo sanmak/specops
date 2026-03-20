@@ -37,7 +37,7 @@ python3 tests/test_platform_consistency.py   # all platform outputs are consiste
 python3 tests/test_build.py                  # generator system produces valid outputs
 python3 tests/test_spec_schema.py            # spec.json/index.json schema validation
 
-# Lint spec artifacts (checkbox staleness, docs review, version validation)
+# Lint spec artifacts (checkbox staleness, docs review, version validation, task tracking IssueID)
 python3 scripts/lint-spec-artifacts.py .specops
 
 # Run installation verification
@@ -90,7 +90,7 @@ generator/      Generates platform outputs from core + platform adapters
 ```
 
 The `core/` directory defines the workflow, safety rules, templates, and vertical adaptations once. The `generator/generate.py` script assembles platform-specific instruction files by:
-1. Loading all `core/*.md` modules (workflow, safety, config-handling, steering, memory, verticals, simplicity, writing-quality, data-handling, error-handling, custom-templates, view, interview, init, update, review-workflow, task-tracking, task-delegation, reconciliation, from-plan, feedback, and spec templates from `core/templates/`)
+1. Loading all `core/*.md` modules (workflow, safety, config-handling, steering, memory, metrics, verticals, simplicity, writing-quality, data-handling, error-handling, custom-templates, view, interview, init, update, review-workflow, task-tracking, task-delegation, reconciliation, from-plan, feedback, and spec templates from `core/templates/`)
 2. Loading `platforms/{name}/platform.json` for tool mappings and capabilities
 3. Rendering through `generator/templates/{name}.j2` Jinja2-style templates
 4. Substituting abstract tool operations (e.g., `READ_FILE`) with platform-specific language from each platform's `toolMapping`

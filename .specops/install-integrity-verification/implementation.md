@@ -12,5 +12,8 @@
 
 ## Blockers Encountered
 
+## Documentation Review
+- Retroactively added — spec predates Documentation Review enforcement gate
+
 ## Session Log
 - **Session 1 (2026-03-17)**: Full implementation. Tasks 1-5 completed in a single session.

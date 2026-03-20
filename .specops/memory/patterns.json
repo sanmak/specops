@@ -25,9 +25,10 @@
       "specs": [
         "drift-detection",
         "ast-based-repo-map",
-        "enforcement-roadmap"
+        "enforcement-roadmap",
+        "project-type-awareness"
       ],
-      "count": 3,
+      "count": 4,
       "lesson": "Avoid renumbering Phase steps when inserting new logic — use sub-step notation (e.g., step 5.5, 5.6) to prevent breaking cross-module references"
     },
     {
@@ -35,9 +36,10 @@
       "specs": [
         "drift-detection",
         "workflow-enforcement-gates",
-        "enforcement-roadmap"
+        "enforcement-roadmap",
+        "project-type-awareness"
       ],
-      "count": 3,
+      "count": 4,
       "lesson": "Validator markers are case-sensitive substrings — when adding new marker constants, add to BOTH per-platform validation AND the cross-platform consistency loop in the same commit"
     },
     {
@@ -60,9 +62,11 @@
         "ast-based-repo-map",
         "task-delegation",
         "workflow-enforcement-gates",
-        "enforcement-roadmap"
+        "enforcement-roadmap",
+        "project-type-awareness",
+        "proxy-metrics"
       ],
-      "count": 8
+      "count": 10
     },
     {
       "file": "generator/validate.py",
@@ -73,9 +77,11 @@
         "ast-based-repo-map",
         "task-delegation",
         "workflow-enforcement-gates",
-        "enforcement-roadmap"
+        "enforcement-roadmap",
+        "project-type-awareness",
+        "proxy-metrics"
       ],
-      "count": 7
+      "count": 9
     },
     {
       "file": "generator/generate.py",
@@ -83,9 +89,10 @@
         "steering-files",
         "drift-detection",
         "ast-based-repo-map",
-        "task-delegation"
+        "task-delegation",
+        "proxy-metrics"
       ],
-      "count": 4
+      "count": 5
     },
     {
       "file": "tests/test_platform_consistency.py",
@@ -93,9 +100,11 @@
         "steering-files",
         "drift-detection",
         "ast-based-repo-map",
-        "workflow-enforcement-gates"
+        "workflow-enforcement-gates",
+        "project-type-awareness",
+        "proxy-metrics"
       ],
-      "count": 4
+      "count": 6
     },
     {
       "file": "core/config-handling.md",
@@ -116,16 +125,18 @@
     {
       "file": "core/verticals.md",
       "specs": [
-        "enforcement-roadmap"
+        "enforcement-roadmap",
+        "project-type-awareness"
       ],
-      "count": 1
+      "count": 2
     },
     {
       "file": "core/templates/implementation.md",
       "specs": [
-        "enforcement-roadmap"
+        "enforcement-roadmap",
+        "project-type-awareness"
       ],
-      "count": 1
+      "count": 2
     },
     {
       "file": "core/tool-abstraction.md",

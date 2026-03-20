@@ -1,0 +1,17 @@
+{
+  "id": "project-type-awareness",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "created": "2026-03-20T19:25:40Z",
+  "updated": "2026-03-20T19:36:02Z",
+  "specopsCreatedWith": "1.3.0",
+  "specopsUpdatedWith": "1.3.0",
+  "author": {
+    "name": "sanmak"
+  },
+  "reviewers": [],
+  "reviewRounds": 0,
+  "approvals": 0,
+  "requiredApprovals": 0
+}

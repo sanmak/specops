@@ -50,6 +50,16 @@ No other adaptations — frontend is well-served by default templates.
 
 **Builder simplicity guardrail:** The Builder vertical covers the broadest possible scope. To prevent spec bloat: (1) Only include design.md sections for domains the specific request actually touches — do NOT speculatively add infrastructure, data, or frontend sections "because a builder might need them." (2) The Scope Boundary section in requirements.md is mandatory — it forces explicit deferral of non-essential work. (3) Tasks should target the shortest path to a shippable product; optimization, observability, and polish tasks should be flagged as non-ship-blocking unless the request specifically demands them.
 
+### migration
+
+**Domain vocabulary:** "Components" → "Systems"; "API Endpoints" → "Integration Boundaries"; "User Stories" → "Migration Requirements"; "Sequence Diagrams" → "Migration Flow"; "Data Model" → "Data Migration Design"; "Rollout Plan" → "Cutover Plan"
+
+**requirements.md:** Replace "User Stories" with "Migration Requirements" (As a [role], I need [capability] migrated from [source] to [target] so that [benefit]). Replace "Non-Functional Requirements" with "Migration Constraints" (downtime tolerance, data integrity requirements, performance parity, backward compatibility period). Add "Source System Analysis" section (current system capabilities being migrated, known limitations, dependencies). Add "Compatibility Requirements" section (coexistence period, backward compatibility, rollback window).
+
+**design.md:** Replace "Component Design" with "Migration Architecture". Add "Source System" section (current architecture being migrated from). Add "Target System" section (architecture being migrated to). Replace "Sequence Diagrams" with "Migration Flow" (data migration sequence, traffic cutover sequence). Replace "Data Model Changes" with "Data Migration Design" (schema mapping, transformation rules, validation). Replace "API Changes" with "Integration Boundaries" (APIs that must remain stable during migration, adapter/facade interfaces). Replace "Rollout Plan" with "Cutover Plan" (migration phases, coexistence strategy, traffic shifting, rollback triggers, success criteria per phase). Add "Coexistence Strategy" section (how source and target systems run simultaneously — routing rules, feature flags, data sync). Skip "Future Enhancements" (migrations have a defined end state).
+
+**tasks.md:** Add "Migration Phase" tag per task (values: `prepare`, `migrate`, `validate`, `cutover`). Add "Rollback Steps" per task (what to undo if this task's migration fails). Add "Validation Steps" per task (how to verify this step completed correctly before proceeding).
+
 ### backend / fullstack
 
 No adaptations needed — default templates are designed for these verticals.
@@ -64,6 +74,7 @@ After generating spec files in Phase 2, verify that vertical-specific vocabulary
 | data | "User Stories", "API Endpoints", "Components" (when "Pipeline Stages" applies), "Sequence Diagrams", "Data Model" |
 | library | "User Stories" (when "Developer Use Cases" applies), "API Endpoints" (when "Public API Surface" applies) |
 | builder | "User Stories" (when "Product Requirements" applies), "API Endpoints" (when "Integration Points" applies), "Rollout Plan" (when "Ship Plan" applies) |
+| migration | "User Stories" (when "Migration Requirements" applies), "API Endpoints" (when "Integration Boundaries" applies), "Rollout Plan" (when "Cutover Plan" applies), "Components" (when "Systems" applies) |
 
 Scan each generated spec file (requirements.md/bugfix.md/refactor.md, design.md, tasks.md) for prohibited terms. If any are found, replace with the vertical-specific term. Record the result in implementation.md Phase 1 Context Summary as `- Vocabulary check: [pass / N term(s) replaced]`.
 

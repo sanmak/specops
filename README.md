@@ -162,6 +162,10 @@ Three layers, strict separation:
 
 See [STRUCTURE.md](docs/STRUCTURE.md) for the full repository layout.
 
+## Proxy Metrics
+
+SpecOps captures proxy productivity metrics at spec completion — artifact sizes, code changes, task counts, and duration — providing data points for ROI analysis without requiring platform token APIs. See [TOKEN-USAGE.md](docs/TOKEN-USAGE.md) for benchmark data and cost estimation guidance.
+
 ## Writing Philosophy
 
 SpecOps spec generation is informed by principles from respected technical writers and leaders:
