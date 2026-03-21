@@ -191,6 +191,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
      - [ ] `canAskInteractive = false` fallback written for every interactive prompt in the new subcommand
      - [ ] Row added to `docs/COMMANDS.md` Quick Lookup table for the new subcommand
      - [ ] `Check if the file exists at` guard used before reading any optional config (e.g., `.specops.json`) in the subcommand's first step
+4.5. **Repo map refresh**: If Check if the file exists at(`<specsDir>/steering/repo-map.md`), refresh the repo map by running the Generation algorithm from the Repo Map module. This ensures the structural map reflects any files added, removed, or reorganized during implementation. If the repo map file does not exist, skip this step (the map will be auto-generated in Phase 1 of the next spec if steering is configured).
 5. **Completion gate**: Before marking the spec as completed, verify that memory was updated. Read the file at(`<specsDir>/memory/context.md`) and confirm it contains a section heading `### <spec-name>`. If missing, go back to step 3 and execute it — do not mark the spec as completed without memory being updated.
 6. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (Execute the command(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`
 6.5. **Git checkpoint (completed) and run log finalization**: If `config.implementation.gitCheckpointing` is true for this run, commit final metadata following the Git Checkpointing module: Execute the command(`git add -A`) then Execute the command(`git commit -m "specops(checkpoint): completed -- <spec-name>"`). If the commit fails, Print to stdout and continue. Then, if `config.implementation.runLogging` is not `"off"`, finalize the run log following the Run Logging module: Edit the file at the run log to update frontmatter with `completedAt` and `finalStatus`.
@@ -3837,6 +3838,49 @@ Before finalizing any spec artifact in Phase 2, silently verify:
 ### Sources
 
 Distilled from: Rich Sutton (ordering, precision, ANT/OAT test, jargon budget, topic sentences), George Orwell ("Politics and the English Language" — cut words, active voice, plain language), Simon Peyton Jones (identify the one key idea, tell a story), Jeff Bezos (narrative structure over bullet-point catalogs), Leslie Lamport (precision over completeness in specifications), Donald Knuth (tense conventions, collaborative "we" voice), Paul Graham ("Write Like You Talk"), Steven Pinker ("The Sense of Style" — curse of knowledge, concrete over abstract), William Zinsser ("On Writing Well" — clarity, simplicity, brevity, humanity).
+
+
+## Engineering Discipline
+
+Apply these engineering rules when generating design artifacts (design.md) during Phase 2 and when making implementation decisions during Phase 3. These rules govern how to reason about architecture, testing, reliability, and quality — not what to write (see the Writing Quality module) or what to include (see the Simplicity Principle). These are mandatory, not suggestions. Rules marked *(reinforces: ...)* overlap with existing modules — they are restated here to ground the underlying principle.
+
+### Architecture and Design Integrity
+
+- Assign every component in design.md exactly one responsibility. If a component description contains "and" joining two independent concerns, split it into two components. A component that does two things is two components sharing a name.
+- Record every technical decision in design.md's Technical Decisions section before implementing it. A decision made during Phase 3 that was not in design.md must be logged in implementation.md's Decision Log with the rationale. No architectural choice may exist only in code. *(reinforces: implementation.md template Decision Log)*
+- Verify substitutability when extending existing components: any new implementation of an existing interface must pass the existing test suite unchanged. If the new code requires changing existing tests for reasons other than added coverage, the interface contract is being violated — redesign.
+- Resolve ambiguity by narrowing the contract, not widening the implementation. When a requirement can be read two ways, pick the interpretation that constrains the system more. Document the discarded interpretation in the Technical Decisions section.
+
+### Testing and Validation Philosophy
+
+- Derive every test case from a specific acceptance criterion or EARS statement. If a test does not trace back to a requirement, it is either testing an undocumented requirement (add it) or testing an implementation detail (remove it).
+- Write the test assertion before writing the production code that satisfies it. For each task in Phase 3, create or identify the failing test first, then implement until it passes. Existing passing tests must remain passing.
+- When modifying code without tests, write a characterization test capturing the current behavior before making changes. The characterization test documents what the system does today — the new test documents what it should do after the change.
+- Treat a passing test suite as necessary evidence, not sufficient proof. After tests pass, review each acceptance criterion in the spec and confirm it is covered. Untested criteria are not done. *(reinforces: Phase 4 acceptance criteria verification)*
+
+### Reliability and Failure Reasoning
+
+- For every new integration point (API call, file I/O, external service, inter-component message), document the failure mode and the system's response in design.md. "What happens when this fails?" must have an explicit answer — not silence.
+- Evaluate changes as interactions, not isolated components. When a change modifies shared state, a message format, or a timing assumption, trace through every consumer of that shared resource and verify each one tolerates the new behavior. *(reinforces: bugfix blast radius analysis)*
+- After completing blast radius analysis (bugfix specs) or risk assessment (feature specs), verify that every identified risk has a corresponding test or monitoring check. A risk without a detection mechanism is an unacknowledged blind spot.
+
+### Constraints and Quality Gates
+
+- Identify the single constraint that most limits delivery for each spec — the one task, dependency, or decision that every other task blocks on. Execute that constraint first. Do not parallelize work around an unresolved bottleneck.
+- Treat quality gates (Phase 2 entry gate, implementation gates, completion gate) as load-bearing structure, not ceremony. Never produce workarounds that technically pass a gate while violating its intent. If a gate blocks progress incorrectly, flag it — do not route around it. *(reinforces: existing enforcement gates)*
+- Scope each spec to deliver one verifiable increment. If design.md describes changes that cannot be validated without completing a second spec, the scope is too large — split it. *(reinforces: Simplicity Principle "scale specs to the task")*
+
+### Self-Check
+
+Before finalizing design.md in Phase 2 and before marking a task complete in Phase 3, silently verify:
+
+1. Every component in design.md has exactly one stated responsibility.
+2. Every acceptance criterion maps to at least one test case (or an explicit justification for why testing is deferred).
+3. Every integration point documents its failure mode and recovery behavior.
+
+### Sources
+
+Distilled from: Fred Brooks (conceptual integrity — one mind or small group must control design), Barbara Liskov (substitutability — new implementations must honor existing contracts), Gregor Hohpe (architecture is decisions, not structure — record and justify every choice), Kent Beck (test-driven development — test first, then implement; tests derive from requirements), Edsger Dijkstra (testing shows the presence of bugs, never their absence — passing tests are necessary, not sufficient), Michael Feathers (characterization tests — capture existing behavior before changing legacy code), Nancy Leveson (STAMP — failures arise from interactions between components, not just component faults), Nassim Taleb (antifragility — systems improve under stress only when failure modes are explicit and monitored), Eliyahu Goldratt (Theory of Constraints — identify and resolve the bottleneck before optimizing elsewhere), W. Edwards Deming (build quality in — gates are structure, not inspection theater), Jez Humble (continuous delivery — every change must be independently deployable and verifiable).
 
 
 ## Error Handling

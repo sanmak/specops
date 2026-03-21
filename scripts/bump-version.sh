@@ -103,7 +103,8 @@ if [ "$REGEN_CHECKSUMS" = true ]; then
     core/workflow.md \
     core/safety.md \
     core/reconciliation.md \
-    core/task-delegation.md \
+    core/engineering-discipline.md \
+    core/writing-quality.md \
     hooks/pre-commit \
     hooks/pre-push \
     scripts/install-hooks.sh \

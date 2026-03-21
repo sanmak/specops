@@ -56,6 +56,14 @@
     "updated": "2026-03-18T20:22:30Z"
   },
   {
+    "id": "engineering-discipline-module",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-21T16:30:00Z"
+  },
+  {
     "id": "exit-plan-mode-hook",
     "type": "feature",
     "status": "completed",

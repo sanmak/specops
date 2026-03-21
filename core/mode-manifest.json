@@ -55,6 +55,7 @@
         "verticals",
         "custom-templates",
         "writing-quality",
+        "engineering-discipline",
         "review-workflow",
         "task-tracking",
         "dependency-safety"
@@ -103,6 +104,7 @@
         "custom-templates",
         "simplicity",
         "writing-quality",
+        "engineering-discipline",
         "data-handling",
         "error-handling",
         "task-tracking",

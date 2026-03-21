@@ -1,0 +1,15 @@
+{
+  "id": "engineering-discipline-module",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "author": {
+    "name": "sanmak"
+  },
+  "created": "2026-03-21T15:47:51Z",
+  "updated": "2026-03-21T16:30:00Z",
+  "specopsCreatedWith": "1.3.0",
+  "specopsUpdatedWith": "1.3.0",
+  "requiredApprovals": 0,
+  "approvals": []
+}

@@ -3,7 +3,7 @@ name: "Repo Map"
 description: "Machine-generated structural map of the codebase"
 inclusion: always
 _generated: true
-_generatedAt: "2026-03-14T18:39:10Z"
+_generatedAt: "2026-03-21T16:35:00Z"
 _sourceHash: "eccb8847762f73887395831078955517cc6f01ead558f3e8e39a218890d43d7a"
 ---
 
@@ -45,28 +45,39 @@ _sourceHash: "eccb8847762f73887395831078955517cc6f01ead558f3e8e39a218890d43d7a"
 
 ### File Declarations
 
-#### core/ (20 files)
+#### core/ (31 files)
 
 - `config-handling.md`
 - `custom-templates.md`
 - `data-handling.md`
+- `dependency-safety.md`
+- `dispatcher.md`
+- `engineering-discipline.md`
 - `error-handling.md`
+- `feedback.md`
 - `from-plan.md`
+- `git-checkpointing.md`
 - `init.md`
 - `interview.md`
 - `memory.md`
+- `metrics.md`
+- `pipeline.md`
+- `plan-validation.md`
 - `reconciliation.md`
 - `repo-map.md`
 - `review-workflow.md`
+- `run-logging.md`
 - `safety.md`
 - `simplicity.md`
 - `steering.md`
+- `task-delegation.md`
 - `task-tracking.md`
 - `tool-abstraction.md`
 - `update.md`
 - `verticals.md`
 - `view.md`
 - `workflow.md`
+- `writing-quality.md`
 
 #### core/templates/ (7 files)
 
@@ -91,20 +102,32 @@ _sourceHash: "eccb8847762f73887395831078955517cc6f01ead558f3e8e39a218890d43d7a"
   - `def render_template(template_str, context)`
   - `def build_example_invocations(platform_config)`
   - `def build_init_templates_section()`
+  - `def build_common_context(core, platform_config)`
+  - `def generate_claude_modes(core, platform_config)`
+  - `def generate_claude(core, platform_config)`
+  - `def generate_plugin_manifests()`
+  - `def generate_cursor(core, platform_config)`
+  - `def generate_codex(core, platform_config)`
+  - `def generate_copilot(core, platform_config)`
 - `validate.py`
   - `def read_file(path)`
   - `def get_generated_files()`
   - `def check_no_abstract_operations(platform, content)`
   - `def check_markers_present(platform, content, markers, category)`
   - `def validate_frontmatter_format(content, platform, required_fields)`
+  - `def validate_claude_dispatcher()`
   - `def validate_platform(platform, info)`
   - `def validate_plugin_manifests()`
   - `def validate_version_in_frontmatter(generated)`
   - `def validate_init_skill()`
+  - `def validate_docs_coverage()`
+  - `def validate_source_syntax()`
+  - `def validate_step_references(generated)`
   - `def main()`
 
-#### generator/templates/ (4 files)
+#### generator/templates/ (5 files)
 
+- `claude-dispatcher.j2`
 - `claude.j2`
 - `codex.j2`
 - `copilot.j2`
@@ -142,10 +165,12 @@ _sourceHash: "eccb8847762f73887395831078955517cc6f01ead558f3e8e39a218890d43d7a"
   - `def expect_invalid(schema, instance, description)`
   - `def main()`
 
-#### scripts/ (5 files)
+#### scripts/ (7 files)
 
 - `bump-version.sh`
 - `install-hooks.sh`
+- `lint-spec-artifacts.py`
+- `lint-specs.sh`
 - `remote-install.sh`
 - `run-review-gate.sh`
 - `run-tests.sh`
@@ -183,9 +208,10 @@ _sourceHash: "eccb8847762f73887395831078955517cc6f01ead558f3e8e39a218890d43d7a"
 - `platform.json`
 - `specops.instructions.md` (generated)
 
-#### docs/ (10 files)
+#### docs/ (12 files)
 
 - `COMMANDS.md`
+- `COMPARISON.md`
 - `DIAGRAMS.md`
 - `MARKETPLACE_SUBMISSIONS.md`
 - `PLAN-VS-SPEC.md`
@@ -195,6 +221,7 @@ _sourceHash: "eccb8847762f73887395831078955517cc6f01ead558f3e8e39a218890d43d7a"
 - `STEERING_GUIDE.md`
 - `STRUCTURE.md`
 - `TEAM_GUIDE.md`
+- `TOKEN-USAGE.md`
 
 #### Root files (17 files)
 

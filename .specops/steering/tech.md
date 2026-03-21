@@ -16,6 +16,6 @@ inclusion: always
 - **GitHub Actions**: CI verifies generated outputs match source, runs tests, validates checksums
 
 ## Quality & Testing
-- **Test suite** (`scripts/run-tests.sh`): 7 tests covering schema validation, schema constraints, schema sync, platform consistency, build system, and spec schema
-- **Validator** (`generator/validate.py`): Checks all generated outputs for abstract operation substitution, safety markers, template markers, workflow markers, steering markers, and platform-specific format rules
+- **Test suite** (`scripts/run-tests.sh`): 8 tests covering schema validation, schema constraints, schema sync, platform consistency, build system, spec schema, and spec artifact lint
+- **Validator** (`generator/validate.py`): Checks all generated outputs for abstract operation substitution, 28+ marker categories (safety, workflow, template, engineering discipline, memory, steering, etc.), cross-platform consistency, and platform-specific format rules
 - **Checksums** (`CHECKSUMS.sha256`): SHA-256 hashes of critical files verified in CI

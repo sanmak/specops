@@ -347,6 +347,7 @@ def build_common_context(core, platform_config):
         "safety": core["safety"],
         "simplicity": core["simplicity"],
         "writing_quality": core["writing-quality"],
+        "engineering_discipline": core["engineering-discipline"],
         "data_handling": core["data-handling"],
         "verticals": core["verticals"],
         "custom_templates": core["custom-templates"],

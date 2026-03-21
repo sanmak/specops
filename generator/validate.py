@@ -237,10 +237,24 @@ WRITING_QUALITY_MARKERS = [
     "### Clarity and Conciseness",
     "### Audience Awareness",
     "### Collaborative Voice",
-    "### Self-Check",
-    "### Sources",
+    "does it sound like natural speech",
+    "Rich Sutton",
     "ANT test",
     "active voice",
+]
+
+
+# Engineering discipline markers that MUST appear in every output
+ENGINEERING_DISCIPLINE_MARKERS = [
+    "## Engineering Discipline",
+    "### Architecture and Design Integrity",
+    "### Testing and Validation Philosophy",
+    "### Reliability and Failure Reasoning",
+    "### Constraints and Quality Gates",
+    "Before finalizing design.md in Phase 2",
+    "Distilled from: Fred Brooks",
+    "substitutability",
+    "characterization test",
 ]
 
 
@@ -565,6 +579,9 @@ def validate_platform(platform, info):
 
     # Check writing quality present
     errors.extend(check_markers_present(platform, content, WRITING_QUALITY_MARKERS, "writing-quality"))
+
+    # Check engineering discipline present
+    errors.extend(check_markers_present(platform, content, ENGINEERING_DISCIPLINE_MARKERS, "engineering-discipline"))
 
     # Check feedback mode present
     errors.extend(check_markers_present(platform, content, FEEDBACK_MARKERS, "feedback"))
@@ -1101,7 +1118,7 @@ def main():
     if len(generated) >= 2:
         platforms = list(generated.keys())
         consistency_errors = []
-        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + TEMPLATE_MARKERS + VERTICAL_MARKERS + INTERVIEW_MARKERS + STEERING_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + EXTERNAL_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS + REPO_MAP_MARKERS + DELEGATION_MARKERS + WRITING_QUALITY_MARKERS + FEEDBACK_MARKERS + COHERENCE_MARKERS + METRICS_MARKERS + RUN_LOGGING_MARKERS + PLAN_VALIDATION_MARKERS + GIT_CHECKPOINT_MARKERS + PIPELINE_MARKERS + ISSUE_BODY_MARKERS + DEPENDENCY_SAFETY_MARKERS:
+        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + TEMPLATE_MARKERS + VERTICAL_MARKERS + INTERVIEW_MARKERS + STEERING_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + EXTERNAL_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS + REPO_MAP_MARKERS + DELEGATION_MARKERS + WRITING_QUALITY_MARKERS + ENGINEERING_DISCIPLINE_MARKERS + FEEDBACK_MARKERS + COHERENCE_MARKERS + METRICS_MARKERS + RUN_LOGGING_MARKERS + PLAN_VALIDATION_MARKERS + GIT_CHECKPOINT_MARKERS + PIPELINE_MARKERS + ISSUE_BODY_MARKERS + DEPENDENCY_SAFETY_MARKERS:
             present_in = [p for p in platforms if marker in generated[p]["content"]]
             if len(present_in) != len(platforms):
                 missing = set(platforms) - set(present_in)
