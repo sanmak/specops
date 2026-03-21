@@ -56,6 +56,14 @@
     "updated": "2026-03-18T20:22:30Z"
   },
   {
+    "id": "exit-plan-mode-hook",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-21T14:51:50Z"
+  },
+  {
     "id": "install-integrity-verification",
     "type": "feature",
     "status": "completed",

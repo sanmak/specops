@@ -16,7 +16,7 @@ How SpecOps compares to other spec-driven and agent-context tools.
 | **Drift detection** | Yes (5 drift checks, audit/reconcile) | No | No | No |
 | **Vertical adaptations** | 7 project types | None | None | Generic templates |
 | **Team review workflow** | Built-in (draft, review, approve, gate) | No | No | No |
-| **Agent hooks** | No | Yes (10 trigger types) | No | No |
+| **Agent hooks** | Yes (ExitPlanMode) | Yes (10 trigger types) | No | No |
 | **MCP integration** | No | Yes | No | No |
 | **Design-first workflow** | No | Yes | No | No |
 | **Security hardening** | Yes (injection defense, schema validation, path containment) | No | No | No |
@@ -44,7 +44,7 @@ How SpecOps compares to other spec-driven and agent-context tools.
 
 ### Where Kiro leads
 
-- **Agent hooks**: 10 trigger types (file events, agent lifecycle, task events) with chaining
+- **Agent hooks**: 10 trigger types (file events, agent lifecycle, task events) with chaining vs SpecOps' 1 (ExitPlanMode auto-trigger)
 - **Design-first workflow**: Start from technical architecture, derive requirements
 - **MCP integration**: Connect to external tools, databases, APIs
 - **Spec referencing**: `#spec` in chat to reference any spec inline

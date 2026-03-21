@@ -130,6 +130,16 @@
       "task": "Task 9",
       "date": "2026-03-21",
       "completedAt": "2026-03-21T09:07:08Z"
+    },
+    {
+      "specId": "exit-plan-mode-hook",
+      "specType": "feature",
+      "number": 1,
+      "decision": "Used nested hooks schema (matcher + hooks array with type: command) instead of flat matcher + command",
+      "rationale": "Claude Code settings.json schema validation requires entries in hooks.PostToolUse to have a hooks array of typed hook objects, not a flat command string",
+      "task": "Task 1",
+      "date": "2026-03-21",
+      "completedAt": "2026-03-21T14:46:03Z"
     }
   ]
 }
