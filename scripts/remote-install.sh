@@ -411,15 +411,23 @@ settings_file = os.environ["SETTINGS_FILE"]
 
 # Load existing settings or create empty dict
 if os.path.isfile(settings_file):
-    with open(settings_file, "r") as f:
-        settings = json.load(f)
+    try:
+        with open(settings_file, "r") as f:
+            settings = json.load(f)
+    except (json.JSONDecodeError, OSError) as e:
+        print(
+            "WARNING: Could not parse {} ({}); skipping hook installation.".format(
+                settings_file, e
+            )
+        )
+        exit(0)
 else:
     settings = {}
 
-# Ensure hooks.PostToolUse array exists
-if "hooks" not in settings:
+# Ensure hooks.PostToolUse array exists with correct types
+if not isinstance(settings.get("hooks"), dict):
     settings["hooks"] = {}
-if "PostToolUse" not in settings["hooks"]:
+if not isinstance(settings["hooks"].get("PostToolUse"), list):
     settings["hooks"]["PostToolUse"] = []
 
 # Check for existing specops-hook marker (idempotent)

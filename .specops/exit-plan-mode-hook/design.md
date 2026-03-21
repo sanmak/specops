@@ -13,7 +13,12 @@ The hook is a PostToolUse entry in Claude Code's `settings.json`:
 ```json
 {
   "matcher": "ExitPlanMode",
-  "command": "test -f .specops.json && echo \"SPECOPS HOOK: A plan was just approved. This project uses SpecOps (.specops.json detected). Do NOT implement directly. Instead, run /specops from-plan to convert the plan into a structured spec before implementation. Implementing without a spec in a SpecOps-configured project is a protocol breach.\" # specops-hook"
+  "hooks": [
+    {
+      "type": "command",
+      "command": "test -f .specops.json && echo \"SPECOPS HOOK: A plan was just approved. This project uses SpecOps (.specops.json detected). Do NOT implement directly. Instead, run /specops from-plan to convert the plan into a structured spec before implementation. Implementing without a spec in a SpecOps-configured project is a protocol breach.\" # specops-hook"
+    }
+  ]
 }
 ```
 
