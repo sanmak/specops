@@ -2594,7 +2594,7 @@ If sensitive content is detected:
 
 1. Create a unique temporary file: Execute the command(`mktemp /tmp/specops-feedback-XXXXXX.md`) and capture the output as `{tmpfile}`.
 2. Write the file at({tmpfile}, composed issue body).
-3. Execute the command(`SPECOPS_TITLE="[{category}] {sanitized_title}" gh issue create --repo sanmak/specops --title "$SPECOPS_TITLE" --label "{label}" --body-file "{tmpfile}"`)
+3. Execute the command(`export SPECOPS_TITLE="[{category}] {sanitized_title}" && gh issue create --repo sanmak/specops --title "$SPECOPS_TITLE" --label "{label}" --body-file "{tmpfile}"`)
 4. If step 3 failed and the error message indicates the label does not exist, retry without the `--label` flag (non-default labels like `friction`, `improvement`, `other` may not exist on the target repo). If it still fails, fall through to Tier 2.
 5. Execute the command(`rm -f "{tmpfile}"`) to clean up — always run this regardless of whether step 3 succeeded, step 4 retried, or the flow falls through to Tier 2.
 6. If step 3 (or step 4 retry) succeeded, parse the issue URL from stdout.

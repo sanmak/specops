@@ -116,6 +116,81 @@ else
   echo "WARNING: Installation may be incomplete - missing files in $INSTALL_DIR"
 fi
 
+# Install PostToolUse ExitPlanMode hook
+install_hook() {
+  local settings_file
+
+  # Determine settings file based on installation scope
+  case "$INSTALL_DIR" in
+    "$HOME"/.claude/skills/specops)
+      settings_file="$HOME/.claude/settings.json"
+      ;;
+    ./.claude/skills/specops)
+      settings_file="./.claude/settings.json"
+      ;;
+    *)
+      settings_file="$HOME/.claude/settings.json"
+      ;;
+  esac
+
+  if ! command -v python3 >/dev/null 2>&1; then
+    echo ""
+    echo "WARNING: python3 not found — cannot install ExitPlanMode hook automatically."
+    echo "To install manually, add this to $settings_file under hooks.PostToolUse:"
+    echo '  {"matcher": "ExitPlanMode", "hooks": [{"type": "command", "command": "test -f .specops.json && echo \"SPECOPS HOOK: ...\" # specops-hook"}]}'
+    return 0
+  fi
+
+  SETTINGS_FILE="$settings_file" python3 - <<'HOOK_PY'
+import json
+import os
+
+settings_file = os.environ["SETTINGS_FILE"]
+
+# Load existing settings or create empty dict
+if os.path.isfile(settings_file):
+    with open(settings_file, "r") as f:
+        settings = json.load(f)
+else:
+    settings = {}
+
+# Ensure hooks.PostToolUse array exists
+if "hooks" not in settings:
+    settings["hooks"] = {}
+if "PostToolUse" not in settings["hooks"]:
+    settings["hooks"]["PostToolUse"] = []
+
+# Check for existing specops-hook marker (idempotent)
+for entry in settings["hooks"]["PostToolUse"]:
+    for hook in entry.get("hooks", []):
+        if "specops-hook" in hook.get("command", ""):
+            print("ExitPlanMode hook already installed (skipped)")
+            exit(0)
+
+# Append the hook entry (Claude Code hooks schema: matcher + hooks array)
+hook_entry = {
+    "matcher": "ExitPlanMode",
+    "hooks": [
+        {
+            "type": "command",
+            "command": 'test -f .specops.json && echo "SPECOPS HOOK: A plan was just approved. This project uses SpecOps (.specops.json detected). Do NOT implement directly. Instead, run /specops from-plan to convert the plan into a structured spec before implementation. Implementing without a spec in a SpecOps-configured project is a protocol breach." # specops-hook'
+        }
+    ]
+}
+settings["hooks"]["PostToolUse"].append(hook_entry)
+
+# Write back with indent=2
+os.makedirs(os.path.dirname(settings_file) or ".", exist_ok=True)
+with open(settings_file, "w") as f:
+    json.dump(settings, f, indent=2)
+    f.write("\n")
+
+print(f"Installed ExitPlanMode hook in {settings_file}")
+HOOK_PY
+}
+
+install_hook
+
 # Update .specops.json with version metadata if it exists
 if [ -f ".specops.json" ] && command -v python3 >/dev/null 2>&1; then
   SPECOPS_VER="$(grep '^version:' "$SCRIPT_DIR/SKILL.md" | head -1 | sed 's/version: *"//;s/"//')"

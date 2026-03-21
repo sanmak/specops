@@ -1,0 +1,17 @@
+{
+  "id": "exit-plan-mode-hook",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "created": "2026-03-21T14:36:04Z",
+  "updated": "2026-03-21T14:51:50Z",
+  "specopsCreatedWith": "1.3.0",
+  "specopsUpdatedWith": "1.3.0",
+  "author": {
+    "name": "sanmak"
+  },
+  "reviewers": [],
+  "reviewRounds": 0,
+  "approvals": 0,
+  "requiredApprovals": 0
+}
