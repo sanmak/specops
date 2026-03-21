@@ -228,6 +228,14 @@ REQUIRED_MARKERS = {
         "### Pipeline Safety",
         "pipelineMaxCycles",
     ],
+    "issue_body": [
+        "Issue Body Composition",
+        "GitHub Label Protocol",
+        "spec:<spec-id>",
+        "P-high",
+        "P-medium",
+        "gh label create",
+    ],
 }
 
 

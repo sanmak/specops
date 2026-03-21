@@ -128,6 +128,8 @@ On **every status transition** (Pending → In Progress, In Progress → Complet
 
 **Completion close**: When transitioning to `Completed`, close the external issue. If the close command fails, warn but do not prevent the task from being marked complete in `tasks.md`.
 
+Issue creation uses the Issue Body Composition template from the Configuration Handling module — freeform issue bodies are a protocol breach.
+
 ### Conformance Rules
 
 - **File-chat consistency**: reported status in chat must match what is persisted in `tasks.md`

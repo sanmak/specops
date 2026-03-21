@@ -46,3 +46,6 @@
 
 ### workflow-automation-suite (feature) — 2026-03-21
 9 tasks completed, 0 deviations from design, 0 blockers. Four new core modules inspired by slop-janitor: `core/run-logging.md` (per-step execution trace complementing metrics), `core/plan-validation.md` (pre-implementation reference validation leveraging repo map), `core/git-checkpointing.md` (3 phase-boundary commits complementing per-task autoCommit), `core/pipeline.md` (automated Phase 3→4 cycling with zero-progress detection). Added 6 workflow hooks using sub-step notation (1.1, 1.5, 5.7, 6.5, 8, 11.7). Extended schema with 4 config options (runLogging, validateReferences, gitCheckpointing, pipelineMaxCycles). Generator pipeline wired with 4 new marker sets. All 8 tests pass.
+
+### rich-issue-bodies (feature) — 2026-03-21
+6 tasks completed, 0 deviations from design, 0 blockers. Added Issue Body Composition template and GitHub Label Protocol to core/config-handling.md — defining a mandatory issue body structure that pulls context from spec artifacts (requirements overview, spec links, task details) and auto-applies GitHub labels (priority, spec name, type). Cross-references added to task-tracking.md and workflow.md. ISSUE_BODY_MARKERS added to both validate.py and test_platform_consistency.py (Gap 31 enforced). All 4 platform outputs regenerated, validator passes all checks, all 8 tests pass.
