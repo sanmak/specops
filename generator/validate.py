@@ -827,8 +827,11 @@ def validate_docs_coverage():
 
 
 def validate_source_syntax():
-    """Validate that core/*.md files use abstract operations with proper call syntax
-    and that all platform.json files have complete toolMapping coverage."""
+    """Validate core/*.md files for empty-argument abstract op calls (e.g., READ_FILE())
+    and verify all platform.json files have complete toolMapping coverage.
+
+    Note: bare-word usage of abstract ops (without call syntax) is intentional in core
+    files — the generator substitutes all occurrences, both call-syntax and prose."""
     errors = []
 
     # Extract canonical abstract operations from ABSTRACT_OPERATIONS

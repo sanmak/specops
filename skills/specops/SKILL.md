@@ -32,7 +32,10 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 After config loading, pre-load persistent project context for inclusion in the Shared Context Block:
 
 1. **Steering files**: If Use the Bash tool to check if the file exists at(`<specsDir>/steering/`), Use the Glob tool to list(`<specsDir>/steering/`) and Use the Read tool to read each `.md` file with `inclusion: always` in its frontmatter. Store the loaded content for the Shared Context Block. Files with `inclusion: fileMatch` or `inclusion: manual` are deferred — mode files handle them when relevant.
-2. **Memory**: If Use the Bash tool to check if the file exists at(`<specsDir>/memory/`), Use the Read tool to read(`<specsDir>/memory/context.md`) and Use the Read tool to read(`<specsDir>/memory/decisions.json`). Store the loaded content for the Shared Context Block.
+2. **Memory**: If Use the Bash tool to check if the file exists at(`<specsDir>/memory/`), attempt to load each file independently:
+   - If Use the Bash tool to check if the file exists at(`<specsDir>/memory/context.md`), Use the Read tool to read it. Otherwise, use empty string.
+   - If Use the Bash tool to check if the file exists at(`<specsDir>/memory/decisions.json`), Use the Read tool to read it. Otherwise, use `{"decisions": []}`.
+   Store the loaded (or fallback) content for the Shared Context Block. Missing individual files are non-fatal — partial memory setups are valid.
 
 If either directory does not exist, note the absence — the dispatched mode will create them if needed.
 
@@ -61,7 +64,7 @@ When invoked, evaluate the user's request against the following detection patter
 
 When the **spec** mode is dispatched AND the user's request references an existing spec for implementation (continuing work, not creating a new spec), run these 7 deterministic checks BEFORE spawning the sub-agent. Each check is a file read — no interpretation or judgment required.
 
-1. **spec.json exists and status is valid**: Use the Bash tool to check if the file exists at(`<specsDir>/<spec-name>/spec.json`). If it exists, Use the Read tool to read it and verify `status` is one of: `draft`, `approved`, `self-approved`, `implementing`. If status is `completed`, Display a message to the user("Spec '<spec-name>' is already completed.") and STOP. If status is `in-review`, Display a message to the user("Spec '<spec-name>' is in review. Approve it first.") and STOP.
+1. **spec.json exists and status is valid**: If Use the Bash tool to check if the file exists at(`<specsDir>/<spec-name>/spec.json`) is false, Display a message to the user("spec.json not found for spec '<spec-name>'. Run the spec workflow to generate it before implementation.") and STOP. Otherwise, Use the Read tool to read it and verify `status` is one of: `draft`, `approved`, `self-approved`, `implementing`. If status is `completed`, Display a message to the user("Spec '<spec-name>' is already completed.") and STOP. If status is `in-review`, Display a message to the user("Spec '<spec-name>' is in review. Approve it first.") and STOP.
 
 2. **implementation.md exists with context summary**: Use the Bash tool to check if the file exists at(`<specsDir>/<spec-name>/implementation.md`). If it exists, Use the Read tool to read it and verify it contains the heading `## Phase 1 Context Summary`. If missing, Display a message to the user("implementation.md is missing the Phase 1 Context Summary. Run the spec workflow from Phase 1 first.") and STOP.
 
@@ -69,7 +72,7 @@ When the **spec** mode is dispatched AND the user's request references an existi
 
 4. **design.md exists**: Use the Bash tool to check if the file exists at(`<specsDir>/<spec-name>/design.md`). If false, Display a message to the user("design.md not found for spec '<spec-name>'. The spec may be incomplete — run the spec workflow to generate it.") and STOP.
 
-5. **IssueID population**: Use the Read tool to read(`.specops.json`) and check `team.taskTracking`. If taskTracking is not `"none"`, Use the Read tool to read(`<specsDir>/<spec-name>/tasks.md`) and find all tasks with `**Priority:** High` or `**Priority:** Medium`. For each, verify `**IssueID:**` is neither `None` nor empty. If any High/Medium task has `**IssueID:** None`, Display a message to the user("Task tracking is configured but the following tasks are missing IssueIDs: <list>. Create external issues first (Phase 2 step 6) before implementation.") and STOP.
+5. **IssueID population**: Use the Read tool to read(`.specops.json`) and check `team.taskTracking`. If taskTracking is not `"none"`, Use the Read tool to read(`<specsDir>/<spec-name>/tasks.md`) and find all tasks with `**Priority:** High` or `**Priority:** Medium`. For each, verify `**IssueID:**` is set to a valid tracker identifier — reject `None`, empty values, and placeholders (`TBD`, `TBA`, `N/A`). If any High/Medium task has an invalid or missing IssueID, Display a message to the user("Task tracking is configured but the following tasks have missing or placeholder IssueIDs: <list>. Create external issues first (Phase 2 step 6) before implementation.") and STOP.
 
 6. **Steering directory exists**: Use the Bash tool to check if the file exists at(`<specsDir>/steering/`). If false, Display a message to the user("Steering directory not found at `<specsDir>/steering/`. Run the spec workflow from Phase 1 to create it.") and STOP.
 
@@ -83,7 +86,7 @@ IF ALL CHECKS PASS: Proceed to the Dispatch Protocol.
 
 After mode detection (and enforcement checks if applicable), dispatch the mode:
 
-1. **Read mode file**: Use the Bash tool to run(`cat .claude/skills/specops/modes/<mode-name>.md 2>/dev/null || cat ~/.claude/skills/specops/modes/<mode-name>.md 2>/dev/null`) to read the mode file. If the command output is empty, Display a message to the user("Mode file not found: modes/<mode-name>.md. SpecOps may need to be reinstalled — run `/specops update`.") and STOP.
+1. **Read mode file**: If the mode is **version**, skip sub-agent dispatch and reply directly: `SpecOps version: <cached version>` (from the Version Extraction Protocol above) and STOP. Otherwise, Use the Bash tool to run(`cat .claude/skills/specops/modes/<mode-name>.md 2>/dev/null || cat ~/.claude/skills/specops/modes/<mode-name>.md 2>/dev/null`) to read the mode file. If the command output is empty, Display a message to the user("Mode file not found: modes/<mode-name>.md. SpecOps may need to be reinstalled — run `/specops update`.") and STOP.
 
 2. **Build sub-agent prompt**: Prepend the Shared Context Block (below) to the mode file content. The combined content is the sub-agent's full instruction set.
 

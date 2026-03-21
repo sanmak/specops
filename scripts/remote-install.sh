@@ -374,9 +374,9 @@ install_claude() {
   mkdir -p "$install_dir/modes"
   local mode_count=0
   for mode in $mode_names; do
-    if download_file "${SPECOPS_BASE_URL}/platforms/claude/modes/${mode}.md" "$install_dir/modes/${mode}.md" 2>/dev/null; then
-      mode_count=$((mode_count + 1))
-    fi
+    # Attempt download, continue on failure (download_file exits on error under set -e)
+    download_file "${SPECOPS_BASE_URL}/platforms/claude/modes/${mode}.md" "$install_dir/modes/${mode}.md" 2>/dev/null || true
+    [ -f "$install_dir/modes/${mode}.md" ] && mode_count=$((mode_count + 1))
   done
   if [ "$mode_count" -gt 0 ]; then
     echo "  Installed dispatcher + ${mode_count} mode files"

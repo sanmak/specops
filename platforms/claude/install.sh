@@ -96,7 +96,12 @@ cp "$SCRIPT_DIR/SKILL.md" "$INSTALL_DIR/"
 # Copy modes/ directory for context-aware dispatch
 if [ -d "$SCRIPT_DIR/modes" ]; then
   mkdir -p "$INSTALL_DIR/modes"
-  cp "$SCRIPT_DIR/modes/"*.md "$INSTALL_DIR/modes/"
+  # shellcheck disable=SC2039
+  if compgen -G "$SCRIPT_DIR/modes/*.md" > /dev/null 2>&1; then
+    cp "$SCRIPT_DIR/modes/"*.md "$INSTALL_DIR/modes/"
+  else
+    echo "WARNING: modes/ directory exists but contains no .md files"
+  fi
   echo "Installed dispatcher + $(find "$SCRIPT_DIR/modes" -name '*.md' 2>/dev/null | wc -l | tr -d ' ') mode files"
 else
   echo "Installed SKILL.md (modes/ directory not found — monolithic mode)"

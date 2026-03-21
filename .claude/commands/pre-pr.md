@@ -63,7 +63,7 @@ Save exit code as `TESTS_RESULT` (0 = PASS, non-zero = FAIL).
 
 Read `.specops.json` and check `team.taskTracking`. If taskTracking is not `"none"`:
 
-1. Read `.specops/index.json` (or scan spec directories) to find specs with status `implementing` or `completed`
+1. Resolve `specsDir` from `.specops.json` (`specsDir`, default `.specops`), then read `<specsDir>/index.json` (or scan `<specsDir>/*/spec.json`) to find specs with status `implementing` or `completed`
 2. For each such spec, read its `tasks.md` and find all tasks with `**Priority:** High` or `**Priority:** Medium`
 3. Check that each eligible task has `**IssueID:**` set to a valid identifier (not `None`, not empty)
 4. If any eligible tasks have missing IssueIDs, set `ISSUEID_RESULT` to `FAIL` and list the affected spec + task names

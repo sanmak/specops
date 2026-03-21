@@ -236,9 +236,9 @@ done <<< "$STAGED_FILES"
 # --- Check 6: Spec artifact checkbox staleness ---
 STAGED_SPECS="$(echo "$STAGED_FILES" | grep '^\.specops/' || true)"
 if [ -n "$STAGED_SPECS" ] && [ -f "$ROOT_DIR/scripts/lint-specs.sh" ]; then
-  if ! bash "$ROOT_DIR/scripts/lint-specs.sh" > /dev/null 2>&1; then
+  if ! SPEC_LINT_OUTPUT="$(bash "$ROOT_DIR/scripts/lint-specs.sh" 2>&1)"; then
     printf '%b' "${RED}FAIL${RESET} Checkbox staleness in spec artifacts.\n"
-    bash "$ROOT_DIR/scripts/lint-specs.sh"
+    printf '%s\n' "$SPEC_LINT_OUTPUT"
     ERRORS=$((ERRORS + 1))
   fi
 fi

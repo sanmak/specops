@@ -8,6 +8,10 @@ reviews:
     - "!.claude-plugin/plugin.json"
     - "!.claude-plugin/marketplace.json"
     - "!CHECKSUMS.sha256"
+    - "!platforms/claude/SKILL.monolithic.md"
+    - "!platforms/*/modes/*.md"
+    - "!skills/*/modes/*.md"
+    - "!skills/*/SKILL.monolithic.md"
   path_instructions:
     - path: "core/*.md"
       instructions: |

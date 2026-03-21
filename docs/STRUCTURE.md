@@ -146,6 +146,7 @@ specops/
 ├── skills/                               # Plugin skills directory
 │   └── specops/
 │       ├── SKILL.md                      # Copy of platforms/claude/SKILL.md (dispatcher)
+│       ├── SKILL.monolithic.md           # Legacy monolithic Claude skill (backward compatibility)
 │       └── modes/                        # Synced mode files from platforms/claude/modes/
 │
 ├── tests/                                # Test suite
