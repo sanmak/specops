@@ -84,21 +84,21 @@ download_file() {
   if [[ "$DOWNLOAD_CMD" == "curl" ]]; then
     if ! curl -fsSL "$url" -o "$tmp_file"; then
       rm -f "$tmp_file"
-      echo "Error: Failed to download $url"
-      exit 1
+      echo "Error: Failed to download $url" >&2
+      return 1
     fi
   else
     if ! wget -qO "$tmp_file" "$url"; then
       rm -f "$tmp_file"
-      echo "Error: Failed to download $url"
-      exit 1
+      echo "Error: Failed to download $url" >&2
+      return 1
     fi
   fi
 
   if [[ ! -s "$tmp_file" ]]; then
     rm -f "$tmp_file"
-    echo "Error: Downloaded file is empty: $url"
-    exit 1
+    echo "Error: Downloaded file is empty: $url" >&2
+    return 1
   fi
 
   mv "$tmp_file" "$dest"
@@ -374,7 +374,7 @@ install_claude() {
   mkdir -p "$install_dir/modes"
   local mode_count=0
   for mode in $mode_names; do
-    # Attempt download, continue on failure (download_file exits on error under set -e)
+    # Attempt download, continue on failure (download_file returns 1 on error, caught by || true)
     download_file "${SPECOPS_BASE_URL}/platforms/claude/modes/${mode}.md" "$install_dir/modes/${mode}.md" 2>/dev/null || true
     [ -f "$install_dir/modes/${mode}.md" ] && mode_count=$((mode_count + 1))
   done
