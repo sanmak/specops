@@ -19,7 +19,7 @@ Detect project ecosystems by scanning for indicator files:
 Detection procedure:
 
 1. LIST_DIR(`.`) to find project root files
-2. For each indicator file in the table, FILE_EXISTS check
+2. For each indicator file path listed in the table (for example `"package-lock.json"`, `"yarn.lock"`, `"pnpm-lock.yaml"`, `"requirements.txt"`, `"Pipfile.lock"`, `"poetry.lock"`, `"Cargo.lock"`, `"Gemfile.lock"`, `"go.sum"`, `"composer.lock"`, `"pom.xml"`, `"build.gradle"`), call `FILE_EXISTS(<path>)` with that path to determine which ecosystems are present
 3. If `config.dependencySafety.scanScope` is `"spec"`, cross-reference detected ecosystems with the spec's affected files to narrow the scan scope. If `"project"`, scan all detected ecosystems.
 
 ### Package Manager Audit Commands
@@ -58,7 +58,11 @@ If the audit tool is not installed: NOTIFY_USER("Audit tool '<tool>' not found f
    - Execute the Offline Fallback Protocol.
    - Use training data knowledge to assess known vulnerabilities for detected dependencies.
 
-4. **Compile findings** — merge results from all layers, deduplicate by CVE ID. Classify each finding:
+4. **Compile findings** — merge results from all layers, deduplicate by a normalized advisory key:
+   - Prefer canonical advisory ID (OSV/GHSA/RUSTSEC/CVE)
+   - If no global ID exists, key by ecosystem+package+affected_version_range+summary hash
+   - Preserve source-layer provenance for merged entries
+   Classify each finding:
    - **Critical**: CVSS >= 9.0
    - **High**: CVSS 7.0–8.9
    - **Medium**: CVSS 4.0–6.9
@@ -71,7 +75,7 @@ If the audit tool is not installed: NOTIFY_USER("Audit tool '<tool>' not found f
 
 7. **Auto-fix** — if `config.dependencySafety.autoFix` is `true`:
    - Node.js: RUN_COMMAND(`npm audit fix`)
-   - Rust: RUN_COMMAND(`cargo update`)
+   - Rust: RUN_COMMAND(`cargo update -p <vulnerable-package>`) for each blocking package, or RUN_COMMAND(`cargo audit fix`) if cargo-audit >= 0.17 is available
    - Other ecosystems: NOTIFY_USER("Auto-fix not available for <ecosystem>.")
    - After auto-fix, re-run Layer 1 audit to update findings.
 
@@ -91,7 +95,8 @@ For the top 10 dependencies (by import frequency or lock file position):
 
 **OSV.dev API** — query for known vulnerabilities:
 
-- RUN_COMMAND(`curl -s --max-time 10 -X POST "https://api.osv.dev/v1/query" -H "Content-Type: application/json" -d '{"package":{"name":"<pkg>","ecosystem":"<ecosystem>"}}'`)
+- RUN_COMMAND(`curl -s --max-time 10 -X POST "https://api.osv.dev/v1/query" -H "Content-Type: application/json" --data-raw "{\"package\":{\"name\":\"<pkg>\",\"ecosystem\":\"<ecosystem>\"},\"version\":\"<resolved-version>\"}"`)
+- Note: `<pkg>` and `<resolved-version>` values must be JSON-encoded before interpolation to prevent shell injection from special characters in package names.
 - Parse the response for vulnerability entries. Extract CVE IDs and severity scores.
 - If the request times out or returns an error, NOTIFY_USER("OSV.dev query failed for <pkg> — falling through to LLM fallback.") and continue.
 

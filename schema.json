@@ -289,8 +289,10 @@
         },
         "allowedAdvisories": {
           "type": "array",
+          "default": [],
           "items": {
             "type": "string",
+            "minLength": 3,
             "maxLength": 100
           },
           "maxItems": 50,
