@@ -110,6 +110,26 @@
       "task": "Task 3",
       "date": "2026-03-21",
       "completedAt": "2026-03-21T07:22:29Z"
+    },
+    {
+      "specId": "dependency-safety-gate",
+      "specType": "feature",
+      "number": 1,
+      "decision": "Audit artifact template defined inline in core/dependency-safety.md, not in core/templates/",
+      "rationale": "generator/generate.py auto-loads ALL core/templates/*.md into _templates dict — adding a file there would cause it to be loaded as a spec-type template",
+      "task": "Task 1",
+      "date": "2026-03-21",
+      "completedAt": "2026-03-21T09:07:08Z"
+    },
+    {
+      "specId": "dependency-safety-gate",
+      "specType": "feature",
+      "number": 2,
+      "decision": "DEPENDENCY_SAFETY_MARKERS added to both validate_platform() and cross-platform consistency loop in same commit",
+      "rationale": "Gap 31 pattern — markers must be in both locations to avoid validator/consistency check mismatch",
+      "task": "Task 9",
+      "date": "2026-03-21",
+      "completedAt": "2026-03-21T09:07:08Z"
     }
   ]
 }

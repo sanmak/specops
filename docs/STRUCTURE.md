@@ -71,6 +71,7 @@ specops/
 │   ├── simplicity.md                     # Simplicity Principle
 │   ├── config-handling.md                # Configuration defaults and handling
 │   ├── data-handling.md                  # Secrets, PII, data classification rules
+│   ├── dependency-safety.md              # Dependency CVE scanning, EOL detection, safety gate
 │   ├── error-handling.md                 # Error handling, success criteria
 │   ├── verticals.md                      # Vertical adaptation rules
 │   ├── custom-templates.md               # Custom template resolution logic
