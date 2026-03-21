@@ -28,17 +28,17 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 1.1. **Git checkpointing pre-flight**: If `config.implementation.gitCheckpointing` is true, check the working tree: Run the terminal command(`git status --porcelain`). If the output is non-empty, Tell the user("Working tree has uncommitted changes — git checkpointing disabled for this run.") and set gitCheckpointing to false for this run. If the command fails (not a git repo), set gitCheckpointing to false silently.
 1.5. **Initialize run log**: If `config.implementation.runLogging` is not `"off"`, capture the run start timestamp via Run the terminal command(`date -u +"%Y%m%d-%H%M%S"`). Ensure the runs directory exists: Run the terminal command(`mkdir -p <specsDir>/runs`). Create the run log file following the Run Logging module. If the spec name is not yet known (new spec), use `_pending-<timestamp>` as the temporary file name — rename when the spec name is determined in Phase 2 step 2.
 2. **Context recovery**: Check for prior work that may inform this session:
-   - If FILE_EXISTS(`<specsDir>/index.json`), Read the file at it
+   - If Check if the file exists at(`<specsDir>/index.json`), Read the file at it
    - If any specs have status `implementing` or `in-review`, Tell the user: "Found incomplete spec: <name> (status: <status>). Continue working on it?"
    - If continuing an existing spec, Read the file at the spec's `implementation.md` to recover session context (decision log, deviations, blockers, session log), then resume from the appropriate phase
    - If starting fresh, proceed normally
-3. **Load steering files**: If FILE_EXISTS(`<specsDir>/steering/`) is false, create the directory and foundation templates: Run the terminal command(`mkdir -p <specsDir>/steering`), then for each of product.md, tech.md, structure.md — if FILE_EXISTS(`<specsDir>/steering/<file>`) is false, Create the file at it with the corresponding foundation template from the Steering Files module. Tell the user("Created steering files in `<specsDir>/steering/` — edit them to describe your project. The agent loads these automatically before every spec."). Then load persistent project context from steering files following the Steering Files module. Always-included files are loaded now; fileMatch files are deferred until after affected components and dependencies are identified (step 9).
-3.5. **Check repo map**: After steering files are loaded, check for a repo map following the Repo Map module. If FILE_EXISTS(`<specsDir>/steering/repo-map.md`), check staleness (time-based and hash-based). If stale, auto-refresh. If the file does not exist, auto-generate it by running the Repo Map Generation algorithm. The repo map is a machine-generated steering file with `inclusion: always` — if it exists and is fresh, it was already loaded in step 3.
-4. **Load memory**: If FILE_EXISTS(`<specsDir>/memory/`) is false, Run the terminal command(`mkdir -p <specsDir>/memory`). Load the local memory layer following the Local Memory Layer module. Decisions, project context, and patterns from prior specs are loaded into the agent's context.
+3. **Load steering files**: If Check if the file exists at(`<specsDir>/steering/`) is false, create the directory and foundation templates: Run the terminal command(`mkdir -p <specsDir>/steering`), then for each of product.md, tech.md, structure.md — if Check if the file exists at(`<specsDir>/steering/<file>`) is false, Create the file at it with the corresponding foundation template from the Steering Files module. Tell the user("Created steering files in `<specsDir>/steering/` — edit them to describe your project. The agent loads these automatically before every spec."). Then load persistent project context from steering files following the Steering Files module. Always-included files are loaded now; fileMatch files are deferred until after affected components and dependencies are identified (step 9).
+3.5. **Check repo map**: After steering files are loaded, check for a repo map following the Repo Map module. If Check if the file exists at(`<specsDir>/steering/repo-map.md`), check staleness (time-based and hash-based). If stale, auto-refresh. If the file does not exist, auto-generate it by running the Repo Map Generation algorithm. The repo map is a machine-generated steering file with `inclusion: always` — if it exists and is fresh, it was already loaded in step 3.
+4. **Load memory**: If Check if the file exists at(`<specsDir>/memory/`) is false, Run the terminal command(`mkdir -p <specsDir>/memory`). Load the local memory layer following the Local Memory Layer module. Decisions, project context, and patterns from prior specs are loaded into the agent's context.
 5. **Pre-flight check (enforcement gate)**: Verify Phase 1 setup completed before proceeding. Proceeding past Phase 1 without completing this gate is a protocol breach.
-   - FILE_EXISTS(`<specsDir>/steering/`) MUST be true. If false, go back to step 3 and execute it.
+   - Check if the file exists at(`<specsDir>/steering/`) MUST be true. If false, go back to step 3 and execute it.
    - List the contents of(`<specsDir>/steering/`) MUST contain at least one `.md` file. If the directory is empty, go back to step 3 and execute the foundation template creation.
-   - FILE_EXISTS(`<specsDir>/memory/`) MUST be true. If false, go back to step 4 and execute it.
+   - Check if the file exists at(`<specsDir>/memory/`) MUST be true. If false, go back to step 4 and execute it.
    - If any check above still fails after the corrective action, Tell the user with the failure and STOP — do not proceed to Phase 2.
    - Verify SpecOps skill availability for team collaboration:
      - Read the file at `.gitignore` if it exists
@@ -116,7 +116,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 3. Create `spec.json` with metadata (author from git config, type, status, version, created date). Set status to `draft`.
 4. Regenerate `<specsDir>/index.json` from all `*/spec.json` files.
 5. **First-spec README prompt**: If `index.json` contains exactly one spec entry (this is the project's first spec):
-   - If FILE_EXISTS(`README.md`) is false, skip this step
+   - If Check if the file exists at(`README.md`) is false, skip this step
    - Read the file at `README.md`. If content already contains "specops" or "SpecOps" (case-insensitive), skip this step
    - On non-interactive platforms (`canAskInteractive = false`), skip this step entirely
    - Ask the user "This is your first SpecOps spec! Would you like me to add a brief Development Process section to your README.md?"
@@ -188,7 +188,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - **New subcommand check**: If this spec shipped a new `/specops` subcommand (a new command branch in Getting Started or a new module routed from there):
      - [ ] `canAskInteractive = false` fallback written for every interactive prompt in the new subcommand
      - [ ] Row added to `docs/COMMANDS.md` Quick Lookup table for the new subcommand
-     - [ ] `FILE_EXISTS` guard used before reading any optional config (e.g., `.specops.json`) in the subcommand's first step
+     - [ ] `Check if the file exists at` guard used before reading any optional config (e.g., `.specops.json`) in the subcommand's first step
 5. **Completion gate**: Before marking the spec as completed, verify that memory was updated. Read the file at(`<specsDir>/memory/context.md`) and confirm it contains a section heading `### <spec-name>`. If missing, go back to step 3 and execute it — do not mark the spec as completed without memory being updated.
 6. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (Run the terminal command(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`
 6.5. **Git checkpoint (completed) and run log finalization**: If `config.implementation.gitCheckpointing` is true for this run, commit final metadata following the Git Checkpointing module: Run the terminal command(`git add -A`) then Run the terminal command(`git commit -m "specops(checkpoint): completed -- <spec-name>"`). If the commit fails, Tell the user and continue. Then, if `config.implementation.runLogging` is not `"off"`, finalize the run log following the Run Logging module: Edit the file at the run log to update frontmatter with `completedAt` and `finalStatus`.
@@ -244,7 +244,7 @@ When invoked:
 11.5. **Post-plan acceptance gate**: If ALL of the following conditions are true, this is a plan acceptance that MUST route through From Plan Mode:
    - The user's request is a short acceptance or implementation phrase ("go ahead", "do it", "proceed", "implement this", "looks good", "yes, implement", "let's build it", "yes", "approved, implement", or similar brief confirmation)
    - The conversation context contains a structured plan (plan mode content visible in earlier messages, numbered implementation steps, a "Files to Modify" or "Execution Order" section, or a plan file was recently discussed)
-   - FILE_EXISTS(`.specops.json`) is true (SpecOps is configured for this project)
+   - Check if the file exists at(`.specops.json`) is true (SpecOps is configured for this project)
    If all three conditions are met: extract the plan content from the conversation context and follow the From Plan Mode workflow. Implementing a plan without converting it to a SpecOps spec first in a SpecOps-configured project is a **protocol breach**.
    If any condition is false: continue to step 11.7.
 11.7. Check if the request is a **pipeline** command (see "Automated Pipeline Mode" module). Patterns: "pipeline <spec-name>", "auto-implement <spec-name>". These must refer to SpecOps automated implementation cycling, NOT a product feature (e.g., "create CI pipeline", "build data pipeline", "add deployment pipeline" is NOT pipeline mode). If detected, follow the Pipeline Mode workflow instead of the standard phases below.
@@ -271,7 +271,7 @@ When the user requests the version (`/specops version`, `/specops --version`, `/
    Latest releases: https://github.com/sanmak/specops/releases
    ```
 
-3. If FILE_EXISTS(`.specops.json`), Read the file at(`.specops.json`) and check for `_installedVersion` and `_installedAt` fields. If present, display:
+3. If Check if the file exists at(`.specops.json`), Read the file at(`.specops.json`) and check for `_installedVersion` and `_installedAt` fields. If present, display:
 
    ```
    Installed version: {_installedVersion}
@@ -683,9 +683,9 @@ The body content after the frontmatter is the project context itself — free-fo
 
 During Phase 1, after reading the config and completing context recovery, load steering files:
 
-1. If FILE_EXISTS(`<specsDir>/steering/`) is false:
+1. If Check if the file exists at(`<specsDir>/steering/`) is false:
    - Run the terminal command(`mkdir -p <specsDir>/steering`)
-   - For each foundation template (product.md, tech.md, structure.md): if FILE_EXISTS(`<specsDir>/steering/<file>`) is false, Create the file at it with the corresponding foundation template (see Foundation File Templates above)
+   - For each foundation template (product.md, tech.md, structure.md): if Check if the file exists at(`<specsDir>/steering/<file>`) is false, Create the file at it with the corresponding foundation template (see Foundation File Templates above)
    - Tell the user("Created steering files in `<specsDir>/steering/`. Edit them to describe your project.")
 2. List the contents of(`<specsDir>/steering/`) to find all `.md` files
    - Sort filenames alphabetically
@@ -788,7 +788,7 @@ These must refer to managing SpecOps steering files, NOT to a product feature (e
 
 #### Workflow
 
-1. If FILE_EXISTS(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`
+1. If Check if the file exists at(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`
 2. Check if `<specsDir>/steering/` exists:
 
 **If steering directory does NOT exist:**
@@ -906,17 +906,17 @@ Memory uses convention-based directory discovery — the `<specsDir>/memory/` di
 
 During Phase 1, after loading steering files (step 3) and before the pre-flight check (step 5), load the memory layer. If the memory directory does not exist, create it first:
 
-0. If FILE_EXISTS(`<specsDir>/memory/`) is false, Run the terminal command(`mkdir -p <specsDir>/memory`).
+0. If Check if the file exists at(`<specsDir>/memory/`) is false, Run the terminal command(`mkdir -p <specsDir>/memory`).
 
-1. If FILE_EXISTS(`<specsDir>/memory/decisions.json`):
+1. If Check if the file exists at(`<specsDir>/memory/decisions.json`):
    - Read the file at(`<specsDir>/memory/decisions.json`)
    - Parse JSON. If JSON is invalid, Tell the user("Warning: decisions.json contains invalid JSON — skipping memory loading. Run `/specops memory seed` to rebuild.") and continue without decisions.
    - Check `version` field. If version is not `1`, Tell the user("Warning: decisions.json has unsupported version {version} — skipping.") and continue.
    - Store decisions in context for reference during spec generation and implementation.
-2. If FILE_EXISTS(`<specsDir>/memory/context.md`):
+2. If Check if the file exists at(`<specsDir>/memory/context.md`):
    - Read the file at(`<specsDir>/memory/context.md`)
    - Add content to agent context as project history.
-3. If FILE_EXISTS(`<specsDir>/memory/patterns.json`):
+3. If Check if the file exists at(`<specsDir>/memory/patterns.json`):
    - Read the file at(`<specsDir>/memory/patterns.json`)
    - Parse JSON. If invalid, Tell the user("Warning: patterns.json contains invalid JSON — skipping.") and continue.
    - Surface any patterns with `count >= 2` to the user as recurring conventions.
@@ -931,9 +931,9 @@ During Phase 4, after finalizing `implementation.md` (step 2) and before the doc
 3. Capture a completion timestamp: Run the terminal command(`date -u +"%Y-%m-%dT%H:%M:%SZ"`). Reuse this value for all `completedAt` fields in this completion flow.
 4. **First-write auto-seed**: Before writing the current spec's data, check if this is the first time memory is being populated:
    - If the directory does not exist, Run the terminal command(`mkdir -p <specsDir>/memory`).
-   - If FILE_EXISTS(`<specsDir>/memory/decisions.json`), Read the file at it and parse existing decisions. If JSON is invalid or `version` is not `1`, Tell the user("Warning: decisions.json is malformed — reinitializing memory decisions structure.") and continue with `{ "version": 1, "decisions": [] }`. If file does not exist, create a new structure with `version: 1` and empty `decisions` array.
+   - If Check if the file exists at(`<specsDir>/memory/decisions.json`), Read the file at it and parse existing decisions. If JSON is invalid or `version` is not `1`, Tell the user("Warning: decisions.json is malformed — reinitializing memory decisions structure.") and continue with `{ "version": 1, "decisions": [] }`. If file does not exist, create a new structure with `version: 1` and empty `decisions` array.
    - If the `decisions` array is empty (no prior decisions recorded), check for other completed specs that should be captured:
-     - If FILE_EXISTS(`<specsDir>/index.json`), Read the file at it and find specs with `status == "completed"` whose `id` is not the current spec being completed.
+     - If Check if the file exists at(`<specsDir>/index.json`), Read the file at it and find specs with `status == "completed"` whose `id` is not the current spec being completed.
      - If completed specs exist, run the seed procedure for those specs first (same logic as the seed workflow in Memory Subcommand): for each completed spec, Read the file at its `implementation.md`, extract Decision Log entries, Read the file at its `spec.json` for metadata, and extract the Summary section for context.md.
      - Tell the user("First-time memory: auto-seeded {N} decisions from {M} prior completed specs.")
    - This ensures upgrading users automatically get full history from prior specs without needing to run `/specops memory seed` manually.
@@ -942,7 +942,7 @@ During Phase 4, after finalizing `implementation.md` (step 2) and before the doc
    - Append new entries. Deduplicate: if an entry with the same `specId` and `number` already exists, skip it (prevents duplicates from re-running Phase 4 or running `memory seed` after completion).
    - Create the file at(`<specsDir>/memory/decisions.json`) with the updated structure, formatted with 2-space indentation.
 6. **Update context.md**:
-   - If FILE_EXISTS(`<specsDir>/memory/context.md`), Read the file at it. If not, start with `# Project Memory\n\n## Completed Specs\n`.
+   - If Check if the file exists at(`<specsDir>/memory/context.md`), Read the file at it. If not, start with `# Project Memory\n\n## Completed Specs\n`.
    - Check if a section for this spec already exists (heading `### <spec-name>`). If it does, skip (idempotent).
    - Append a new section using the Summary from `implementation.md` and metadata from `spec.json`.
    - Create the file at(`<specsDir>/memory/context.md`).
@@ -963,7 +963,7 @@ Pattern detection runs as part of memory writing (Phase 4, step 3). It produces 
 
 **File overlap detection:**
 1. For each completed spec in `<specsDir>/` (read from index.json or scan directories):
-   - If FILE_EXISTS(`<specsDir>/<spec>/tasks.md`), Read the file at it.
+   - If Check if the file exists at(`<specsDir>/<spec>/tasks.md`), Read the file at it.
    - Extract all file paths from `**Files to Modify:**` sections.
    - Collect as `spec → [file paths]`.
 2. Invert the map: `file → [specs that modified it]`.
@@ -983,11 +983,11 @@ Patterns: "memory", "show memory", "view memory", "memory seed", "seed memory".
 These must refer to SpecOps memory management, NOT a product feature (e.g., "add memory cache" or "optimize memory usage" is NOT memory mode).
 
 **View workflow** (`/specops memory`):
-1. If FILE_EXISTS(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
-2. If FILE_EXISTS(`<specsDir>/memory/`) is false: Tell the user("No memory found. Memory is created automatically after your first spec completes, or run `/specops memory seed` to populate from existing completed specs.") and stop.
-3. If FILE_EXISTS(`<specsDir>/memory/decisions.json`), Read the file at it and parse.
-4. If FILE_EXISTS(`<specsDir>/memory/context.md`), Read the file at it.
-5. If FILE_EXISTS(`<specsDir>/memory/patterns.json`), Read the file at it and parse.
+1. If Check if the file exists at(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
+2. If Check if the file exists at(`<specsDir>/memory/`) is false: Tell the user("No memory found. Memory is created automatically after your first spec completes, or run `/specops memory seed` to populate from existing completed specs.") and stop.
+3. If Check if the file exists at(`<specsDir>/memory/decisions.json`), Read the file at it and parse.
+4. If Check if the file exists at(`<specsDir>/memory/context.md`), Read the file at it.
+5. If Check if the file exists at(`<specsDir>/memory/patterns.json`), Read the file at it and parse.
 6. Present a formatted summary:
 
 ```text
@@ -1021,9 +1021,9 @@ These must refer to SpecOps memory management, NOT a product feature (e.g., "add
 8. On non-interactive platforms, display the summary and stop.
 
 **Seed workflow** (`/specops memory seed`):
-1. If FILE_EXISTS(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
-2. If FILE_EXISTS(`<specsDir>/`) is false: Tell the user("No specs directory found at `<specsDir>`. Create a spec first or run `/specops init`.") and stop.
-3. If FILE_EXISTS(`<specsDir>/index.json`), Read the file at(`<specsDir>/index.json`) to get all specs. If the file contains invalid JSON, treat it as missing. If `index.json` does not exist or is invalid, List the contents of(`<specsDir>`) to get subdirectories, then for each subdirectory `<dir>` check FILE_EXISTS(`<specsDir>/<dir>/spec.json`), and Read the file at each found `spec.json` to build the spec list.
+1. If Check if the file exists at(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
+2. If Check if the file exists at(`<specsDir>/`) is false: Tell the user("No specs directory found at `<specsDir>`. Create a spec first or run `/specops init`.") and stop.
+3. If Check if the file exists at(`<specsDir>/index.json`), Read the file at(`<specsDir>/index.json`) to get all specs. If the file contains invalid JSON, treat it as missing. If `index.json` does not exist or is invalid, List the contents of(`<specsDir>`) to get subdirectories, then for each subdirectory `<dir>` check Check if the file exists at(`<specsDir>/<dir>/spec.json`), and Read the file at each found `spec.json` to build the spec list.
    - If a discovered `spec.json` contains invalid JSON, Tell the user("Warning: `<specsDir>/<dir>/spec.json` is invalid — skipping this spec.") and continue scanning remaining directories.
 4. Filter to specs with `status == "completed"`.
 5. If no completed specs found: Tell the user("No completed specs found. Complete a spec first, then run seed.") and stop.
@@ -1035,9 +1035,9 @@ These must refer to SpecOps memory management, NOT a product feature (e.g., "add
 8. Build `context.md` with completion summaries for all specs, ordered by `spec.json.updated` date ascending.
 9. Run Pattern Detection to build `patterns.json`.
 10. Run the terminal command(`mkdir -p <specsDir>/memory`) if the directory does not exist.
-11. **Merge with existing data**: If FILE_EXISTS(`<specsDir>/memory/decisions.json`), Read the file at it and parse. If JSON is invalid, Tell the user("Warning: existing decisions.json is malformed — it will be replaced with seeded data.") and skip merge. Otherwise, identify entries in the existing file whose `specId+number` combination does NOT appear in the seeded set (these are manually-added entries). Preserve those entries by appending them to the seeded decisions array.
+11. **Merge with existing data**: If Check if the file exists at(`<specsDir>/memory/decisions.json`), Read the file at it and parse. If JSON is invalid, Tell the user("Warning: existing decisions.json is malformed — it will be replaced with seeded data.") and skip merge. Otherwise, identify entries in the existing file whose `specId+number` combination does NOT appear in the seeded set (these are manually-added entries). Preserve those entries by appending them to the seeded decisions array.
 12. Create the file at(`<specsDir>/memory/decisions.json`) with the merged decisions array from step 11 (or step 7 if no existing file).
-13. Initialize `preservedCustomSections` to empty. If FILE_EXISTS(`<specsDir>/memory/context.md`), Read the file at it and check for custom content. Canonical (managed) content includes: the `# Project Memory` heading, the `## Completed Specs` heading, and any entry matching `### <spec-name> (<type>) — YYYY-MM-DD`. Everything outside these canonical sections is user-added custom content. If custom content exists, sanitize each section using the Memory Safety convention-sanitization rule (skip sections that contain agent meta-instructions or obvious sensitive data patterns). Tell the user("Warning: context.md contains manual additions; safe sections will be preserved at the end of the file.") and store only sanitized sections in `preservedCustomSections`.
+13. Initialize `preservedCustomSections` to empty. If Check if the file exists at(`<specsDir>/memory/context.md`), Read the file at it and check for custom content. Canonical (managed) content includes: the `# Project Memory` heading, the `## Completed Specs` heading, and any entry matching `### <spec-name> (<type>) — YYYY-MM-DD`. Everything outside these canonical sections is user-added custom content. If custom content exists, sanitize each section using the Memory Safety convention-sanitization rule (skip sections that contain agent meta-instructions or obvious sensitive data patterns). Tell the user("Warning: context.md contains manual additions; safe sections will be preserved at the end of the file.") and store only sanitized sections in `preservedCustomSections`.
 14. Create the file at(`<specsDir>/memory/context.md`) with the seeded summaries from step 8 followed by `preservedCustomSections` (empty if no existing file or no custom content).
 15. Create the file at(`<specsDir>/memory/patterns.json`) with the pattern data built in step 9.
 16. Tell the user("Seeded memory from {N} completed specs: {D} decisions, {P} patterns detected.")
@@ -1126,11 +1126,11 @@ The repo map is generated entirely by the agent using abstract operations. No ex
 
 **Generation algorithm:**
 
-1. **Determine specsDir**: If FILE_EXISTS(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
+1. **Determine specsDir**: If Check if the file exists at(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
 
 2. **Discover project files**:
    - If `canAccessGit` is true: Run the terminal command(`git ls-files --cached --others --exclude-standard`) to get tracked and untracked-but-not-ignored files. This respects `.gitignore` natively.
-   - If `canAccessGit` is false: List the contents of(`.`) recursively up to depth 3. Then, if FILE_EXISTS(`.gitignore`), Read the file at(`.gitignore`) and manually exclude matching patterns.
+   - If `canAccessGit` is false: List the contents of(`.`) recursively up to depth 3. Then, if Check if the file exists at(`.gitignore`), Read the file at(`.gitignore`) and manually exclude matching patterns.
    - In both cases, exclude: the `<specsDir>/` directory itself, `node_modules/`, `.git/`, `__pycache__/`, `.venv/`, `dist/`, `build/`, `.next/`, `.nuxt/`, `vendor/` directories.
    - After applying all exclusions, store the total count as `{total}`. Then cap the working set to the first 200 entries (sorted alphabetically) for processing. Save the full pre-cap list for hash computation in step 7.
 
@@ -1207,7 +1207,7 @@ Staleness is checked in Phase 1, step 3.5 (after steering files load, before mem
 
 **Staleness check procedure:**
 
-1. If FILE_EXISTS(`<specsDir>/steering/repo-map.md`):
+1. If Check if the file exists at(`<specsDir>/steering/repo-map.md`):
    - Read the file at(`<specsDir>/steering/repo-map.md`) and parse the YAML frontmatter.
    - If frontmatter is missing `_generated`, `_generatedAt`, or `_sourceHash`, treat as stale (legacy or manually created file).
    - Check time: parse `_generatedAt`, compute age. If > 7 days → stale (reason: "generated {N} days ago").
@@ -1243,8 +1243,8 @@ These must refer to SpecOps repo map management, NOT a product feature (e.g., "a
 
 **Workflow:**
 
-1. If FILE_EXISTS(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
-2. If FILE_EXISTS(`<specsDir>/steering/repo-map.md`):
+1. If Check if the file exists at(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
+2. If Check if the file exists at(`<specsDir>/steering/repo-map.md`):
    - Read the file at(`<specsDir>/steering/repo-map.md`) and parse frontmatter.
    - Display current map metadata:
      ```
@@ -1526,7 +1526,7 @@ If the user mentions multiple section names (e.g., "requirements and design"), t
 
 1. Read the file at(`.specops.json`) to get `specsDir` (default: `.specops`). Apply path containment rules from the Configuration Safety module.
 2. If a spec-name is provided:
-   a. Check FILE_EXISTS(`<specsDir>/<spec-name>/spec.json`)
+   a. Check Check if the file exists at(`<specsDir>/<spec-name>/spec.json`)
    b. If not found, List the contents of(`<specsDir>`) to find all spec directories
    c. Check if spec-name is a partial match against any directory name. If exactly one match, use it. If multiple matches, present them and Ask the user to clarify. On platforms without `canAskInteractive`, show the closest matches and stop.
    d. If no match, show "Spec not found" error (see Error Handling below)
@@ -1657,8 +1657,8 @@ Presents the complete content of all spec files, formatted with clear section se
 2. Read the file at the requirements file (requirements.md, bugfix.md, or refactor.md)
 3. Read the file at `design.md`
 4. Read the file at `tasks.md`
-5. If FILE_EXISTS, Read the file at `implementation.md`
-6. If FILE_EXISTS, Read the file at `reviews.md`
+5. If Check if the file exists at, Read the file at `implementation.md`
+6. If Check if the file exists at, Read the file at `reviews.md`
 
 Present using this format:
 
@@ -1751,7 +1751,7 @@ A compact metadata and progress view. No spec content is shown — only metrics.
 
 1. Read the file at `spec.json` for all metadata
 2. Read the file at `tasks.md` and parse task statuses (count Completed, In Progress, Pending)
-3. If FILE_EXISTS `reviews.md`, Read the file at it to count review rounds
+3. If Check if the file exists at `reviews.md`, Read the file at it to count review rounds
 
 Present using this format:
 
@@ -1813,8 +1813,8 @@ An interactive, guided tour through the spec, section by section, with AI commen
    a. **Requirements/Bugfix/Refactor** — Read the file at and present with full content. After presenting, add a 1-2 sentence AI commentary summarizing key points. Ask the user "Next section (Design), skip, or any questions?"
    b. **Design** — Read the file at and present with full content. Commentary on key architectural decisions. Ask the user "Next section (Tasks), skip, or any questions?"
    c. **Tasks** — Read the file at and present with full content. Commentary on progress and task ordering. Ask the user "Next section (Implementation Notes), skip, or done?"
-   d. **Implementation Notes** — If FILE_EXISTS, Read the file at and present. Commentary on deviations or blockers. Ask the user "Next section (Reviews), skip, or done?"
-   e. **Reviews** — If FILE_EXISTS, Read the file at and present. Commentary on review feedback themes.
+   d. **Implementation Notes** — If Check if the file exists at, Read the file at and present. Commentary on deviations or blockers. Ask the user "Next section (Reviews), skip, or done?"
+   e. **Reviews** — If Check if the file exists at, Read the file at and present. Commentary on review feedback themes.
 5. After the last section: "That covers the full spec. Any questions or would you like to see any section again?"
 
 **On platforms with `canAskInteractive: false` (e.g., Codex):**
@@ -1919,13 +1919,13 @@ If neither pattern matches, continue to interview check and the standard phases.
 
 ### Audit Workflow
 
-1. If FILE_EXISTS(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`
+1. If Check if the file exists at(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`
 2. Parse target spec name from the request if present.
    - If a name is given, audit that spec (any status, including completed — Post-Completion Modification runs for completed specs only when audited by name).
-   - If no name is given, List the contents of(`<specsDir>`) to enumerate candidate directories, keep only entries where FILE_EXISTS(`<specsDir>/<dir>/spec.json`) is true (skipping non-spec folders like `steering/`), load each retained `spec.json`, then audit all specs whose `status` is not `completed` (completed specs are frozen; use `/specops audit <name>` to explicitly audit a completed spec).
+   - If no name is given, List the contents of(`<specsDir>`) to enumerate candidate directories, keep only entries where Check if the file exists at(`<specsDir>/<dir>/spec.json`) is true (skipping non-spec folders like `steering/`), load each retained `spec.json`, then audit all specs whose `status` is not `completed` (completed specs are frozen; use `/specops audit <name>` to explicitly audit a completed spec).
 3. For each target spec:
-   a. If FILE_EXISTS(`<specsDir>/<name>/spec.json`), Read the file at(`<specsDir>/<name>/spec.json`) to load metadata. If not found, Tell the user(`"Spec '<name>' not found in <specsDir>. Run '/specops list' to see available specs."`) and stop.
-   b. If FILE_EXISTS(`<specsDir>/<name>/tasks.md`), Read the file at(`<specsDir>/<name>/tasks.md`) to load tasks.
+   a. If Check if the file exists at(`<specsDir>/<name>/spec.json`), Read the file at(`<specsDir>/<name>/spec.json`) to load metadata. If not found, Tell the user(`"Spec '<name>' not found in <specsDir>. Run '/specops list' to see available specs."`) and stop.
+   b. If Check if the file exists at(`<specsDir>/<name>/tasks.md`), Read the file at(`<specsDir>/<name>/tasks.md`) to load tasks.
    c. Run the 5 drift checks below. Record each result as `Healthy`, `Warning`, or `Drift`.
    d. Overall health = worst result across all checks.
 4. Present the Audit Report (format below).
@@ -1937,8 +1937,8 @@ If neither pattern matches, continue to interview check and the standard phases.
 Verify all "Files to Modify" paths in `tasks.md` still exist.
 
 - Parse all file paths listed under `**Files to Modify:**` sections across all tasks
-- For each path, check FILE_EXISTS(`<path>`)
-- If FILE_EXISTS returns false AND `canAccessGit` is true: Run the terminal command(`git log --diff-filter=R --summary --oneline -- "<path>"`) to detect renames; Run the terminal command(`git log --diff-filter=D --oneline -- "<path>"`) to detect deletions
+- For each path, check Check if the file exists at(`<path>`)
+- If Check if the file exists at returns false AND `canAccessGit` is true: Run the terminal command(`git log --diff-filter=R --summary --oneline -- "<path>"`) to detect renames; Run the terminal command(`git log --diff-filter=D --oneline -- "<path>"`) to detect deletions
   - Renamed file → **Warning** (note new path if found)
   - Deleted file → **Drift**
   - No git available → **Warning** (cannot confirm deletion vs rename)
@@ -1979,7 +1979,7 @@ Detect specs stuck without activity.
 
 Detect multiple active (non-completed) specs referencing the same files.
 
-- List the contents of(`<specsDir>`) to find candidate directories; keep only those where FILE_EXISTS(`<specsDir>/<dir>/spec.json`) is true; Read the file at each `<specsDir>/<dir>/spec.json` to load metadata
+- List the contents of(`<specsDir>`) to find candidate directories; keep only those where Check if the file exists at(`<specsDir>/<dir>/spec.json`) is true; Read the file at each `<specsDir>/<dir>/spec.json` to load metadata
 - For each spec with `status ≠ completed` (active specs only): Read the file at(`<specsDir>/<dir>/tasks.md`) if it exists, collect all "Files to Modify" paths
 - Build a map: `file_path → [distinct spec names]` (deduplicate spec names per file — a single spec referencing the same file in multiple tasks counts as one)
 - Any file with 2+ distinct specs → **Warning** (no repair available — informational only)
@@ -2055,7 +2055,7 @@ Guided interactive repair for drifted specs. Available only on platforms with `c
 
 ### Reconcile Workflow
 
-1. If FILE_EXISTS(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`
+1. If Check if the file exists at(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`
 2. Parse target spec name from the request. Reconcile requires a target — if no name given, Tell the user(`"Reconcile requires a specific spec name. Example: 'reconcile <spec-name>'. Run 'audit' to see all specs."`) and stop.
 3. **Platform check**: If `canAskInteractive` is false, Tell the user(`"Reconcile mode requires interactive input. Run audit to see findings. Manual fixes can be applied to tasks.md and spec.json directly."`) and stop.
 4. Run full audit on the target spec (all 5 checks).
@@ -2236,7 +2236,7 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
    - Reject paths containing `../` traversal sequences
    - Reject paths that do not end in `.md`
    - Reject paths outside the project root
-   - Check FILE_EXISTS(`<path>`). If the file does not exist, Tell the user: "Plan file not found: `<path>`" and stop.
+   - Check Check if the file exists at(`<path>`). If the file does not exist, Tell the user: "Plan file not found: `<path>`" and stop.
    - Read the file at(`<path>`) to obtain plan content.
 
    **Branch C — Platform auto-discovery**: If no content and no path were provided, and the platform configuration includes a `planFileDirectory` field:
@@ -2244,7 +2244,7 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
    - If no files found, fall through to Branch D.
    - If `canAskInteractive`: present the file list to the user with modification dates and Ask the user: "Which plan would you like to convert? Enter a number, or paste a plan below."
    - If `canAskInteractive` is false: Tell the user with the list of discovered plan files and stop ("From Plan mode found these recent plans but requires interactive input to select one.").
-   - Once the user selects a file, validate the path (must remain within `<planFileDirectory>`, no absolute path, no `../`, must be `.md`, FILE_EXISTS check) and Read the file at it.
+   - Once the user selects a file, validate the path (must remain within `<planFileDirectory>`, no absolute path, no `../`, must be `.md`, Check if the file exists at check) and Read the file at it.
 
    **Branch D — Interactive paste (fallback)**: If `canAskInteractive`, Ask the user: "Please paste your plan below."
 
@@ -2261,7 +2261,7 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
    | **Constraints** | "Constraints", "Trade-offs", "Risks", "Considerations", "Out of scope", "Do NOT touch", "Limitations" |
    | **Files / paths** | Any file paths mentioned (e.g., `src/auth.ts`, `core/workflow.md`) |
 
-3. **Detect vertical and codebase context**: Use file paths and keywords in the plan to detect the project vertical (backend, frontend, infrastructure, etc.) using the same vertical detection rules as Phase 1. Do a lightweight codebase scan — for each file path mentioned in the plan, validate the path before reading: reject absolute paths (starting with `/`), paths containing `../` traversal sequences, and paths outside the project root. For each valid relative path, check FILE_EXISTS(`<path>`) and if it exists Read the file at(`<path>`) to examine its current content and identify any additional affected files not already listed. Skip invalid or non-existent paths with a warning in the mapping summary.
+3. **Detect vertical and codebase context**: Use file paths and keywords in the plan to detect the project vertical (backend, frontend, infrastructure, etc.) using the same vertical detection rules as Phase 1. Do a lightweight codebase scan — for each file path mentioned in the plan, validate the path before reading: reject absolute paths (starting with `/`), paths containing `../` traversal sequences, and paths outside the project root. For each valid relative path, check Check if the file exists at(`<path>`) and if it exists Read the file at(`<path>`) to examine its current content and identify any additional affected files not already listed. Skip invalid or non-existent paths with a warning in the mapping summary.
 
 4. **Show mapping summary**: Tell the user with a brief mapping summary before generating files:
    ```text
@@ -2354,7 +2354,7 @@ Six categories, each mapping to a GitHub issue label:
 On platforms where `canAskInteractive = true`:
 
 1. Run the terminal command `grep '^version:' .github/instructions/specops.instructions.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the running version.
-2. If FILE_EXISTS(`.specops.json`), Read the file at(`.specops.json`) to extract the `vertical` value only. Do NOT include any other config fields.
+2. If Check if the file exists at(`.specops.json`), Read the file at(`.specops.json`) to extract the `vertical` value only. Do NOT include any other config fields.
 3. Ask the user("What type of feedback would you like to send?\n\n1. Bug report — something is broken\n2. Feature request — a new capability\n3. Friction / UX issue — confusing or annoying workflow\n4. Improvement — enhance existing functionality\n5. Docs gap — missing or unclear documentation\n6. Other — anything else")
 4. Parse the category from the response (accept number or keyword).
 5. Ask the user("Describe your feedback:")
@@ -2381,7 +2381,7 @@ On platforms where `canAskInteractive = false`, the feedback content must be pro
 2. Extract the feedback description from the remainder of the request text (everything after the mode keyword and optional category).
 3. If no description could be extracted: Tell the user("Feedback mode requires a description. Usage: specops feedback [bug|feature|friction|improvement|docs gap|other] <description>") and stop.
 4. Run the terminal command `grep '^version:' .github/instructions/specops.instructions.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the running version.
-5. If FILE_EXISTS(`.specops.json`), Read the file at(`.specops.json`) to extract the `vertical` value only.
+5. If Check if the file exists at(`.specops.json`), Read the file at(`.specops.json`) to extract the `vertical` value only.
 6. Apply the Privacy Safety Rules (see below) to scan the description.
 7. Compose the issue draft (see Issue Composition below).
 8. Display the composed issue to the user for review.
@@ -2477,7 +2477,7 @@ If sensitive content is detected:
 
 **Tier 3 — Local draft file** (if both Tier 1 and Tier 2 fail, or if the URL would be too long):
 1. Determine the save path:
-   - If FILE_EXISTS(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
+   - If Check if the file exists at(`.specops.json`), Read the file at(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
    - Save to `<specsDir>/feedback-draft.md`. If `<specsDir>` does not exist, save to `.specops-feedback-draft.md` in the project root.
 2. Create the file at the save path with the composed issue content.
 3. Tell the user("Your feedback has been saved to `{path}`. You can submit it manually:\n\n1. Go to https://github.com/sanmak/specops/issues/new\n2. Copy the content from `{path}`\n3. Select the '{category}' label\n4. Submit the issue")
@@ -2510,7 +2510,7 @@ If update intent is not detected, continue to the next check in the routing chai
 
 1. Attempt Run the terminal command `grep '^version:' .github/instructions/specops.instructions.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the **running version** of SpecOps.
    - If extraction fails (command returns empty or cannot execute), Tell the user("Could not determine the running SpecOps version automatically.") and stop update mode with manual fallback guidance: "Check the latest version manually: https://github.com/sanmak/specops/releases"
-2. If FILE_EXISTS(`.specops.json`), Read the file at(`.specops.json`) and check for `_installedVersion` and `_installedAt` fields.
+2. If Check if the file exists at(`.specops.json`), Read the file at(`.specops.json`) and check for `_installedVersion` and `_installedAt` fields.
 3. Display:
 
    ```
@@ -2572,13 +2572,13 @@ Split both the current version and the latest version on `"."` and compare each 
 Use heuristic file-path probing to determine how SpecOps was installed. No user input needed.
 
 1. **Claude Plugin Marketplace**: If this instruction file was loaded as a Claude Code plugin/skill (the agent can detect this from its own loading context — e.g., the file path includes a plugin directory like `.claude-plugin/` or the skill was loaded via the plugin system rather than from a project or user skills directory), the installation method is **Plugin Marketplace**.
-2. **User-level install** (Claude only): Check FILE_EXISTS for `~/.claude/skills/specops/SKILL.md`. If present, the installation method is **Claude user-level install**. Note: `~` resolves to the user's home directory; if the platform cannot resolve this path, skip this check and fall through.
-3. **Project-level install**: Check FILE_EXISTS for platform-specific paths in the current project:
+2. **User-level install** (Claude only): Check Check if the file exists at for `~/.claude/skills/specops/SKILL.md`. If present, the installation method is **Claude user-level install**. Note: `~` resolves to the user's home directory; if the platform cannot resolve this path, skip this check and fall through.
+3. **Project-level install**: Check Check if the file exists at for platform-specific paths in the current project:
    - `.cursor/rules/specops.mdc` → Cursor project install
    - `.codex/skills/specops/SKILL.md` → Codex project install
    - `.github/instructions/specops.instructions.md` → Copilot project install
    - `.claude/skills/specops/SKILL.md` → Claude project install
-4. **Local clone**: Check FILE_EXISTS for `generator/generate.py` in the current directory. If present, the user is running from a cloned SpecOps repository.
+4. **Local clone**: Check Check if the file exists at for `generator/generate.py` in the current directory. If present, the user is running from a cloned SpecOps repository.
 5. **Unknown**: If none of the above match, the method is unknown. Show all update options.
 
 #### Step 5: Present Update Instructions
@@ -3601,7 +3601,7 @@ When `canDelegateTask = true`:
 5. When the agent returns:
    a. Read the file at `tasks.md` — verify the task status is `Completed` or `Blocked`
    a.5. **Quality gate** (if status is `Completed`): Check for degradation signals before accepting the result:
-      - **File existence**: For each path in the task's "Files to Modify", FILE_EXISTS the path. If any file was supposed to be created but does not exist, Tell the user with warning and set the task back to `In Progress` for re-evaluation.
+      - **File existence**: For each path in the task's "Files to Modify", Check if the file exists at the path. If any file was supposed to be created but does not exist, Tell the user with warning and set the task back to `In Progress` for re-evaluation.
       - **Checkbox consistency**: Verify all Acceptance Criteria and Tests Required checkboxes are checked (`[x]`) for the Completed task. If any are unchecked, Tell the user with warning and keep the task as `In Progress`.
       - **Session Log presence**: Read the file at `implementation.md`, verify a Session Log entry exists for this task. If missing, Edit the file at `implementation.md` to append a fallback entry: `Task N: completed by delegate (no session log written — quality gate backfill)`.
       - If any quality check fails, immediately re-dispatch the same task (do not continue to next ready task). The orchestrator must re-select this task on the next loop iteration rather than leaving it stranded as `In Progress`.
@@ -3875,12 +3875,12 @@ Runs as Phase 2 step 5.7, after coherence verification (5.5) and vocabulary veri
 For each extracted reference:
 
 1. **Repo map lookup**: If `<specsDir>/steering/repo-map.md` was loaded in Phase 1, search its File Declarations for a matching path or symbol. A match means the reference is valid.
-2. **FILE_EXISTS fallback**: If not found in the repo map, check FILE_EXISTS(`<path>`) for file paths. For symbol references (function/class names), this is a repo-map-only check — symbols not in the map are flagged as "not found in repo map" rather than definitively unresolved.
+2. **Check if the file exists at fallback**: If not found in the repo map, check Check if the file exists at(`<path>`) for file paths. For symbol references (function/class names), this is a repo-map-only check — symbols not in the map are flagged as "not found in repo map" rather than definitively unresolved.
 3. **Prefix normalization**: If the path starts with `./`, strip the prefix and retry. If the path does not match, attempt common prefix adjustments (e.g., strip leading `src/` if the project root contains the file directly).
 
 Classification:
-- **Resolved**: Found in repo map or confirmed via FILE_EXISTS
-- **Unresolved**: Not found in repo map AND FILE_EXISTS returns false AND not a new-file path
+- **Resolved**: Found in repo map or confirmed via Check if the file exists at
+- **Unresolved**: Not found in repo map AND Check if the file exists at returns false AND not a new-file path
 - **New file**: Detected by the new-file heuristic (skip validation)
 - **Symbol only**: Backtick reference not found in repo map (advisory — never blocks)
 
@@ -3907,7 +3907,7 @@ For `"warn"` mode with unresolved references, the notification includes each unr
 |-----------|--------|
 | `canAskInteractive: true` | In strict mode, Ask the user before blocking |
 | `canAskInteractive: false` | In strict mode, note unresolved references as assumptions and proceed |
-| `canAccessGit: true` | No special impact — validation uses FILE_EXISTS and repo map, not git |
+| `canAccessGit: true` | No special impact — validation uses Check if the file exists at and repo map, not git |
 
 No platform-specific fallbacks needed for warn/off modes. Strict mode degrades gracefully on non-interactive platforms.
 
@@ -4019,11 +4019,11 @@ If detected, follow the Pipeline Mode workflow below instead of the standard pha
 
 Before entering the cycle loop, validate:
 
-1. **Spec exists**: FILE_EXISTS(`<specsDir>/<spec-name>/spec.json`). If not found, Tell the user("Spec '<spec-name>' not found. Create it first with `/specops <description>`.") and stop.
+1. **Spec exists**: Check if the file exists at(`<specsDir>/<spec-name>/spec.json`). If not found, Tell the user("Spec '<spec-name>' not found. Create it first with `/specops <description>`.") and stop.
 2. **Status is compatible**: Read the file at(`<specsDir>/<spec-name>/spec.json`). Status must be `draft`, `approved`, `self-approved`, or `implementing`.
    - If `completed`: Tell the user("Spec '<spec-name>' is already completed.") and stop.
    - If `in-review`: Tell the user("Spec '<spec-name>' is in review. Approve it first.") and stop.
-3. **Spec files present**: FILE_EXISTS for the requirements/bugfix/refactor file, design.md, and tasks.md. If any are missing, Tell the user("Spec '<spec-name>' is incomplete — missing <file>. Generate the spec first.") and stop.
+3. **Spec files present**: Check if the file exists at for the requirements/bugfix/refactor file, design.md, and tasks.md. If any are missing, Tell the user("Spec '<spec-name>' is incomplete — missing <file>. Generate the spec first.") and stop.
 4. **Read config**: Determine `maxCycles` from `config.implementation.pipelineMaxCycles` (default: 3).
 5. **Initialize run log**: If `config.implementation.runLogging` is not `"off"`, initialize a run log following the Run Logging module (using the known spec name directly — no `_pending` workaround needed since the spec already exists).
 

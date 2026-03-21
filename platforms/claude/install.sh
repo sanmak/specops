@@ -93,6 +93,15 @@ echo "Installing to: $INSTALL_DIR"
 mkdir -p "$INSTALL_DIR"
 cp "$SCRIPT_DIR/SKILL.md" "$INSTALL_DIR/"
 
+# Copy modes/ directory for context-aware dispatch
+if [ -d "$SCRIPT_DIR/modes" ]; then
+  mkdir -p "$INSTALL_DIR/modes"
+  cp "$SCRIPT_DIR/modes/"*.md "$INSTALL_DIR/modes/"
+  echo "Installed dispatcher + $(find "$SCRIPT_DIR/modes" -name '*.md' 2>/dev/null | wc -l | tr -d ' ') mode files"
+else
+  echo "Installed SKILL.md (modes/ directory not found — monolithic mode)"
+fi
+
 echo "Installed successfully!"
 echo ""
 

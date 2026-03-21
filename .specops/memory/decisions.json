@@ -6,7 +6,7 @@
       "specType": "feature",
       "number": 1,
       "decision": "EARS patterns as HTML comments in template",
-      "rationale": "Keeps template clean while providing pattern reference to agents — comments are invisible in rendered markdown but visible to the LLM reading the file",
+      "rationale": "Keeps template clean while providing pattern reference to agents \u2014 comments are invisible in rendered markdown but visible to the LLM reading the file",
       "task": "Task 1",
       "date": "2026-03-07",
       "completedAt": "2026-03-07T12:30:00Z"
@@ -36,7 +36,7 @@
       "specType": "feature",
       "number": 2,
       "decision": "Reconcile mode requires canAskInteractive: true; audit works on all platforms",
-      "rationale": "Audit is read-only and produces a report regardless of platform. Reconcile makes destructive edits to tasks.md and must confirm each repair — requires interactive input.",
+      "rationale": "Audit is read-only and produces a report regardless of platform. Reconcile makes destructive edits to tasks.md and must confirm each repair \u2014 requires interactive input.",
       "task": "Task 1",
       "date": "2026-03-08",
       "completedAt": "2026-03-08T09:36:18Z"
@@ -46,7 +46,7 @@
       "specType": "feature",
       "number": 3,
       "decision": "All-specs audit targets status != completed instead of all specs",
-      "rationale": "Completed specs are frozen — auditing them for staleness would always produce false Warnings. Only active specs need drift detection.",
+      "rationale": "Completed specs are frozen \u2014 auditing them for staleness would always produce false Warnings. Only active specs need drift detection.",
       "task": "Task 1",
       "date": "2026-03-08",
       "completedAt": "2026-03-08T09:36:18Z"
@@ -90,6 +90,26 @@
       "task": "Task 5",
       "date": "2026-03-17",
       "completedAt": "2026-03-17T03:54:42Z"
+    },
+    {
+      "specId": "context-aware-dispatch",
+      "specType": "feature",
+      "number": 1,
+      "decision": "SKILL.md becomes dispatcher, monolithic preserved as SKILL.monolithic.md",
+      "rationale": "Backward compatibility: old installs work with monolithic; new installs get dispatcher + modes",
+      "task": "Task 3",
+      "date": "2026-03-21",
+      "completedAt": "2026-03-21T07:22:29Z"
+    },
+    {
+      "specId": "context-aware-dispatch",
+      "specType": "feature",
+      "number": 2,
+      "decision": "Mode file paths use RUN_COMMAND with cat fallback for both skill directories",
+      "rationale": "Mode files install alongside SKILL.md; Read tool needs actual installed path, not project-relative path",
+      "task": "Task 3",
+      "date": "2026-03-21",
+      "completedAt": "2026-03-21T07:22:29Z"
     }
   ]
 }

@@ -5,8 +5,11 @@ Validates:
 2. No raw abstract tool operations remain in outputs
 3. Platform-specific format requirements are met
 4. Generated files are non-empty
+5. Claude split output: dispatcher + monolithic backup + 13 mode files
+6. Skills directory synced with platform output
 """
 
+import filecmp
 import json
 import os
 import subprocess
@@ -14,6 +17,7 @@ import sys
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PLATFORMS_DIR = os.path.join(ROOT_DIR, "platforms")
+SKILLS_DIR = os.path.join(ROOT_DIR, "skills", "specops")
 
 EXPECTED_OUTPUTS = {
     "claude": "SKILL.md",
@@ -21,6 +25,26 @@ EXPECTED_OUTPUTS = {
     "codex": "SKILL.md",
     "copilot": "specops.instructions.md",
 }
+
+# Claude split output: 13 mode files (from core/mode-manifest.json)
+EXPECTED_CLAUDE_MODES = [
+    "audit.md",
+    "feedback.md",
+    "from-plan.md",
+    "init.md",
+    "interview.md",
+    "map.md",
+    "memory.md",
+    "pipeline.md",
+    "spec.md",
+    "steering.md",
+    "update.md",
+    "version.md",
+    "view.md",
+]
+
+# Modes that have no core modules and are expected to be empty
+EMPTY_MODE_FILES = ["version.md"]
 
 # Abstract operations that should NOT appear in generated outputs
 ABSTRACT_OPERATIONS = [
@@ -98,6 +122,159 @@ def test_no_abstract_operations():
 
     if errors == 0:
         print("PASS: No raw abstract operations in generated outputs")
+
+    return errors
+
+
+def test_claude_split_output():
+    """Verify Claude generates dispatcher + monolithic backup + 13 mode files."""
+    errors = 0
+    claude_dir = os.path.join(PLATFORMS_DIR, "claude")
+    modes_dir = os.path.join(claude_dir, "modes")
+
+    # 1. Dispatcher SKILL.md exists and is non-empty
+    dispatcher_path = os.path.join(claude_dir, "SKILL.md")
+    if not os.path.exists(dispatcher_path):
+        print("FAIL: Claude dispatcher SKILL.md not found")
+        errors += 1
+    else:
+        content = read_file(dispatcher_path)
+        if len(content.strip()) == 0:
+            print("FAIL: Claude dispatcher SKILL.md is empty")
+            errors += 1
+        else:
+            print(f"PASS: Claude dispatcher SKILL.md exists ({len(content)} chars)")
+
+    # 2. Monolithic backup exists and is non-empty
+    monolithic_path = os.path.join(claude_dir, "SKILL.monolithic.md")
+    if not os.path.exists(monolithic_path):
+        print("FAIL: Claude monolithic backup SKILL.monolithic.md not found")
+        errors += 1
+    else:
+        content = read_file(monolithic_path)
+        if len(content.strip()) == 0:
+            print("FAIL: Claude SKILL.monolithic.md is empty")
+            errors += 1
+        else:
+            print(f"PASS: Claude SKILL.monolithic.md exists ({len(content)} chars)")
+
+    # 3. modes/ directory exists with exactly 13 .md files
+    if not os.path.isdir(modes_dir):
+        print("FAIL: Claude modes/ directory not found")
+        errors += 1
+        return errors
+
+    mode_files = sorted(f for f in os.listdir(modes_dir) if f.endswith(".md"))
+    if mode_files != sorted(EXPECTED_CLAUDE_MODES):
+        missing = set(EXPECTED_CLAUDE_MODES) - set(mode_files)
+        extra = set(mode_files) - set(EXPECTED_CLAUDE_MODES)
+        if missing:
+            print(f"FAIL: Missing mode files: {', '.join(sorted(missing))}")
+        if extra:
+            print(f"FAIL: Unexpected mode files: {', '.join(sorted(extra))}")
+        errors += 1
+    else:
+        print(f"PASS: Claude modes/ has exactly {len(EXPECTED_CLAUDE_MODES)} mode files")
+
+    # 4. Each mode file has content (except known empty modes like version)
+    for mode_file in EXPECTED_CLAUDE_MODES:
+        mode_path = os.path.join(modes_dir, mode_file)
+        if not os.path.exists(mode_path):
+            continue
+        content = read_file(mode_path)
+        if mode_file in EMPTY_MODE_FILES:
+            # Known empty modes (no core modules) — just verify file exists
+            print(f"PASS: Claude modes/{mode_file} exists (empty mode, expected)")
+        elif len(content.strip()) == 0:
+            print(f"FAIL: Claude modes/{mode_file} is empty (expected content)")
+            errors += 1
+        else:
+            print(f"PASS: Claude modes/{mode_file} has content ({len(content)} chars)")
+
+    return errors
+
+
+def test_claude_modes_no_abstract_operations():
+    """Check that no raw abstract operations remain in Claude mode files."""
+    errors = 0
+    modes_dir = os.path.join(PLATFORMS_DIR, "claude", "modes")
+
+    if not os.path.isdir(modes_dir):
+        print("SKIP: Claude modes/ directory not found")
+        return 0
+
+    for mode_file in sorted(os.listdir(modes_dir)):
+        if not mode_file.endswith(".md"):
+            continue
+        mode_path = os.path.join(modes_dir, mode_file)
+        content = read_file(mode_path)
+        for op in ABSTRACT_OPERATIONS:
+            if op in content:
+                lines = content.split("\n")
+                for i, line in enumerate(lines, 1):
+                    if op in line and not line.strip().startswith("#") and "abstraction" not in line.lower():
+                        print(f"FAIL: Raw abstract operation '{op}' found in claude/modes/{mode_file} line {i}")
+                        errors += 1
+
+    if errors == 0:
+        print("PASS: No raw abstract operations in Claude mode files")
+
+    return errors
+
+
+def test_claude_skills_sync():
+    """Verify skills/specops/ is synced with platforms/claude/ for split output."""
+    errors = 0
+    claude_modes_dir = os.path.join(PLATFORMS_DIR, "claude", "modes")
+    skills_modes_dir = os.path.join(SKILLS_DIR, "modes")
+
+    # Check skills/specops/SKILL.md matches platforms/claude/SKILL.md
+    claude_skill = os.path.join(PLATFORMS_DIR, "claude", "SKILL.md")
+    skills_skill = os.path.join(SKILLS_DIR, "SKILL.md")
+    if os.path.exists(claude_skill) and os.path.exists(skills_skill):
+        if filecmp.cmp(claude_skill, skills_skill, shallow=False):
+            print("PASS: skills/specops/SKILL.md matches platforms/claude/SKILL.md")
+        else:
+            print("FAIL: skills/specops/SKILL.md differs from platforms/claude/SKILL.md")
+            errors += 1
+    elif not os.path.exists(skills_skill):
+        print("FAIL: skills/specops/SKILL.md not found")
+        errors += 1
+
+    # Check skills/specops/modes/ directory exists
+    if not os.path.isdir(skills_modes_dir):
+        print("FAIL: skills/specops/modes/ directory not found")
+        errors += 1
+        return errors
+
+    if not os.path.isdir(claude_modes_dir):
+        print("SKIP: platforms/claude/modes/ not found, cannot compare")
+        return errors
+
+    # Compare mode files
+    claude_modes = sorted(f for f in os.listdir(claude_modes_dir) if f.endswith(".md"))
+    skills_modes = sorted(f for f in os.listdir(skills_modes_dir) if f.endswith(".md"))
+
+    if claude_modes != skills_modes:
+        missing = set(claude_modes) - set(skills_modes)
+        extra = set(skills_modes) - set(claude_modes)
+        if missing:
+            print(f"FAIL: skills/specops/modes/ missing: {', '.join(sorted(missing))}")
+        if extra:
+            print(f"FAIL: skills/specops/modes/ has extra: {', '.join(sorted(extra))}")
+        errors += 1
+    else:
+        # Compare content of each file
+        all_match = True
+        for mode_file in claude_modes:
+            claude_path = os.path.join(claude_modes_dir, mode_file)
+            skills_path = os.path.join(skills_modes_dir, mode_file)
+            if not filecmp.cmp(claude_path, skills_path, shallow=False):
+                print(f"FAIL: skills/specops/modes/{mode_file} differs from platforms/claude/modes/{mode_file}")
+                errors += 1
+                all_match = False
+        if all_match:
+            print(f"PASS: skills/specops/modes/ synced with platforms/claude/modes/ ({len(claude_modes)} files)")
 
     return errors
 
@@ -308,6 +485,15 @@ def main():
 
     print("\n--- Test: No Abstract Operations ---")
     total_errors += test_no_abstract_operations()
+
+    print("\n--- Test: Claude Split Output ---")
+    total_errors += test_claude_split_output()
+
+    print("\n--- Test: Claude Modes No Abstract Operations ---")
+    total_errors += test_claude_modes_no_abstract_operations()
+
+    print("\n--- Test: Claude Skills Sync ---")
+    total_errors += test_claude_skills_sync()
 
     print("\n--- Test: Cursor MDC Format ---")
     total_errors += test_cursor_mdc_format()

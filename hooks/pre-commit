@@ -233,6 +233,16 @@ while IFS= read -r staged_file; do
   fi
 done <<< "$STAGED_FILES"
 
+# --- Check 6: Spec artifact checkbox staleness ---
+STAGED_SPECS="$(echo "$STAGED_FILES" | grep '^\.specops/' || true)"
+if [ -n "$STAGED_SPECS" ] && [ -f "$ROOT_DIR/scripts/lint-specs.sh" ]; then
+  if ! bash "$ROOT_DIR/scripts/lint-specs.sh" > /dev/null 2>&1; then
+    printf '%b' "${RED}FAIL${RESET} Checkbox staleness in spec artifacts.\n"
+    bash "$ROOT_DIR/scripts/lint-specs.sh"
+    ERRORS=$((ERRORS + 1))
+  fi
+fi
+
 # --- Summary ---
 if [ "$ERRORS" -gt 0 ]; then
   printf '%b' "\n${RED}${BOLD}Pre-commit failed with ${ERRORS} error(s).${RESET}\n"

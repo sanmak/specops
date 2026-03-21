@@ -54,6 +54,8 @@ Examine the staged files list with `git diff --cached --name-only`.
 
 Run `git diff --cached --stat` for a summary and `git diff --cached` for the full diff. Analyze the changes to understand their purpose and scope. Save this analysis — you will use it for the PR body.
 
+**Tip**: Run `/pre-pr` before `/ship-pr` to catch issues that review bots (CodeRabbit, Copilot, Greptile) would flag in PR review.
+
 ### Step 5.5: Documentation staleness check
 
 After reviewing the diff, quickly check if the staged changes might affect documentation. Get the staged file list from the `git diff --cached --name-only` output you already have.

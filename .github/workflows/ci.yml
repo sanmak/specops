@@ -80,6 +80,17 @@ jobs:
       - name: Lint shell scripts
         run: shellcheck setup.sh verify.sh scripts/bump-version.sh scripts/run-tests.sh scripts/remote-install.sh scripts/install-hooks.sh scripts/run-review-gate.sh platforms/claude/install.sh platforms/cursor/install.sh platforms/codex/install.sh platforms/copilot/install.sh hooks/pre-commit hooks/pre-push
 
+  markdownlint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Lint markdown source files
+        run: |
+          npx markdownlint-cli2 "core/**/*.md" "docs/**/*.md" \
+            ".claude/commands/**/*.md" "README.md" "CLAUDE.md" \
+            "QUICKSTART.md" "CONTRIBUTING.md" "CHANGELOG.md"
+
   verify-checksums:
     name: Verify File Checksums
     runs-on: ubuntu-latest

@@ -16,6 +16,7 @@ SpecOps brings structured spec-driven development to your AI coding assistant �
 - **Domain-specific templates** — Infrastructure specs include Rollback Steps and Resource Definitions. Data pipeline specs include Data Contracts and Backfill Strategy. Library specs flag Breaking Changes per task. Backend and fullstack use clean defaults — no unnecessary ceremony.
 - **Built-in team review cycle** — Draft a spec, get section-by-section feedback from teammates, revise, and only implement once `minApprovals` is met. Git identity detection, configurable approval thresholds, and an implementation gate that blocks unapproved specs from proceeding. Solo developers can enable `allowSelfApproval` for a self-review workflow with distinct audit trail.
 - **Security-hardened spec processing** — Convention strings and custom templates are sanitized against prompt injection. Secrets use placeholders, PII uses synthetic data, all config fields enforce strict schema validation, and path traversal is rejected at the boundary.
+- **Context-aware dispatch** — Reduces agent context load by 42-88% per invocation, improving enforcement gate reliability and reducing token costs.
 
 ## Quick Start
 
@@ -92,6 +93,7 @@ SpecOps brings multi-platform support, domain-specific templates, team review wo
 | **Vertical templates** | 7 project types | None | Generic |
 | **Team review** | Built-in | No | No |
 | **Agent hooks** | No | Yes | No |
+| **Context-aware dispatch** | Yes (Claude) | No | No |
 | **Security hardening** | Yes | No | No |
 | **Open source** | MIT | Proprietary | MIT |
 
@@ -161,6 +163,18 @@ Three layers, strict separation:
 - **`platforms/`** — Generated instruction files per platform (checked into git, no build step for users)
 
 See [STRUCTURE.md](docs/STRUCTURE.md) for the full repository layout.
+
+### Context-Aware Dispatch (Claude Code)
+
+SpecOps uses context-aware dispatch on Claude Code to reduce context load by 42-88% per invocation. Instead of loading the full ~4,600-line skill into every session, a lightweight dispatcher (~155 lines) routes each invocation to a focused mode file containing only the instructions needed for that specific operation.
+
+**How it works:**
+1. The dispatcher loads with routing logic, safety rules, and enforcement gates
+2. It detects the mode from the user's request (13 modes: init, version, update, view, steering, memory, feedback, map, audit, from-plan, pipeline, interview, spec)
+3. It reads the matching mode file and spawns a focused sub-agent with only the relevant instructions
+4. Critical enforcement gates (like task tracking IssueID verification) run in the dispatcher before the sub-agent spawns, ensuring they cannot be skipped under context pressure
+
+Other platforms (Cursor, Codex, Copilot) continue to use monolithic output since they lack sub-agent infrastructure.
 
 ## Proxy Metrics
 

@@ -66,6 +66,8 @@ For each changed file, check which documentation may be affected using this mapp
 | `core/writing-quality.md` | `CLAUDE.md` (Writing Quality), `README.md` (Writing Philosophy) |
 | `core/update.md` | `docs/COMMANDS.md` (Update) |
 | `core/view.md` | `docs/COMMANDS.md` (View/List) |
+| `core/dispatcher.md` | `CLAUDE.md` (Architecture), `docs/STRUCTURE.md`, `README.md` (Context-Aware Dispatch) |
+| `core/mode-manifest.json` | `CLAUDE.md` (Architecture), `docs/STRUCTURE.md` |
 | New `core/*.md` (not in table) | `docs/STRUCTURE.md`, determine target docs from module content |
 
 Collect all matched target docs into a deduplicated list. If no matches found, report "No documentation impact detected" and skip to Step 4.

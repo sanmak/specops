@@ -23,6 +23,7 @@
     "WRITE_FILE": "Create the file at",
     "EDIT_FILE": "Edit the file at",
     "LIST_DIR": "List the contents of",
+    "FILE_EXISTS": "Check if the file exists at",
     "RUN_COMMAND": "Run the terminal command",
     "ASK_USER": "Ask the user",
     "NOTIFY_USER": "Tell the user",
