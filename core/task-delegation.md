@@ -49,6 +49,7 @@ When `canDelegateTask = true`:
       - **Checkbox consistency**: Verify all Acceptance Criteria and Tests Required checkboxes are checked (`[x]`) for the Completed task. If any are unchecked, NOTIFY_USER with warning and keep the task as `In Progress`.
       - **Session Log presence**: READ_FILE `implementation.md`, verify a Session Log entry exists for this task. If missing, EDIT_FILE `implementation.md` to append a fallback entry: `Task N: completed by delegate (no session log written — quality gate backfill)`.
       - If any quality check fails, immediately re-dispatch the same task (do not continue to next ready task). The orchestrator must re-select this task on the next loop iteration rather than leaving it stranded as `In Progress`.
+   a.6. **External tracker sync**: If `config.team.taskTracking` is not `"none"` and the task has a valid IssueID (neither `None` nor prefixed with `FAILED`), sync the task's final status to the external tracker following the Status Sync protocol in the Configuration Handling module. The orchestrator is responsible for this — delegates do NOT run Status Sync. If the sync command fails, NOTIFY_USER and continue (non-blocking).
    b. READ_FILE `implementation.md` — check for new Decision Log or Deviation entries
    c. If `Blocked`: read the `**Blocker:**` line and apply the following decision tree:
       - If the blocker is a missing dependency from another task: skip to the next task with no dependencies on the blocked task
@@ -81,6 +82,7 @@ The delegate receives the handoff bundle and executes the single assigned task:
   - Exception: When implementation diverges from design.md (pivot), record the deviation in implementation.md Deviations table. Do NOT update design.md — the orchestrator flags deviations for user review after delegation completes.
 - Must NOT skip Acceptance Criteria verification
 - Must follow the Write Ordering Protocol (update tasks.md status before reporting)
+- Must NOT run external tracker commands (Status Sync is the orchestrator's responsibility — see step 5a.6)
 - Inherits all safety rules (convention sanitization, path containment, no secrets in specs)
 
 ### Strategy B: Session Checkpoint

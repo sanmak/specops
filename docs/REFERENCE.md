@@ -158,6 +158,10 @@ Metrics are captured automatically at Phase 4 completion. See [TOKEN-USAGE.md](T
 | `implementation.formatting.enabled` | boolean | `true` | | Run formatter before commits |
 | `implementation.formatting.tool` | `prettier`/`black`/`rustfmt`/`gofmt` | (auto-detect) | enum | Formatting tool |
 | `implementation.taskDelegation` | `auto`/`always`/`never` | `auto` | enum | Task delegation strategy for Phase 3. `auto`: delegate when complexity score reaches threshold (based on effort sizing and file breadth). `always`: always delegate. `never`: sequential. Strategy adapts to platform capabilities. |
+| `implementation.runLogging` | `on`/`off` | `on` | enum | Per-run execution logging to `<specsDir>/runs/`. Captures phase transitions, decisions, errors as a chronological trace. |
+| `implementation.validateReferences` | `off`/`warn`/`strict` | `off` | enum | Validate file paths and code references in spec against codebase before implementation. `off`: skip. `warn`: notify and continue. `strict`: block on unresolved. |
+| `implementation.gitCheckpointing` | boolean | `false` | | Commit at phase boundaries (spec-created, implemented, completed). Three commits max per run. Complements `autoCommit` (per-task). |
+| `implementation.pipelineMaxCycles` | integer | `3` | min 1, max 10 | Maximum Phase 3→4 iteration cycles in pipeline mode. |
 | `team.codeReview.required` | boolean | `false` | | Require code review |
 | `team.codeReview.minApprovals` | integer | `1` | min 1 | Minimum approvals needed |
 | `team.codeReview.requireTests` | boolean | `true` | | Require tests in implementation |
