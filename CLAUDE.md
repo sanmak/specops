@@ -24,8 +24,8 @@ python3 generator/validate.py
 # Lint shell scripts
 shellcheck setup.sh verify.sh scripts/*.sh platforms/*/install.sh hooks/pre-commit hooks/pre-push
 
-# Lint markdown (core and docs only)
-npx markdownlint-cli2 "core/**/*.md" "docs/**/*.md"
+# Lint markdown (matches CI scope)
+npx markdownlint-cli2 "core/**/*.md" "docs/**/*.md" ".claude/commands/**/*.md" "README.md" "CLAUDE.md" "QUICKSTART.md" "CONTRIBUTING.md" "CHANGELOG.md"
 
 # Verify file integrity
 shasum -a 256 -c CHECKSUMS.sha256
@@ -39,7 +39,7 @@ python3 tests/test_spec_schema.py
 python3 tests/check_schema_sync.py
 
 # Version bumping
-bash scripts/bump-version.sh 1.2.0 --checksums
+bash scripts/bump-version.sh <new-version> --checksums
 ```
 
 ## Three-Tier Architecture

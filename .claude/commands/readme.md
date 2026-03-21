@@ -62,9 +62,9 @@ Propose 3 tagline candidates, each under 10 words:
 
 ```text
 Tagline candidates:
-1. "Make your AI agent think before it codes."
-2. "Structured specs for AI agents. Think first, code right."
-3. "Stop correcting your AI. Start directing it."
+1. "[Benefit of using the tool in one punchy phrase]"
+2. "[Alternative framing of the core value proposition]"
+3. "[Action-oriented phrase starting with a verb]"
 ```
 
 Ask the user to pick one or suggest their own.

@@ -42,6 +42,7 @@ Specs are git-tracked, survive across sessions, and work natively with **Claude 
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/sanmak/specops/main/scripts/remote-install.sh)
+# Inspect the script first: https://github.com/sanmak/specops/blob/main/scripts/remote-install.sh
 ```
 
 **Or clone and run:**
@@ -98,7 +99,7 @@ Agent:
 
 ## Built With SpecOps
 
-Every feature of SpecOps was specified, designed, and implemented using the SpecOps workflow. All specs are [public in `.specops/`](.specops/). The [friction log](internal/dogfood-friction.md) captures 42 lessons learned that shaped the tool.
+Every feature of SpecOps was specified, designed, and implemented using the SpecOps workflow. All specs are [public in `.specops/`](.specops/). The friction log captures 42 lessons learned that shaped the tool.
 
 ## What Only SpecOps Does
 
