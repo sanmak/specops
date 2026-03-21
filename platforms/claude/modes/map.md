@@ -253,6 +253,13 @@ Load configuration from `.specops.json` at project root. If not found, use these
     "testing": "auto",
     "linting": { "enabled": true, "fixOnSave": false },
     "formatting": { "enabled": true }
+  },
+  "dependencySafety": {
+    "enabled": true,
+    "severityThreshold": "medium",
+    "autoFix": false,
+    "allowedAdvisories": [],
+    "scanScope": "spec"
   }
 }
 ```
@@ -570,6 +577,14 @@ If `config.integrations` is configured, use these as **contextual information**:
 - **`analytics`**: Include analytics tracking in acceptance criteria when relevant
 
 These are informational — the agent uses them to generate more accurate specs, not to directly invoke the tools.
+
+### Workflow Impact: dependencySafety
+
+- **Phase 1 step 3**: If `dependencies.md` steering file exists and `_generatedAt` is over 30 days old, notify the user about stale dependency data.
+- **Phase 2 step 6.7 (mandatory gate)**: If `enabled` is not `false`, execute the dependency safety verification. Block implementation when findings exceed `severityThreshold`. Skipping this gate when enabled is a protocol breach.
+- **Phase 2 step 6.7**: If `autoFix` is `true`, attempt automatic remediation before re-evaluating.
+- **Phase 2 step 6.7**: Filter `allowedAdvisories` CVE IDs from blocking decisions (still recorded in audit artifact).
+- **Phase 2 step 6.7**: `scanScope` controls whether to audit only spec-relevant ecosystems (`"spec"`) or all detected ecosystems (`"project"`).
 
 ### Workflow Impact: integrations
 

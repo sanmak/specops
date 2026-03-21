@@ -24,6 +24,14 @@
     "updated": "2026-03-21T07:23:41Z"
   },
   {
+    "id": "dependency-safety-gate",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-21T09:22:38Z"
+  },
+  {
     "id": "drift-detection",
     "type": "feature",
     "status": "completed",

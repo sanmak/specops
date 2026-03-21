@@ -47,6 +47,7 @@ For each changed file, check which documentation may be affected using this mapp
 | `core/config-handling.md` | `docs/REFERENCE.md` (Configuration Options) |
 | `core/custom-templates.md` | `docs/REFERENCE.md` (Spec Templates) |
 | `core/data-handling.md` | `CLAUDE.md` (Security-Sensitive Files) |
+| `core/dependency-safety.md` | `CLAUDE.md` (Security-Sensitive Files, core modules list), `docs/REFERENCE.md` (Configuration Options), `docs/STRUCTURE.md` |
 | `core/error-handling.md` | `docs/REFERENCE.md` |
 | `core/feedback.md` | `docs/COMMANDS.md` (Send Feedback) |
 | `core/from-plan.md` | `docs/COMMANDS.md` (From Plan) |

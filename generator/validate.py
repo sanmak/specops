@@ -335,6 +335,22 @@ ISSUE_BODY_MARKERS = [
 ]
 
 
+# Dependency safety markers that MUST appear in every output
+DEPENDENCY_SAFETY_MARKERS = [
+    "## Dependency Safety",
+    "### Dependency Detection Protocol",
+    "### Dependency Safety Gate",
+    "### Online Verification Protocol",
+    "### Offline Fallback Protocol",
+    "### Severity Evaluation",
+    "dependency-audit.md",
+    "dependencies.md",
+    "protocol breach",
+    "severityThreshold",
+    "allowedAdvisories",
+]
+
+
 def read_file(path):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
@@ -573,6 +589,9 @@ def validate_platform(platform, info):
 
     # Check issue body composition present
     errors.extend(check_markers_present(platform, content, ISSUE_BODY_MARKERS, "issue-body"))
+
+    # Check dependency safety present
+    errors.extend(check_markers_present(platform, content, DEPENDENCY_SAFETY_MARKERS, "dependency-safety"))
 
     # Platform-specific format validation
     if platform == "cursor":
@@ -1082,7 +1101,7 @@ def main():
     if len(generated) >= 2:
         platforms = list(generated.keys())
         consistency_errors = []
-        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + TEMPLATE_MARKERS + VERTICAL_MARKERS + INTERVIEW_MARKERS + STEERING_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + EXTERNAL_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS + REPO_MAP_MARKERS + DELEGATION_MARKERS + WRITING_QUALITY_MARKERS + FEEDBACK_MARKERS + COHERENCE_MARKERS + METRICS_MARKERS + RUN_LOGGING_MARKERS + PLAN_VALIDATION_MARKERS + GIT_CHECKPOINT_MARKERS + PIPELINE_MARKERS + ISSUE_BODY_MARKERS:
+        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + TEMPLATE_MARKERS + VERTICAL_MARKERS + INTERVIEW_MARKERS + STEERING_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + EXTERNAL_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS + REPO_MAP_MARKERS + DELEGATION_MARKERS + WRITING_QUALITY_MARKERS + FEEDBACK_MARKERS + COHERENCE_MARKERS + METRICS_MARKERS + RUN_LOGGING_MARKERS + PLAN_VALIDATION_MARKERS + GIT_CHECKPOINT_MARKERS + PIPELINE_MARKERS + ISSUE_BODY_MARKERS + DEPENDENCY_SAFETY_MARKERS:
             present_in = [p for p in platforms if marker in generated[p]["content"]]
             if len(present_in) != len(platforms):
                 missing = set(platforms) - set(present_in)

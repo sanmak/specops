@@ -24,5 +24,9 @@
     "autoCommit": false,
     "createPR": true,
     "testing": "auto"
+  },
+  "dependencySafety": {
+    "enabled": true,
+    "severityThreshold": "medium"
   }
 }

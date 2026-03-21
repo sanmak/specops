@@ -359,6 +359,7 @@ def build_common_context(core, platform_config):
         "plan_validation": core["plan-validation"],
         "git_checkpointing": core["git-checkpointing"],
         "pipeline": core["pipeline"],
+        "dependency_safety": core["dependency-safety"],
         "templates_section": templates_section,
         "examples": examples,
         "version": version,

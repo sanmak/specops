@@ -166,6 +166,11 @@ Metrics are captured automatically at Phase 4 completion. See [TOKEN-USAGE.md](T
 | `implementation.validateReferences` | `off`/`warn`/`strict` | `off` | enum | Validate file paths and code references in spec against codebase before implementation. `off`: skip. `warn`: notify and continue. `strict`: block on unresolved. |
 | `implementation.gitCheckpointing` | boolean | `false` | | Commit at phase boundaries (spec-created, implemented, completed). Three commits max per run. Complements `autoCommit` (per-task). |
 | `implementation.pipelineMaxCycles` | integer | `3` | min 1, max 10 | Maximum Phase 3→4 iteration cycles in pipeline mode. |
+| `dependencySafety.enabled` | boolean | `true` | | Enable dependency safety gate in Phase 2 step 6.7. Scans for CVEs, EOL status, and best practices. |
+| `dependencySafety.severityThreshold` | `strict`/`medium`/`low` | `medium` | enum, max 10 chars | Severity that blocks implementation. strict: any finding. medium: Critical/High. low: warn only. |
+| `dependencySafety.autoFix` | boolean | `false` | | Attempt automatic remediation (npm audit fix, cargo update) before re-evaluating. |
+| `dependencySafety.allowedAdvisories` | string[] | `[]` | max 50 items, each max 100 chars | CVE IDs acknowledged and excluded from blocking (still recorded in audit). |
+| `dependencySafety.scanScope` | `spec`/`project` | `spec` | enum, max 10 chars | Scope of scan. spec: ecosystems relevant to current spec. project: all detected ecosystems. |
 | `team.codeReview.required` | boolean | `false` | | Require code review |
 | `team.codeReview.minApprovals` | integer | `1` | min 1 | Minimum approvals needed |
 | `team.codeReview.requireTests` | boolean | `true` | | Require tests in implementation |

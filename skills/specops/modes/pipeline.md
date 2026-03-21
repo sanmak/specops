@@ -257,7 +257,8 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 5.6. **Vocabulary Verification**: If the detected vertical is not `backend`, `fullstack`, or `frontend`, and no custom template is used, scan generated spec files for prohibited default terms (see the Vocabulary Verification subsection in the Vertical Adaptation Rules module). Replace any found terms with vertical-specific vocabulary. Record the result in implementation.md Phase 1 Context Summary.
 5.7. **Code-grounded plan validation**: If `config.implementation.validateReferences` is not `"off"`, validate file paths and code references in design.md and tasks.md against the codebase following the Code-Grounded Plan Validation module. Use the repo map (loaded in Phase 1 step 3.5) as the primary reference. Record the result in implementation.md Phase 1 Context Summary.
 6. **External issue creation (mandatory when taskTracking configured)**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. Use the Read tool to read `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`. For each eligible task, compose the issue body using the Issue Body Composition template (reading spec artifacts for context), create issues via the Issue Creation Protocol (with labels for GitHub), and write IssueIDs back to `tasks.md`. If issue creation is skipped or all IssueIDs remain `None`, the Phase 3 task tracking gate will catch the omission — the spec artifact linter validates IssueIDs on completed specs and fails CI when they are missing.
-6.5. **Git checkpoint (spec-created)**: If `config.implementation.gitCheckpointing` is true for this run, commit spec artifacts following the Git Checkpointing module: Use the Bash tool to run(`git add <specsDir>/<spec-name>/`) then Use the Bash tool to run(`git commit -m "specops(checkpoint): spec-created -- <spec-name>"`). If the commit fails, Display a message to the user and continue.
+6.5. **Dependency safety gate (mandatory)**: If `config.dependencySafety.enabled` is not `false` (default: true), execute the dependency safety verification following the Dependency Safety module. This is a Phase 2 completion gate — specs cannot proceed to review or implementation without passing. Skipping this gate when dependency safety is enabled is a protocol breach.
+6.7. **Git checkpoint (spec-created)**: If `config.implementation.gitCheckpointing` is true for this run, commit spec artifacts following the Git Checkpointing module: Use the Bash tool to run(`git add <specsDir>/<spec-name>/`) then Use the Bash tool to run(`git commit -m "specops(checkpoint): spec-created -- <spec-name>"`). If the commit fails, Display a message to the user and continue.
 7. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow.
 
 **Phase 2.5: Review Cycle** (if spec review enabled)
@@ -458,6 +459,13 @@ Load configuration from `.specops.json` at project root. If not found, use these
     "testing": "auto",
     "linting": { "enabled": true, "fixOnSave": false },
     "formatting": { "enabled": true }
+  },
+  "dependencySafety": {
+    "enabled": true,
+    "severityThreshold": "medium",
+    "autoFix": false,
+    "allowedAdvisories": [],
+    "scanScope": "spec"
   }
 }
 ```
@@ -775,6 +783,14 @@ If `config.integrations` is configured, use these as **contextual information**:
 - **`analytics`**: Include analytics tracking in acceptance criteria when relevant
 
 These are informational — the agent uses them to generate more accurate specs, not to directly invoke the tools.
+
+### Workflow Impact: dependencySafety
+
+- **Phase 1 step 3**: If `dependencies.md` steering file exists and `_generatedAt` is over 30 days old, notify the user about stale dependency data.
+- **Phase 2 step 6.7 (mandatory gate)**: If `enabled` is not `false`, execute the dependency safety verification. Block implementation when findings exceed `severityThreshold`. Skipping this gate when enabled is a protocol breach.
+- **Phase 2 step 6.7**: If `autoFix` is `true`, attempt automatic remediation before re-evaluating.
+- **Phase 2 step 6.7**: Filter `allowedAdvisories` CVE IDs from blocking decisions (still recorded in audit artifact).
+- **Phase 2 step 6.7**: `scanScope` controls whether to audit only spec-relevant ecosystems (`"spec"`) or all detected ecosystems (`"project"`).
 
 ### Workflow Impact: integrations
 

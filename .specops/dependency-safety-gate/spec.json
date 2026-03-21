@@ -1,0 +1,15 @@
+{
+  "id": "dependency-safety-gate",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "author": {
+    "name": "sanmak"
+  },
+  "created": "2026-03-21T09:07:08Z",
+  "updated": "2026-03-21T09:22:38Z",
+  "specopsCreatedWith": "1.3.0",
+  "specopsUpdatedWith": "1.3.0",
+  "requiredApprovals": 0,
+  "approvals": []
+}
