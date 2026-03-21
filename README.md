@@ -1,26 +1,36 @@
-# SpecOps
+<p align="center">
+  <img src="logo.svg" alt="SpecOps" width="200"/>
+</p>
 
-**Spec-driven development that adapts to your stack, your team, and your workflow.**
+<h3 align="center">Make your AI agent think before it codes.</h3>
 
-[![CI](https://github.com/sanmak/specops/actions/workflows/ci.yml/badge.svg)](https://github.com/sanmak/specops/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/sanmak/specops/actions/workflows/codeql.yml/badge.svg)](https://github.com/sanmak/specops/actions/workflows/codeql.yml)
-[![Dependabot](https://img.shields.io/badge/dependabot-enabled-025e8c?logo=dependabot)](https://github.com/sanmak/specops/network/updates)
-[![GitHub Release](https://img.shields.io/github/v/release/sanmak/specops)](https://github.com/sanmak/specops/releases)
-[![GitHub Stars](https://img.shields.io/github/stars/sanmak/specops?style=social)](https://github.com/sanmak/specops)
-[![License: MIT](https://img.shields.io/github/license/sanmak/specops)](https://github.com/sanmak/specops/blob/main/LICENSE)
+<p align="center">
+  <a href="https://github.com/sanmak/specops/actions/workflows/ci.yml"><img src="https://github.com/sanmak/specops/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/sanmak/specops/releases"><img src="https://img.shields.io/github/v/release/sanmak/specops" alt="GitHub Release"></a>
+  <a href="https://github.com/sanmak/specops"><img src="https://img.shields.io/github/stars/sanmak/specops?style=social" alt="GitHub Stars"></a>
+  <a href="https://github.com/sanmak/specops/blob/main/LICENSE"><img src="https://img.shields.io/github/license/sanmak/specops" alt="License: MIT"></a>
+</p>
 
-SpecOps brings structured spec-driven development to your AI coding assistant — with domain-specific templates for infrastructure, data pipelines, and SDKs, and a built-in team review workflow for shared codebases. Works with **Claude Code**, **Cursor**, **OpenAI Codex**, and **GitHub Copilot**.
+---
 
-## Why SpecOps
+You describe a feature to your AI coding assistant. It starts writing code immediately. No requirements. No design. No task breakdown. You spend the next hour correcting assumptions it made in the first minute.
 
-- **Domain-specific templates** — Infrastructure specs include Rollback Steps and Resource Definitions. Data pipeline specs include Data Contracts and Backfill Strategy. Library specs flag Breaking Changes per task. Backend and fullstack use clean defaults — no unnecessary ceremony.
-- **Built-in team review cycle** — Draft a spec, get section-by-section feedback from teammates, revise, and only implement once `minApprovals` is met. Git identity detection, configurable approval thresholds, and an implementation gate that blocks unapproved specs from proceeding. Solo developers can enable `allowSelfApproval` for a self-review workflow with distinct audit trail.
-- **Security-hardened spec processing** — Convention strings and custom templates are sanitized against prompt injection. Secrets use placeholders, PII uses synthetic data, all config fields enforce strict schema validation, and path traversal is rejected at the boundary.
-- **Context-aware dispatch** — Reduces agent context load by 42-88% per invocation, improving enforcement gate reliability and reducing token costs.
+The problem isn't the AI. It's that nobody told it to think first.
+
+## What SpecOps Does
+
+SpecOps adds a structured thinking step to AI coding. One command triggers a 4-phase workflow:
+
+1. **Understand** the codebase and context
+2. **Spec** requirements, design, and ordered tasks
+3. **Implement** from the spec, not from assumptions
+4. **Complete** with verified acceptance criteria
+
+Specs are git-tracked, survive across sessions, and work natively with **Claude Code**, **Cursor**, **OpenAI Codex**, and **GitHub Copilot**.
 
 ## Quick Start
 
-**Install (Claude Code):**
+**Claude Code (plugin marketplace):**
 
 ```text
 /plugin marketplace add sanmak/specops
@@ -28,173 +38,107 @@ SpecOps brings structured spec-driven development to your AI coding assistant �
 /reload-plugins
 ```
 
-**Other platforms & manual install:** [QUICKSTART.md](QUICKSTART.md)
+**One-line install (any platform):**
 
-**Use:**
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/sanmak/specops/main/scripts/remote-install.sh)
+# Inspect the script first: https://github.com/sanmak/specops/blob/main/scripts/remote-install.sh
+```
 
-**Claude Code:** `/specops Add user authentication with OAuth` | `View the spec` | `List all specs`
-**Cursor / Codex / Copilot:** `Use specops to add user authentication with OAuth` | `View the spec` | `List all specs`
+**Or clone and run:**
 
-> Full command reference: [docs/COMMANDS.md](docs/COMMANDS.md) | Troubleshooting: [QUICKSTART.md#troubleshooting](QUICKSTART.md#troubleshooting)
+```bash
+git clone https://github.com/sanmak/specops.git && cd specops && bash setup.sh
+```
 
-## How It Works
+**Try it:**
+
+```text
+/specops Add user authentication with OAuth
+```
+
+> Platform-specific install details: [QUICKSTART.md](QUICKSTART.md) | Full command reference: [docs/COMMANDS.md](docs/COMMANDS.md)
+
+## Before and After
+
+**Without SpecOps:**
+
+```text
+You: "Add OAuth authentication"
+Agent: *writes auth.ts, picks JWT without asking, hardcodes Google,
+       skips rate limiting, creates 6 files*
+You: "No, I needed GitHub too, and..." (30 min of corrections)
+```
+
+**With SpecOps:**
+
+```text
+You: "/specops Add OAuth authentication"
+Agent:
+  requirements.md  ->  4 user stories, 12 acceptance criteria (EARS notation)
+  design.md        ->  JWT vs sessions trade-off, provider abstraction layer
+  tasks.md         ->  8 ordered tasks with dependencies and effort estimates
+  Then implements each task against verified criteria.
+```
 
 <p align="center">
-  <img src="assets/workflow.svg" alt="SpecOps 4-phase workflow with optional interview mode: Understand, Spec, Implement, Complete" width="900"/>
+  <img src="assets/workflow.svg" alt="SpecOps 4-phase workflow: Understand, Spec, Implement, Complete" width="900"/>
 </p>
 
-One command triggers a 4-phase workflow: understand your codebase, generate a structured spec, implement it, and verify the result. For vague or high-level ideas, an optional interview mode gathers structured requirements before spec generation. See [Sequence Diagrams](docs/DIAGRAMS.md) for detailed actor interaction views of each workflow.
+## Problems SpecOps Solves
 
-### Interview Mode (Optional)
+| Problem | How SpecOps handles it |
+| --- | --- |
+| AI starts coding without understanding the domain | 7 vertical templates: backend, frontend, infra, data pipelines, library/SDK, fullstack, builder |
+| Specs lost when you close the session | Git-tracked spec files with cross-session context recovery |
+| Agent forgets decisions from yesterday | Local memory layer, loaded automatically every session |
+| No way to review specs before coding starts | Built-in team review workflow with configurable approval gates |
+| Agent hallucinates vague acceptance criteria | EARS notation for precise requirements: `WHEN [event] THE SYSTEM SHALL [behavior]` |
+| Specs drift from codebase after implementation | 5 automated drift checks with audit and reconcile commands |
+| Locked into one AI coding tool | One source of truth, 4 platform outputs |
 
-For vague or exploratory ideas, SpecOps guides you through a structured interview before generating specs. Trigger explicitly with `/specops interview I want to build X` or say something vague and it auto-triggers. Once approved, SpecOps proceeds to spec generation with enriched context.
+## Built With SpecOps
 
-<p align="center">
-  <img src="assets/interview-workflow.svg" alt="SpecOps interview mode: gathering questions → clarifying vague answers → confirming summary → proceeding to Phase 1" width="900"/>
-</p>
+Every feature of SpecOps was specified, designed, and implemented using the SpecOps workflow. All specs are [public in `.specops/`](.specops/). The friction log captures 42 lessons learned that shaped the tool.
 
-### Team Review Workflow
+## What Only SpecOps Does
 
-<p align="center">
-  <img src="assets/review-workflow.svg" alt="SpecOps collaborative review workflow: draft, review, revise, approve, implement" width="800"/>
-</p>
+- **Multi-platform**: the only spec-driven development tool that works across Claude Code, Cursor, OpenAI Codex, and GitHub Copilot from a single source
+- **Vertical awareness**: domain-specific spec templates. Infrastructure specs include rollback steps and resource definitions. Data pipeline specs include data contracts and backfill strategy.
+- **Enforcement, not suggestions**: CI-integrated drift detection, checkbox completion gates, and approval workflows that block implementation until specs are approved
+- **Open source, local, no lock-in**: everything is git-tracked markdown. No cloud service, no account required. MIT license.
 
-For teams, SpecOps adds a structured review cycle between spec creation and implementation. Engineers review specs collaboratively, provide section-by-section feedback, and approve before coding begins. See [TEAM_GUIDE.md](docs/TEAM_GUIDE.md) for the full team workflow.
-
-## What Gets Created
-
-<p align="center">
-  <img src="assets/spec-structure.svg" alt="SpecOps generates spec.json, requirements.md, design.md, tasks.md, and optional implementation.md and reviews.md" width="700"/>
-</p>
+> [Full comparison with Kiro, EPIC/Reload, and Spec Kit](docs/COMPARISON.md) | [Plan Mode vs Spec Mode](docs/PLAN-VS-SPEC.md)
 
 ## Platforms
 
-| Platform           | Status    | Trigger                                                                       |
-| ------------------ | --------- | ----------------------------------------------------------------------------- |
-| **Claude Code**    | Supported | `/specops [description]`, `/specops view`, `/specops list`                    |
-| **Cursor**         | Supported | `Use specops to [description]`, `View the ... spec`, `List all specops specs` |
-| **OpenAI Codex**   | Supported | `Use specops to [description]`, `View the ... spec`, `List all specops specs` |
-| **GitHub Copilot** | Supported | `Use specops to [description]`, `View the ... spec`, `List all specops specs` |
-| Windsurf           | Planned   | —                                                                             |
-| Continue.dev       | Planned   | —                                                                             |
-
-## How SpecOps Compares
-
-SpecOps brings multi-platform support, domain-specific templates, team review workflows, and persistent project memory to spec-driven development. Built with 6 features dogfooded using SpecOps itself — every spec is [public in `.specops/`](.specops/).
-
-| Capability | SpecOps | Kiro (Amazon) | GitHub Spec Kit |
-| --- | --- | --- | --- |
-| **Platform support** | 4 platforms | Single IDE | 18+ agents |
-| **EARS notation** | Yes | Yes | No |
-| **Steering files** | Yes (3 modes) | Yes (4 modes) | No |
-| **Local memory** | Yes (git-tracked) | No | No |
-| **Drift detection** | Yes (5 checks) | No | No |
-| **Vertical templates** | 7 project types | None | Generic |
-| **Team review** | Built-in | No | No |
-| **Agent hooks** | No | Yes | No |
-| **Context-aware dispatch** | Yes (Claude) | No | No |
-| **Security hardening** | Yes | No | No |
-| **Open source** | MIT | Proprietary | MIT |
-
-[Full comparison with Kiro, EPIC/Reload, and Spec Kit →](docs/COMPARISON.md)
-
-### Plan Mode vs Spec Mode
-
-Most AI coding assistants include a **plan mode** for session-scoped planning. SpecOps adds persistent, reviewable specifications that survive across sessions and team members. Plan mode is a whiteboard sketch; spec mode is the architectural blueprint. Use plan mode for tactical "how" decisions during implementation — use SpecOps when the work spans sessions, involves teammates, or touches code where regressions matter.
-
-[See the full comparison →](docs/PLAN-VS-SPEC.md)
+| Platform | Trigger |
+| --- | --- |
+| **Claude Code** | `/specops [description]` |
+| **Cursor** | `Use specops to [description]` |
+| **OpenAI Codex** | `Use specops to [description]` |
+| **GitHub Copilot** | `Use specops to [description]` |
 
 ## Configuration
 
-Create `.specops.json` in your project root. Configuration is optional — SpecOps uses sensible defaults.
+Create `.specops.json` in your project root. Configuration is optional. SpecOps uses sensible defaults.
 
 ```json
 {
   "specsDir": ".specops",
+  "vertical": "backend",
   "team": {
     "conventions": ["Use TypeScript", "Write tests for business logic"],
-    "reviewRequired": true,
-    "specReview": { "enabled": true, "minApprovals": 2 }
-  },
-  "implementation": {
-    "autoCommit": false,
-    "createPR": true,
-    "testing": "auto",
-    "taskDelegation": "auto"
+    "reviewRequired": true
   }
 }
 ```
 
-See [examples/](examples/) for minimal, standard, and full configurations. Full schema reference in [REFERENCE.md](docs/REFERENCE.md).
-
-### Steering Files
-
-Steering files are persistent Markdown documents that give SpecOps rich project context — product overview, technology stack, directory structure — loaded automatically before every spec. Unlike `team.conventions` (short coding rules), steering files carry multi-paragraph narrative that the agent uses to understand your project without re-asking the same questions.
-
-Run `/specops steering` to scaffold the three foundation files (`product.md`, `tech.md`, `structure.md`), or create them manually in `<specsDir>/steering/`. See the [Steering Files Guide](docs/STEERING_GUIDE.md) for the file format, inclusion modes, and best practices.
-
-### Vertical Adaptation
-
-SpecOps adapts spec templates to your project type. Set the `vertical` key in `.specops.json` or let SpecOps auto-detect from your codebase.
-
-| Vertical             | Adaptation                                               |
-| -------------------- | -------------------------------------------------------- |
-| **Backend**          | Default templates (API endpoints, services, data models) |
-| **Frontend**         | State management, components, UI patterns                |
-| **Full Stack**       | Handles both frontend and backend layers                 |
-| **Infrastructure**   | Resource definitions, topology, IaC                      |
-| **Data Engineering** | Pipeline stages, data flow, contracts                    |
-| **Library/SDK**      | Public API surface, developer use cases                  |
-| **Builder**          | Product modules, ship plans, cross-domain tasks          |
-
-Full per-vertical documentation and decision trees: [REFERENCE.md](docs/REFERENCE.md)
-
-## Architecture
-
-<p align="center">
-  <img src="assets/architecture.svg" alt="SpecOps three-layer architecture: core, generator, platforms" width="800"/>
-</p>
-
-Three layers, strict separation:
-
-- **`core/`** — Platform-agnostic workflow, templates, and safety rules (single source of truth)
-- **`generator/`** — Builds platform-specific outputs from core + platform adapters
-- **`platforms/`** — Generated instruction files per platform (checked into git, no build step for users)
-
-See [STRUCTURE.md](docs/STRUCTURE.md) for the full repository layout.
-
-### Context-Aware Dispatch (Claude Code)
-
-SpecOps uses context-aware dispatch on Claude Code to reduce context load by 42-88% per invocation. Instead of loading the full ~4,600-line skill into every session, a lightweight dispatcher (~155 lines) routes each invocation to a focused mode file containing only the instructions needed for that specific operation.
-
-**How it works:**
-
-1. The dispatcher loads with routing logic, safety rules, and enforcement gates
-2. It detects the mode from the user's request (13 modes: init, version, update, view, steering, memory, feedback, map, audit, from-plan, pipeline, interview, spec)
-3. It reads the matching mode file and spawns a focused sub-agent with only the relevant instructions
-4. Critical enforcement gates (like task tracking IssueID verification) run in the dispatcher before the sub-agent spawns, ensuring they cannot be skipped under context pressure
-
-Other platforms (Cursor, Codex, Copilot) continue to use monolithic output since they lack sub-agent infrastructure.
-
-## Proxy Metrics
-
-SpecOps captures proxy productivity metrics at spec completion — artifact sizes, code changes, task counts, and duration — providing data points for ROI analysis without requiring platform token APIs. See [TOKEN-USAGE.md](docs/TOKEN-USAGE.md) for benchmark data and cost estimation guidance.
+> Examples: [examples/](examples/) | Full schema reference: [REFERENCE.md](docs/REFERENCE.md) | Steering files: [STEERING_GUIDE.md](docs/STEERING_GUIDE.md)
 
 ## Writing Philosophy
 
-SpecOps spec generation is informed by principles from respected technical writers and leaders:
-
-- **Rich Sutton** — ordering (important first), precision (ANT/OAT test), jargon budget
-- **George Orwell** — cut unnecessary words, active voice, plain language
-- **Simon Peyton Jones** — identify the one key idea, tell a story
-- **Jeff Bezos** — narrative structure over bullet-point catalogs
-- **Leslie Lamport** — precision over completeness in specifications
-- **Donald Knuth** — tense conventions, collaborative "we" voice
-- **Paul Graham** — write like you talk
-- **Steven Pinker** — curse of knowledge, concrete over abstract
-- **William Zinsser** — clarity, simplicity, brevity, humanity
-
-These principles are codified in `core/writing-quality.md` and enforced during spec generation.
+Specs generated by SpecOps follow principles from Rich Sutton (importance ordering), George Orwell (cut unnecessary words), Jeff Bezos (narrative over bullet points), Leslie Lamport (precision over completeness), and Steven Pinker (concrete over abstract). Every requirement passes the ANT test (Arguably Not True): if a statement cannot be false, it carries no information and gets rewritten. [Full rules](core/writing-quality.md).
 
 ## Contributing
 
