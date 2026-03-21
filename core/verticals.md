@@ -69,7 +69,7 @@ No adaptations needed — default templates are designed for these verticals.
 After generating spec files in Phase 2, verify that vertical-specific vocabulary was applied. For each non-default vertical, check that prohibited default terms do not remain in the generated spec files:
 
 | Vertical | Prohibited Default Terms |
-|----------|------------------------|
+| --- | --- |
 | infrastructure | "User Stories", "API Endpoints", "Components" (when "Resources" applies), "Sequence Diagrams", "Data Model" |
 | data | "User Stories", "API Endpoints", "Components" (when "Pipeline Stages" applies), "Sequence Diagrams", "Data Model" |
 | library | "User Stories" (when "Developer Use Cases" applies), "API Endpoints" (when "Public API Surface" applies) |
@@ -79,6 +79,7 @@ After generating spec files in Phase 2, verify that vertical-specific vocabulary
 Scan each generated spec file (requirements.md/bugfix.md/refactor.md, design.md, tasks.md) for prohibited terms. If any are found, replace with the vertical-specific term. Record the result in implementation.md Phase 1 Context Summary as `- Vocabulary check: [pass / N term(s) replaced]`.
 
 This check does NOT apply when:
+
 - The vertical is `backend`, `fullstack`, or `frontend` (default vocabulary is correct)
 - A custom template is used (custom templates define their own structure)
 

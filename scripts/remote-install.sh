@@ -369,6 +369,19 @@ install_claude() {
     exit 1
   fi
 
+  # Download mode files for context-aware dispatch
+  local mode_names="audit feedback from-plan init interview map memory pipeline spec steering update version view"
+  mkdir -p "$install_dir/modes"
+  local mode_count=0
+  for mode in $mode_names; do
+    # Attempt download, continue on failure (download_file exits on error under set -e)
+    download_file "${SPECOPS_BASE_URL}/platforms/claude/modes/${mode}.md" "$install_dir/modes/${mode}.md" 2>/dev/null || true
+    [ -f "$install_dir/modes/${mode}.md" ] && mode_count=$((mode_count + 1))
+  done
+  if [ "$mode_count" -gt 0 ]; then
+    echo "  Installed dispatcher + ${mode_count} mode files"
+  fi
+
   if [ -f "$install_dir/SKILL.md" ]; then
     echo "Installed files verified at $install_dir"
   else

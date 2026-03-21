@@ -39,6 +39,7 @@ Apply these writing rules when generating spec artifacts (requirements.md, bugfi
 ### Self-Check
 
 Before finalizing any spec artifact in Phase 2, silently verify:
+
 1. Read the Overview or Summary — does it sound like natural speech? If it reads like a legal document, simplify.
 2. Read the first sentence of each section. Those sentences alone should convey the spec's key insights. If they are generic or descriptive ("This section covers..."), rewrite them as topic sentences.
 3. Confirm no section is a wall of bullet points without at least one connecting narrative sentence explaining how the points relate.

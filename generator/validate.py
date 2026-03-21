@@ -25,6 +25,7 @@ ABSTRACT_OPERATIONS = [
     "WRITE_FILE(",
     "EDIT_FILE(",
     "LIST_DIR(",
+    "FILE_EXISTS(",
     "RUN_COMMAND(",
     "ASK_USER(",
     "NOTIFY_USER(",
@@ -340,7 +341,12 @@ def read_file(path):
 
 
 def get_generated_files():
-    """Find all generated platform output files."""
+    """Find all generated platform output files.
+
+    For Claude, loads the union of dispatcher SKILL.md + all mode files
+    as the combined content for marker validation. The dispatcher file
+    path is stored separately for frontmatter checks.
+    """
     generated = {}
     platform_outputs = {
         "claude": "SKILL.md",
@@ -352,10 +358,26 @@ def get_generated_files():
     for platform, filename in platform_outputs.items():
         filepath = os.path.join(PLATFORMS_DIR, platform, filename)
         if os.path.exists(filepath):
-            generated[platform] = {
-                "path": filepath,
-                "content": read_file(filepath),
-            }
+            if platform == "claude":
+                # Load dispatcher + all mode files as combined content
+                dispatcher_content = read_file(filepath)
+                combined_parts = [dispatcher_content]
+                modes_dir = os.path.join(PLATFORMS_DIR, "claude", "modes")
+                if os.path.isdir(modes_dir):
+                    for mode_file in sorted(os.listdir(modes_dir)):
+                        if mode_file.endswith(".md"):
+                            mode_path = os.path.join(modes_dir, mode_file)
+                            combined_parts.append(read_file(mode_path))
+                generated[platform] = {
+                    "path": filepath,
+                    "content": "\n".join(combined_parts),
+                    "dispatcher_content": dispatcher_content,
+                }
+            else:
+                generated[platform] = {
+                    "path": filepath,
+                    "content": read_file(filepath),
+                }
 
     return generated
 
@@ -417,6 +439,53 @@ def validate_frontmatter_format(content, platform, required_fields):
     # Return body content (after frontmatter) for further validation
     body = content[second_dash + 4:]
     return errors, body
+
+
+def validate_claude_dispatcher():
+    """Validate Claude's dispatcher SKILL.md and modes directory."""
+    errors = []
+
+    dispatcher_path = os.path.join(PLATFORMS_DIR, "claude", "SKILL.md")
+    if not os.path.exists(dispatcher_path):
+        errors.append("  Missing platforms/claude/SKILL.md (dispatcher)")
+        return errors
+
+    content = read_file(dispatcher_path)
+
+    # Check dispatcher-specific markers
+    dispatcher_markers = [
+        "Mode Router",
+        "Pre-Phase-3 Enforcement Checklist",
+        "Dispatch Protocol",
+        "Shared Context Block",
+        "Convention Sanitization",
+        "Path Containment",
+    ]
+    for marker in dispatcher_markers:
+        if marker not in content:
+            errors.append(
+                f"  Claude dispatcher SKILL.md missing marker: '{marker}'"
+            )
+
+    # Check dispatcher has valid YAML frontmatter
+    fmt_errors, _ = validate_frontmatter_format(
+        content, "Claude dispatcher SKILL.md", ["name", "description", "version"]
+    )
+    errors.extend(fmt_errors)
+
+    # Check modes directory exists and has exactly 13 .md files
+    modes_dir = os.path.join(PLATFORMS_DIR, "claude", "modes")
+    if not os.path.isdir(modes_dir):
+        errors.append("  Missing platforms/claude/modes/ directory")
+    else:
+        mode_files = [f for f in os.listdir(modes_dir) if f.endswith(".md")]
+        if len(mode_files) != 13:
+            errors.append(
+                f"  Expected 13 mode files in platforms/claude/modes/,"
+                f" found {len(mode_files)}: {sorted(mode_files)}"
+            )
+
+    return errors
 
 
 def validate_platform(platform, info):
@@ -512,8 +581,10 @@ def validate_platform(platform, info):
         )
         errors.extend(fmt_errors)
     elif platform == "claude":
+        # For Claude, check frontmatter from dispatcher SKILL.md (not combined content)
+        dispatcher_content = info.get("dispatcher_content", content)
         fmt_errors, _ = validate_frontmatter_format(
-            content, "Claude SKILL.md", ["name", "description", "version"]
+            dispatcher_content, "Claude SKILL.md", ["name", "description", "version"]
         )
         errors.extend(fmt_errors)
     elif platform == "codex":
@@ -609,7 +680,8 @@ def validate_version_in_frontmatter(generated):
     """Check that all generated outputs have a version field in frontmatter."""
     errors = []
     for platform, info in generated.items():
-        content = info["content"]
+        # For Claude, use dispatcher content for frontmatter (not combined)
+        content = info.get("dispatcher_content", info["content"])
         if not content.startswith("---\n"):
             continue
         second_dash = content.find("---\n", 4)
@@ -638,7 +710,11 @@ def validate_version_in_frontmatter(generated):
 
 
 def validate_init_skill():
-    """Validate init mode content is present in Claude SKILL.md."""
+    """Validate init mode content is present in Claude's output.
+
+    Checks across dispatcher SKILL.md + mode files (combined content)
+    since init markers live in the init mode file.
+    """
     errors = []
 
     claude_skill_path = os.path.join(PLATFORMS_DIR, "claude", "SKILL.md")
@@ -646,7 +722,16 @@ def validate_init_skill():
         errors.append("  Missing platforms/claude/SKILL.md (needed for init validation)")
         return errors
 
-    content = read_file(claude_skill_path)
+    # Build combined content: dispatcher + all mode files
+    combined_parts = [read_file(claude_skill_path)]
+    modes_dir = os.path.join(PLATFORMS_DIR, "claude", "modes")
+    if os.path.isdir(modes_dir):
+        for mode_file in sorted(os.listdir(modes_dir)):
+            if mode_file.endswith(".md"):
+                combined_parts.append(
+                    read_file(os.path.join(modes_dir, mode_file))
+                )
+    content = "\n".join(combined_parts)
 
     # Check init mode markers
     init_markers = ["Init Mode", "Init Workflow", "Init Mode Detection"]
@@ -741,6 +826,163 @@ def validate_docs_coverage():
     return errors
 
 
+def validate_source_syntax():
+    """Validate core/*.md files for empty-argument abstract op calls (e.g., READ_FILE())
+    and verify all platform.json files have complete toolMapping coverage.
+
+    Note: bare-word usage of abstract ops (without call syntax) is intentional in core
+    files — the generator substitutes all occurrences, both call-syntax and prose."""
+    errors = []
+
+    # Extract canonical abstract operations from ABSTRACT_OPERATIONS
+    # Strip trailing "(" to get base names
+    canonical_ops = []
+    for op in ABSTRACT_OPERATIONS:
+        name = op.rstrip("(").strip()
+        if name:
+            canonical_ops.append(name)
+
+    # Check each core/*.md file for bare abstract ops (without proper call syntax)
+    tool_abstraction_file = os.path.join(CORE_DIR, "tool-abstraction.md")
+    for filename in sorted(os.listdir(CORE_DIR)):
+        if not filename.endswith(".md"):
+            continue
+        filepath = os.path.join(CORE_DIR, filename)
+        if not os.path.isfile(filepath):
+            continue
+        # Skip the tool-abstraction definition file itself
+        if filepath == tool_abstraction_file:
+            continue
+
+        content = read_file(filepath)
+        lines = content.split("\n")
+        in_code_block = False
+
+        for line_num, line in enumerate(lines, 1):
+            if line.strip().startswith("```"):
+                in_code_block = not in_code_block
+                continue
+            if in_code_block:
+                continue
+
+            for op_name in canonical_ops:
+                # Skip GET_SPECOPS_VERSION — it doesn't take arguments
+                if op_name == "GET_SPECOPS_VERSION":
+                    continue
+                # Look for the operation name followed by ( — this is proper usage
+                # Flag if the operation appears as a bare word (not followed by "(")
+                # but only in contexts that look like instructions (not prose mentions)
+                call_pattern = f"{op_name}("
+                if call_pattern in line:
+                    # Proper call syntax — check it has at least some content after (
+                    idx = line.index(call_pattern)
+                    after = line[idx + len(call_pattern):]
+                    # If immediately followed by ) with nothing inside, flag it
+                    stripped_after = after.lstrip()
+                    if stripped_after.startswith(")"):
+                        errors.append(
+                            f"  core/{filename}:{line_num}: {op_name}() called"
+                            f" with empty arguments"
+                        )
+
+    # Check each platform.json has mappings for all abstract operations
+    for platform_name in sorted(os.listdir(PLATFORMS_DIR)):
+        config_path = os.path.join(PLATFORMS_DIR, platform_name, "platform.json")
+        if not os.path.exists(config_path):
+            continue
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = json.load(f)
+        tool_mapping = config.get("toolMapping", {})
+        for op_name in canonical_ops:
+            if op_name not in tool_mapping:
+                errors.append(
+                    f"  platforms/{platform_name}/platform.json: missing"
+                    f" toolMapping for '{op_name}'"
+                )
+
+    return errors
+
+
+def validate_step_references(generated):
+    """Validate that step references within heading-defined step sections
+    refer to steps that actually exist. Only checks sections that use
+    heading-based step definitions (e.g., '#### Step 1: ...')."""
+    import re
+    errors = []
+
+    step_heading_pattern = re.compile(r'^(#{2,4})\s+Step\s+(\d+)\b')
+
+    for platform, info in generated.items():
+        content = info["content"]
+        lines = content.split("\n")
+
+        # Find sections that define steps via headings
+        # Group step definitions by their parent section
+        sections_with_steps = {}  # parent_heading -> set of step numbers
+        current_parent = None
+
+        for line in lines:
+            # Track parent sections (## level headings)
+            if line.startswith("## ") and not line.startswith("### "):
+                current_parent = line
+            elif line.startswith("### ") and not line.startswith("#### "):
+                current_parent = line
+
+            m = step_heading_pattern.match(line)
+            if m and current_parent:
+                if current_parent not in sections_with_steps:
+                    sections_with_steps[current_parent] = set()
+                sections_with_steps[current_parent].add(m.group(2))
+
+        # Only validate if there are heading-defined step sections
+        if not sections_with_steps:
+            continue
+
+        # Collect all defined step numbers across all sections
+        all_defined = set()
+        for steps in sections_with_steps.values():
+            all_defined.update(steps)
+
+        # Check references within those sections only
+        ref_pattern = re.compile(r'[Ss]tep\s+(\d+)\b')
+        in_step_section = False
+        current_section_steps = set()
+        in_code_block = False
+
+        for line_num, line in enumerate(lines, 1):
+            if line.strip().startswith("```"):
+                in_code_block = not in_code_block
+                continue
+            if in_code_block:
+                continue
+
+            # Track when we enter/exit a section that has step headings
+            if line.startswith("## ") or (line.startswith("### ") and not line.startswith("#### ")):
+                if line in sections_with_steps:
+                    in_step_section = True
+                    current_section_steps = sections_with_steps[line]
+                else:
+                    in_step_section = False
+                    current_section_steps = set()
+
+            # Only check references within step-defined sections
+            if not in_step_section:
+                continue
+            # Skip heading lines themselves
+            if line.startswith("#"):
+                continue
+
+            for m in ref_pattern.finditer(line):
+                ref_num = m.group(1)
+                if ref_num not in current_section_steps:
+                    errors.append(
+                        f"  {platform}:{line_num}: Reference to 'Step {ref_num}'"
+                        f" but no Step {ref_num} heading in this section"
+                    )
+
+    return errors
+
+
 def main():
     print("SpecOps Platform Validator")
     print("=" * 40)
@@ -785,6 +1027,16 @@ def main():
     else:
         print("  PASS: All plugin manifest checks passed")
 
+    # Claude dispatcher validation
+    print("\nValidating: Claude dispatcher")
+    dispatcher_errors = validate_claude_dispatcher()
+    if dispatcher_errors:
+        for err in dispatcher_errors:
+            print(f"  FAIL: {err}")
+        all_errors.extend(dispatcher_errors)
+    else:
+        print("  PASS: Claude dispatcher checks passed")
+
     # Init mode validation
     print("\nValidating: init mode")
     init_errors = validate_init_skill()
@@ -804,6 +1056,26 @@ def main():
         all_errors.extend(docs_errors)
     else:
         print("  PASS: All docs coverage checks passed")
+
+    # Source syntax validation
+    print("\nValidating: source syntax (core/*.md + platform.json toolMapping)")
+    source_errors = validate_source_syntax()
+    if source_errors:
+        for err in source_errors:
+            print(f"  FAIL: {err}")
+        all_errors.extend(source_errors)
+    else:
+        print("  PASS: Source syntax checks passed")
+
+    # Step reference validation
+    print("\nValidating: step references in generated outputs")
+    step_errors = validate_step_references(generated)
+    if step_errors:
+        for err in step_errors:
+            print(f"  FAIL: {err}")
+        all_errors.extend(step_errors)
+    else:
+        print("  PASS: All step references are valid")
 
     # Cross-platform consistency check
     print("\nCross-platform consistency:")

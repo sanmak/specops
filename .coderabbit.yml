@@ -1,0 +1,33 @@
+reviews:
+  path_filters:
+    - "!platforms/claude/SKILL.md"
+    - "!platforms/cursor/specops.mdc"
+    - "!platforms/codex/SKILL.md"
+    - "!platforms/copilot/specops.instructions.md"
+    - "!skills/specops/SKILL.md"
+    - "!.claude-plugin/plugin.json"
+    - "!.claude-plugin/marketplace.json"
+    - "!CHECKSUMS.sha256"
+    - "!platforms/claude/SKILL.monolithic.md"
+    - "!platforms/*/modes/*.md"
+    - "!skills/*/modes/*.md"
+    - "!skills/*/SKILL.monolithic.md"
+  path_instructions:
+    - path: "core/*.md"
+      instructions: |
+        These files use abstract tool operations (READ_FILE, WRITE_FILE, EDIT_FILE,
+        LIST_DIR, FILE_EXISTS, RUN_COMMAND, ASK_USER, NOTIFY_USER, UPDATE_PROGRESS,
+        GET_SPECOPS_VERSION) defined in core/tool-abstraction.md. These are substituted
+        with platform-specific language during build via generator/generate.py.
+        Do NOT flag them as broken function calls or suggest platform-specific replacements.
+        The 3-layer architecture is: core/ (platform-agnostic) -> generator/ -> platforms/ (generated).
+    - path: "generator/templates/*.j2"
+      instructions: |
+        Jinja2 templates using {{ variable }} syntax and {% block %} tags.
+        Variables are substituted during the build process by generator/generate.py.
+        Do not flag template variables as undefined or Jinja2 syntax as errors.
+    - path: "generator/validate.py"
+      instructions: |
+        When new *_MARKERS constants are added, they must also be added to the
+        cross-platform consistency check loop later in the same file.
+        This is the most common recurring review issue — check both locations.

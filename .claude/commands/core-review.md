@@ -7,6 +7,7 @@ Follow these steps precisely.
 ### Argument Parsing
 
 Parse `$ARGUMENTS`:
+
 - A number (e.g., `11`) → **PR mode**: review that PR's diff
 - `staged` → **Staged mode**: review only staged changes (`git diff --cached`)
 - `current` or empty → **Current mode**: review all uncommitted changes (`git diff HEAD`)
@@ -14,6 +15,7 @@ Parse `$ARGUMENTS`:
 ### Step 1: Collect the diff
 
 **PR mode**:
+
 1. Verify `gh --version` is available. If not, report error and stop.
 2. Fetch the PR diff: `gh pr diff <PR_NUMBER>`
 3. Get changed file paths: `gh pr view <PR_NUMBER> --json files -q '[.files[].path]'`
@@ -21,11 +23,13 @@ Parse `$ARGUMENTS`:
 5. Set `REVIEW_TARGET = "PR #<PR_NUMBER>"`
 
 **Staged mode**:
+
 1. `git diff --cached` → `DIFF_CONTENT`
 2. `git diff --cached --name-only` → `CHANGED_FILES`
 3. Set `REVIEW_TARGET = "staged changes"`
 
 **Current mode**:
+
 1. `git diff HEAD` → `DIFF_CONTENT`
 2. `git diff HEAD --name-only` → `CHANGED_FILES`
 3. Set `REVIEW_TARGET = "current changes"`
@@ -47,6 +51,7 @@ These indicate a broken build or a push that will definitely fail. Flag every in
 **[1a] Raw abstract operations in generated outputs**
 
 Read each generated platform file that appears in `CHANGED_FILES` OR read them fresh if Pass 1 is scanning for latent issues:
+
 - `platforms/claude/SKILL.md`
 - `platforms/cursor/specops.mdc`
 - `platforms/codex/SKILL.md`
@@ -70,6 +75,7 @@ Flag any instance matching: `git worktree add <path> origin/<branch>` WITHOUT a 
 **[1c] Malformed tool-abstraction calls in source files**
 
 For any `core/*.md` or `generator/templates/*.j2` files in `CHANGED_FILES`, scan for:
+
 - `WRITE_FILE` not followed by `(` on the same or next line
 - `READ_FILE` not followed by `(`
 - `EDIT_FILE` not followed by `(`
@@ -86,6 +92,7 @@ These must be resolved before the PR merges.
 **[2a] Generated file modified directly**
 
 Check `CHANGED_FILES` for any of:
+
 - `platforms/claude/SKILL.md`
 - `platforms/cursor/specops.mdc`
 - `platforms/codex/SKILL.md`
@@ -102,6 +109,7 @@ If found, check whether `core/` or `generator/templates/` files are ALSO in `CHA
 **[2b] Cross-platform marker gap**
 
 If `generator/validate.py` or `tests/test_platform_consistency.py` appears in `CHANGED_FILES`:
+
 1. Read `generator/validate.py` — extract all marker strings from the `*_MARKERS` dicts (e.g., `SAFETY_MARKERS`, `STEERING_MARKERS`, etc.)
 2. Read `tests/test_platform_consistency.py` — extract all marker strings from its marker lists
 3. Compare: any marker present in validate.py but absent from test_platform_consistency.py, or vice versa
@@ -123,6 +131,7 @@ Specifically check: when a new variable is introduced in Fix/All mode, verify Wa
 **[2d] Missing entry in COMMANDS.md quick-lookup table**
 
 If `docs/COMMANDS.md` is NOT in `CHANGED_FILES` but any of these changed:
+
 - A platform skill file (adding a new subcommand or mode)
 - `core/workflow.md` (adding a new phase or workflow step)
 - `.claude/commands/*.md` (adding a new command)
@@ -182,6 +191,7 @@ Check `CHANGED_FILES` for: `core/workflow.md`, `core/safety.md`, `core/review-wo
 **[3b] Spec/implementation alignment spot check**
 
 If both `.specops/*/requirements.md` (or `design.md`) AND implementation files are in `CHANGED_FILES`:
+
 1. Read the requirements/design file
 2. Read the changed implementation files
 3. Check: do the key acceptance criteria in the spec reflect what was actually implemented? Look for obvious mismatches (spec says "schema-configured" but impl uses "convention-based", spec says "required approval" but impl skips it, etc.)
@@ -220,7 +230,7 @@ For any `.specops/` files in `CHANGED_FILES`, check for section headers (lines s
 
 **[4c] Malformed checkboxes**
 
-For any `.md` files in `CHANGED_FILES`, scan for checkbox patterns. Valid: `- [ ] `, `- [x] `. Invalid: `- []`, `-[ ]`, `- [~]` (non-standard), missing space after `]`.
+For any `.md` files in `CHANGED_FILES`, scan for checkbox patterns. Valid: `- [ ]`, `- [x]`. Invalid: `- []`, `-[ ]`, `- [~]` (non-standard), missing space after `]`.
 
 > **P3** for each malformed checkbox.
 > Fix: Correct the spacing.
@@ -231,7 +241,7 @@ For any `.md` files in `CHANGED_FILES`, scan for checkbox patterns. Valid: `- [ 
 
 Display all collected findings:
 
-```
+```text
 Core Review — <REVIEW_TARGET>
 ==========================================
 
@@ -271,7 +281,8 @@ Summary: <X> P0 blockers, <Y> P1 issues, <Z> P2 advisories, <W> P3 notes
 ### Step 4: Auto-fix offer
 
 If P0 or P1 findings exist, ask:
-```
+
+```text
 Auto-fix mechanical P0/P1 issues? (yes / no / select)
   Mechanical fixes available: [list each auto-fixable finding by ID]
   Requires manual fix: [list each finding that needs human judgment]

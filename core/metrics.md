@@ -40,6 +40,7 @@ During Phase 4, after finalizing `implementation.md` (step 2) and before the mem
 
 6. **Write metrics to spec.json:**
    - Assemble the `metrics` object:
+
      ```json
      {
        "specArtifactTokensEstimate": <integer>,
@@ -51,6 +52,7 @@ During Phase 4, after finalizing `implementation.md` (step 2) and before the mem
        "specDurationMinutes": <integer>
      }
      ```
+
    - EDIT_FILE(`<specsDir>/<spec-name>/spec.json`) to add or update the `metrics` field
    - If any individual metric could not be computed, set its value to 0 rather than omitting it
 
@@ -59,7 +61,7 @@ During Phase 4, after finalizing `implementation.md` (step 2) and before the mem
 All 4 supported platforms have the capabilities required for metrics capture:
 
 | Capability | Claude Code | Cursor | Codex | Copilot | Impact |
-|-----------|-------------|--------|-------|---------|--------|
+| --- | --- | --- | --- | --- | --- |
 | `canAccessGit` | true | true | true | true | Git diff stats available on all platforms |
 | `canExecuteCode` | true | true | true | true | RUN_COMMAND available for git and date commands |
 

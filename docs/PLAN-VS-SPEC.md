@@ -34,7 +34,7 @@ SpecOps creates git-tracked specification files that persist across sessions, de
 ## Side-by-Side
 
 | Dimension | Plan Mode | Spec Mode (SpecOps) |
-|-----------|-----------|---------------------|
+| ----------- | ----------- | --------------------- |
 | **Persistence** | Session-scoped (lost on close) | Git-tracked files (permanent) |
 | **Collaboration** | Single developer | Multi-stakeholder review workflow |
 | **Structure** | Freeform markdown | Domain-specific templates (7 verticals) |
@@ -50,7 +50,7 @@ SpecOps creates git-tracked specification files that persist across sessions, de
 ## When to Use What
 
 | Scenario | Use | Why |
-|----------|-----|-----|
+| ---------- | ----- | ----- |
 | Quick bug fix (< 30 min) | Plan mode | Lightweight, no overhead needed |
 | Small feature (1-2 files) | Plan mode | Spec would be heavier than the code |
 | Team feature (multi-day) | SpecOps | Needs review, tracking, cross-session persistence |
@@ -66,7 +66,7 @@ SpecOps creates git-tracked specification files that persist across sessions, de
 The most effective workflow layers both:
 
 | Phase | What happens | Plan mode role |
-|-------|-------------|----------------|
+| ------- | ------------- | ---------------- |
 | **Phase 1: Understand** | SpecOps reads the codebase, detects the project vertical, identifies affected components | Plan mode's exploration is built into this phase |
 | **Phase 2: Spec** | SpecOps creates requirements, design, and task breakdown | Not needed — SpecOps provides the structure |
 | **Phase 3: Implement** | Execute tasks from the spec | Use plan mode *within* each task for tactical "how" decisions |
@@ -75,6 +75,7 @@ The most effective workflow layers both:
 **Example — Adding OAuth authentication:**
 
 Without SpecOps:
+
 ```text
 Enter plan mode → sketch approach → exit → code → close session →
 reopen → re-explain context → code more → forget edge cases →
@@ -82,6 +83,7 @@ ship → discover regressions
 ```
 
 With SpecOps:
+
 ```text
 /specops Add OAuth authentication
 → Structured requirements with EARS criteria

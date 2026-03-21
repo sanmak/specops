@@ -49,8 +49,8 @@ done
 
 echo ""
 echo "Done! Git hooks installed."
-echo "  Pre-commit: JSON validation, ShellCheck, staleness detection"
-echo "  Pre-push:   Platform validation, checksums, freshness, tests"
+echo "  Pre-commit: JSON validation, ShellCheck, markdown lint, staleness detection"
+echo "  Pre-push:   Platform validation, checksums, freshness, tests, markdown lint"
 echo ""
 echo "Bypass hooks when needed:"
 echo "  git commit --no-verify"

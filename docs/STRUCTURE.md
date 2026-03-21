@@ -2,7 +2,7 @@
 
 ## Directory Tree
 
-```
+```bash
 specops/
 ├── README.md                             # Main documentation
 ├── QUICKSTART.md                         # Getting started guide
@@ -93,7 +93,9 @@ specops/
 │   ├── plan-validation.md                # Code-grounded spec reference validation
 │   ├── git-checkpointing.md              # Phase-boundary git commits
 │   ├── pipeline.md                       # Automated pipeline mode (implement-verify cycling)
+│   ├── dispatcher.md                     # Dispatcher routing, enforcement gates, dispatch protocol (Claude only)
 │   ├── tool-abstraction.md               # Abstract tool operations and capability flags
+│   ├── mode-manifest.json                # Maps 13 modes to their required core module lists
 │   └── templates/                        # Default spec templates
 │       ├── feature-requirements.md       # Feature requirements template
 │       ├── bugfix.md                     # Bug fix template
@@ -106,7 +108,9 @@ specops/
 ├── platforms/                            # Platform-specific adapters
 │   ├── claude/                           # Claude Code adapter
 │   │   ├── platform.json                 # Capabilities, tool mapping, entry point
-│   │   ├── SKILL.md                      # Generated Claude Code skill file
+│   │   ├── SKILL.md                      # Generated dispatcher skill file (lightweight routing)
+│   │   ├── SKILL.monolithic.md           # Monolithic backup for backward compatibility
+│   │   ├── modes/                        # Generated per-mode instruction files (13 files)
 │   │   ├── install.sh                    # Claude-specific installer
 │   │   └── README.md                     # Claude Code quickstart
 │   ├── cursor/                           # Cursor adapter
@@ -129,7 +133,8 @@ specops/
 │   ├── generate.py                       # Assembles platform outputs from core/
 │   ├── validate.py                       # Validates generated outputs
 │   └── templates/                        # Platform-specific templates
-│       ├── claude.j2                     # Claude Code output template
+│       ├── claude.j2                     # Claude Code monolithic output template
+│       ├── claude-dispatcher.j2          # Claude Code dispatcher output template
 │       ├── cursor.j2                     # Cursor output template
 │       ├── codex.j2                      # Codex output template
 │       └── copilot.j2                    # Copilot output template
@@ -140,7 +145,9 @@ specops/
 │
 ├── skills/                               # Plugin skills directory
 │   └── specops/
-│       └── SKILL.md                      # Copy of platforms/claude/SKILL.md
+│       ├── SKILL.md                      # Copy of platforms/claude/SKILL.md (dispatcher)
+│       ├── SKILL.monolithic.md           # Legacy monolithic Claude skill (backward compatibility)
+│       └── modes/                        # Synced mode files from platforms/claude/modes/
 │
 ├── tests/                                # Test suite
 │   ├── test_schema_validation.py         # Validates example configs against schema
@@ -184,7 +191,7 @@ specops/
 
 ### Three-Layer Design
 
-```
+```text
 ┌─────────────────────────────────────────────────┐
 │                  core/                          │
 │  Platform-agnostic workflow, templates, safety  │

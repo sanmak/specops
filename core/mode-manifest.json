@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "modes": {
+    "init": {
+      "description": "Setup .specops.json project configuration",
+      "modules": ["init", "config-handling", "safety", "steering"],
+      "templates": []
+    },
+    "version": {
+      "description": "Display installed SpecOps version information",
+      "modules": [],
+      "templates": []
+    },
+    "update": {
+      "description": "Check for and apply SpecOps updates",
+      "modules": ["update"],
+      "templates": []
+    },
+    "view": {
+      "description": "View or list existing spec artifacts",
+      "modules": ["view", "config-handling"],
+      "templates": []
+    },
+    "steering": {
+      "description": "Manage steering files for persistent project context",
+      "modules": ["steering", "config-handling", "safety"],
+      "templates": []
+    },
+    "memory": {
+      "description": "View or seed the local memory layer",
+      "modules": ["memory", "config-handling"],
+      "templates": []
+    },
+    "feedback": {
+      "description": "Send feedback about SpecOps via GitHub issue",
+      "modules": ["feedback"],
+      "templates": []
+    },
+    "map": {
+      "description": "Generate or refresh the repo map steering file",
+      "modules": ["repo-map", "config-handling"],
+      "templates": []
+    },
+    "audit": {
+      "description": "Drift detection and reconciliation for spec artifacts",
+      "modules": ["reconciliation", "config-handling"],
+      "templates": []
+    },
+    "from-plan": {
+      "description": "Convert an existing plan into a SpecOps spec",
+      "modules": [
+        "from-plan",
+        "config-handling",
+        "safety",
+        "verticals",
+        "custom-templates",
+        "writing-quality",
+        "review-workflow",
+        "task-tracking"
+      ],
+      "templates": [
+        "feature-requirements",
+        "bugfix",
+        "refactor",
+        "design",
+        "tasks",
+        "implementation"
+      ]
+    },
+    "pipeline": {
+      "description": "Automated Phase 3/4 acceptance cycling for existing specs",
+      "modules": [
+        "pipeline",
+        "workflow",
+        "config-handling",
+        "safety",
+        "task-tracking",
+        "task-delegation",
+        "metrics",
+        "run-logging",
+        "plan-validation",
+        "git-checkpointing",
+        "error-handling"
+      ],
+      "templates": ["implementation"]
+    },
+    "interview": {
+      "description": "Structured Q&A session to refine vague requests before spec generation",
+      "modules": ["interview"],
+      "templates": []
+    },
+    "spec": {
+      "description": "Full Phase 1-4 spec-driven development workflow (default mode)",
+      "modules": [
+        "workflow",
+        "config-handling",
+        "safety",
+        "steering",
+        "memory",
+        "repo-map",
+        "verticals",
+        "custom-templates",
+        "simplicity",
+        "writing-quality",
+        "data-handling",
+        "error-handling",
+        "task-tracking",
+        "task-delegation",
+        "metrics",
+        "run-logging",
+        "plan-validation",
+        "git-checkpointing",
+        "pipeline",
+        "review-workflow",
+        "interview",
+        "init",
+        "update",
+        "view",
+        "reconciliation",
+        "from-plan",
+        "feedback"
+      ],
+      "templates": [
+        "feature-requirements",
+        "bugfix",
+        "refactor",
+        "design",
+        "tasks",
+        "implementation",
+        "reviews"
+      ]
+    }
+  }
+}

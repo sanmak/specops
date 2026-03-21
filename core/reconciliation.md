@@ -86,7 +86,7 @@ Overall health = worst result across all 5 checks (Drift > Warning > Healthy).
 Report each check as:
 
 | Check | Result | Details |
-|-------|--------|---------|
+| --- | --- | --- |
 | File Drift | Healthy / Warning / Drift | N files checked, M issues |
 | Post-Completion Mods | Healthy / Warning / Skipped | Notes |
 | Task Consistency | Healthy / Warning / Drift | N tasks checked, M issues |
@@ -159,7 +159,7 @@ Guided interactive repair for drifted specs. Available only on platforms with `c
 8. For each selected finding, apply the appropriate repair:
 
 | Finding Type | Repair Options |
-|-------------|----------------|
+| --- | --- |
 | File missing (renamed) | Update path in tasks.md / Skip |
 | File missing (deleted) | Remove reference from tasks.md / Provide new path / Skip |
 | Completed task, file missing | Provide new path / Note as discrepancy in tasks.md / Skip |
@@ -167,15 +167,15 @@ Guided interactive repair for drifted specs. Available only on platforms with `c
 | Stale spec | Continue as-is / Skip |
 | Cross-spec conflict | Informational only — no repair action |
 
-9. For each repair: EDIT_FILE(`<specsDir>/<name>/tasks.md`) to apply path or status changes.
-10. Update `spec.json`: RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) and EDIT_FILE(`<specsDir>/<name>/spec.json`) to set `updated` to the current timestamp and `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol).
-11. Regenerate `<specsDir>/index.json` from all `*/spec.json` files.
-12. NOTIFY_USER(`"Reconciliation complete. Applied N fix(es) to <spec-name>."`)
+1. For each repair: EDIT_FILE(`<specsDir>/<name>/tasks.md`) to apply path or status changes.
+2. Update `spec.json`: RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) and EDIT_FILE(`<specsDir>/<name>/spec.json`) to set `updated` to the current timestamp and `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol).
+3. Regenerate `<specsDir>/index.json` from all `*/spec.json` files.
+4. NOTIFY_USER(`"Reconciliation complete. Applied N fix(es) to <spec-name>."`)
 
 ### Platform Adaptation
 
 | Capability | Impact |
-|-----------|--------|
+| --- | --- |
 | `canAccessGit: false` | Checks 2 (post-completion mods) degrade gracefully; Check 1 loses rename detection; Check 4 (staleness) works via `spec.json.updated` timestamp regardless of git access; each skipped check notes the reason in the report |
 | `canAskInteractive: false` | Audit works fully (read-only report); Reconcile mode blocked with message |
 | `canTrackProgress: false` | Report progress in response text instead of the built-in todo system |

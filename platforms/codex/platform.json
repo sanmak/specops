@@ -23,6 +23,7 @@
     "WRITE_FILE": "Write the file at",
     "EDIT_FILE": "Edit the file at",
     "LIST_DIR": "List the directory at",
+    "FILE_EXISTS": "Check if the file exists at",
     "RUN_COMMAND": "Execute the command",
     "ASK_USER": "If uncertain, note assumptions in the spec and proceed. List any ambiguities for the user to review",
     "NOTIFY_USER": "Print to stdout",

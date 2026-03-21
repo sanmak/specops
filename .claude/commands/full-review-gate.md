@@ -166,16 +166,19 @@ For each P0 and P1 finding:
 After all fixes, run the regeneration and validation cycle:
 
 - If any files under `core/`, `generator/templates/`, `generator/generate.py`, or `platforms/*/platform.json` were modified:
+
   ```bash
   cd <WORKTREE_DIR> && python3 generator/generate.py --all
   ```
 
 - If any checksummed files were modified (`skills/specops/SKILL.md`, `schema.json`, `platforms/claude/SKILL.md`, `platforms/claude/platform.json`, `platforms/cursor/specops.mdc`, `platforms/cursor/platform.json`, `platforms/codex/SKILL.md`, `platforms/codex/platform.json`, `platforms/copilot/specops.instructions.md`, `platforms/copilot/platform.json`, `core/workflow.md`, `core/safety.md`, `hooks/pre-commit`, `hooks/pre-push`, `scripts/install-hooks.sh`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`):
+
   ```bash
   cd <WORKTREE_DIR> && shasum -a 256 skills/specops/SKILL.md schema.json platforms/claude/SKILL.md platforms/claude/platform.json platforms/cursor/specops.mdc platforms/cursor/platform.json platforms/codex/SKILL.md platforms/codex/platform.json platforms/copilot/specops.instructions.md platforms/copilot/platform.json core/workflow.md core/safety.md core/reconciliation.md hooks/pre-commit hooks/pre-push scripts/install-hooks.sh .claude-plugin/plugin.json .claude-plugin/marketplace.json > CHECKSUMS.sha256
   ```
 
 - Run validation from the worktree:
+
   ```bash
   cd <WORKTREE_DIR> && python3 generator/validate.py
   cd <WORKTREE_DIR> && shasum -a 256 -c CHECKSUMS.sha256
@@ -193,12 +196,15 @@ cd <WORKTREE_DIR> && bash scripts/run-review-gate.sh
 ### Step 8: Commit and Push from Worktree
 
 1. Create a new branch in the worktree:
+
    ```bash
    git -C <WORKTREE_DIR> checkout -b fix/review-gate-<branch-slug>
    ```
+
    If the branch name already exists, append `-2` (or `-3`, etc.).
 
 2. Stage all modified files:
+
    ```bash
    git -C <WORKTREE_DIR> add -A
    ```
@@ -206,15 +212,18 @@ cd <WORKTREE_DIR> && bash scripts/run-review-gate.sh
 3. Un-stage any sensitive files (`.env*`, `credentials.json`, `*.pem`, `*.key`).
 
 4. Generate a commit message with `fix:` prefix summarizing the findings. Commit using heredoc:
+
    ```bash
    git -C <WORKTREE_DIR> commit -m "$(cat <<'EOF'
    fix: resolve P0/P1 review gate findings
    EOF
    )"
    ```
+
    Do NOT use `--no-verify`. If the pre-commit hook fails, fix and retry (up to 2 times).
 
 5. Push the fix branch:
+
    ```bash
    git -C <WORKTREE_DIR> push -u origin fix/review-gate-<branch-slug>
    ```

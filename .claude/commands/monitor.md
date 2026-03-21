@@ -13,13 +13,15 @@ If there are uncommitted changes (modified or untracked files), warn the user: "
 ### Step 2: Identify CI runs
 
 Get the current commit SHA and branch:
-```
+
+```bash
 git rev-parse HEAD
 git rev-parse --abbrev-ref HEAD
 ```
 
 List workflow runs for this commit:
-```
+
+```bash
 gh run list --branch <branch> --commit <sha> --json databaseId,status,conclusion,name,event --limit 20
 ```
 
@@ -41,21 +43,25 @@ Safety: if you have polled more than 30 times (~15 minutes), stop and tell the u
 Examine the `conclusion` field of each completed run.
 
 If ALL runs have `conclusion: success`:
+
 - Report to the user: "All CI checks passed!" with a list of the workflow names
 - Stop — you are done
 
 If ANY run has `conclusion: failure` (or `cancelled`, `timed_out`):
+
 - Report which workflows failed (list names and conclusions)
 - Proceed to Step 5
 
 ### Step 5: Diagnose failures
 
 For each failed run, fetch the failure logs:
-```
+
+```bash
 gh run view <databaseId> --log-failed
 ```
 
 Analyze the log output to determine the root cause. Common failures in this project:
+
 - **build-platforms**: Generated files are stale → run `python3 generator/generate.py --all`
 - **verify-checksums**: Checksums are stale → regenerate with `shasum -a 256 -c CHECKSUMS.sha256` to identify mismatches, then regenerate
 - **shellcheck**: Shell script lint errors → fix the flagged script
@@ -72,10 +78,12 @@ If you cannot determine the cause from the logs, report the raw failure output t
 Apply the appropriate fix based on your diagnosis from Step 5.
 
 After fixing:
+
 1. Stage only the specific files you changed: `git add <file1> <file2> ...`
 2. If you changed files in `core/`, `generator/templates/`, or `platforms/*/platform.json`, also run `python3 generator/generate.py --all` and stage the regenerated outputs: `git add platforms/ skills/ .claude-plugin/`
 3. If you changed checksummed files, regenerate checksums:
-   ```
+
+   ```bash
    shasum -a 256 skills/specops/SKILL.md schema.json platforms/claude/SKILL.md \
      platforms/claude/platform.json platforms/cursor/specops.mdc \
      platforms/cursor/platform.json platforms/codex/SKILL.md \
@@ -84,10 +92,12 @@ After fixing:
      hooks/pre-commit hooks/pre-push scripts/install-hooks.sh \
      .claude-plugin/plugin.json .claude-plugin/marketplace.json > CHECKSUMS.sha256
    ```
+
    Then `git add CHECKSUMS.sha256`
 
 Commit with a conventional message describing the fix. Use a heredoc:
-```
+
+```bash
 git commit -m "$(cat <<'EOF'
 fix: <concise description of what was fixed for CI>
 EOF
@@ -118,6 +128,7 @@ Otherwise, go back to Step 2 with the new commit SHA and repeat the monitoring c
 ### Reporting
 
 Throughout the process, keep the user informed:
+
 - Which cycle you are on (e.g., "Monitoring cycle 1 of 3")
 - Which workflows are running/passing/failing
 - What failure was detected and what fix is being applied

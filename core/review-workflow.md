@@ -62,7 +62,7 @@ The index is a **derived file** — per-spec `spec.json` files are the source of
 
 ### Status Lifecycle
 
-```
+```text
 draft → in-review → approved       → implementing → completed
               ↑    ↘ self-approved ↗
               |          |
@@ -116,6 +116,7 @@ When entering review mode:
 7. Regenerate `index.json`
 
 **On platforms without interactive questions (canAskInteractive: false):**
+
 - Parse the user's initial prompt for feedback content and verdict
 - If the prompt contains explicit feedback and a clear verdict (e.g., "approve", "request changes"), process it
 - If the prompt lacks a clear verdict, write the feedback to `reviews.md` with reviewer status `"pending"` and note: "Human reviewer should confirm verdict."
@@ -167,6 +168,7 @@ When the spec author reviews their own spec (self-review enabled via `allowSelfA
 9. Regenerate `index.json`
 
 **On platforms without interactive questions (canAskInteractive: false):**
+
 - Parse the user's initial prompt for self-review feedback and verdict
 - If the prompt contains a clear self-approval intent, process it
 - If the prompt lacks a clear verdict, write the feedback to `reviews.md` with reviewer status `"pending"` and note: "Author should confirm self-review verdict."
@@ -198,6 +200,7 @@ When the user requests spec status (`/specops status` or "show specops status"):
 ### Late Review Handling
 
 If a review is submitted while `spec.json.status` is `"implementing"`:
+
 - Append the review to `reviews.md` as normal
 - Update the reviewer entry in `spec.json`
 - Update `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol) and `updated` timestamp
@@ -207,6 +210,7 @@ If a review is submitted while `spec.json.status` is `"implementing"`:
 ### Completing a Spec
 
 At the end of Phase 4, after all acceptance criteria are verified:
+
 1. Set `spec.json.status` to `"completed"`
 2. Update `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol)
 3. Update `updated` timestamp (via `date -u` command)

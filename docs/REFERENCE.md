@@ -5,18 +5,20 @@ A one-page reference for daily use of SpecOps.
 ## Invocation
 
 **Claude Code:**
-```
+
+```text
 /specops [description]
 ```
 
 **Cursor / Codex:**
-```
+
+```text
 Use specops to [description]
 ```
 
 ## Common Usage Patterns
 
-```
+```text
 # Feature development
 Add user authentication with OAuth
 
@@ -87,7 +89,7 @@ list
 
 ## Spec Structure
 
-```
+```text
 .specops/
   index.json             # Auto-generated spec dashboard
   feature-name/
@@ -104,7 +106,7 @@ list
 Completed specs include an optional `metrics` object in `spec.json` with proxy productivity data:
 
 | Field | Description |
-|-------|-------------|
+| ------- | ------------- |
 | `specArtifactTokensEstimate` | Estimated tokens of spec artifacts (total chars / 4) |
 | `filesChanged` | Files changed during implementation |
 | `linesAdded` | Lines added during implementation |
@@ -119,12 +121,14 @@ Metrics are captured automatically at Phase 4 completion. See [TOKEN-USAGE.md](T
 
 **Optional pre-phase:**
 0. **Interview** (optional) - Structured Q&A to gather requirements for vague or exploratory ideas
-   - Triggered by: explicit `/specops interview` or auto-detected vague requests
-   - Asks 5 questions: Problem, Users, Features, Constraints, Done Criteria
-   - Collects answers with smart follow-ups for clarification
-   - Proceeds to Phase 1 with enriched context
+
+- Triggered by: explicit `/specops interview` or auto-detected vague requests
+- Asks 5 questions: Problem, Users, Features, Constraints, Done Criteria
+- Collects answers with smart follow-ups for clarification
+- Proceeds to Phase 1 with enriched context
 
 **Core workflow:**
+
 1. **Understand** - Agent analyzes request and codebase
 2. **Spec** - Creates structured specification (always creates spec.json)
 2.5. **Review** - Team reviews spec, provides feedback, approves (if specReview enabled). Solo developers can self-review (if allowSelfApproval enabled)
@@ -134,7 +138,7 @@ Metrics are captured automatically at Phase 4 completion. See [TOKEN-USAGE.md](T
 ## Configuration Options
 
 | Option | Values | Default | Constraints | Description |
-|--------|--------|---------|-------------|-------------|
+| -------- | -------- | --------- | ------------- | ------------- |
 | `specsDir` | string | `.specops` | max 200 chars, no `../` or absolute paths | Where to store specs |
 | `vertical` | `backend`/`frontend`/`fullstack`/`infrastructure`/`data`/`library`/`builder`/`migration` | (auto-detect) | enum | Project vertical for template adaptation |
 | `templates.feature` | string | `default` | max 100 chars | Custom template for feature specifications |
@@ -182,6 +186,7 @@ Metrics are captured automatically at Phase 4 completion. See [TOKEN-USAGE.md](T
 > **Vertical adaptation:** When a vertical is configured or detected, default template sections are adapted. For example, with `"vertical": "infrastructure"`, "User Stories" becomes "Infrastructure Requirements" and "Component Design" becomes "Infrastructure Topology".
 
 ### requirements.md
+
 ```markdown
 # Feature: [Title]
 
@@ -203,6 +208,7 @@ Metrics are captured automatically at Phase 4 completion. See [TOKEN-USAGE.md](T
 > **EARS Notation:** Acceptance criteria use [EARS (Easy Approach to Requirements Syntax)](https://alistairmavin.com/ears/) for precision and testability. Five patterns: **Ubiquitous** (`THE SYSTEM SHALL`), **Event-Driven** (`WHEN ... THE SYSTEM SHALL`), **State-Driven** (`WHILE ... THE SYSTEM SHALL`), **Optional** (`WHERE ... THE SYSTEM SHALL`), **Unwanted** (`IF ... THEN THE SYSTEM SHALL`). Checkboxes are an optional progress checklist derived from EARS statements.
 
 ### design.md
+
 ```markdown
 # Design: [Title]
 
@@ -217,12 +223,15 @@ Metrics are captured automatically at Phase 4 completion. See [TOKEN-USAGE.md](T
 
 ## Sequence Diagram
 ```
+
 User -> Frontend: Action
 Frontend -> API: Request
-```
+
+```text
 ```
 
 ### tasks.md
+
 ```markdown
 # Tasks: [Title]
 
@@ -259,6 +268,7 @@ Frontend -> API: Request
 ## Integration with Git
 
 ### Manual Workflow
+
 ```bash
 # After spec creation
 git add .specops/
@@ -271,6 +281,7 @@ git push
 ```
 
 ### Automatic Workflow
+
 ```json
 {
   "implementation": {
@@ -283,6 +294,7 @@ git push
 ## Task Tracking Integration
 
 ### GitHub
+
 ```json
 {
   "team": {
@@ -290,11 +302,13 @@ git push
   }
 }
 ```
+
 - Creates GitHub issues for tasks
 - Links commits to issues
 - Updates issue status
 
 ### Jira
+
 ```json
 {
   "team": {
@@ -303,6 +317,7 @@ git push
   }
 }
 ```
+
 - References Jira tickets
 - Updates ticket status
 - Links in commits
@@ -327,7 +342,7 @@ git push
 ## Troubleshooting
 
 | Issue | Solution |
-|-------|----------|
+| ------- | ---------- |
 | Skill not found | Verify installation path, restart Claude Code |
 | Config not loading | Check JSON validity, verify file location |
 | Can't create specs | Check directory permissions |
@@ -336,6 +351,7 @@ git push
 ## Best Practices
 
 ✅ **DO:**
+
 - Review specs before implementing
 - Commit specs to git
 - Use team conventions
@@ -344,6 +360,7 @@ git push
 - Keep specs proportional to the task
 
 ❌ **DON'T:**
+
 - Skip spec review
 - Ignore test failures
 - Mix unrelated changes
@@ -354,7 +371,7 @@ git push
 
 ## File Locations
 
-```
+```text
 # Claude Code
 ~/.claude/skills/specops/           # User installation
 <project>/.claude/skills/specops/   # Project installation
@@ -385,7 +402,7 @@ git push
 
 ## Keyboard Shortcuts (in Claude Code)
 
-```
+```text
 /specops                        # Launch SpecOps agent
 /specops view <spec-name>       # View a spec
 /specops list                   # List all specs
@@ -394,7 +411,7 @@ Ctrl+C                          # Cancel current operation
 
 ## Example Session Flow
 
-```
+```text
 You: /specops Add payment processing
 
 Agent:
@@ -431,6 +448,7 @@ Agent:
 ## Quick Configuration Examples
 
 ### Minimal
+
 ```json
 {
   "specsDir": ".specops"
@@ -438,6 +456,7 @@ Agent:
 ```
 
 ### Solo Developer
+
 ```json
 {
   "specsDir": ".specops",
@@ -449,6 +468,7 @@ Agent:
 ```
 
 ### Team Project
+
 ```json
 {
   "specsDir": ".specops",
@@ -466,6 +486,7 @@ Agent:
 ```
 
 ### Team Review
+
 ```json
 {
   "team": {

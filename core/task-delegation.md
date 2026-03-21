@@ -92,13 +92,15 @@ When `canDelegateTask = false` and `canAskInteractive = true`:
 After completing each task using standard sequential execution:
 
 1. EDIT_FILE `implementation.md` — append a Session Log entry:
-   ```
+
+   ```text
    ### Session N — Task M completed (YYYY-MM-DD)
    Task: [task name]
    Key decisions: [any decisions made, or "none"]
    Files modified: [list of files]
    Next task: Task [N+1] — [title]
    ```
+
 2. ASK_USER: "Task [N] completed. To keep context fresh, start a new conversation and invoke SpecOps — it will automatically detect the in-progress spec and resume from Task [N+1]."
 3. If the user chooses to continue in the same session: proceed with standard sequential execution for the next task.
 
@@ -126,7 +128,7 @@ Execute tasks sequentially (standard Phase 3 behavior) with enhanced checkpointi
 ### Platform Adaptation
 
 | Capability | Strategy | Behavior |
-|-----------|----------|----------|
+| --- | --- | --- |
 | `canDelegateTask = true` | A (Sub-Agent) | Fresh agent per task, orchestrator verifies |
 | `canDelegateTask = false`, `canAskInteractive = true` | B (Session Checkpoint) | Prompt user for fresh session after each task |
 | `canDelegateTask = false`, `canAskInteractive = false` | C (Enhanced Sequential) | Standard execution with detailed checkpointing |

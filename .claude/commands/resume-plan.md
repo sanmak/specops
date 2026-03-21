@@ -7,6 +7,7 @@ Follow these steps precisely.
 ### Argument Parsing
 
 Parse `$ARGUMENTS`:
+
 - If non-empty, treat as a plan file identifier: a full filename (e.g., `serene-hugging-orbit.md`), a name without extension (e.g., `serene-hugging-orbit`), or a full path.
 - If empty, proceed to plan discovery in Step 1.
 
@@ -22,7 +23,7 @@ Parse `$ARGUMENTS`:
    - The first `#` heading from the file content, or "Untitled plan" if none
 4. Display the list as a numbered table:
 
-```
+```text
 Available plans (most recent first):
 
  #  Plan file                          Last modified       Title
@@ -31,7 +32,7 @@ Available plans (most recent first):
  ...
 ```
 
-5. Ask the user: "Which plan would you like to resume? Enter a number or filename." Wait for their response. Save the selection as `PLAN_PATH`.
+1. Ask the user: "Which plan would you like to resume? Enter a number or filename." Wait for their response. Save the selection as `PLAN_PATH`.
 
 **If `$ARGUMENTS` is non-empty:**
 
@@ -98,7 +99,7 @@ For each referenced file path, check if the file exists in the current working t
 
 If any referenced files are missing, display a warning:
 
-```
+```text
 Warning: The following files referenced in the plan may no longer exist:
   - path/to/deleted-file.md
   - path/to/moved-file.py
@@ -113,7 +114,7 @@ Do NOT stop. This is informational only.
 
 Display the full plan with context:
 
-```
+```text
 ========================================
   Plan: <PLAN_TITLE>
   Branch: <CURRENT_BRANCH>

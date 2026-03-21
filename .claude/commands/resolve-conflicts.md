@@ -31,7 +31,7 @@ If empty, try auto-detection: `gh pr view --json number -q .number 2>/dev/null`.
 
 Display a conflict summary:
 
-```
+```text
 PR #<N>: <title>
 Merge: <BASE_BRANCH> → <PR_BRANCH>
 
@@ -48,9 +48,11 @@ Proceeding to resolve conflicts in an isolated worktree.
 
 1. Fetch the latest remote state: `git fetch origin <PR_BRANCH>`.
 2. Create an isolated worktree attached to a local branch tracking the PR head:
-   ```
+
+   ```bash
    git worktree add -b <PR_BRANCH> .claude/worktrees/resolve-conflicts-<PR_NUMBER> origin/<PR_BRANCH>
    ```
+
    If the local branch already exists, use `git worktree add .claude/worktrees/resolve-conflicts-<PR_NUMBER> <PR_BRANCH>` instead, then sync to the remote HEAD: `git -C .claude/worktrees/resolve-conflicts-<PR_NUMBER> reset --hard origin/<PR_BRANCH>`.
 3. If worktree creation fails (e.g., branch already checked out), report the error and stop.
 
@@ -59,7 +61,8 @@ Save `.claude/worktrees/resolve-conflicts-<PR_NUMBER>` as `WORKTREE_DIR`.
 ### Step 4: Merge base branch into PR branch
 
 Run:
-```
+
+```bash
 git -C <WORKTREE_DIR> merge origin/<BASE_BRANCH> --no-commit
 ```
 
@@ -91,6 +94,7 @@ Stage generated and checksummed files immediately: `git -C <WORKTREE_DIR> add <p
 #### Step 5b: JSON conflict resolution
 
 Read all three versions of the conflicting file:
+
 - Base (merge base): `git -C <WORKTREE_DIR> show :1:<path>`
 - Ours (PR branch): `git -C <WORKTREE_DIR> show :2:<path>`
 - Theirs (base branch / main): `git -C <WORKTREE_DIR> show :3:<path>`
@@ -102,7 +106,8 @@ Parse all three as JSON. For each key:
    - If both sides modified existing entries at the same position: present to user.
 
 2. **Object fields with updated scalar values**: If both sides modified the same key to different values, present to user:
-   ```
+
+   ```text
    Conflict in <path> at key "<key>":
      Base:   <base value>
      Main:   <main value>
@@ -120,7 +125,8 @@ After resolution, write the merged JSON (pretty-printed with 2-space indent) and
 `git -C <WORKTREE_DIR> add <path>`.
 
 Report:
-```
+
+```text
 Resolved <path>:
   Strategy: JSON array merge
   Result: <brief description, e.g., "9 decisions (7 base + 1 from main + 1 from PR)">
@@ -137,7 +143,8 @@ Diff base vs ours and base vs theirs to identify what each side added/changed.
 2. **Non-overlapping edits**: If edits are in completely different regions of the file, combine both changes (take ours version as base, apply theirs additions).
 
 3. **Overlapping edits**: If both sides modified the same lines, present to user:
-   ```
+
+   ```text
    Conflict in <path> at lines <N-M>:
 
    === PR version (ours) ===
@@ -152,7 +159,8 @@ Diff base vs ours and base vs theirs to identify what each side added/changed.
 After resolution, write the merged content and stage it.
 
 Report:
-```
+
+```text
 Resolved <path>:
   Strategy: additive markdown sections
   Result: <brief description, e.g., "8 spec summaries (6 base + 1 from main + 1 from PR)">
@@ -161,6 +169,7 @@ Resolved <path>:
 #### Step 5d: Other file conflict resolution (fallback)
 
 For any file that is not JSON, markdown, generated, or checksummed:
+
 1. Read all three versions
 2. Try to detect if the conflict is purely additive (both sides added content at the same location)
 3. If additive, include both additions (PR branch first, then base branch)
@@ -172,17 +181,22 @@ For any file that is not JSON, markdown, generated, or checksummed:
 Check the list of all files affected by the merge (both auto-merged and conflict-resolved) using `git -C <WORKTREE_DIR> diff --cached --name-only`.
 
 **If any files under `core/`, `generator/templates/`, `generator/generate.py`, or `platforms/*/platform.json` are present:**
+
 - Run `python3 generator/generate.py --all` from `WORKTREE_DIR`
 - Stage regenerated files: `git -C <WORKTREE_DIR> add platforms/ skills/ .claude-plugin/`
 
 **If any checksummed files were affected** (`skills/specops/SKILL.md`, `schema.json`, `platforms/claude/SKILL.md`, `platforms/claude/platform.json`, `platforms/cursor/specops.mdc`, `platforms/cursor/platform.json`, `platforms/codex/SKILL.md`, `platforms/codex/platform.json`, `platforms/copilot/specops.instructions.md`, `platforms/copilot/platform.json`, `core/workflow.md`, `core/safety.md`, `core/reconciliation.md`, `hooks/pre-commit`, `hooks/pre-push`, `scripts/install-hooks.sh`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`):
+
 - Regenerate checksums from `WORKTREE_DIR`:
-  ```
+
+  ```bash
   cd <WORKTREE_DIR> && shasum -a 256 skills/specops/SKILL.md schema.json platforms/claude/SKILL.md platforms/claude/platform.json platforms/cursor/specops.mdc platforms/cursor/platform.json platforms/codex/SKILL.md platforms/codex/platform.json platforms/copilot/specops.instructions.md platforms/copilot/platform.json core/workflow.md core/safety.md core/reconciliation.md hooks/pre-commit hooks/pre-push scripts/install-hooks.sh .claude-plugin/plugin.json .claude-plugin/marketplace.json > CHECKSUMS.sha256
   ```
+
 - Stage: `git -C <WORKTREE_DIR> add CHECKSUMS.sha256`
 
 Run validation from `WORKTREE_DIR`:
+
 1. `python3 generator/validate.py`
 2. `shasum -a 256 -c CHECKSUMS.sha256`
 3. `bash scripts/run-tests.sh`
@@ -199,7 +213,8 @@ If any validation fails, attempt to fix (up to 2 retries). If still failing, rep
    - Any file with "secret", "credential", or "token" in its name
    - `id_rsa`, `id_ed25519`, or any SSH private key files
 3. Commit using heredoc:
-   ```
+
+   ```bash
    git -C <WORKTREE_DIR> commit -m "$(cat <<'EOF'
    fix: resolve merge conflicts with <BASE_BRANCH>
 
@@ -210,6 +225,7 @@ If any validation fails, attempt to fix (up to 2 retries). If still failing, rep
    EOF
    )"
    ```
+
 4. Do NOT use `--no-verify`. If the pre-commit hook fails:
    - Read the error output
    - Fix the issue (regenerate files, fix JSON, etc.)
@@ -220,7 +236,7 @@ If any validation fails, attempt to fix (up to 2 retries). If still failing, rep
 
 ### Step 8: Cleanup worktree
 
-```
+```bash
 git worktree remove <WORKTREE_DIR> --force
 ```
 
@@ -232,7 +248,7 @@ If any step after Step 3 fails and the command must stop, run this cleanup step 
 
 Report the result:
 
-```
+```text
 Merge conflicts resolved for PR #<PR_NUMBER>
 
 Conflicts resolved (<K>):

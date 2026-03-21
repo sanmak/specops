@@ -330,6 +330,7 @@ sequenceDiagram
 ```
 
 **Valid state transitions:**
+
 ```text
 Pending ──────► In Progress
 In Progress ──► Completed

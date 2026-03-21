@@ -365,23 +365,98 @@ def build_common_context(core, platform_config):
     }
 
 
+def generate_claude_modes(core, platform_config):
+    """Generate per-mode files for Claude context-aware dispatch."""
+    manifest_path = os.path.join(CORE_DIR, "mode-manifest.json")
+    with open(manifest_path, "r", encoding="utf-8") as f:
+        manifest = json.load(f)
+
+    # Template name-to-title mapping (same order as render_templates_section)
+    template_titles = {
+        "feature-requirements": "requirements.md (Feature)",
+        "bugfix": "bugfix.md (Bug Fix)",
+        "refactor": "refactor.md (Refactor)",
+        "design": "design.md",
+        "tasks": "tasks.md",
+        "implementation": "implementation.md (Decision Journal)",
+        "reviews": "reviews.md (Review Feedback)",
+    }
+
+    modes_dir = os.path.join(PLATFORMS_DIR, "claude", "modes")
+    skills_modes_dir = os.path.join(SKILLS_DIR, "specops", "modes")
+
+    for mode_name, mode_config in manifest["modes"].items():
+        sections = []
+
+        # Build init content with injected config templates for modes that need it
+        init_content = None
+        if "init" in mode_config["modules"]:
+            init_content = core["init"].replace(
+                "{{ init_templates }}", build_init_templates_section()
+            )
+
+        # Add core modules
+        for module_name in mode_config["modules"]:
+            if module_name == "init" and init_content is not None:
+                sections.append(init_content)
+            elif module_name in core:
+                sections.append(core[module_name])
+
+        # Add templates if specified
+        if mode_config.get("templates"):
+            template_sections = []
+            for tpl_name in mode_config["templates"]:
+                if tpl_name in core.get("_templates", {}):
+                    title = template_titles.get(tpl_name, tpl_name)
+                    template_sections.append(
+                        f"### {title}\n\n```markdown\n"
+                        f"{core['_templates'][tpl_name].strip()}\n```"
+                    )
+            if template_sections:
+                sections.append(
+                    "## Specification Templates\n\n"
+                    + "\n\n".join(template_sections)
+                )
+
+        # Add examples for spec mode (the full workflow mode)
+        if mode_name == "spec":
+            sections.append(build_example_invocations(platform_config))
+            sections.append(
+                'Use the `AskUserQuestion` tool for clarifications.'
+            )
+
+        # Combine and apply tool substitution
+        content = "\n\n".join(sections)
+        content = substitute_tools(content, platform_config["toolMapping"])
+
+        # Write mode file to platforms/claude/modes/
+        mode_path = os.path.join(modes_dir, f"{mode_name}.md")
+        write_file(mode_path, content)
+
+        # Sync to skills/specops/modes/
+        skills_mode_path = os.path.join(skills_modes_dir, f"{mode_name}.md")
+        write_file(skills_mode_path, content)
+
+
 def generate_claude(core, platform_config):
-    """Generate Claude Code platform files."""
-    template = load_template("claude")
+    """Generate Claude Code platform files (dispatcher + monolithic + modes)."""
+    version = platform_config.get("version", "1.0.0")
 
     # Build init content with injected config templates (Claude-only feature)
     init_content = core["init"].replace(
         "{{ init_templates }}", build_init_templates_section()
     )
 
+    # --- Monolithic output (backward compatibility) ---
+    template = load_template("claude")
     context = build_common_context(core, platform_config)
     context["init"] = init_content
-    version = context["version"]
 
-    output = render_template(template, context)
-    output = substitute_tools(output, platform_config["toolMapping"])
+    monolithic_output = render_template(template, context)
+    monolithic_output = substitute_tools(
+        monolithic_output, platform_config["toolMapping"]
+    )
 
-    # Generate SKILL.md (Claude Code skill format: YAML frontmatter + prompt content)
     frontmatter = (
         '---\n'
         'name: specops\n'
@@ -393,13 +468,36 @@ def generate_claude(core, platform_config):
         'argument-hint: "[mode] [description]"\n'
         '---\n\n'
     )
-    skill_md_path = os.path.join(PLATFORMS_DIR, "claude", "SKILL.md")
-    skill_content = frontmatter + output
-    write_file(skill_md_path, skill_content)
 
-    # Sync legacy skills directory
+    # Write monolithic as backup
+    monolithic_path = os.path.join(
+        PLATFORMS_DIR, "claude", "SKILL.monolithic.md"
+    )
+    write_file(monolithic_path, frontmatter + monolithic_output)
+
+    # --- Dispatcher output (new primary SKILL.md) ---
+    dispatcher_template = load_template("claude-dispatcher")
+    dispatcher_context = {"dispatcher": core.get("dispatcher", "")}
+    dispatcher_output = render_template(dispatcher_template, dispatcher_context)
+    dispatcher_output = substitute_tools(
+        dispatcher_output, platform_config["toolMapping"]
+    )
+
+    skill_md_path = os.path.join(PLATFORMS_DIR, "claude", "SKILL.md")
+    write_file(skill_md_path, frontmatter + dispatcher_output)
+
+    # Sync to skills directory
     legacy_skill_path = os.path.join(SKILLS_DIR, "specops", "SKILL.md")
-    write_file(legacy_skill_path, skill_content)
+    write_file(legacy_skill_path, frontmatter + dispatcher_output)
+
+    # Sync monolithic to skills directory too
+    legacy_monolithic_path = os.path.join(
+        SKILLS_DIR, "specops", "SKILL.monolithic.md"
+    )
+    write_file(legacy_monolithic_path, frontmatter + monolithic_output)
+
+    # --- Mode files ---
+    generate_claude_modes(core, platform_config)
 
 
 

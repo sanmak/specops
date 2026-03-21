@@ -52,7 +52,7 @@ When the user requests a list of all specs:
 
 Present the spec list as a formatted overview:
 
-```
+```text
 # Specs Overview
 
 | Spec | Type | Status | Version | Author | Last Updated |
@@ -66,7 +66,7 @@ Present the spec list as a formatted overview:
 
 If the list contains more than 10 specs, group them by status:
 
-```
+```text
 # Specs Overview
 
 ## Implementing (2)
@@ -102,7 +102,7 @@ The default view. Provides an executive overview — answering "What is this spe
 
 Present using this format:
 
-```
+```text
 # <spec-name>
 
 **Type**: Feature | **Status**: Implementing | **Version**: v2 | **Author**: Jane Doe
@@ -166,7 +166,7 @@ Presents the complete content of all spec files, formatted with clear section se
 
 Present using this format:
 
-```
+```text
 # <spec-name> (Full Specification)
 
 **Type**: Feature | **Status**: Implementing | **Version**: v2 | **Author**: Jane Doe
@@ -220,7 +220,8 @@ When the user requests one or more specific sections:
 4. If a requested file does not exist, note it (see Error Handling)
 
 For a single section:
-```
+
+```text
 # <spec-name>: Design
 
 **Type**: Feature | **Status**: Implementing | **Version**: v2
@@ -231,7 +232,8 @@ For a single section:
 ```
 
 For combination views (multiple sections):
-```
+
+```text
 # <spec-name>: Requirements + Design
 
 **Type**: Feature | **Status**: Implementing | **Version**: v2
@@ -259,7 +261,7 @@ A compact metadata and progress view. No spec content is shown — only metrics.
 
 Present using this format:
 
-```
+```text
 # <spec-name>: Status
 
 ## Metadata
@@ -325,7 +327,7 @@ An interactive, guided tour through the spec, section by section, with AI commen
 
 Fall back to the Full view with AI commentary. Present all sections sequentially with a brief commentary paragraph before each section:
 
-```
+```text
 # <spec-name>: Walkthrough
 
 **Type**: Feature | **Status**: Implementing | **Version**: v2
@@ -363,6 +365,7 @@ To calculate task progress from tasks.md:
 6. Percentage = (completed / total) * 100, rounded to nearest integer
 
 The progress bar format uses 40 characters width:
+
 - Filled portion: `=`
 - Empty portion: `.`
 - Example: `[========================................] 60%`
@@ -370,7 +373,8 @@ The progress bar format uses 40 characters width:
 ### View/List Error Handling
 
 **Spec not found:**
-```
+
+```text
 Could not find spec "<spec-name>" in <specsDir>/.
 
 Available specs:
@@ -382,27 +386,33 @@ Did you mean one of these?
 ```
 
 If no specs exist at all:
-```
+
+```text
 No specs found in <specsDir>/. Create your first spec to get started.
 ```
 
 **Section not found:**
 When a requested section file does not exist:
-```
+
+```text
 The section "implementation" does not exist for spec "<spec-name>".
 This spec has: requirements, design, tasks
 ```
+
 Then proceed to show the sections that do exist. Do not treat a missing optional section (implementation.md, reviews.md) as an error in full/summary/walkthrough views — simply omit it silently unless the user specifically requested that section.
 
 **Corrupt or missing spec.json:**
 If `spec.json` is missing or invalid JSON:
-```
+
+```text
 Warning: spec.json is missing or invalid for "<spec-name>". Showing available files without metadata.
 ```
+
 Proceed to show whatever spec files exist, with a minimal header (just the spec name, no metadata fields).
 
 **Empty specsDir:**
 If the specsDir directory does not exist:
-```
+
+```text
 The specs directory (<specsDir>) does not exist. Create your first spec to get started.
 ```

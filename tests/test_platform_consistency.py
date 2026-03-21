@@ -254,7 +254,18 @@ def main():
         if not os.path.exists(filepath):
             print(f"SKIP: {filepath} not found (run generator/generate.py --all first)")
             continue
-        platform_contents[platform] = read_file(filepath)
+        if platform == "claude":
+            # Load dispatcher + all mode files as combined content
+            combined_parts = [read_file(filepath)]
+            modes_dir = os.path.join(PLATFORMS_DIR, "claude", "modes")
+            if os.path.isdir(modes_dir):
+                for mode_file in sorted(os.listdir(modes_dir)):
+                    if mode_file.endswith(".md"):
+                        mode_path = os.path.join(modes_dir, mode_file)
+                        combined_parts.append(read_file(mode_path))
+            platform_contents[platform] = "\n".join(combined_parts)
+        else:
+            platform_contents[platform] = read_file(filepath)
 
     if len(platform_contents) < 2:
         print("Need at least 2 platform outputs to check consistency")

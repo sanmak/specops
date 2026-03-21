@@ -5,7 +5,7 @@ How SpecOps compares to other spec-driven and agent-context tools.
 ## Feature Matrix
 
 | Capability | SpecOps | Kiro (Amazon) | EPIC/Reload | GitHub Spec Kit |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | **Spec-driven workflow** | 4-phase (Understand, Spec, Implement, Complete) | 3-phase (Requirements, Design, Tasks) | Memory layer (no spec workflow) | 3-phase (similar to Kiro) |
 | **Platform support** | Claude Code, Cursor, Codex, Copilot | Kiro IDE only | IDE-specific | 18+ agents |
 | **EARS notation** | Yes (5 patterns, HTML comment guidance) | Yes | No | No |
@@ -74,7 +74,7 @@ How SpecOps compares to other spec-driven and agent-context tools.
 **Choose SpecOps** if you need domain-specific templates, team review, security hardening, or persistent project memory.
 
 | Capability | SpecOps | GitHub Spec Kit |
-|---|---|---|
+| --- | --- | --- |
 | Supported platforms | 4 (Claude Code, Cursor, Codex, Copilot) | 18+ agents |
 | Installation | Plugin marketplace or `curl \| bash` | Python 3.11+ and uv |
 | Team review workflow | Built-in | Not available |

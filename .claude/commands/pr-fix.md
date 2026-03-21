@@ -40,9 +40,11 @@ For fix mode, extract the PR number from `$ARGUMENTS`. If empty, try auto-detect
 
 1. Fetch the latest remote state: `git fetch origin <PR_BRANCH>`.
 2. Create an isolated worktree attached to a local branch tracking the PR head:
-   ```
+
+   ```bash
    git worktree add -b <PR_BRANCH> .claude/worktrees/pr-fix-<PR_NUMBER> origin/<PR_BRANCH>
    ```
+
    If the local branch already exists, use `git worktree add .claude/worktrees/pr-fix-<PR_NUMBER> <PR_BRANCH>` instead.
 3. If worktree creation fails (e.g., branch already checked out), report the error and stop.
 
@@ -51,7 +53,8 @@ Save `.claude/worktrees/pr-fix-<PR_NUMBER>` as `WORKTREE_DIR`.
 ### Step 3: Fetch review comments
 
 Fetch all inline review comments:
-```
+
+```bash
 gh api repos/{OWNER_REPO}/pulls/<PR_NUMBER>/comments --paginate
 ```
 
@@ -64,6 +67,7 @@ If no comments are found, report "No review comments on PR #<PR_NUMBER>" and ski
 After fetching raw comment payloads, estimate context window usage. If the conversation is ≥60% full:
 
 1. Write `.claude/.pr-fix-compact-state-<PR_NUMBER>.json`:
+
    ```json
    {
      "mode": "fix",
@@ -75,6 +79,7 @@ After fetching raw comment payloads, estimate context window usage. If the conve
      "raw_comments": <full comments array from Step 3>
    }
    ```
+
 2. Run `/compact` with the hint: `"Compacting mid-execution of /pr-fix fix mode. PR #<PR_NUMBER> (<PR_TITLE>), worktree at <WORKTREE_DIR>. State saved to .claude/.pr-fix-compact-state-<PR_NUMBER>.json. Resuming at Step 4 (group and fix comments)."`
 3. After compaction, read `.claude/.pr-fix-compact-state-<PR_NUMBER>.json` to restore `PR_NUMBER`, `PR_BRANCH`, `PR_TITLE`, `OWNER_REPO`, `WORKTREE_DIR`, and the raw comments array, then continue to Step 4.
 
@@ -85,10 +90,12 @@ If context usage is below 60%, skip this checkpoint and proceed directly to Step
 #### 4a: Filter non-actionable and minor-severity comments
 
 Before grouping, discard the following — they are never fix requests:
+
 - **CodeRabbit Walkthrough/Summary**: Any comment where `user.login == "coderabbitai[bot]"` AND it is a PR-level issue comment (not an inline review comment on a file). These are AI-generated PR summaries.
 - Any comment whose body starts with "## Walkthrough", "## Summary", "## Changes", or similar section headings with no inline file reference.
 
 **Severity filter** (applies only when `INCLUDE_MINOR` is false, which is the default):
+
 - For comments from `coderabbitai[bot]`: parse the comment body for severity markers using the pattern `_(🔴 Critical|🟠 Major|🟡 Minor)_`. If the severity is `🟡 Minor`, discard the comment. If no severity marker is found, keep the comment (treat as potentially important).
 - Comments from `copilot[bot]`, `greptile-apps[bot]`, `greptileai[bot]`, and all other reviewers: keep all comments regardless — these bots do not emit severity markers, so filtering is not possible.
 - Track the count of discarded minor comments as `MINOR_FILTERED_COUNT` for display in Step 4e.
@@ -98,6 +105,7 @@ When `INCLUDE_MINOR` is true, skip this severity filter entirely — all comment
 #### 4b: Group comments
 
 Group remaining comments that describe the **same underlying issue**:
+
 - Comments with identical `body` text (ignoring trailing whitespace and code suggestion blocks) are grouped together
 - Comments describing the same fix pattern across different files (detected by similar body structure) should also be grouped
 
@@ -108,6 +116,7 @@ For each unique issue group, extract: **Issue title**, **Affected files** (`path
 Assign each issue group a tier:
 
 **Tier 1 — Auto-fix** (apply in Step 5 without asking):
+
 - Contains a code suggestion block (` ```suggestion ` fenced block) — highest confidence
 - Format/string fix: missing `###` heading prefix on a marker, spacing in checkboxes, off-by-one step references in prose
 - Missing entry in an additive list or table (COMMANDS.md, validator marker list, test marker list)
@@ -116,6 +125,7 @@ Assign each issue group a tier:
 - From `coderabbitai[bot]` inline (file-level) comment with a clear, localized fix
 
 **Tier 2 — Show & confirm** (display full comment, wait for user approval before fixing):
+
 - Affected file is in the security-sensitive list: `core/workflow.md`, `core/safety.md`, `core/review-workflow.md`, `generator/generate.py`, `hooks/pre-commit`, `hooks/pre-push`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`
 - From `copilot[bot]` — catches logic errors/edge cases; show before applying
 - From `greptile-apps[bot]` or `greptileai[bot]` (unless it contains a code suggestion block, which promotes to Tier 1) — these catch real architectural issues; show before applying
@@ -123,6 +133,7 @@ Assign each issue group a tier:
 - Multiple conflicting fixes suggested for the same location
 
 **Tier 3 — Skip** (report to user but do not fix):
+
 - Comment describes a design/architecture mismatch ("spec says X but impl does Y")
 - Comment is ambiguous about what the correct fix is
 - Affected file is a generated output: `platforms/claude/SKILL.md`, `platforms/cursor/specops.mdc`, `platforms/codex/SKILL.md`, `platforms/copilot/specops.instructions.md`, `skills/specops/SKILL.md` — these must be fixed at their source (see Step 5 generated-file rule)
@@ -130,6 +141,7 @@ Assign each issue group a tier:
 #### 4d: Assign priority
 
 Within each tier, assign a priority tag for ordering:
+
 - **P0**: Broken syntax, undefined/inconsistent variables, detached HEAD issues, missing required schema fields — fix these first
 - **P1**: Missing entries in validators/tests/docs, format inconsistencies — fix in normal order
 - **P2**: Security-sensitive file changes (Tier 2) — fix after Tier 1 with approval
@@ -137,7 +149,7 @@ Within each tier, assign a priority tag for ordering:
 
 #### 4e: Display triage summary
 
-```
+```text
 Found <N> review comments grouped into <M> unique issues:
 Severity filter: <MINOR_FILTERED_COUNT> minor comments excluded (use --minor to include)
 
@@ -173,7 +185,7 @@ Process groups in priority order (P0 → P1 → P2). Maximum 10 groups total —
 
 **Tier 3 groups are not processed here** — they were already reported as skipped in Step 4.
 
-#### For each Tier 1 (auto-fix) group:
+#### For each Tier 1 (auto-fix) group
 
 1. **Present**: Show the full comment body and all affected file paths with their diff hunks.
 2. **Generated-file re-routing**: If the affected file is a generated output (`platforms/claude/SKILL.md`, `platforms/cursor/specops.mdc`, `platforms/codex/SKILL.md`, `platforms/copilot/specops.instructions.md`, `skills/specops/SKILL.md`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`): do NOT edit the generated file. Instead, identify the source file in `core/` or `generator/templates/` that produces the relevant section. Apply the fix to the source file. Report: "Fixing in source file `<core/file.md>` — regeneration in Step 6 will propagate to generated outputs." Skip to the next group if no clear source file can be identified.
@@ -181,7 +193,7 @@ Process groups in priority order (P0 → P1 → P2). Maximum 10 groups total —
 4. **Fix**: Apply the code change. If a code suggestion block is present, use it as the basis but verify correctness. All edits must target files inside `WORKTREE_DIR`.
 5. **Report**: Tell the user what was changed in each file.
 
-#### For each Tier 2 (needs approval) group:
+#### For each Tier 2 (needs approval) group
 
 1. **Present**: Show the full comment body, affected file paths with diff hunks, and explain why it requires approval (e.g., "This touches `core/workflow.md`, a security-sensitive file").
 2. **Ask**: "Apply this fix? (yes/no/skip)"
@@ -195,16 +207,20 @@ After all groups are processed, proceed to Step 6.
 Check the list of modified files (relative to the worktree).
 
 **If any files under `core/`, `generator/templates/`, `generator/generate.py`, or `platforms/*/platform.json` were modified:**
+
 - Run `python3 generator/generate.py --all` from `WORKTREE_DIR`
 - Stage regenerated files
 
 **If any checksummed files were modified** (`skills/specops/SKILL.md`, `schema.json`, `platforms/claude/SKILL.md`, `platforms/claude/platform.json`, `platforms/cursor/specops.mdc`, `platforms/cursor/platform.json`, `platforms/codex/SKILL.md`, `platforms/codex/platform.json`, `platforms/copilot/specops.instructions.md`, `platforms/copilot/platform.json`, `core/workflow.md`, `core/safety.md`, `hooks/pre-commit`, `hooks/pre-push`, `scripts/install-hooks.sh`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`):
+
 - Regenerate checksums from `WORKTREE_DIR`:
-  ```
+
+  ```bash
   cd <WORKTREE_DIR> && shasum -a 256 skills/specops/SKILL.md schema.json platforms/claude/SKILL.md platforms/claude/platform.json platforms/cursor/specops.mdc platforms/cursor/platform.json platforms/codex/SKILL.md platforms/codex/platform.json platforms/copilot/specops.instructions.md platforms/copilot/platform.json core/workflow.md core/safety.md hooks/pre-commit hooks/pre-push scripts/install-hooks.sh .claude-plugin/plugin.json .claude-plugin/marketplace.json > CHECKSUMS.sha256
   ```
 
 Run validation from `WORKTREE_DIR`:
+
 1. `python3 generator/validate.py`
 2. `shasum -a 256 -c CHECKSUMS.sha256`
 3. `bash scripts/run-tests.sh`
@@ -217,12 +233,14 @@ If any validation fails, attempt to fix (up to 2 retries). If still failing, sto
 2. Un-stage sensitive files (`.env*`, `credentials.json`, `*.pem`, `*.key`, SSH keys) if any.
 3. Generate a commit message with `fix:` prefix summarizing the review fixes.
 4. Commit using heredoc:
-   ```
+
+   ```bash
    git -C <WORKTREE_DIR> commit -m "$(cat <<'EOF'
    fix: <generated message>
    EOF
    )"
    ```
+
 5. Do NOT use `--no-verify`. If pre-commit hook fails, fix and retry (up to 2 times).
 6. Push: `git -C <WORKTREE_DIR> push`. Do NOT use `--no-verify`.
 
@@ -230,7 +248,7 @@ If any validation fails, attempt to fix (up to 2 retries). If still failing, sto
 
 For each issue group that was fixed, reply to ONE comment in the group (the first one) using:
 
-```
+```bash
 gh api repos/{OWNER_REPO}/pulls/comments/<comment_id>/replies -f body="Fixed in <short-sha>."
 ```
 
@@ -239,7 +257,8 @@ This avoids spamming every duplicate comment with a reply.
 ### Step 9: Cleanup worktree
 
 Remove the worktree:
-```
+
+```bash
 git worktree remove <WORKTREE_DIR> --force
 ```
 
@@ -250,6 +269,7 @@ Delete the compact state file if it exists: `rm -f .claude/.pr-fix-compact-state
 ### Step 10: Confirm
 
 Report the result:
+
 - Number of issues fixed (grouped count)
 - Files modified
 - Commit hash and message
@@ -271,6 +291,7 @@ Watch mode is designed for use with `/loop` to babysit a PR. It checks CI status
 ### Step W2: Load state
 
 Check if `.claude/.pr-fix-state-<PR_NUMBER>.json` exists. If yes, read it. If not, initialize with empty state:
+
 ```json
 {
   "lastCommentCount": 0,
@@ -283,11 +304,13 @@ Check if `.claude/.pr-fix-state-<PR_NUMBER>.json` exists. If yes, read it. If no
 ### Step W3: Check CI status
 
 Run:
-```
+
+```bash
 gh run list --branch <PR_BRANCH> --json databaseId,status,conclusion,name --limit 10
 ```
 
 Categorize each workflow run:
+
 - **Passing**: `conclusion == "success"`
 - **Failing**: `conclusion == "failure"`
 - **In progress**: `status == "in_progress" || status == "queued"`
@@ -295,11 +318,13 @@ Categorize each workflow run:
 ### Step W4: Check for new review comments
 
 Fetch inline review comments:
-```
+
+```bash
 gh api repos/{OWNER_REPO}/pulls/<PR_NUMBER>/comments --paginate
 ```
 
 Compare the count against `lastCommentCount` from state. If new comments exist:
+
 1. Extract only comments with `id > lastCommentId`
 2. Apply severity filter: if `INCLUDE_MINOR` is false (default), discard CodeRabbit comments with `_🟡 Minor_` severity marker. Track filtered count for the status dashboard (Step W6).
 3. Group and deduplicate remaining new comments (same logic as Fix Mode Step 4, including Greptile promotion to Tier 2)
@@ -309,11 +334,13 @@ Compare the count against `lastCommentCount` from state. If new comments exist:
 ### Step W5: Check PR conversations
 
 Fetch PR issue comments (general discussion, not inline reviews):
-```
+
+```bash
 gh api repos/{OWNER_REPO}/issues/<PR_NUMBER>/comments
 ```
 
 Compare count against `lastIssueCommentCount`. If new messages:
+
 1. Summarize each new message
 2. If a reviewer asks a question, draft a reply for the user's approval before posting
 
@@ -321,7 +348,7 @@ Compare count against `lastIssueCommentCount`. If new messages:
 
 Display a concise summary:
 
-```
+```text
 PR #<N> Status (checked at HH:MM)
 ├─ CI: ✓ All checks passing / ✗ <name> failed / ⏳ <name> in progress
 ├─ Review comments: <N> new since last check (<M> auto-fixed, <K> need attention, <J> minor filtered)
@@ -329,12 +356,14 @@ PR #<N> Status (checked at HH:MM)
 ```
 
 If any fixes were auto-applied in Step W4:
+
 - Stage, commit with `fix: auto-fix PR review comment (<brief description>)`, and push
 - Reply to the fixed comment with the commit SHA
 
 ### Step W7: Save state
 
 Write updated state to `.claude/.pr-fix-state-<PR_NUMBER>.json`:
+
 ```json
 {
   "lastCommentCount": <current total>,
@@ -413,9 +442,11 @@ Save the list as `PR_LIST` with each entry containing: `number`, `headRefName`, 
 For each PR in `PR_LIST`:
 
 1. Fetch all inline review comments:
-   ```
+
+   ```bash
    gh api repos/{OWNER_REPO}/pulls/<NUMBER>/comments --paginate
    ```
+
 2. For each comment, extract: `id`, `path`, `line`, `original_line`, `body`, `diff_hunk`.
 3. If no comments are found for this PR, remove it from `PR_LIST` and continue.
 4. Apply the **full Fix Mode Step 4 pipeline**:
@@ -430,7 +461,7 @@ For each PR in `PR_LIST`:
 
 Display the full summary:
 
-```
+```text
 PR Fix-All Discovery
 =====================
 
@@ -463,6 +494,7 @@ If `--dry-run` is active, display this dashboard and stop with message: "Dry run
 After displaying the discovery dashboard, estimate context window usage. If the conversation is ≥60% full:
 
 1. Write `.claude/.pr-fix-compact-state-all.json`:
+
    ```json
    {
      "mode": "all",
@@ -472,6 +504,7 @@ After displaying the discovery dashboard, estimate context window usage. If the 
      "results": []
    }
    ```
+
 2. Run `/compact` with the hint: `"Compacting mid-execution of /pr-fix all mode. Discovered <N> PRs: [PR numbers and titles]. State saved to .claude/.pr-fix-compact-state-all.json. Resuming at Step A5 (process each PR)."`
 3. After compaction, read `.claude/.pr-fix-compact-state-all.json` to restore `OWNER_REPO`, `PR_LIST`, and `results`, then continue to Step A5.
 
@@ -485,9 +518,11 @@ For each PR in `PR_LIST` (sequentially, one at a time):
 
 1. Fetch the latest remote state: `git fetch origin <headRefName>`.
 2. Create an isolated worktree attached to a local branch tracking the PR head:
-   ```
+
+   ```bash
    git worktree add -b <headRefName> .claude/worktrees/pr-fix-<NUMBER> origin/<headRefName>
    ```
+
    If the local branch already exists, use `git worktree add .claude/worktrees/pr-fix-<NUMBER> <headRefName>` instead.
 3. If worktree creation fails, log the error, record this PR as `SKIPPED: <reason>`, and continue to the next PR.
 
@@ -499,7 +534,7 @@ Process groups in priority order (P0 → P1 → P2). Maximum 10 groups — if mo
 
 **Tier 3 groups are not processed here** — they were already reported as skipped in Step A4.
 
-##### For each Tier 1 (auto-fix) group:
+##### For each Tier 1 (auto-fix) group in All Mode
 
 1. **Present**: Show the full comment body and all affected file paths with their diff hunks.
 2. **Generated-file re-routing**: If the affected file is a generated output (`platforms/claude/SKILL.md`, `platforms/cursor/specops.mdc`, `platforms/codex/SKILL.md`, `platforms/copilot/specops.instructions.md`, `skills/specops/SKILL.md`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`): do NOT edit the generated file. Instead, identify the source file in `core/` or `generator/templates/` that produces the relevant section. Apply the fix to the source file. Report: "Fixing in source file `<core/file.md>` — regeneration in Step A5c will propagate to generated outputs." Skip to the next group if no clear source file can be identified.
@@ -507,7 +542,7 @@ Process groups in priority order (P0 → P1 → P2). Maximum 10 groups — if mo
 4. **Fix**: Apply the code change. If a code suggestion block is present, use it as the basis but verify correctness. All edits must target files inside `WORKTREE_DIR`.
 5. **Report**: Tell the user what was changed in each file.
 
-##### For each Tier 2 (needs approval) group:
+##### For each Tier 2 (needs approval) group in All Mode
 
 1. **Present**: Show the full comment body, affected file paths with diff hunks, and explain why it requires approval (e.g., "This touches `core/workflow.md`, a security-sensitive file").
 2. **Ask**: "Apply this fix? (yes/no/skip)"
@@ -526,12 +561,14 @@ If any validation fails after 2 retries, record this PR as `FAILED: validation e
 2. Un-stage sensitive files (`.env*`, `credentials.json`, `*.pem`, `*.key`, SSH keys) if any.
 3. Generate a commit message with `fix:` prefix summarizing the review fixes for this PR.
 4. Commit using heredoc:
-   ```
+
+   ```bash
    git -C <WORKTREE_DIR> commit -m "$(cat <<'EOF'
    fix: <generated message>
    EOF
    )"
    ```
+
 5. Do NOT use `--no-verify`. If pre-commit hook fails, fix and retry (up to 2 times). If still failing, record this PR as `FAILED: pre-commit hook — <details>` and continue.
 6. Push: `git -C <WORKTREE_DIR> push`. Do NOT use `--no-verify`.
 
@@ -541,13 +578,14 @@ Save the short commit SHA for this PR.
 
 For each issue group that was fixed, reply to ONE comment in the group (the first one) using:
 
-```
+```bash
 gh api repos/{OWNER_REPO}/pulls/comments/<comment_id>/replies -f body="Fixed in <short-sha>."
 ```
 
 #### Step A5f: Record result
 
 Save the result for this PR:
+
 - **Status**: `FIXED`, `SKIPPED`, or `FAILED`
 - **Commit SHA** (if fixed)
 - **Files modified** (list)
@@ -562,6 +600,7 @@ Save the result for this PR:
 After recording the result for this PR and before beginning the next PR, estimate context window usage. If the conversation is ≥60% full AND there are more PRs remaining:
 
 1. Update `.claude/.pr-fix-compact-state-all.json`:
+
    ```json
    {
      "mode": "all",
@@ -571,6 +610,7 @@ After recording the result for this PR and before beginning the next PR, estimat
      "results": <array of all results recorded so far>
    }
    ```
+
 2. Run `/compact` with the hint: `"Compacting mid-execution of /pr-fix all mode. Completed PR #<N> (<title>). <K> of <total> PRs processed so far. State saved to .claude/.pr-fix-compact-state-all.json. Resuming with next PR."`
 3. After compaction, read `.claude/.pr-fix-compact-state-all.json` to restore `OWNER_REPO`, `PR_LIST`, `current_pr_index`, and `results`, then continue with the next PR at index `current_pr_index`.
 
@@ -579,7 +619,8 @@ If context usage is below 60% or no more PRs remain, skip this checkpoint and co
 ### Step A6: Cleanup worktrees
 
 For each worktree created during this run:
-```
+
+```bash
 git worktree remove .claude/worktrees/pr-fix-<NUMBER> --force
 ```
 
@@ -591,7 +632,7 @@ Delete the compact state file if it exists: `rm -f .claude/.pr-fix-compact-state
 
 Display the consolidated results:
 
-```
+```text
 PR Fix-All Summary
 ===================
 

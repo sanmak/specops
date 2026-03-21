@@ -26,7 +26,7 @@ Before entering the cycle loop, validate:
 
 The core loop:
 
-```
+```text
 previousUnmetCriteria = null
 cycle = 0
 
@@ -97,7 +97,7 @@ while cycle < maxCycles:
 Pipeline mode connects to other SpecOps features:
 
 | Feature | Integration |
-|---------|------------|
+| --- | --- |
 | **Run logging** | Each cycle writes a `## Cycle N` section in the run log with cycle-specific entries |
 | **Git checkpointing** | "implemented" checkpoint fires after each cycle's Phase 3. "completed" checkpoint fires once at final completion. |
 | **Task delegation** | Within each cycle, task execution respects `config.implementation.taskDelegation`. If delegation is active, the pipeline orchestrator delegates tasks the same way Phase 3 does. |
@@ -116,7 +116,7 @@ Pipeline mode connects to other SpecOps features:
 ### Platform Adaptation
 
 | Capability | Impact |
-|-----------|--------|
+| --- | --- |
 | `canAskInteractive: true` | After max cycles reached, ASK_USER("Pipeline exhausted max cycles. Run another round, or stop?"). If user chooses another round, increment maxCycles by the original value and continue. |
 | `canAskInteractive: false` | After max cycles reached, stop with NOTIFY_USER. Note remaining unmet criteria as assumptions. |
 | `canDelegateTask: true` | Task delegation available within each cycle |

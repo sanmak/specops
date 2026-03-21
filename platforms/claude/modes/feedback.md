@@ -1,0 +1,175 @@
+## Feedback Mode
+
+The Feedback Mode allows users to submit feedback about SpecOps (bugs, feature requests, friction, improvements) directly as a GitHub issue on the `sanmak/specops` repository. Submission uses a 3-tier strategy: `gh` CLI → pre-filled browser URL → local draft file.
+
+### Feedback Mode Detection
+
+When the user invokes SpecOps, check for feedback intent:
+
+- **Feedback mode**: Patterns: "feedback", "send feedback", "report bug", "report issue", "suggest improvement", "feature request for specops", "specops friction".
+- These must refer to providing feedback about SpecOps itself, NOT about a product feature (e.g., "add feedback form", "implement user feedback system", "collect user feedback" is NOT feedback mode).
+- If detected, follow the Feedback Mode workflow instead of the standard phases below.
+
+### Feedback Categories
+
+Six categories, each mapping to a GitHub issue label:
+
+| Category | Label | When to use |
+| --- | --- | --- |
+| `bug` | `bug` | Something is broken or behaving incorrectly |
+| `feature` | `enhancement` | A new capability or behavior |
+| `friction` | `friction` | UX issue, workflow annoyance, or confusing behavior |
+| `improvement` | `improvement` | Enhancement to existing functionality |
+| `docs gap` | `documentation` | Missing, unclear, or outdated documentation |
+| `other` | `other` | Anything that does not fit the above categories |
+
+### Interactive Feedback Workflow
+
+On platforms where `canAskInteractive = true`:
+
+1. Use the Bash tool to run `grep -h '^version:' .claude/skills/specops/SKILL.md ~/.claude/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the running version.
+2. If Use the Bash tool to check if the file exists at(`.specops.json`), Use the Read tool to read(`.specops.json`) to extract the `vertical` value only. Do NOT include any other config fields.
+3. Use the AskUserQuestion tool("What type of feedback would you like to send?\n\n1. Bug report — something is broken\n2. Feature request — a new capability\n3. Friction / UX issue — confusing or annoying workflow\n4. Improvement — enhance existing functionality\n5. Docs gap — missing or unclear documentation\n6. Other — anything else")
+4. Parse the category from the response (accept number or keyword).
+5. Use the AskUserQuestion tool("Describe your feedback:")
+6. Collect the description text.
+7. Apply the Privacy Safety Rules (see below) to scan the description.
+8. Compose the issue draft (see Issue Composition below).
+9. Display the full issue draft to the user for review.
+10. Use the AskUserQuestion tool("This will be submitted as a GitHub issue on sanmak/specops. Confirm? (yes/no/edit)")
+    - If "edit": Use the AskUserQuestion tool("What would you like to change?"), apply edits, re-display, and re-confirm.
+    - If "no": Display a message to the user("Feedback cancelled. No issue created.") and stop.
+    - If "yes": Proceed to Submission.
+
+### Non-Interactive Feedback Workflow
+
+On platforms where `canAskInteractive = false`, the feedback content must be provided inline in the initial request.
+
+1. Parse the request for a category keyword. If absent, default to `improvement`.
+   - Keywords: "bug", "broken", "error" → `bug`
+   - Keywords: "feature", "request", "add", "new" → `feature`
+   - Keywords: "friction", "ux", "confusing", "annoying" → `friction`
+   - Keywords: "improve", "enhance", "better" → `improvement`
+   - Keywords: "docs", "documentation", "doc gap" → `docs gap`
+   - Keywords: "other", "misc", "miscellaneous" → `other`
+2. Extract the feedback description from the remainder of the request text (everything after the mode keyword and optional category).
+3. If no description could be extracted: Display a message to the user("Feedback mode requires a description. Usage: specops feedback [bug|feature|friction|improvement|docs gap|other] <description>") and stop.
+4. Use the Bash tool to run `grep -h '^version:' .claude/skills/specops/SKILL.md ~/.claude/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the running version.
+5. If Use the Bash tool to check if the file exists at(`.specops.json`), Use the Read tool to read(`.specops.json`) to extract the `vertical` value only.
+6. Apply the Privacy Safety Rules (see below) to scan the description.
+7. Compose the issue draft (see Issue Composition below).
+8. Display the composed issue to the user for review.
+9. Proceed to Submission.
+
+### Issue Composition
+
+Compose the GitHub issue with these fields:
+
+**Title**: `[{category}] {first 70 characters of description}`
+
+**Title sanitization**: Before using the title in any shell command or URL, sanitize it:
+
+1. Generate the title from the *redacted* description (after Privacy Safety Rules scanning), not the raw input.
+2. Strip characters that are unsafe in shell contexts: remove `"`, `` ` ``, `$`, `\`, `!`, `(`, `)`, `{`, `}`, `|`, `;`, `&`, `<`, `>`, and newlines.
+3. Truncate to 70 characters after sanitization.
+
+**Label**: The label from the Feedback Categories table corresponding to the selected category.
+
+**Body**:
+
+```markdown
+## Feedback
+
+{user's description text}
+
+## Context
+
+| Field | Value |
+|-------|-------|
+| SpecOps Version | {version} |
+| Platform | {platform name} |
+| Vertical | {vertical or "default"} |
+
+---
+*Submitted via `/specops feedback` from a user project.*
+```
+
+### Privacy Safety Rules
+
+**These rules are mandatory and must not be circumvented.**
+
+The issue body MUST contain ONLY:
+
+- The user's typed feedback description
+- SpecOps version string
+- Platform name (claude, cursor, codex, copilot)
+- Vertical name (from config, or "default")
+
+The issue body MUST NOT contain:
+
+- File paths from the user's project
+- File contents or code snippets from the user's project
+- The user's `.specops.json` configuration beyond the vertical field
+- Spec names, spec content, or any spec artifacts
+- Git repository URLs, branch names, or commit hashes from the user's project
+- Environment variables, API keys, tokens, or credentials
+- The user's name, email, or other PII (unless they explicitly typed it in the feedback)
+
+**Sensitive content scan**: Before composing the issue body, scan the user's description for:
+
+- File paths (starting with `/`, `./`, or containing directory separators with structure like `src/components/`)
+- Credential patterns (strings matching API key formats, connection strings, bearer tokens)
+- Code blocks containing what appears to be project-specific code (function definitions, class declarations with project-specific names)
+
+If sensitive content is detected:
+
+**Credential patterns (hard block)**: If credential patterns (API keys, tokens, connection strings, bearer tokens) are found, block submission on all platforms:
+
+- Display a message to the user("Credentials detected in feedback. Submission blocked for security. Please remove sensitive data and retry.")
+- Stop. Do not proceed to Submission.
+
+**File paths / code (redaction required)**:
+
+- On interactive platforms: Use the AskUserQuestion tool("Your feedback appears to contain {file paths / code}. This will be submitted publicly to GitHub. Would you like to redact these before submitting?"). If the user declines redaction, cancel submission and save as local draft only (Tier 3).
+- On non-interactive platforms: Do not auto-submit. Save as local draft (Tier 3) and Display a message to the user("Feedback may contain project-specific content. Saved as local draft for manual review before submission. Review and redact sensitive content, then submit manually.")
+
+### Submission
+
+**Shell safety**: The feedback description contains user-controlled text. Never interpolate unescaped user text directly in shell command strings. Write the issue body to a temporary file and use `--body-file`. Pass the title via an environment variable to prevent shell injection.
+
+**Tier 1 — `gh` CLI**:
+
+1. Create a unique temporary file: Use the Bash tool to run(`mktemp /tmp/specops-feedback-XXXXXX.md`) and capture the output as `{tmpfile}`.
+2. Use the Write tool to create({tmpfile}, composed issue body).
+3. Use the Bash tool to run(`SPECOPS_TITLE="[{category}] {sanitized_title}" gh issue create --repo sanmak/specops --title "$SPECOPS_TITLE" --label "{label}" --body-file "{tmpfile}"`)
+4. If step 3 failed and the error message indicates the label does not exist, retry without the `--label` flag (non-default labels like `friction`, `improvement`, `other` may not exist on the target repo). If it still fails, fall through to Tier 2.
+5. Use the Bash tool to run(`rm -f "{tmpfile}"`) to clean up — always run this regardless of whether step 3 succeeded, step 4 retried, or the flow falls through to Tier 2.
+6. If step 3 (or step 4 retry) succeeded, parse the issue URL from stdout.
+7. Display a message to the user("Feedback submitted: {issue URL}\n\nThank you for helping improve SpecOps!")
+8. Stop.
+
+**Tier 2 — Pre-filled browser URL** (if `gh` CLI is not installed, not authenticated, or fails):
+
+1. URL-encode the title, label, and body.
+2. Compose the URL: `https://github.com/sanmak/specops/issues/new?title={encoded_title}&labels={encoded_label}&body={encoded_body}`
+3. If the composed URL exceeds 8000 characters, skip to Tier 3 instead (GitHub truncates long URLs).
+4. Display a message to the user("Could not submit via `gh` CLI. Open this URL to submit your feedback:\n\n{url}")
+
+### Feedback Graceful Degradation
+
+**Tier 3 — Local draft file** (if both Tier 1 and Tier 2 fail, or if the URL would be too long):
+
+1. Determine the save path:
+   - If Use the Bash tool to check if the file exists at(`.specops.json`), Use the Read tool to read(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
+   - Save to `<specsDir>/feedback-draft.md`. If `<specsDir>` does not exist, save to `.specops-feedback-draft.md` in the project root.
+2. Use the Write tool to create the save path with the composed issue content.
+3. Display a message to the user("Your feedback has been saved to `{path}`. You can submit it manually:\n\n1. Go to <https://github.com/sanmak/specops/issues/new\n2>. Copy the content from `{path}`\n3. Select the '{category}' label\n4. Submit the issue")
+
+### Platform Adaptation
+
+| Capability | Impact |
+| --- | --- |
+| `canAskInteractive: false` | Feedback must be provided inline. No category prompt, no edit/confirm cycle. Draft displayed to stdout, then submitted. |
+| `canAskInteractive: true` | Full interactive flow: category selection, description prompt, draft review, edit/confirm. |
+| `canExecuteCode: true` (all platforms) | Use the Bash tool to run available for `gh issue create` on all platforms. |
+| `canCreateFiles: true` (all platforms) | Can save local feedback draft on all platforms. |

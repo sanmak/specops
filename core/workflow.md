@@ -14,7 +14,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 
 ## Core Workflow
 
-**Phase 1: Understand Context**
+### Phase 1: Understand Context
 
 1. Read `.specops.json` config if it exists, use defaults otherwise.
    - If `.specops.json` does not exist: ASK_USER("No `.specops.json` found. SpecOps works best with a project configuration that sets up steering files (persistent project context) and memory (cross-spec learning). Would you like to run `/specops init` first (recommended), or continue with defaults?")
@@ -73,7 +73,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 8. **(Brownfield/migration only)** Explore codebase to understand existing patterns and architecture
 9. **(Brownfield/migration only)** Identify affected files, components, and dependencies — produce a concrete list of affected file paths for `fileMatch` steering file evaluation
 
-**Phase 2: Create Specification**
+### Phase 2: Create Specification
 
 0. **Phase 2 entry gate**: After creating `<specsDir>/<spec-name>/` and `implementation.md` (step 2 below), READ_FILE `<specsDir>/<spec-name>/implementation.md` and verify it contains `## Phase 1 Context Summary`. If missing (new spec), write the context summary now using the data captured in Phase 1 step 5.5. If the section still cannot be written, STOP — return to Phase 1 step 5.5. Proceeding without the Context Summary is a protocol breach.
 1. Generate a structured spec directory in the configured `specsDir`
@@ -117,7 +117,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
    - ASK_USER "This is your first SpecOps spec! Would you like me to add a brief Development Process section to your README.md?"
    - If yes, EDIT_FILE `README.md` to append:
 
-     ```
+     ```markdown
      ## Development Process
 
      This project uses [SpecOps](https://github.com/sanmak/specops) for spec-driven development. Feature requirements, designs, and task breakdowns live in `<specsDir>/`.
@@ -137,7 +137,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 **Phase 2.5: Review Cycle** (if spec review enabled)
 See "Collaborative Spec Review" module for the full review workflow including review mode, revision mode, and approval tracking.
 
-**Phase 3: Implement**
+### Phase 3: Implement
 
 1. **Implementation gates** — run these checks before any implementation begins:
    - **Review gate**: If spec review is enabled, verify `spec.json` status is `approved` or `self-approved` before proceeding (see the Implementation Gate section in the Collaborative Spec Review module for interactive override behavior when the spec is not yet approved).
@@ -155,7 +155,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
 7. Commit changes based on `autoCommit` setting. If `config.team.taskTracking` is not `"none"` and the current task has a valid IssueID, include the IssueID in the commit message (see Commit Linking in the Configuration Handling module).
 8. **Git checkpoint (implemented)**: If `config.implementation.gitCheckpointing` is true for this run, commit all changes following the Git Checkpointing module: RUN_COMMAND(`git add -A`) then RUN_COMMAND(`git commit -m "specops(checkpoint): implemented -- <spec-name>"`). If the commit fails (e.g., nothing new to commit because autoCommit captured everything), continue silently.
 
-**Phase 4: Complete**
+### Phase 4: Complete
 
 1. Verify all acceptance criteria are met:
    - READ_FILE `requirements.md` (or `bugfix.md`/`refactor.md`)
@@ -237,21 +237,26 @@ When invoked:
 10. Check if the request is an **audit** or **reconcile** command (see the Reconciliation module). Patterns for audit: "audit", "audit <name>", "health check", "check drift", "spec health". Patterns for reconcile: "reconcile <name>", "fix <name>" (when referring to a spec), "repair <name>", "sync <name>". These must refer to SpecOps spec health, NOT product features like "audit log" or "health endpoint". If detected, follow the Reconciliation module workflow instead of the standard phases below.
 11. Check if the request is a **from-plan** command (see "From Plan Mode" module). Patterns: "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan", "implement the plan", "implement my plan", "go ahead with the plan", "proceed with plan". These must refer to converting an AI coding assistant plan into a SpecOps spec, NOT to a product feature. If so, follow the From Plan Mode workflow instead of the standard phases below.
 11.5. **Post-plan acceptance gate**: If ALL of the following conditions are true, this is a plan acceptance that MUST route through From Plan Mode:
-   - The user's request is a short acceptance or implementation phrase ("go ahead", "do it", "proceed", "implement this", "looks good", "yes, implement", "let's build it", "yes", "approved, implement", or similar brief confirmation)
-   - The conversation context contains a structured plan (plan mode content visible in earlier messages, numbered implementation steps, a "Files to Modify" or "Execution Order" section, or a plan file was recently discussed)
-   - FILE_EXISTS(`.specops.json`) is true (SpecOps is configured for this project)
+
+- The user's request is a short acceptance or implementation phrase ("go ahead", "do it", "proceed", "implement this", "looks good", "yes, implement", "let's build it", "yes", "approved, implement", or similar brief confirmation)
+- The conversation context contains a structured plan (plan mode content visible in earlier messages, numbered implementation steps, a "Files to Modify" or "Execution Order" section, or a plan file was recently discussed)
+- FILE_EXISTS(`.specops.json`) is true (SpecOps is configured for this project)
    If all three conditions are met: extract the plan content from the conversation context and follow the From Plan Mode workflow. Implementing a plan without converting it to a SpecOps spec first in a SpecOps-configured project is a **protocol breach**.
    If any condition is false: continue to step 11.7.
+
 11.7. Check if the request is a **pipeline** command (see "Automated Pipeline Mode" module). Patterns: "pipeline <spec-name>", "auto-implement <spec-name>". These must refer to SpecOps automated implementation cycling, NOT a product feature (e.g., "create CI pipeline", "build data pipeline", "add deployment pipeline" is NOT pipeline mode). If detected, follow the Pipeline Mode workflow instead of the standard phases below.
-12. Check if interview mode is triggered (see "Interview Mode" module):
-   - Explicit: request contains "interview" keyword
-   - Auto (interactive platforms only): request is vague (≤5 words, no technical keywords, no action verb)
-   - If triggered: follow the Interview Mode workflow, then continue with the enriched context
-13. Confirm the request type (feature/bugfix/implement/other)
-14. Show the configuration you'll use (including detected vertical)
-15. Begin the workflow immediately (high autonomy)
-16. Provide progress updates as you work
-17. Summarize completion clearly
+
+1. Check if interview mode is triggered (see "Interview Mode" module):
+
+- Explicit: request contains "interview" keyword
+- Auto (interactive platforms only): request is vague (≤5 words, no technical keywords, no action verb)
+- If triggered: follow the Interview Mode workflow, then continue with the enriched context
+
+1. Confirm the request type (feature/bugfix/implement/other)
+1. Show the configuration you'll use (including detected vertical)
+1. Begin the workflow immediately (high autonomy)
+1. Provide progress updates as you work
+1. Summarize completion clearly
 
 ## Version Display
 
@@ -260,7 +265,7 @@ When the user requests the version (`/specops version`, `/specops --version`, `/
 1. GET_SPECOPS_VERSION to extract the installed SpecOps version.
 2. Display the version information:
 
-   ```
+   ```text
    SpecOps v{version}
 
    Latest releases: https://github.com/sanmak/specops/releases
@@ -268,7 +273,7 @@ When the user requests the version (`/specops version`, `/specops --version`, `/
 
 3. If FILE_EXISTS(`.specops.json`), READ_FILE(`.specops.json`) and check for `_installedVersion` and `_installedAt` fields. If present, display:
 
-   ```
+   ```text
    Installed version: {_installedVersion}
    Installed at: {_installedAt}
    ```
@@ -279,7 +284,7 @@ When the user requests the version (`/specops version`, `/specops --version`, `/
    - Collect the `specopsCreatedWith` field from each spec (skip specs without this field)
    - Group specs by `specopsCreatedWith` version and display a summary:
 
-     ```
+     ```text
      Specs by SpecOps version:
        v1.1.0: 3 specs
        v1.2.0: 5 specs

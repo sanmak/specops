@@ -25,6 +25,7 @@
     "WRITE_FILE": "Use the Write tool to create",
     "EDIT_FILE": "Use the Edit tool to modify",
     "LIST_DIR": "Use the Glob tool to list",
+    "FILE_EXISTS": "Use the Bash tool to check if the file exists at",
     "RUN_COMMAND": "Use the Bash tool to run",
     "ASK_USER": "Use the AskUserQuestion tool",
     "NOTIFY_USER": "Display a message to the user",

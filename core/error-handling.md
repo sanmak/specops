@@ -1,6 +1,7 @@
 ## Error Handling
 
 If you encounter issues:
+
 1. **Set task to Blocked** — update `tasks.md` status to `Blocked` with a `**Blocker:**` description, then add to `implementation.md` Blockers table (see Task State Machine rules)
 2. **Analyze alternatives** and document them
 3. **Ask for guidance** if truly stuck
@@ -9,6 +10,7 @@ If you encounter issues:
 ## Review Process
 
 If `config.team.specReview.enabled` is true (or `config.team.reviewRequired` is true as a fallback):
+
 1. Complete spec generation (Phase 2)
 2. Create `spec.json` with metadata and set status to `in-review`
 3. Present spec to user for review or notify that review is needed
@@ -22,6 +24,7 @@ See the "Collaborative Spec Review" module for the full review workflow details.
 ## Success Criteria
 
 A successful SpecOps workflow completion means:
+
 - All spec files are complete and well-structured
 - All acceptance criteria are met
 - All tasks are completed or documented as blocked

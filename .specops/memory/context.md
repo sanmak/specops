@@ -49,3 +49,6 @@
 
 ### rich-issue-bodies (feature) — 2026-03-21
 6 tasks completed, 0 deviations from design, 0 blockers. Added Issue Body Composition template and GitHub Label Protocol to core/config-handling.md — defining a mandatory issue body structure that pulls context from spec artifacts (requirements overview, spec links, task details) and auto-applies GitHub labels (priority, spec name, type). Cross-references added to task-tracking.md and workflow.md. ISSUE_BODY_MARKERS added to both validate.py and test_platform_consistency.py (Gap 31 enforced). All 4 platform outputs regenerated, validator passes all checks, all 8 tests pass.
+
+### context-aware-dispatch (feature) — 2026-03-21
+10 tasks completed, 2 design decisions, 0 deviations, 0 blockers. Decomposed monolithic SKILL.md (4,596 lines) into dispatcher (155 lines) + 13 mode files for Claude Code, reducing context load by 42-88% per invocation. New core/dispatcher.md with routing, enforcement gates (7-point pre-Phase-3 checklist), and dispatch protocol. New core/mode-manifest.json mapping 13 modes to core modules. Generator produces dispatcher + modes + monolithic backup. Validator updated for split-file checking. Pre-PR IssueID verification added. Installation scripts copy modes/. 3 new test functions, 8/8 tests pass.

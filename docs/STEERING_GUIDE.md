@@ -9,7 +9,7 @@ Steering files are persistent project context documents that SpecOps loads durin
 SpecOps offers two ways to give the agent project context. They are complementary, not interchangeable:
 
 | | `team.conventions` in `.specops.json` | Steering files |
-|---|---|---|
+| --- | --- | --- |
 | **Format** | Short strings, one rule per entry | Free-form Markdown documents |
 | **Purpose** | Coding standards and rules | Project understanding and background |
 | **Examples** | `"Use TypeScript for all new code"`, `"No raw SQL queries"` | Product overview, technology rationale, directory layout |
@@ -41,7 +41,7 @@ Who uses this and in what context.
 ### Frontmatter Fields
 
 | Field | Required | Type | Description |
-|-------|----------|------|-------------|
+| ------- | ---------- | ------ | ------------- |
 | `name` | Yes | string | Display name shown in the steering summary table |
 | `description` | Yes | string | One-line purpose description |
 | `inclusion` | Yes | `always` \| `fileMatch` \| `manual` | When this file is loaded (see below) |
@@ -83,7 +83,7 @@ Good candidates: database migration conventions, API contract rules, frontend co
 **Glob syntax:** Standard file glob patterns. Examples:
 
 | Pattern | Matches |
-|---------|---------|
+| --------- | --------- |
 | `*.sql` | Any SQL file in the root |
 | `migrations/**` | All files under `migrations/` |
 | `src/api/**/*.ts` | TypeScript files anywhere under `src/api/` |
@@ -108,11 +108,13 @@ inclusion: manual
 Run the steering command and SpecOps will scaffold the three foundation files for you:
 
 **Claude Code:**
+
 ```text
 /specops steering
 ```
 
 **Other platforms:**
+
 ```text
 Use specops steering
 ```
