@@ -56,7 +56,8 @@
         "custom-templates",
         "writing-quality",
         "review-workflow",
-        "task-tracking"
+        "task-tracking",
+        "dependency-safety"
       ],
       "templates": [
         "feature-requirements",
@@ -118,7 +119,8 @@
         "view",
         "reconciliation",
         "from-plan",
-        "feedback"
+        "feedback",
+        "dependency-safety"
       ],
       "templates": [
         "feature-requirements",

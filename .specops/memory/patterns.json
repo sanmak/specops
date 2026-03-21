@@ -39,9 +39,10 @@
         "workflow-enforcement-gates",
         "enforcement-roadmap",
         "project-type-awareness",
-        "workflow-automation-suite"
+        "workflow-automation-suite",
+        "dependency-safety-gate"
       ],
-      "count": 5,
+      "count": 6,
       "lesson": "Validator markers are case-sensitive substrings — when adding new marker constants, add to BOTH per-platform validation AND the cross-platform consistency loop in the same commit"
     },
     {
@@ -67,9 +68,10 @@
         "enforcement-roadmap",
         "project-type-awareness",
         "proxy-metrics",
-        "workflow-automation-suite"
+        "workflow-automation-suite",
+        "dependency-safety-gate"
       ],
-      "count": 11
+      "count": 12
     },
     {
       "file": "generator/validate.py",
@@ -83,9 +85,10 @@
         "enforcement-roadmap",
         "project-type-awareness",
         "proxy-metrics",
-        "workflow-automation-suite"
+        "workflow-automation-suite",
+        "dependency-safety-gate"
       ],
-      "count": 10
+      "count": 11
     },
     {
       "file": "generator/generate.py",
@@ -95,9 +98,10 @@
         "ast-based-repo-map",
         "task-delegation",
         "proxy-metrics",
-        "workflow-automation-suite"
+        "workflow-automation-suite",
+        "dependency-safety-gate"
       ],
-      "count": 6
+      "count": 7
     },
     {
       "file": "tests/test_platform_consistency.py",
@@ -116,9 +120,10 @@
       "file": "core/config-handling.md",
       "specs": [
         "workflow-enforcement-gates",
-        "enforcement-roadmap"
+        "enforcement-roadmap",
+        "dependency-safety-gate"
       ],
-      "count": 2
+      "count": 3
     },
     {
       "file": "core/task-tracking.md",
@@ -164,9 +169,10 @@
       "file": "core/steering.md",
       "specs": [
         "steering-files",
-        "ast-based-repo-map"
+        "ast-based-repo-map",
+        "dependency-safety-gate"
       ],
-      "count": 2
+      "count": 3
     },
     {
       "file": "docs/COMMANDS.md",

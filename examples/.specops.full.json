@@ -74,6 +74,13 @@
       ]
     }
   },
+  "dependencySafety": {
+    "enabled": true,
+    "severityThreshold": "medium",
+    "autoFix": false,
+    "allowedAdvisories": [],
+    "scanScope": "spec"
+  },
   "integrations": {
     "ci": "github-actions",
     "deployment": "vercel",

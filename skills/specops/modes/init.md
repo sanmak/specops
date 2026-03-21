@@ -113,6 +113,10 @@ Based on the user's selection, Use the Write tool to create(`.specops.json`) wit
     "autoCommit": false,
     "createPR": true,
     "testing": "auto"
+  },
+  "dependencySafety": {
+    "enabled": true,
+    "severityThreshold": "medium"
   }
 }
 ```
@@ -195,6 +199,13 @@ Based on the user's selection, Use the Write tool to create(`.specops.json`) wit
         "Use CSS modules for styling"
       ]
     }
+  },
+  "dependencySafety": {
+    "enabled": true,
+    "severityThreshold": "medium",
+    "autoFix": false,
+    "allowedAdvisories": [],
+    "scanScope": "spec"
   },
   "integrations": {
     "ci": "github-actions",
@@ -370,6 +381,13 @@ Load configuration from `.specops.json` at project root. If not found, use these
     "testing": "auto",
     "linting": { "enabled": true, "fixOnSave": false },
     "formatting": { "enabled": true }
+  },
+  "dependencySafety": {
+    "enabled": true,
+    "severityThreshold": "medium",
+    "autoFix": false,
+    "allowedAdvisories": [],
+    "scanScope": "spec"
   }
 }
 ```
@@ -688,6 +706,14 @@ If `config.integrations` is configured, use these as **contextual information**:
 
 These are informational — the agent uses them to generate more accurate specs, not to directly invoke the tools.
 
+### Workflow Impact: dependencySafety
+
+- **Phase 1 step 3**: If `dependencies.md` steering file exists and `_generatedAt` is over 30 days old, notify the user about stale dependency data.
+- **Phase 2 step 6.7 (mandatory gate)**: If `enabled` is not `false`, execute the dependency safety verification. Block implementation when findings exceed `severityThreshold`. Skipping this gate when enabled is a protocol breach.
+- **Phase 2 step 6.7**: If `autoFix` is `true`, attempt automatic remediation before re-evaluating.
+- **Phase 2 step 6.7**: Filter `allowedAdvisories` CVE IDs from blocking decisions (still recorded in audit artifact).
+- **Phase 2 step 6.7**: `scanScope` controls whether to audit only spec-relevant ecosystems (`"spec"`) or all detected ecosystems (`"project"`).
+
 ### Workflow Impact: integrations
 
 - **Informational only**: Referenced in Phase 2 spec generation (rollout plans, risk mitigations, acceptance criteria). No workflow conditionals — context enrichment only.
@@ -788,7 +814,7 @@ During Phase 1, after reading the config and completing context recovery, load s
 
 1. If Use the Bash tool to check if the file exists at(`<specsDir>/steering/`) is false:
    - Use the Bash tool to run(`mkdir -p <specsDir>/steering`)
-   - For each foundation template (product.md, tech.md, structure.md): if Use the Bash tool to check if the file exists at(`<specsDir>/steering/<file>`) is false, Use the Write tool to create it with the corresponding foundation template (see Foundation File Templates above)
+   - For each foundation template (product.md, tech.md, structure.md, dependencies.md): if Use the Bash tool to check if the file exists at(`<specsDir>/steering/<file>`) is false, Use the Write tool to create it with the corresponding foundation template (see Foundation File Templates above)
    - Display a message to the user("Created steering files in `<specsDir>/steering/`. Edit them to describe your project.")
 2. Use the Glob tool to list(`<specsDir>/steering/`) to find all `.md` files
    - Sort filenames alphabetically
@@ -879,6 +905,44 @@ inclusion: always
 [How modules relate and communicate]
 ```
 
+#### dependencies.md
+
+```yaml
+---
+name: "Dependency Safety"
+description: "Project dependencies, known issues, approved versions, and migration timelines"
+inclusion: always
+_generated: true
+_generatedAt: "YYYY-MM-DDTHH:MM:SSZ"
+---
+```
+
+```markdown
+## Detected Dependencies
+
+[Auto-populated by the dependency safety gate — see Dependency Safety module]
+
+## Runtime & Framework Status
+
+[Auto-populated by the dependency safety gate]
+
+## Approved Versions
+
+[Team-maintained: list approved dependency versions and ranges]
+
+## Banned Libraries
+
+[Team-maintained: libraries that must not be used, with reasons]
+
+## Migration Timelines
+
+[Team-maintained: planned dependency upgrades and deadlines]
+
+## Known Accepted Risks
+
+[Team-maintained: acknowledged vulnerabilities with justification]
+```
+
 ### Steering Command
 
 When the user invokes SpecOps with steering intent, enter steering mode.
@@ -896,20 +960,22 @@ These must refer to managing SpecOps steering files, NOT to a product feature (e
 
 **If steering directory does NOT exist:**
 
-- On interactive platforms (`canAskInteractive = true`), Use the AskUserQuestion tool: "No steering files found. Would you like to create foundation steering files (product.md, tech.md, structure.md) for persistent project context?"
-  - If yes: create the directory and 3 foundation templates using:
+- On interactive platforms (`canAskInteractive = true`), Use the AskUserQuestion tool: "No steering files found. Would you like to create foundation steering files (product.md, tech.md, structure.md, dependencies.md) for persistent project context?"
+  - If yes: create the directory and 4 foundation templates using:
     - Use the Bash tool to run(`mkdir -p <specsDir>/steering`)
     - `Use the Write tool to create(<specsDir>/steering/product.md, <productTemplate>)`
     - `Use the Write tool to create(<specsDir>/steering/tech.md, <techTemplate>)`
     - `Use the Write tool to create(<specsDir>/steering/structure.md, <structureTemplate>)`
-    (see Foundation File Templates above for `<...Template>` contents), then Display a message to the user: "Created 3 steering files in `<specsDir>/steering/`. Edit them to describe your project — the agent will load them automatically before every spec."
+    - `Use the Write tool to create(<specsDir>/steering/dependencies.md, <dependenciesTemplate>)`
+    (see Foundation File Templates above for `<...Template>` contents), then Display a message to the user: "Created 4 steering files in `<specsDir>/steering/`. Edit them to describe your project — the agent will load them automatically before every spec."
   - If no: Display a message to the user: "No steering files created. You can create them manually in `<specsDir>/steering/` — see the Foundation File Templates section for the expected format."
 - On non-interactive platforms (`canAskInteractive = false`), create the directory and foundation templates unconditionally:
   - Use the Bash tool to run(`mkdir -p <specsDir>/steering`)
   - Use the Write tool to create(`<specsDir>/steering/product.md`, `<productTemplate>`)
   - Use the Write tool to create(`<specsDir>/steering/tech.md`, `<techTemplate>`)
   - Use the Write tool to create(`<specsDir>/steering/structure.md`, `<structureTemplate>`)
-    (see Foundation File Templates above for `<...Template>` contents), then Display a message to the user: "Created 3 steering files in `<specsDir>/steering/`. Edit them to describe your project."
+  - Use the Write tool to create(`<specsDir>/steering/dependencies.md`, `<dependenciesTemplate>`)
+    (see Foundation File Templates above for `<...Template>` contents), then Display a message to the user: "Created 4 steering files in `<specsDir>/steering/`. Edit them to describe your project."
 
 **If steering directory exists:**
 

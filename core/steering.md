@@ -44,7 +44,7 @@ During Phase 1, after reading the config and completing context recovery, load s
 
 1. If FILE_EXISTS(`<specsDir>/steering/`) is false:
    - RUN_COMMAND(`mkdir -p <specsDir>/steering`)
-   - For each foundation template (product.md, tech.md, structure.md): if FILE_EXISTS(`<specsDir>/steering/<file>`) is false, WRITE_FILE it with the corresponding foundation template (see Foundation File Templates above)
+   - For each foundation template (product.md, tech.md, structure.md, dependencies.md): if FILE_EXISTS(`<specsDir>/steering/<file>`) is false, WRITE_FILE it with the corresponding foundation template (see Foundation File Templates above)
    - NOTIFY_USER("Created steering files in `<specsDir>/steering/`. Edit them to describe your project.")
 2. LIST_DIR(`<specsDir>/steering/`) to find all `.md` files
    - Sort filenames alphabetically
@@ -135,6 +135,44 @@ inclusion: always
 [How modules relate and communicate]
 ```
 
+#### dependencies.md
+
+```yaml
+---
+name: "Dependency Safety"
+description: "Project dependencies, known issues, approved versions, and migration timelines"
+inclusion: always
+_generated: true
+_generatedAt: "YYYY-MM-DDTHH:MM:SSZ"
+---
+```
+
+```markdown
+## Detected Dependencies
+
+[Auto-populated by the dependency safety gate — see Dependency Safety module]
+
+## Runtime & Framework Status
+
+[Auto-populated by the dependency safety gate]
+
+## Approved Versions
+
+[Team-maintained: list approved dependency versions and ranges]
+
+## Banned Libraries
+
+[Team-maintained: libraries that must not be used, with reasons]
+
+## Migration Timelines
+
+[Team-maintained: planned dependency upgrades and deadlines]
+
+## Known Accepted Risks
+
+[Team-maintained: acknowledged vulnerabilities with justification]
+```
+
 ### Steering Command
 
 When the user invokes SpecOps with steering intent, enter steering mode.
@@ -152,20 +190,22 @@ These must refer to managing SpecOps steering files, NOT to a product feature (e
 
 **If steering directory does NOT exist:**
 
-- On interactive platforms (`canAskInteractive = true`), ASK_USER: "No steering files found. Would you like to create foundation steering files (product.md, tech.md, structure.md) for persistent project context?"
-  - If yes: create the directory and 3 foundation templates using:
+- On interactive platforms (`canAskInteractive = true`), ASK_USER: "No steering files found. Would you like to create foundation steering files (product.md, tech.md, structure.md, dependencies.md) for persistent project context?"
+  - If yes: create the directory and 4 foundation templates using:
     - RUN_COMMAND(`mkdir -p <specsDir>/steering`)
     - `WRITE_FILE(<specsDir>/steering/product.md, <productTemplate>)`
     - `WRITE_FILE(<specsDir>/steering/tech.md, <techTemplate>)`
     - `WRITE_FILE(<specsDir>/steering/structure.md, <structureTemplate>)`
-    (see Foundation File Templates above for `<...Template>` contents), then NOTIFY_USER: "Created 3 steering files in `<specsDir>/steering/`. Edit them to describe your project — the agent will load them automatically before every spec."
+    - `WRITE_FILE(<specsDir>/steering/dependencies.md, <dependenciesTemplate>)`
+    (see Foundation File Templates above for `<...Template>` contents), then NOTIFY_USER: "Created 4 steering files in `<specsDir>/steering/`. Edit them to describe your project — the agent will load them automatically before every spec."
   - If no: NOTIFY_USER: "No steering files created. You can create them manually in `<specsDir>/steering/` — see the Foundation File Templates section for the expected format."
 - On non-interactive platforms (`canAskInteractive = false`), create the directory and foundation templates unconditionally:
   - RUN_COMMAND(`mkdir -p <specsDir>/steering`)
   - WRITE_FILE(`<specsDir>/steering/product.md`, `<productTemplate>`)
   - WRITE_FILE(`<specsDir>/steering/tech.md`, `<techTemplate>`)
   - WRITE_FILE(`<specsDir>/steering/structure.md`, `<structureTemplate>`)
-    (see Foundation File Templates above for `<...Template>` contents), then NOTIFY_USER: "Created 3 steering files in `<specsDir>/steering/`. Edit them to describe your project."
+  - WRITE_FILE(`<specsDir>/steering/dependencies.md`, `<dependenciesTemplate>`)
+    (see Foundation File Templates above for `<...Template>` contents), then NOTIFY_USER: "Created 4 steering files in `<specsDir>/steering/`. Edit them to describe your project."
 
 **If steering directory exists:**
 

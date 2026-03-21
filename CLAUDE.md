@@ -92,7 +92,7 @@ generator/      Generates platform outputs from core + platform adapters
 
 The `core/` directory defines the workflow, safety rules, templates, and vertical adaptations once. The `generator/generate.py` script assembles platform-specific instruction files by:
 
-1. Loading all `core/*.md` modules (workflow, safety, config-handling, steering, memory, metrics, verticals, simplicity, writing-quality, data-handling, error-handling, custom-templates, view, interview, init, update, review-workflow, task-tracking, task-delegation, reconciliation, from-plan, feedback, dispatcher, and spec templates from `core/templates/`) plus `core/mode-manifest.json` for Claude's per-mode file generation
+1. Loading all `core/*.md` modules (workflow, safety, config-handling, steering, memory, metrics, verticals, simplicity, writing-quality, data-handling, dependency-safety, error-handling, custom-templates, view, interview, init, update, review-workflow, task-tracking, task-delegation, reconciliation, from-plan, feedback, dispatcher, and spec templates from `core/templates/`) plus `core/mode-manifest.json` for Claude's per-mode file generation
 2. Loading `platforms/{name}/platform.json` for tool mappings and capabilities
 3. Rendering through `generator/templates/{name}.j2` Jinja2-style templates
 4. Substituting abstract tool operations (e.g., `READ_FILE`) with platform-specific language from each platform's `toolMapping`
@@ -151,7 +151,7 @@ Plugin manifests (`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json
 
 ### Security-Sensitive Files
 
-These files require extra scrutiny when modified — they can alter agent behavior, security guardrails, or configuration validation: `core/workflow.md`, `core/safety.md`, `core/review-workflow.md`, `core/feedback.md`, `schema.json`, `spec-schema.json`, `platforms/claude/SKILL.md`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `setup.sh`, `scripts/remote-install.sh`, `generator/generate.py`, `hooks/pre-commit`, `hooks/pre-push`.
+These files require extra scrutiny when modified — they can alter agent behavior, security guardrails, or configuration validation: `core/workflow.md`, `core/safety.md`, `core/review-workflow.md`, `core/feedback.md`, `core/dependency-safety.md`, `schema.json`, `spec-schema.json`, `platforms/claude/SKILL.md`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `setup.sh`, `scripts/remote-install.sh`, `generator/generate.py`, `hooks/pre-commit`, `hooks/pre-push`.
 
 ## What to Do After Changes
 
