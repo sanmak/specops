@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-03-22
+
+### Fixed
+
+- **Remote installer crash on empty mode files**: `download_file()` used `exit 1` which killed the entire script even inside `|| true` error suppression — changed to `return 1` so the mode download loop gracefully skips empty files (like `version.md`) while critical downloads still fail-fast via `set -e`. Error messages now go to stderr so `2>/dev/null` properly suppresses them.
+
 ## [1.4.0] - 2026-03-22
 
 ### Added

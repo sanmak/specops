@@ -1,7 +1,7 @@
 {
   "name": "specops",
   "description": "Spec-driven development workflow - transforms ideas into structured specifications (requirements, design, tasks) before implementation.",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "author": {
     "name": "Sanket Makhija"
   },

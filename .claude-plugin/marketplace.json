@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "SpecOps - spec-driven development workflow for AI coding assistants",
-    "version": "1.4.0"
+    "version": "1.4.1"
   },
   "plugins": [
     {
       "name": "specops",
       "source": "./",
       "description": "Spec-driven development workflow with /specops command (includes init, view, list, interview, update subcommands).",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "category": "development-workflows",
       "tags": [
         "spec-driven",

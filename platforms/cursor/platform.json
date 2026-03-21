@@ -1,7 +1,7 @@
 {
   "name": "cursor",
   "displayName": "Cursor",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "instructionFormat": "mdc",
   "outputFiles": {
     "rules": "specops.mdc"
