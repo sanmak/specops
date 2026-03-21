@@ -7,24 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-03-22
+
 ### Added
 
-- **Task delegation for Phase 3**: Context-managed task execution with three strategies — sub-agent delegation (`canDelegateTask`), session checkpoint, and enhanced sequential fallback. New `implementation.taskDelegation` config option (`auto`/`always`/`never`)
+- **Context-aware dispatch**: Decomposed monolithic `SKILL.md` into a lightweight dispatcher + 13 mode files (`modes/`) for faster loading, reduced context usage, and cleaner separation of concerns
+- **Engineering discipline module**: Grounds design, testing, reliability, and constraint rules in named engineering leaders (Parnas, Dijkstra, Lamport, et al.) for principled decision-making
+- **Dependency safety gate**: Mandatory CVE, EOL, and best-practices verification before implementation — blocks Phase 3 when critical vulnerabilities or unsupported dependencies are detected
+- **Workflow automation suite**: Run logging, plan validation, git checkpointing, and pipeline mode (`/specops pipeline`) for CI-driven spec execution
+- **Project-type awareness and proxy metrics**: Auto-detect project type (web app, CLI, library, etc.) and surface domain-appropriate quality proxy metrics during implementation
+- **Feedback submission and writing quality rules**: `/specops feedback` command for structured feedback submission; writing quality module enforces clarity, precision, and consistency in spec artifacts
+- **Rich issue body composition and GitHub auto-labels**: External task tracking creates detailed issue bodies with acceptance criteria, context links, and auto-applied labels based on spec type and vertical
+- **Task delegation with complexity scoring**: Context-managed task execution with complexity-based strategy selection, quality gates, and dependency ordering — extends Phase 3 delegation with sub-agent support, session checkpoints, and sequential fallback
 - **`/resolve-conflicts` slash command**: Resolve merge conflicts on a GitHub PR by merging the base branch into the PR branch in an isolated worktree, with JSON/markdown-aware resolution
 - **Enforcement gates**: Deterministic enforcement for Phase 1 steering/memory setup, Phase 4 memory write, and Phase 3 task tracking — mandatory steps with verification, not optional suggestions
+- **Spec artifact linter**: Structural validation of spec documents — heading hierarchy, required sections, placeholder detection, and cross-reference integrity checks
+- **Plan-to-spec transition**: Automated conversion from plan mode to SpecOps workflow with 3-layer enforcement (PostToolUse hook, dispatcher gate, mode instructions)
+- **Markdown lint in local validation**: CI-local parity with `markdownlint-cli2` integrated into pre-commit hook and test suite
+- **ExitPlanMode PostToolUse hook**: Intercepts plan mode exit to offer SpecOps workflow transition before unstructured implementation begins
 - **SHA-256 checksum verification in remote installer**: Integrity verification of downloaded files during remote installation
+- **Repo-map refresh in Phase 4**: Automatically refreshes the AST repo map during Phase 4 completion when structural changes are detected
 - **Expanded docs-sync dependency map**: Coverage for all `core/*.md` modules in the docs-sync command's change-to-docs mapping
+
+### Changed
+
+- **README and CLAUDE.md rewritten**: Streamlined for developer clarity and conversion — clearer value proposition, simplified architecture explanation, and updated build/validate commands
+- **Steering files updated**: Repo-map and tech stack steering files refreshed to reflect current project state
 
 ### Fixed
 
-- **Task delegation protocol gaps**: Address review feedback on delegation handoff bundles, blocked task handling, and orchestrator loop
-- **Resolve-conflicts correctness**: Fix ours/theirs semantics, fast-path handling, merge-tree order, and checksum list
-- **Resolve-conflicts resilience**: Add UNKNOWN mergeability retry, empty-commit guard, cleanup-on-failure rule, and count/specs fix
-- **Issue creation shell safety**: Harden shell quoting, fix FAILED sentinel mismatch, add blocked transition sync, reorder Phase 2 steps
-- **RUN_COMMAND noun usage**: Resolve abstract operation verb/noun inconsistency, IssueID guard, and restore reconciliation checksum
-- **Checksum verification**: Anchor grep pattern and fail-closed on missing checksum entry
-- **Merge conflict resolution**: Resolve merge conflicts with main branch across multiple PRs
-- **CHECKSUMS.sha256**: Add missing `core/task-delegation.md` entry
+- **Task delegation protocol gaps**: Delegation handoff bundles, blocked task handling, and orchestrator loop correctness
+- **Resolve-conflicts correctness**: Ours/theirs semantics, fast-path handling, merge-tree order, checksum list, UNKNOWN mergeability retry, empty-commit guard, and cleanup-on-failure
+- **Issue creation shell safety**: Hardened shell quoting, FAILED sentinel mismatch, blocked transition sync, and Phase 2 step ordering
+- **JSON error handling in hook installers**: Type guards and error handling for hook installation scripts; restored missing checksum entries
+- **Feedback shell expansion bug**: Fixed variable expansion in feedback submission shell commands
+- **Validation marker uniqueness**: Replaced non-unique validation markers in `validate.py` with module-specific text to prevent false-positive marker validation
+- **Markdownlint compliance**: Resolved 1150+ markdownlint violations across source files
+- **RUN_COMMAND noun usage**: Resolved abstract operation verb/noun inconsistency and IssueID guard
+- **Linter type safety**: Per-task status filter, resume-plan merge handling, and linter enforcement fixes
+- **Checksum alignment**: Aligned checksummed file lists, unique `validate.py` markers, and docs-sync map across all validation surfaces
 
 ## [1.3.0] - 2026-03-15
 
@@ -56,7 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Sequence diagrams**: `docs/DIAGRAMS.md` with 8 Mermaid sequence diagrams covering all major SpecOps workflows
 - **PII prevention in data handling**: Specs use synthetic data instead of real PII, with classification-aware handling rules
 
-### Changed
+### Changed in 1.3.0
 
 - **Init merged into main skill**: `/specops:init` is now `/specops init` — a subcommand of the main skill rather than a separate skill
 - **Bugfix and refactor templates include acceptance criteria checklists**: Phase 4 checkbox verification is now uniformly executable across all spec types
