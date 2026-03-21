@@ -52,6 +52,10 @@ For each changed file, check which documentation may be affected using this mapp
 | `core/from-plan.md` | `docs/COMMANDS.md` (From Plan) |
 | `core/memory.md` | `docs/COMMANDS.md` (Local Memory), `docs/REFERENCE.md` |
 | `core/metrics.md` | `docs/REFERENCE.md` (Usage Metrics), `docs/TOKEN-USAGE.md` |
+| `core/run-logging.md` | `docs/REFERENCE.md` (Configuration Options) |
+| `core/plan-validation.md` | `docs/REFERENCE.md` (Configuration Options) |
+| `core/git-checkpointing.md` | `docs/REFERENCE.md` (Configuration Options) |
+| `core/pipeline.md` | `docs/COMMANDS.md` (Pipeline Mode), `docs/REFERENCE.md` |
 | `core/reconciliation.md` | `docs/COMMANDS.md` (Drift Detection) |
 | `core/repo-map.md` | `docs/COMMANDS.md` (Repo Map), `docs/REFERENCE.md` |
 | `core/simplicity.md` | `CLAUDE.md` (Simplicity Principle) |

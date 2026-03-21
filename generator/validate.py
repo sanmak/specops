@@ -271,6 +271,58 @@ FEEDBACK_MARKERS = [
 ]
 
 
+# Run logging markers that MUST appear in every output
+RUN_LOGGING_MARKERS = [
+    "## Run Logging",
+    "### Run Log Format",
+    "### Log Entry Types",
+    "### Logging Procedure",
+    "### Run Log Safety",
+    "Phase transition",
+    "Step execution",
+    "runs/",
+]
+
+
+# Plan validation markers that MUST appear in every output
+PLAN_VALIDATION_MARKERS = [
+    "## Code-Grounded Plan Validation",
+    "### Validation Scope",
+    "### Validation Procedure",
+    "### Reference Resolution",
+    "### Validation Outcomes",
+    "### Plan Validation Safety",
+    "Files to Modify",
+    "repo map",
+]
+
+
+# Git checkpointing markers that MUST appear in every output
+GIT_CHECKPOINT_MARKERS = [
+    "## Git Checkpointing",
+    "### Checkpoint Procedure",
+    "### Dirty Tree Safety",
+    "### Checkpoint Commit Messages",
+    "### Interaction with autoCommit",
+    "### Git Checkpointing Safety",
+    "specops(checkpoint)",
+    "spec-created",
+]
+
+
+# Pipeline mode markers that MUST appear in every output
+PIPELINE_MARKERS = [
+    "## Automated Pipeline Mode",
+    "### Pipeline Mode Detection",
+    "### Pipeline Prerequisites",
+    "### Pipeline Cycle",
+    "### Cycle Limit and Progress",
+    "### Pipeline Integration",
+    "### Pipeline Safety",
+    "pipelineMaxCycles",
+]
+
+
 def read_file(path):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
@@ -426,6 +478,18 @@ def validate_platform(platform, info):
 
     # Check coherence verification present
     errors.extend(check_markers_present(platform, content, COHERENCE_MARKERS, "coherence"))
+
+    # Check run logging present
+    errors.extend(check_markers_present(platform, content, RUN_LOGGING_MARKERS, "run-logging"))
+
+    # Check plan validation present
+    errors.extend(check_markers_present(platform, content, PLAN_VALIDATION_MARKERS, "plan-validation"))
+
+    # Check git checkpointing present
+    errors.extend(check_markers_present(platform, content, GIT_CHECKPOINT_MARKERS, "git-checkpointing"))
+
+    # Check pipeline mode present
+    errors.extend(check_markers_present(platform, content, PIPELINE_MARKERS, "pipeline"))
 
     # Platform-specific format validation
     if platform == "cursor":
@@ -732,7 +796,7 @@ def main():
     if len(generated) >= 2:
         platforms = list(generated.keys())
         consistency_errors = []
-        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + TEMPLATE_MARKERS + VERTICAL_MARKERS + INTERVIEW_MARKERS + STEERING_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + EXTERNAL_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS + REPO_MAP_MARKERS + DELEGATION_MARKERS + WRITING_QUALITY_MARKERS + FEEDBACK_MARKERS + COHERENCE_MARKERS + METRICS_MARKERS:
+        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + TEMPLATE_MARKERS + VERTICAL_MARKERS + INTERVIEW_MARKERS + STEERING_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + EXTERNAL_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS + REPO_MAP_MARKERS + DELEGATION_MARKERS + WRITING_QUALITY_MARKERS + FEEDBACK_MARKERS + COHERENCE_MARKERS + METRICS_MARKERS + RUN_LOGGING_MARKERS + PLAN_VALIDATION_MARKERS + GIT_CHECKPOINT_MARKERS + PIPELINE_MARKERS:
             present_in = [p for p in platforms if marker in generated[p]["content"]]
             if len(present_in) != len(platforms):
                 missing = set(platforms) - set(present_in)

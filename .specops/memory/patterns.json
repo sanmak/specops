@@ -26,9 +26,10 @@
         "drift-detection",
         "ast-based-repo-map",
         "enforcement-roadmap",
-        "project-type-awareness"
+        "project-type-awareness",
+        "workflow-automation-suite"
       ],
-      "count": 4,
+      "count": 5,
       "lesson": "Avoid renumbering Phase steps when inserting new logic — use sub-step notation (e.g., step 5.5, 5.6) to prevent breaking cross-module references"
     },
     {
@@ -37,9 +38,10 @@
         "drift-detection",
         "workflow-enforcement-gates",
         "enforcement-roadmap",
-        "project-type-awareness"
+        "project-type-awareness",
+        "workflow-automation-suite"
       ],
-      "count": 4,
+      "count": 5,
       "lesson": "Validator markers are case-sensitive substrings — when adding new marker constants, add to BOTH per-platform validation AND the cross-platform consistency loop in the same commit"
     },
     {
@@ -64,9 +66,10 @@
         "workflow-enforcement-gates",
         "enforcement-roadmap",
         "project-type-awareness",
-        "proxy-metrics"
+        "proxy-metrics",
+        "workflow-automation-suite"
       ],
-      "count": 10
+      "count": 11
     },
     {
       "file": "generator/validate.py",
@@ -79,9 +82,10 @@
         "workflow-enforcement-gates",
         "enforcement-roadmap",
         "project-type-awareness",
-        "proxy-metrics"
+        "proxy-metrics",
+        "workflow-automation-suite"
       ],
-      "count": 9
+      "count": 10
     },
     {
       "file": "generator/generate.py",
@@ -90,9 +94,10 @@
         "drift-detection",
         "ast-based-repo-map",
         "task-delegation",
-        "proxy-metrics"
+        "proxy-metrics",
+        "workflow-automation-suite"
       ],
-      "count": 5
+      "count": 6
     },
     {
       "file": "tests/test_platform_consistency.py",
@@ -102,9 +107,10 @@
         "ast-based-repo-map",
         "workflow-enforcement-gates",
         "project-type-awareness",
-        "proxy-metrics"
+        "proxy-metrics",
+        "workflow-automation-suite"
       ],
-      "count": 6
+      "count": 7
     },
     {
       "file": "core/config-handling.md",

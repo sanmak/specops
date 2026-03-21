@@ -20,6 +20,8 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
    - If `.specops.json` does not exist: ASK_USER("No `.specops.json` found. SpecOps works best with a project configuration that sets up steering files (persistent project context) and memory (cross-spec learning). Would you like to run `/specops init` first (recommended), or continue with defaults?")
      - If the user chooses init → redirect to Init Mode workflow
      - If the user chooses defaults → proceed with step 2 using default configuration
+1.1. **Git checkpointing pre-flight**: If `config.implementation.gitCheckpointing` is true, check the working tree: RUN_COMMAND(`git status --porcelain`). If the output is non-empty, NOTIFY_USER("Working tree has uncommitted changes — git checkpointing disabled for this run.") and set gitCheckpointing to false for this run. If the command fails (not a git repo), set gitCheckpointing to false silently.
+1.5. **Initialize run log**: If `config.implementation.runLogging` is not `"off"`, capture the run start timestamp via RUN_COMMAND(`date -u +"%Y%m%d-%H%M%S"`). Ensure the runs directory exists: RUN_COMMAND(`mkdir -p <specsDir>/runs`). Create the run log file following the Run Logging module. If the spec name is not yet known (new spec), use `_pending-<timestamp>` as the temporary file name — rename when the spec name is determined in Phase 2 step 2.
 2. **Context recovery**: Check for prior work that may inform this session:
    - If FILE_EXISTS(`<specsDir>/index.json`), READ_FILE it
    - If any specs have status `implementing` or `in-review`, NOTIFY_USER: "Found incomplete spec: <name> (status: <status>). Continue working on it?"
@@ -127,7 +129,9 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 
 5.5. **Coherence Verification**: After generating all spec files, cross-check for contradictions between spec sections. READ_FILE the requirements/bugfix/refactor file and design.md. Extract numeric constraints from NFRs (performance targets, SLAs, limits) and verify they do not contradict functional requirements or design decisions. Record the result in implementation.md under `## Phase 1 Context Summary` as a `- Coherence check: [pass / N contradiction(s) found — details]` entry. If contradictions are found, NOTIFY_USER with the specifics before proceeding.
 5.6. **Vocabulary Verification**: If the detected vertical is not `backend`, `fullstack`, or `frontend`, and no custom template is used, scan generated spec files for prohibited default terms (see the Vocabulary Verification subsection in the Vertical Adaptation Rules module). Replace any found terms with vertical-specific vocabulary. Record the result in implementation.md Phase 1 Context Summary.
+5.7. **Code-grounded plan validation**: If `config.implementation.validateReferences` is not `"off"`, validate file paths and code references in design.md and tasks.md against the codebase following the Code-Grounded Plan Validation module. Use the repo map (loaded in Phase 1 step 3.5) as the primary reference. Record the result in implementation.md Phase 1 Context Summary.
 6. **External issue creation (mandatory when taskTracking configured)**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. READ_FILE `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`, create issues via the Issue Creation Protocol, and write IssueIDs back to `tasks.md`. If issue creation is skipped or all IssueIDs remain `None`, the Phase 3 task tracking gate will catch the omission — the spec artifact linter validates IssueIDs on completed specs and fails CI when they are missing.
+6.5. **Git checkpoint (spec-created)**: If `config.implementation.gitCheckpointing` is true for this run, commit spec artifacts following the Git Checkpointing module: RUN_COMMAND(`git add <specsDir>/<spec-name>/`) then RUN_COMMAND(`git commit -m "specops(checkpoint): spec-created -- <spec-name>"`). If the commit fails, NOTIFY_USER and continue.
 7. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow.
 
 **Phase 2.5: Review Cycle** (if spec review enabled)
@@ -140,7 +144,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - **Task tracking gate**: If `config.team.taskTracking` is not `"none"`, verify external issue creation following the Task Tracking Gate in the Configuration Handling module. This gate is mandatory when task tracking is configured — skipping it is a protocol breach.
    - After both gates pass, update status to `implementing`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`.
 2. **Determine execution strategy**: Check if task delegation is active (see the Task Delegation module — reads `config.implementation.taskDelegation` and platform capability `canDelegateTask`). If delegation is active, execute tasks using the delegation protocol (orchestrator dispatches each task to a fresh context). If delegation is not active, execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions).
-3. For each task: set `In Progress` in tasks.md FIRST (following Write Ordering Protocol), then if `config.team.taskTracking` is not `"none"` and the task has a valid IssueID, sync the status to the external tracker (see Status Sync in the Configuration Handling module). Then implement, then report progress.
+3. For each task: set `In Progress` in tasks.md FIRST (following Write Ordering Protocol), then if `config.team.taskTracking` is not `"none"` and the task has a valid IssueID, sync the status to the external tracker (see Status Sync in the Configuration Handling module). Skipping Status Sync when taskTracking is configured and the task has a valid IssueID is a protocol breach — the external tracker must reflect the current task state. Sync failures are non-blocking (warn and continue), but sync omissions are not. When task delegation is active, the orchestrator handles Status Sync (see Task Delegation module step 5a.6). Then implement, then report progress.
 4. After completing each code-modifying task, update `implementation.md`:
    - Design decision made (library choice, algorithm, approach) → append to Decision Log
    - Deviated from `design.md` → append to Deviations table
@@ -149,6 +153,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
 5. Follow the design and maintain consistency
 6. Run tests according to configured testing strategy
 7. Commit changes based on `autoCommit` setting. If `config.team.taskTracking` is not `"none"` and the current task has a valid IssueID, include the IssueID in the commit message (see Commit Linking in the Configuration Handling module).
+8. **Git checkpoint (implemented)**: If `config.implementation.gitCheckpointing` is true for this run, commit all changes following the Git Checkpointing module: RUN_COMMAND(`git add -A`) then RUN_COMMAND(`git commit -m "specops(checkpoint): implemented -- <spec-name>"`). If the commit fails (e.g., nothing new to commit because autoCommit captured everything), continue silently.
 
 **Phase 4: Complete**
 
@@ -181,6 +186,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
      - [ ] `FILE_EXISTS` guard used before reading any optional config (e.g., `.specops.json`) in the subcommand's first step
 5. **Completion gate**: Before marking the spec as completed, verify that memory was updated. READ_FILE(`<specsDir>/memory/context.md`) and confirm it contains a section heading `### <spec-name>`. If missing, go back to step 3 and execute it — do not mark the spec as completed without memory being updated.
 6. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`
+6.5. **Git checkpoint (completed) and run log finalization**: If `config.implementation.gitCheckpointing` is true for this run, commit final metadata following the Git Checkpointing module: RUN_COMMAND(`git add -A`) then RUN_COMMAND(`git commit -m "specops(checkpoint): completed -- <spec-name>"`). If the commit fails, NOTIFY_USER and continue. Then, if `config.implementation.runLogging` is not `"off"`, finalize the run log following the Run Logging module: EDIT_FILE the run log to update frontmatter with `completedAt` and `finalStatus`.
 7. Create PR if `createPR` is true
 8. Summarize completed work
 
@@ -235,7 +241,8 @@ When invoked:
    - The conversation context contains a structured plan (plan mode content visible in earlier messages, numbered implementation steps, a "Files to Modify" or "Execution Order" section, or a plan file was recently discussed)
    - FILE_EXISTS(`.specops.json`) is true (SpecOps is configured for this project)
    If all three conditions are met: extract the plan content from the conversation context and follow the From Plan Mode workflow. Implementing a plan without converting it to a SpecOps spec first in a SpecOps-configured project is a **protocol breach**.
-   If any condition is false: continue to step 12.
+   If any condition is false: continue to step 11.7.
+11.7. Check if the request is a **pipeline** command (see "Automated Pipeline Mode" module). Patterns: "pipeline <spec-name>", "auto-implement <spec-name>". These must refer to SpecOps automated implementation cycling, NOT a product feature (e.g., "create CI pipeline", "build data pipeline", "add deployment pipeline" is NOT pipeline mode). If detected, follow the Pipeline Mode workflow instead of the standard phases below.
 12. Check if interview mode is triggered (see "Interview Mode" module):
    - Explicit: request contains "interview" keyword
    - Auto (interactive platforms only): request is vague (≤5 words, no technical keywords, no action verb)

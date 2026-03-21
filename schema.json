@@ -196,6 +196,32 @@
           "enum": ["auto", "always", "never"],
           "default": "auto",
           "description": "Task delegation strategy for Phase 3. auto: delegate when complexity score reaches threshold (based on effort sizing and file breadth). always: always delegate. never: sequential execution. Strategy adapts to platform capabilities (sub-agents, checkpoints, or sequential fallback)."
+        },
+        "runLogging": {
+          "type": "string",
+          "enum": ["on", "off"],
+          "default": "on",
+          "maxLength": 10,
+          "description": "Per-run execution logging to <specsDir>/runs/. Captures phase transitions, decisions, file operations, and errors as a chronological trace."
+        },
+        "validateReferences": {
+          "type": "string",
+          "enum": ["off", "warn", "strict"],
+          "default": "off",
+          "maxLength": 10,
+          "description": "Validate file paths and code references in spec against codebase before implementation. off: skip. warn: notify and continue. strict: block on unresolved references."
+        },
+        "gitCheckpointing": {
+          "type": "boolean",
+          "default": false,
+          "description": "Commit at phase boundaries (spec-created, implemented, completed). Three commits max per spec run. Complements autoCommit which commits per-task."
+        },
+        "pipelineMaxCycles": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 3,
+          "description": "Maximum Phase 3 to Phase 4 iteration cycles in pipeline mode. Pipeline stops after this many cycles even if criteria are unmet."
         }
       },
       "additionalProperties": false

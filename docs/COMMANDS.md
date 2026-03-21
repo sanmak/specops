@@ -29,6 +29,7 @@ All supported commands across Claude Code, Cursor, OpenAI Codex, and GitHub Copi
 | View memory | `/specops memory` | `Use specops memory` |
 | Seed memory from specs | `/specops memory seed` | `Use specops memory seed` |
 | Generate/refresh repo map | `/specops map` | `Use specops map` |
+| Auto-implement spec (pipeline) | `/specops pipeline <name>` | `Use specops pipeline for <name>` |
 | Check version | `/specops version` | `Use specops version` |
 | Update SpecOps | `/specops update` | `Use specops update` |
 | Review a spec | `review <spec-name>` | `review <spec-name>` |

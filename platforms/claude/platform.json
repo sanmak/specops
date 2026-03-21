@@ -57,7 +57,8 @@
       "/specops view auth-feature requirements design",
       "/specops list",
       "/specops update",
-      "/specops feedback"
+      "/specops feedback",
+      "/specops pipeline auth-feature"
     ]
   }
 }

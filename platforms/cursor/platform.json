@@ -54,7 +54,8 @@
       "View auth-feature requirements and design sections",
       "List all specops specs",
       "Use specops update to check for updates",
-      "Use specops feedback to report an issue"
+      "Use specops feedback to report an issue",
+      "Use specops pipeline for auth-feature"
     ]
   }
 }

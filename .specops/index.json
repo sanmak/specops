@@ -96,6 +96,14 @@
     "updated": "2026-03-18T02:34:12Z"
   },
   {
+    "id": "workflow-automation-suite",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-21T03:31:46Z"
+  },
+  {
     "id": "workflow-enforcement-gates",
     "type": "feature",
     "status": "completed",

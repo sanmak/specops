@@ -50,7 +50,11 @@
       "enabled": true,
       "tool": "prettier"
     },
-    "taskDelegation": "auto"
+    "taskDelegation": "auto",
+    "runLogging": "on",
+    "validateReferences": "warn",
+    "gitCheckpointing": true,
+    "pipelineMaxCycles": 3
   },
   "modules": {
     "backend": {

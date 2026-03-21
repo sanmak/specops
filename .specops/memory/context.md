@@ -43,3 +43,6 @@
 
 ### proxy-metrics (feature) — 2026-03-21
 8 tasks completed, 0 deviations from design, 0 blockers. New `core/metrics.md` module with 6-step metrics capture procedure using abstract operations. Integrated into Phase 4 as step 2.5 (sub-step notation per project convention — no renumbering). Generator pipeline wired for all 4 platforms with 8 METRICS_MARKERS. Schema extended with optional `metrics` object (7 integer fields). Documentation: `docs/TOKEN-USAGE.md` with benchmarks and ROI guidance, updates to REFERENCE.md, README.md, STRUCTURE.md, CLAUDE.md. All 8 tests pass.
+
+### workflow-automation-suite (feature) — 2026-03-21
+9 tasks completed, 0 deviations from design, 0 blockers. Four new core modules inspired by slop-janitor: `core/run-logging.md` (per-step execution trace complementing metrics), `core/plan-validation.md` (pre-implementation reference validation leveraging repo map), `core/git-checkpointing.md` (3 phase-boundary commits complementing per-task autoCommit), `core/pipeline.md` (automated Phase 3→4 cycling with zero-progress detection). Added 6 workflow hooks using sub-step notation (1.1, 1.5, 5.7, 6.5, 8, 11.7). Extended schema with 4 config options (runLogging, validateReferences, gitCheckpointing, pipelineMaxCycles). Generator pipeline wired with 4 new marker sets. All 8 tests pass.

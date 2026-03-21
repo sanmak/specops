@@ -89,6 +89,10 @@ specops/
 │   ├── task-tracking.md                  # Task state machine and ordering
 │   ├── task-delegation.md                # Task delegation for Phase 3 context management
 │   ├── writing-quality.md                # Writing quality rules for spec artifacts
+│   ├── run-logging.md                    # Per-run execution trace logging
+│   ├── plan-validation.md                # Code-grounded spec reference validation
+│   ├── git-checkpointing.md              # Phase-boundary git commits
+│   ├── pipeline.md                       # Automated pipeline mode (implement-verify cycling)
 │   ├── tool-abstraction.md               # Abstract tool operations and capability flags
 │   └── templates/                        # Default spec templates
 │       ├── feature-requirements.md       # Feature requirements template

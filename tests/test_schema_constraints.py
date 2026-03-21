@@ -143,6 +143,56 @@ def main():
         "team": {"specReview": {"enabled": True, "allowSelfApproval": "yes"}}
     }, "Rejects non-boolean allowSelfApproval"))
 
+    # --- Workflow automation config constraints ---
+    check(expect_valid(schema, {
+        "implementation": {"runLogging": "on"}
+    }, "Valid runLogging on"))
+    check(expect_valid(schema, {
+        "implementation": {"runLogging": "off"}
+    }, "Valid runLogging off"))
+    check(expect_invalid(schema, {
+        "implementation": {"runLogging": "maybe"}
+    }, "Rejects invalid runLogging enum value"))
+
+    check(expect_valid(schema, {
+        "implementation": {"validateReferences": "off"}
+    }, "Valid validateReferences off"))
+    check(expect_valid(schema, {
+        "implementation": {"validateReferences": "warn"}
+    }, "Valid validateReferences warn"))
+    check(expect_valid(schema, {
+        "implementation": {"validateReferences": "strict"}
+    }, "Valid validateReferences strict"))
+    check(expect_invalid(schema, {
+        "implementation": {"validateReferences": "invalid"}
+    }, "Rejects invalid validateReferences enum value"))
+
+    check(expect_valid(schema, {
+        "implementation": {"gitCheckpointing": True}
+    }, "Valid gitCheckpointing true"))
+    check(expect_valid(schema, {
+        "implementation": {"gitCheckpointing": False}
+    }, "Valid gitCheckpointing false"))
+    check(expect_invalid(schema, {
+        "implementation": {"gitCheckpointing": "yes"}
+    }, "Rejects non-boolean gitCheckpointing"))
+
+    check(expect_valid(schema, {
+        "implementation": {"pipelineMaxCycles": 1}
+    }, "Valid pipelineMaxCycles min"))
+    check(expect_valid(schema, {
+        "implementation": {"pipelineMaxCycles": 10}
+    }, "Valid pipelineMaxCycles max"))
+    check(expect_invalid(schema, {
+        "implementation": {"pipelineMaxCycles": 0}
+    }, "Rejects pipelineMaxCycles < 1"))
+    check(expect_invalid(schema, {
+        "implementation": {"pipelineMaxCycles": 15}
+    }, "Rejects pipelineMaxCycles > 10"))
+    check(expect_invalid(schema, {
+        "implementation": {"pipelineMaxCycles": 3.5}
+    }, "Rejects non-integer pipelineMaxCycles"))
+
     # --- Module constraints ---
     check(expect_invalid(schema, {
         "modules": {"frontend": {"specsDir": "../../../etc"}}
