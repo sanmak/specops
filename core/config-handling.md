@@ -91,25 +91,105 @@ After Phase 2 generates `tasks.md` and before Phase 3 begins, create external is
 
 For each eligible task:
 
-**Shell safety**: `<TaskTitle>` and `<TaskDescription>` contain user-controlled text. Before interpolating into shell commands, write the title and body to temporary files and pass via file-based arguments (e.g., `--body-file`). If file-based arguments are unavailable for the tracker CLI, single-quote the values with internal single-quotes escaped (`'` → `'\''`). Never pass unescaped user text directly in shell command strings.
+### Issue Body Composition
+
+Before creating each issue, compose `<IssueBody>` by extracting content from spec artifacts. This composition is mandatory — writing a freeform description instead of following this template is a protocol breach.
+
+For each eligible task, READ_FILE `<specsDir>/<spec-name>/requirements.md` (or `bugfix.md`/`refactor.md`), READ_FILE `<specsDir>/<spec-name>/spec.json`, and extract:
+
+1. **Context**: The spec's Overview/Product Requirements first paragraph (1-3 sentences explaining "why")
+2. **Spec type**: From `spec.json` `type` field
+3. **Spec name**: From `spec.json` `id` field
+
+Compose `<IssueBody>` using this template:
+
+```
+## Context
+
+<1-3 sentence summary from requirements.md/bugfix.md/refactor.md Overview explaining why this work exists>
+
+**Spec:** `<spec-id>` | **Type:** <spec-type>
+
+## Spec Artifacts
+
+- [Requirements](<specsDir>/<spec-name>/requirements.md)
+- [Design](<specsDir>/<spec-name>/design.md)
+- [Tasks](<specsDir>/<spec-name>/tasks.md)
+
+## Description
+
+<Full text from the task's **Description:** section in tasks.md>
+
+## Implementation Steps
+
+<Numbered list from the task's **Implementation Steps:** section in tasks.md>
+
+## Acceptance Criteria
+
+<Checkbox items from the task's **Acceptance Criteria:** section in tasks.md>
+
+## Files to Modify
+
+<Bulleted list from the task's **Files to Modify:** section in tasks.md>
+
+## Tests Required
+
+<Checkbox items from the task's **Tests Required:** section in tasks.md. If the task has no Tests Required section, omit this entire section.>
+
+---
+
+**Priority:** <task priority> | **Effort:** <task effort> | **Dependencies:** <task dependencies>
+```
+
+Every section above (except Tests Required) is mandatory. If a section's source data is empty in `tasks.md`, write "None specified" rather than omitting the section.
+
+### GitHub Label Protocol
+
+When `taskTracking` is `"github"`, apply labels to each created issue. Labels make issues searchable and categorizable.
+
+**Label set per issue:**
+- **Priority label**: `P-high` or `P-medium` (matching the task's `**Priority:**` field; Low tasks are not created as issues)
+- **Spec label**: `spec:<spec-id>` where `<spec-id>` is the `id` from `spec.json` (e.g., `spec:proxy-metrics`)
+- **Type label**: `<type>` where `<type>` is the `type` from `spec.json` — one of `feat`, `fix`, or `refactor` (map `feature` to `feat`, `bugfix` to `fix`, `refactor` stays `refactor`)
+
+**Label creation**: Before creating the first issue for a spec, ensure all required labels exist. For each label in the set, run:
+
+RUN_COMMAND(`gh label create "<label>" --force --description "<description>"`)
+
+The `--force` flag is idempotent — it creates the label if missing, does nothing if it already exists. Run this once per unique label, not once per issue.
+
+Label descriptions:
+- `P-high`: "High priority task"
+- `P-medium`: "Medium priority task"
+- `spec:<spec-id>`: "SpecOps spec: <spec-id>"
+- `feat`: "Feature implementation"
+- `fix`: "Bug fix"
+- `refactor`: "Code refactoring"
+
+**Jira and Linear**: Label/tag support varies. For Jira, use `--label` flag if available in the CLI version. For Linear, use `--label` flag. If the flag is unavailable or fails, skip labels silently — labels are enhancement, not requirement. Do not block issue creation on label failure.
+
+**Shell safety**: `<TaskTitle>` and `<IssueBody>` contain user-controlled text. Before interpolating into shell commands, write the title and body to temporary files and pass via file-based arguments (e.g., `--body-file`). If file-based arguments are unavailable for the tracker CLI, single-quote the values with internal single-quotes escaped (`'` → `'\''`). Never pass unescaped user text directly in shell command strings.
 
 **GitHub** (`taskTracking: "github"`):
-1. WRITE_FILE a temp file with `<TaskDescription>` as content
-2. RUN_COMMAND(`gh issue create --title '<taskPrefix><TaskTitle>' --body-file <tempFile>`)
-3. Parse the issue URL/number from stdout
-4. EDIT_FILE `tasks.md` — set the task's `**IssueID:**` to the returned issue identifier (e.g., `#42`)
+1. Compose `<IssueBody>` following the Issue Body Composition template above
+2. WRITE_FILE a temp file with `<IssueBody>` as content
+3. RUN_COMMAND(`gh issue create --title '<taskPrefix><TaskTitle>' --body-file <tempFile> --label '<priorityLabel>' --label 'spec:<specId>' --label '<typeLabel>'`)
+4. Parse the issue URL/number from stdout
+5. EDIT_FILE `tasks.md` — set the task's `**IssueID:**` to the returned issue identifier (e.g., `#42`)
 
 **Jira** (`taskTracking: "jira"`):
-1. WRITE_FILE a temp file with `<TaskDescription>` as content
-2. RUN_COMMAND(`jira issue create --type=Task --summary='<taskPrefix><TaskTitle>' --description-file <tempFile>`)
-3. Parse the issue key from stdout (e.g., `PROJ-123`)
-4. EDIT_FILE `tasks.md` — set the task's `**IssueID:**` to the returned key
+1. Compose `<IssueBody>` following the Issue Body Composition template above
+2. WRITE_FILE a temp file with `<IssueBody>` as content
+3. RUN_COMMAND(`jira issue create --type=Task --summary='<taskPrefix><TaskTitle>' --description-file <tempFile>`)
+4. Parse the issue key from stdout (e.g., `PROJ-123`)
+5. EDIT_FILE `tasks.md` — set the task's `**IssueID:**` to the returned key
 
 **Linear** (`taskTracking: "linear"`):
-1. WRITE_FILE a temp file with `<TaskDescription>` as content
-2. RUN_COMMAND(`linear issue create --title '<taskPrefix><TaskTitle>' --description-file <tempFile>`)
-3. Parse the issue identifier from stdout
-4. EDIT_FILE `tasks.md` — set the task's `**IssueID:**` to the returned identifier
+1. Compose `<IssueBody>` following the Issue Body Composition template above
+2. WRITE_FILE a temp file with `<IssueBody>` as content
+3. RUN_COMMAND(`linear issue create --title '<taskPrefix><TaskTitle>' --description-file <tempFile>`)
+4. Parse the issue identifier from stdout
+5. EDIT_FILE `tasks.md` — set the task's `**IssueID:**` to the returned identifier
 
 If `config.team.taskPrefix` is set, prepend it to the issue title.
 

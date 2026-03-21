@@ -137,7 +137,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 5.5. **Coherence Verification**: After generating all spec files, cross-check for contradictions between spec sections. Use the Read tool to read the requirements/bugfix/refactor file and design.md. Extract numeric constraints from NFRs (performance targets, SLAs, limits) and verify they do not contradict functional requirements or design decisions. Record the result in implementation.md under `## Phase 1 Context Summary` as a `- Coherence check: [pass / N contradiction(s) found — details]` entry. If contradictions are found, Display a message to the user with the specifics before proceeding.
 5.6. **Vocabulary Verification**: If the detected vertical is not `backend`, `fullstack`, or `frontend`, and no custom template is used, scan generated spec files for prohibited default terms (see the Vocabulary Verification subsection in the Vertical Adaptation Rules module). Replace any found terms with vertical-specific vocabulary. Record the result in implementation.md Phase 1 Context Summary.
 5.7. **Code-grounded plan validation**: If `config.implementation.validateReferences` is not `"off"`, validate file paths and code references in design.md and tasks.md against the codebase following the Code-Grounded Plan Validation module. Use the repo map (loaded in Phase 1 step 3.5) as the primary reference. Record the result in implementation.md Phase 1 Context Summary.
-6. **External issue creation (mandatory when taskTracking configured)**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. Use the Read tool to read `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`, create issues via the Issue Creation Protocol, and write IssueIDs back to `tasks.md`. If issue creation is skipped or all IssueIDs remain `None`, the Phase 3 task tracking gate will catch the omission — the spec artifact linter validates IssueIDs on completed specs and fails CI when they are missing.
+6. **External issue creation (mandatory when taskTracking configured)**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. Use the Read tool to read `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`. For each eligible task, compose the issue body using the Issue Body Composition template (reading spec artifacts for context), create issues via the Issue Creation Protocol (with labels for GitHub), and write IssueIDs back to `tasks.md`. If issue creation is skipped or all IssueIDs remain `None`, the Phase 3 task tracking gate will catch the omission — the spec artifact linter validates IssueIDs on completed specs and fails CI when they are missing.
 6.5. **Git checkpoint (spec-created)**: If `config.implementation.gitCheckpointing` is true for this run, commit spec artifacts following the Git Checkpointing module: Use the Bash tool to run(`git add <specsDir>/<spec-name>/`) then Use the Bash tool to run(`git commit -m "specops(checkpoint): spec-created -- <spec-name>"`). If the commit fails, Display a message to the user and continue.
 7. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow.
 
@@ -395,25 +395,105 @@ After Phase 2 generates `tasks.md` and before Phase 3 begins, create external is
 
 For each eligible task:
 
-**Shell safety**: `<TaskTitle>` and `<TaskDescription>` contain user-controlled text. Before interpolating into shell commands, write the title and body to temporary files and pass via file-based arguments (e.g., `--body-file`). If file-based arguments are unavailable for the tracker CLI, single-quote the values with internal single-quotes escaped (`'` → `'\''`). Never pass unescaped user text directly in shell command strings.
+### Issue Body Composition
+
+Before creating each issue, compose `<IssueBody>` by extracting content from spec artifacts. This composition is mandatory — writing a freeform description instead of following this template is a protocol breach.
+
+For each eligible task, Use the Read tool to read `<specsDir>/<spec-name>/requirements.md` (or `bugfix.md`/`refactor.md`), Use the Read tool to read `<specsDir>/<spec-name>/spec.json`, and extract:
+
+1. **Context**: The spec's Overview/Product Requirements first paragraph (1-3 sentences explaining "why")
+2. **Spec type**: From `spec.json` `type` field
+3. **Spec name**: From `spec.json` `id` field
+
+Compose `<IssueBody>` using this template:
+
+```
+## Context
+
+<1-3 sentence summary from requirements.md/bugfix.md/refactor.md Overview explaining why this work exists>
+
+**Spec:** `<spec-id>` | **Type:** <spec-type>
+
+## Spec Artifacts
+
+- [Requirements](<specsDir>/<spec-name>/requirements.md)
+- [Design](<specsDir>/<spec-name>/design.md)
+- [Tasks](<specsDir>/<spec-name>/tasks.md)
+
+## Description
+
+<Full text from the task's **Description:** section in tasks.md>
+
+## Implementation Steps
+
+<Numbered list from the task's **Implementation Steps:** section in tasks.md>
+
+## Acceptance Criteria
+
+<Checkbox items from the task's **Acceptance Criteria:** section in tasks.md>
+
+## Files to Modify
+
+<Bulleted list from the task's **Files to Modify:** section in tasks.md>
+
+## Tests Required
+
+<Checkbox items from the task's **Tests Required:** section in tasks.md. If the task has no Tests Required section, omit this entire section.>
+
+---
+
+**Priority:** <task priority> | **Effort:** <task effort> | **Dependencies:** <task dependencies>
+```
+
+Every section above (except Tests Required) is mandatory. If a section's source data is empty in `tasks.md`, write "None specified" rather than omitting the section.
+
+### GitHub Label Protocol
+
+When `taskTracking` is `"github"`, apply labels to each created issue. Labels make issues searchable and categorizable.
+
+**Label set per issue:**
+- **Priority label**: `P-high` or `P-medium` (matching the task's `**Priority:**` field; Low tasks are not created as issues)
+- **Spec label**: `spec:<spec-id>` where `<spec-id>` is the `id` from `spec.json` (e.g., `spec:proxy-metrics`)
+- **Type label**: `<type>` where `<type>` is the `type` from `spec.json` — one of `feat`, `fix`, or `refactor` (map `feature` to `feat`, `bugfix` to `fix`, `refactor` stays `refactor`)
+
+**Label creation**: Before creating the first issue for a spec, ensure all required labels exist. For each label in the set, run:
+
+Use the Bash tool to run(`gh label create "<label>" --force --description "<description>"`)
+
+The `--force` flag is idempotent — it creates the label if missing, does nothing if it already exists. Run this once per unique label, not once per issue.
+
+Label descriptions:
+- `P-high`: "High priority task"
+- `P-medium`: "Medium priority task"
+- `spec:<spec-id>`: "SpecOps spec: <spec-id>"
+- `feat`: "Feature implementation"
+- `fix`: "Bug fix"
+- `refactor`: "Code refactoring"
+
+**Jira and Linear**: Label/tag support varies. For Jira, use `--label` flag if available in the CLI version. For Linear, use `--label` flag. If the flag is unavailable or fails, skip labels silently — labels are enhancement, not requirement. Do not block issue creation on label failure.
+
+**Shell safety**: `<TaskTitle>` and `<IssueBody>` contain user-controlled text. Before interpolating into shell commands, write the title and body to temporary files and pass via file-based arguments (e.g., `--body-file`). If file-based arguments are unavailable for the tracker CLI, single-quote the values with internal single-quotes escaped (`'` → `'\''`). Never pass unescaped user text directly in shell command strings.
 
 **GitHub** (`taskTracking: "github"`):
-1. Use the Write tool to create a temp file with `<TaskDescription>` as content
-2. Use the Bash tool to run(`gh issue create --title '<taskPrefix><TaskTitle>' --body-file <tempFile>`)
-3. Parse the issue URL/number from stdout
-4. Use the Edit tool to modify `tasks.md` — set the task's `**IssueID:**` to the returned issue identifier (e.g., `#42`)
+1. Compose `<IssueBody>` following the Issue Body Composition template above
+2. Use the Write tool to create a temp file with `<IssueBody>` as content
+3. Use the Bash tool to run(`gh issue create --title '<taskPrefix><TaskTitle>' --body-file <tempFile> --label '<priorityLabel>' --label 'spec:<specId>' --label '<typeLabel>'`)
+4. Parse the issue URL/number from stdout
+5. Use the Edit tool to modify `tasks.md` — set the task's `**IssueID:**` to the returned issue identifier (e.g., `#42`)
 
 **Jira** (`taskTracking: "jira"`):
-1. Use the Write tool to create a temp file with `<TaskDescription>` as content
-2. Use the Bash tool to run(`jira issue create --type=Task --summary='<taskPrefix><TaskTitle>' --description-file <tempFile>`)
-3. Parse the issue key from stdout (e.g., `PROJ-123`)
-4. Use the Edit tool to modify `tasks.md` — set the task's `**IssueID:**` to the returned key
+1. Compose `<IssueBody>` following the Issue Body Composition template above
+2. Use the Write tool to create a temp file with `<IssueBody>` as content
+3. Use the Bash tool to run(`jira issue create --type=Task --summary='<taskPrefix><TaskTitle>' --description-file <tempFile>`)
+4. Parse the issue key from stdout (e.g., `PROJ-123`)
+5. Use the Edit tool to modify `tasks.md` — set the task's `**IssueID:**` to the returned key
 
 **Linear** (`taskTracking: "linear"`):
-1. Use the Write tool to create a temp file with `<TaskDescription>` as content
-2. Use the Bash tool to run(`linear issue create --title '<taskPrefix><TaskTitle>' --description-file <tempFile>`)
-3. Parse the issue identifier from stdout
-4. Use the Edit tool to modify `tasks.md` — set the task's `**IssueID:**` to the returned identifier
+1. Compose `<IssueBody>` following the Issue Body Composition template above
+2. Use the Write tool to create a temp file with `<IssueBody>` as content
+3. Use the Bash tool to run(`linear issue create --title '<taskPrefix><TaskTitle>' --description-file <tempFile>`)
+4. Parse the issue identifier from stdout
+5. Use the Edit tool to modify `tasks.md` — set the task's `**IssueID:**` to the returned identifier
 
 If `config.team.taskPrefix` is set, prepend it to the issue title.
 
@@ -3802,6 +3882,8 @@ On **every status transition** (Pending → In Progress, In Progress → Complet
 **Sync failures are non-blocking**: If the command to update the external tracker fails, Display a message to the user with the error and continue. The `tasks.md` state machine is always the source of truth.
 
 **Completion close**: When transitioning to `Completed`, close the external issue. If the close command fails, warn but do not prevent the task from being marked complete in `tasks.md`.
+
+Issue creation uses the Issue Body Composition template from the Configuration Handling module — freeform issue bodies are a protocol breach.
 
 ### Conformance Rules
 
