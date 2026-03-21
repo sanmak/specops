@@ -16,10 +16,10 @@ We add a new core module `core/engineering-discipline.md` that grounds architect
 
 **Decision:** Organize rules into 4 domains mapping to engineering concerns that already exist implicitly in SpecOps:
 
-1. **Architecture & Design Integrity** (Brooks, Liskov, Hohpe) — 4 rules
-2. **Testing & Validation Philosophy** (Beck, Dijkstra, Feathers) — 4 rules
-3. **Reliability & Failure Reasoning** (Leveson, Taleb) — 3 rules
-4. **Constraints & Quality Gates** (Goldratt, Deming, Humble) — 3 rules
+1. **Architecture and Design Integrity** (Brooks, Liskov, Hohpe) — 4 rules
+2. **Testing and Validation Philosophy** (Beck, Dijkstra, Feathers) — 4 rules
+3. **Reliability and Failure Reasoning** (Leveson, Taleb) — 3 rules
+4. **Constraints and Quality Gates** (Goldratt, Deming, Humble) — 3 rules
 
 **Rationale:** These 4 domains map to Phase 2 (architecture, constraints) and Phase 3 (testing, reliability) where engineering discipline is applied. Each domain has 3-4 rules — enough to be substantive, few enough to be memorable.
 

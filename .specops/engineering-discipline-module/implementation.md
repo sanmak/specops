@@ -25,7 +25,7 @@
 
 ## Deviations from Design
 
-None. All 8 tasks implemented exactly as specified in design.md and tasks.md.
+Minor naming deviation: domain headings use "and" instead of the original "&" from design.md/tasks.md (e.g., "Architecture and Design Integrity" instead of "Architecture & Design Integrity") to avoid ampersands in markdown headings. Spec artifacts updated to match.
 
 ## Session Log
 
@@ -35,5 +35,5 @@ None. All 8 tasks implemented exactly as specified in design.md and tasks.md.
 - Task 4: Added `engineering-discipline` to `from-plan` and `spec` mode modules in `core/mode-manifest.json`.
 - Task 5: Added `ENGINEERING_DISCIPLINE_MARKERS` to `generator/validate.py` in all 3 locations (constant, `validate_platform()`, cross-platform consistency loop). Gap 31 rule satisfied.
 - Task 6: Ran `python3 generator/generate.py --all` (exit 0), `python3 generator/validate.py` (2 expected docs failures), `bash scripts/run-tests.sh` (8/8 pass). All 4 platforms confirmed to contain "Engineering Discipline".
-- Task 7: Regenerated `CHECKSUMS.sha256` with 19 entries (18 existing + 1 new `core/engineering-discipline.md`). `shasum -a 256 -c` passed all 19.
+- Task 7: Regenerated `CHECKSUMS.sha256` with 20 entries (17 existing + 3 new: `core/engineering-discipline.md`, `core/reconciliation.md` restored, `core/writing-quality.md` added). `shasum -a 256 -c` passed all 20.
 - Task 8: Updated `docs/STRUCTURE.md`, `README.md`, `.claude/commands/docs-sync.md`. Final `python3 generator/validate.py` passed all checks (0 errors).

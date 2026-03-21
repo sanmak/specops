@@ -15,10 +15,10 @@ Create the engineering discipline module as a new core file following the exact 
 
 1. Create `core/engineering-discipline.md` with the `## Engineering Discipline` heading
 2. Add introductory paragraph explaining when these rules apply (Phase 2 design, Phase 3 implementation)
-3. Add `### Architecture & Design Integrity` section with 4 rules (Brooks, Liskov, Hohpe)
-4. Add `### Testing & Validation Philosophy` section with 4 rules (Beck, Dijkstra, Feathers)
-5. Add `### Reliability & Failure Reasoning` section with 3 rules (Leveson, Taleb)
-6. Add `### Constraints & Quality Gates` section with 3 rules (Goldratt, Deming, Humble)
+3. Add `### Architecture and Design Integrity` section with 4 rules (Brooks, Liskov, Hohpe)
+4. Add `### Testing and Validation Philosophy` section with 4 rules (Beck, Dijkstra, Feathers)
+5. Add `### Reliability and Failure Reasoning` section with 3 rules (Leveson, Taleb)
+6. Add `### Constraints and Quality Gates` section with 3 rules (Goldratt, Deming, Humble)
 7. Add `### Self-Check` section with 3 silent verification items
 8. Add `### Sources` section attributing all 11 leaders to specific rules
 9. Verify total line count is under 60 lines
