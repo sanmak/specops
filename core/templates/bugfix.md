@@ -1,25 +1,31 @@
 # Bug Fix: [Title]
 
 ## Problem Statement
+
 Clear description of the bug and its impact.
 
 ## Root Cause Analysis
+
 Detailed analysis of what's causing the bug.
 
 **Affected Components:**
+
 - Component 1
 - Component 2
 
 **Error Symptoms:**
+
 - Symptom 1
 - Symptom 2
 
 ## Impact Assessment
+
 - **Severity:** [Critical/High/Medium/Low]
 - **Users Affected:** [Number/Percentage]
 - **Frequency:** [Always/Often/Sometimes/Rarely]
 
 ## Reproduction Steps
+
 1. Step 1
 2. Step 2
 3. Expected: [expected behavior]
@@ -63,7 +69,7 @@ Detailed analysis of what's causing the bug.
      Low-Risk     → separate module boundary; independent codepath
      Only Must-Test items are required gates for Unchanged Behavior verification. -->
 | Behavior | Tier | Reason |
-|----------|------|--------|
+| --- | --- | --- |
 | [behavior] | Must-Test | [why] |
 | [behavior] | Nice-To-Test | [why] |
 
@@ -79,6 +85,7 @@ Detailed analysis of what's causing the bug.
 **Scope:** [Contained | Escalation needed — reason]
 
 ## Proposed Fix
+
 Description of the fix approach and why it addresses the root cause.
 
 ## Unchanged Behavior
@@ -91,9 +98,11 @@ Description of the fix approach and why it addresses the root cause.
 ## Testing Plan
 
 ### Current Behavior (verify the bug exists)
+
 - WHEN [reproduction condition] THE SYSTEM CURRENTLY [broken behavior]
 
 ### Expected Behavior (verify the fix works)
+
 - WHEN [reproduction condition] THE SYSTEM SHALL [correct behavior after fix]
 
 ### Unchanged Behavior (verify no regressions)
@@ -113,4 +122,5 @@ Description of the fix approach and why it addresses the root cause.
 - [ ] Test coverage gaps from Coverage Assessment addressed
 
 ## Team Conventions
+
 [Load from config.team.conventions]

@@ -11,6 +11,7 @@ Follow these steps precisely. Do not skip any step.
 Run the `/core-review` command with the `current` argument to check all uncommitted changes against SpecOps-specific patterns.
 
 This catches ~40% of issues that bots would flag:
+
 - P0: Raw abstract operations in generated outputs, detached HEAD patterns
 - P1: Generated file edits, cross-platform marker gaps, variable inconsistency, missing checksums
 - P2: Security-sensitive file advisories, spec alignment, step reference errors
@@ -27,32 +28,41 @@ Save the `/core-review` result summary (pass/fail, finding counts by severity) a
 Run these checks sequentially. Record each result.
 
 **2a. Platform validation:**
+
 ```bash
 python3 generator/validate.py
 ```
+
 Save exit code as `VALIDATE_RESULT` (0 = PASS, non-zero = FAIL).
 
 **2b. Spec artifact lint:**
+
 ```bash
 bash scripts/lint-specs.sh
 ```
+
 Save exit code as `LINT_RESULT` (0 = PASS, non-zero = FAIL).
 
 **2c. Checksum verification:**
+
 ```bash
 shasum -a 256 -c CHECKSUMS.sha256
 ```
+
 Save exit code as `CHECKSUMS_RESULT` (0 = PASS, non-zero = FAIL).
 
 **2d. Full test suite:**
+
 ```bash
 bash scripts/run-tests.sh
 ```
+
 Save exit code as `TESTS_RESULT` (0 = PASS, non-zero = FAIL).
 
 **2e. IssueID verification (when taskTracking configured):**
 
 Read `.specops.json` and check `team.taskTracking`. If taskTracking is not `"none"`:
+
 1. Read `.specops/index.json` (or scan spec directories) to find specs with status `implementing` or `completed`
 2. For each such spec, read its `tasks.md` and find all tasks with `**Priority:** High` or `**Priority:** Medium`
 3. Check that each eligible task has `**IssueID:**` set to a valid identifier (not `None`, not empty)
@@ -73,11 +83,13 @@ git diff HEAD --name-only
 ```
 
 If any files match `core/*.md`, `generator/templates/*.j2`, `generator/generate.py`, `schema.json`, or `docs/*.md`:
+
 - Inform the user: "Source files with documentation impact were modified. Running docs-sync check..."
 - Run the `/docs-sync` command
 - Save the result as `DOCS_RESULT`
 
 If no documentation-impacting files were modified:
+
 - Set `DOCS_RESULT` to "SKIP (no doc-impacting changes)"
 
 ---
@@ -86,7 +98,7 @@ If no documentation-impacting files were modified:
 
 Present the results in this format:
 
-```
+```text
 Pre-PR Quality Gate
 ════════════════════════════════════════
   Core Review:   {PASS/FAIL} ({P0 count} P0, {P1 count} P1, {P2 count} P2, {P3 count} P3)
@@ -101,6 +113,7 @@ Pre-PR Quality Gate
 ```
 
 **Verdict logic:**
+
 - If ALL checks pass: "Ready to ship. Run `/ship-pr` to create the PR."
 - If only P2/P3 findings in core-review and all automated checks pass: "Ready to ship (advisory findings only). Run `/ship-pr` to create the PR."
 - If any automated check fails OR P0/P1 findings remain: "Fix the issues above before creating a PR."

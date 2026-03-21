@@ -15,11 +15,11 @@ If update intent is not detected, continue to the next check in the routing chai
 #### Step 1: Detect Current Version
 
 1. Attempt Use the Bash tool to run `grep -h '^version:' .claude/skills/specops/SKILL.md ~/.claude/skills/specops/SKILL.md 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the **running version** of SpecOps.
-   - If extraction fails (command returns empty or cannot execute), Display a message to the user("Could not determine the running SpecOps version automatically.") and stop update mode with manual fallback guidance: "Check the latest version manually: https://github.com/sanmak/specops/releases"
+   - If extraction fails (command returns empty or cannot execute), Display a message to the user("Could not determine the running SpecOps version automatically.") and stop update mode with manual fallback guidance: "Check the latest version manually: <https://github.com/sanmak/specops/releases>"
 2. If Use the Bash tool to check if the file exists at(`.specops.json`), Use the Read tool to read(`.specops.json`) and check for `_installedVersion` and `_installedAt` fields.
 3. Display:
 
-   ```
+   ```text
    SpecOps — Current Installation
 
    Running version: {version extracted in step 1}
@@ -34,19 +34,21 @@ If update intent is not detected, continue to the next check in the routing chai
 Attempt to fetch the latest release from GitHub. Try the primary method first, then fall back.
 
 **Primary** (requires `gh` CLI):
-```
+
+```text
 Use the Bash tool to run(gh release view --repo sanmak/specops --json tagName,publishedAt -q '.tagName + " (" + .publishedAt + ")"')
 ```
 
 **Fallback** (requires `curl` + `python3`):
-```
+
+```text
 Use the Bash tool to run(curl -s https://api.github.com/repos/sanmak/specops/releases/latest | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['tag_name'], d.get('published_at',''))")
 ```
 
 - Parse the tag name from the output. Strip the `v` prefix if present (e.g., `v1.3.0` → `1.3.0`).
 - If both commands fail (no network, no `gh` CLI, API rate limited): display the manual check URL and stop:
 
-  ```
+  ```text
   Could not check for updates automatically.
   Check the latest version manually: https://github.com/sanmak/specops/releases
   ```
@@ -57,7 +59,7 @@ Split both the current version and the latest version on `"."` and compare each 
 
 - If the current version is **equal to or newer** than the latest:
 
-  ```
+  ```text
   You're on the latest version (v{current}).
   ```
 
@@ -65,7 +67,7 @@ Split both the current version and the latest version on `"."` and compare each 
 
 - If an update is available:
 
-  ```
+  ```text
   Update available: v{current} → v{latest}
 
   Changelog: https://github.com/sanmak/specops/releases/tag/v{latest}
@@ -93,7 +95,7 @@ Based on the detected installation method, present the appropriate update comman
 
 ##### Plugin Marketplace (Claude only)
 
-```
+```text
 To update via the plugin marketplace:
 
   /plugin install specops@specops-marketplace
@@ -107,21 +109,24 @@ This will pull the latest version from the marketplace.
 Based on the installation method detected in Step 4, include the appropriate `--scope` flag for Claude installs:
 
 **If Claude user-level install was detected:**
-```
+
+```text
 To update to v{latest}:
 
   curl -fsSL https://raw.githubusercontent.com/sanmak/specops/v{latest}/scripts/remote-install.sh | bash -s -- --version v{latest} --platform claude --scope user
 ```
 
 **If Claude project-level install was detected:**
-```
+
+```text
 To update to v{latest}:
 
   curl -fsSL https://raw.githubusercontent.com/sanmak/specops/v{latest}/scripts/remote-install.sh | bash -s -- --version v{latest} --platform claude --scope project
 ```
 
 **For other platforms** (Cursor, Codex, Copilot — no scope concept):
-```
+
+```text
 To update to v{latest}:
 
   curl -fsSL https://raw.githubusercontent.com/sanmak/specops/v{latest}/scripts/remote-install.sh | bash -s -- --version v{latest} --platform {detected-platform}
@@ -131,7 +136,7 @@ Replace `{detected-platform}` with the platform detected in Step 4 (`cursor`, `c
 
 ##### Local Clone
 
-```
+```text
 To update your local clone:
 
   git pull origin main

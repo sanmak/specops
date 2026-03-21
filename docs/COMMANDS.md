@@ -7,7 +7,7 @@ All supported commands across Claude Code, Cursor, OpenAI Codex, and GitHub Copi
 ## Quick Reference
 
 | Command | Claude Code | Cursor / Codex / Copilot |
-|---------|-------------|--------------------------|
+| --- | --- | --- |
 | Create spec (feature) | `/specops <description>` | `Use specops to <description>` |
 | Create spec (bugfix) | `/specops Fix: <description>` | `Use specops to fix <description>` |
 | Create spec (refactor) | `/specops Refactor <description>` | `Use specops to refactor <description>` |
@@ -43,16 +43,19 @@ All supported commands across Claude Code, Cursor, OpenAI Codex, and GitHub Copi
 Creates a structured specification before implementation.
 
 ### Feature Spec
+
 Request types: `Add`, `Build`, `Create`, `Implement`
 
 **Claude Code:**
-```
+
+```text
 /specops Add a login page with email and password
 /specops Build a payment processing system
-```
+```text
 
 **Other platforms:**
-```
+
+```text
 Use specops to add a login page with email and password
 Build a payment processing system using specops
 ```
@@ -62,16 +65,19 @@ Build a payment processing system using specops
 ---
 
 ### Bugfix Spec
+
 Request types: `Fix`, `Bug`
 
 **Claude Code:**
-```
+
+```text
 /specops Fix: Users can't submit forms with special characters
 /specops Bug Users getting 500 errors on checkout
-```
+```text
 
 **Other platforms:**
-```
+
+```text
 Use specops to fix users getting 500 errors on checkout
 ```
 
@@ -80,15 +86,18 @@ Use specops to fix users getting 500 errors on checkout
 ---
 
 ### Refactor Spec
+
 Request types: `Refactor`
 
 **Claude Code:**
-```
+
+```text
 /specops Refactor Extract API layer into repository pattern
-```
+```text
 
 **Other platforms:**
-```
+
+```text
 Use specops to refactor the database layer
 ```
 
@@ -101,12 +110,14 @@ Use specops to refactor the database layer
 Creates a `.specops.json` configuration file in the project. Presents template options (minimal, standard, full, review, builder), writes the selected config, creates foundation steering files (`product.md`, `tech.md`, `structure.md` in `<specsDir>/steering/`), and scaffolds the memory directory (`<specsDir>/memory/`).
 
 **Claude Code:**
-```
+
+```text
 /specops init
-```
+```text
 
 **Other platforms:**
-```
+
+```text
 Use specops init
 ```
 
@@ -119,14 +130,16 @@ Use specops init
 Displays the installed SpecOps version.
 
 **Claude Code:**
-```
+
+```text
 /specops version
 /specops --version
 /specops -v
-```
+```text
 
 **Other platforms:**
-```
+
+```text
 Use specops version
 ```
 
@@ -137,12 +150,14 @@ Use specops version
 Checks for newer SpecOps versions and guides through upgrading.
 
 **Claude Code:**
-```
+
+```text
 /specops update
 ```
 
 **Other platforms:**
-```
+
+```text
 Use specops update
 ```
 
@@ -155,23 +170,26 @@ Use specops update
 Scaffold, view, and manage steering files — markdown files with YAML frontmatter that provide persistent project context (product overview, tech stack, project structure). `always`-included files are loaded before every spec; `fileMatch` files load conditionally; `manual` files are never auto-loaded.
 
 **Claude Code:**
+
 ```text
 /specops steering
-```
+```text
 
 **Other platforms:**
+
 ```text
 Use specops steering
 ```
 
 **Workflow:**
+
 - If no steering directory exists, offers to create three foundation files: `product.md`, `tech.md`, `structure.md`
 - If the directory exists, shows a summary table of all steering files (name, inclusion mode, description) and offers to add, edit, or done on interactive platforms
 
 **Steering file inclusion modes:**
 
 | Mode | Description |
-|------|-------------|
+| ------ | ------------- |
 | `always` | Loaded before every spec (use for product overview, tech stack, project structure) |
 | `fileMatch` | Loaded only when affected files match the file globs (e.g., `["*.sql", "migrations/**"]`) |
 | `manual` | Not loaded automatically — available for explicit reference only |
@@ -189,12 +207,14 @@ Use specops steering
 Shows decisions, project context, and detected patterns from completed specs.
 
 **Claude Code:**
-```
+
+```text
 /specops memory
 ```
 
 **Other platforms:**
-```
+
+```text
 Use specops memory
 ```
 
@@ -205,12 +225,14 @@ Use specops memory
 Populates the memory layer from all completed specs' `implementation.md` decision journals. Use after enabling memory on a project with existing specs.
 
 **Claude Code:**
-```
+
+```text
 /specops memory seed
 ```
 
 **Other platforms:**
-```
+
+```text
 Use specops memory seed
 ```
 
@@ -225,7 +247,8 @@ Use specops memory seed
 Runs 5 drift checks against one or more specs and produces a health report. Read-only — no files are modified.
 
 **Claude Code:**
-```
+
+```text
 /specops audit
 /specops audit <name>
 /specops health check
@@ -234,7 +257,8 @@ Runs 5 drift checks against one or more specs and produces a health report. Read
 ```
 
 **Other platforms:**
-```
+
+```text
 audit <name>
 health check
 check drift
@@ -242,13 +266,14 @@ spec health
 ```
 
 **Behavior:**
+
 - With a name: audits that single spec
 - Without a name: audits all specs whose status is not `completed`
 
 **5 Drift Checks:**
 
 | Check | What it detects | Severity |
-|-------|-----------------|----------|
+| ------- | ----------------- | ---------- |
 | File Drift | "Files to Modify" paths that no longer exist | Drift / Warning |
 | Post-Completion Modification | Files changed after a completed spec's `updated` timestamp | Warning |
 | Task Status Inconsistency | Completed tasks with missing files; pending tasks with early implementations | Drift / Warning |
@@ -266,7 +291,8 @@ spec health
 Guided interactive repair for drifted specs. Presents numbered findings and applies selected fixes to `tasks.md` and `spec.json`.
 
 **Claude Code:**
-```
+
+```text
 /specops reconcile <name>
 /specops fix <name>
 /specops repair <name>
@@ -274,7 +300,8 @@ Guided interactive repair for drifted specs. Presents numbered findings and appl
 ```
 
 **Other platforms:**
-```
+
+```text
 reconcile <name>
 fix <name>
 repair <name>
@@ -282,6 +309,7 @@ sync <name>
 ```
 
 **Workflow:**
+
 1. Runs a full audit on the target spec
 2. If healthy → notifies no action needed
 3. Presents numbered findings list
@@ -292,7 +320,7 @@ sync <name>
 **Available repairs by finding type:**
 
 | Finding | Options |
-|---------|---------|
+| --------- | --------- |
 | Missing file (renamed) | Update path in tasks.md / Skip |
 | Missing file (deleted) | Remove reference / Provide new path / Skip |
 | Completed task, file missing | Provide new path / Note as discrepancy in tasks.md / Skip |
@@ -309,16 +337,19 @@ sync <name>
 Convert an existing AI coding assistant plan (from plan mode, a planning session, or any structured outline) into a persistent SpecOps spec. SpecOps faithfully maps the plan into the standard spec structure: goals → requirements with EARS acceptance criteria, approach → design.md, steps → tasks.md. Where the plan omits information, SpecOps uses `[To be defined]` placeholders rather than inferring content.
 
 **Claude Code:**
+
 ```text
 /specops from-plan
-```
+```text
 
 **Other platforms:**
+
 ```text
 Use specops from-plan
 ```
 
 **Workflow:**
+
 1. If no plan content is included in the invocation, prompts you to paste the plan
 2. Parses the plan to identify goals, approach, steps, acceptance criteria, constraints, and file paths
 3. Shows a mapping summary before generating (e.g., "Found 2 goals → requirements.md, 8 steps → tasks.md")
@@ -338,23 +369,27 @@ Use specops from-plan
 Submit feedback about SpecOps (bugs, feature requests, friction, improvements) directly as a GitHub issue on the SpecOps repository.
 
 **Claude Code:**
+
 ```text
 /specops feedback
-```
+```text
 
 **Other platforms:**
+
 ```text
 Use specops feedback
 Use specops feedback bug The interview mode skips my follow-up answers
 ```
 
 **Workflow (interactive):**
+
 1. Select category (bug, feature, friction, improvement, docs gap, other)
 2. Describe the feedback
 3. Review the draft issue
 4. Confirm submission
 
 **Workflow (non-interactive):**
+
 - Provide category and description inline
 - Issue is composed and submitted automatically
 
@@ -371,7 +406,7 @@ Display an existing spec in a structured, readable format.
 ### View Types
 
 | View type | Description | Keywords |
-|-----------|-------------|----------|
+| ----------- | ------------- | ---------- |
 | `summary` (default) | Executive overview with key decisions and progress | (no keyword) or `summary` |
 | `full` | Complete spec content: all sections in sequence | `full`, `everything`, `all sections`, `complete` |
 | `status` | Metrics only: metadata, progress table, review status | `status`, `progress`, `metadata` |
@@ -384,7 +419,8 @@ Display an existing spec in a structured, readable format.
 ### Examples
 
 **Claude Code:**
-```
+
+```text
 /specops view login-page
 /specops view login-page full
 /specops view login-page design
@@ -394,7 +430,8 @@ Display an existing spec in a structured, readable format.
 ```
 
 **Other platforms:**
-```
+
+```text
 View the login-page spec
 Show me the full login-page spec
 Show me the login-page design
@@ -408,12 +445,14 @@ Walk me through the login-page spec
 Show a formatted table of all existing specs with status, version, and last updated.
 
 **Claude Code:**
-```
+
+```text
 /specops list
 ```
 
 **Other platforms:**
-```
+
+```text
 List all specops specs
 ```
 
@@ -426,13 +465,15 @@ List all specops specs
 View a summary of all specs grouped by status, with approval counts and progress.
 
 **Claude Code:**
-```
+
+```text
 /specops status
 /specops status in-review
 ```
 
 **Other platforms:**
-```
+
+```text
 show specops status
 show specops status in-review
 ```
@@ -440,7 +481,7 @@ show specops status in-review
 **Arguments:**
 
 | Argument | Example | Effect |
-|----------|---------|--------|
+| ---------- | --------- | -------- |
 | None | `/specops status` | Shows all specs grouped by status |
 | Status filter | `/specops status in-review` | Shows only specs with that status |
 
@@ -455,26 +496,30 @@ Guided Q&A session for vague or exploratory ideas. Gathers structured requiremen
 ### Explicit Trigger
 
 **Claude Code:**
-```
+
+```text
 /specops interview I want to build something for restaurants
 /specops interview Help me design a product
 ```
 
 **Other platforms:**
-```
+
+```text
 Use specops interview to explore a saas idea
 ```
 
 ### Auto-Trigger
 
 Interview mode activates automatically on interactive platforms when:
+
 - Request is **5 words or fewer** (e.g., "I want to build a SaaS")
 - **No technical keywords detected** (no mention of infra, data, library, frontend, backend)
 - **No action verb** (no Add, Fix, Refactor, Implement, Build, etc.)
 - **Explicit signals** like "Help me think about", "Idea:", "Brainstorm", "Need advice"
 
 Examples that auto-trigger:
-```
+
+```text
 I have an idea
 Something for restaurants
 What if we built a product...
@@ -482,7 +527,8 @@ Help me design a dashboard
 ```
 
 Examples that skip interview (too specific):
-```
+
+```text
 Add OAuth authentication to the API
 Fix the 500 error on checkout
 Refactor the database layer
@@ -507,7 +553,8 @@ Fixed set of 5 questions, each with conditional follow-ups:
 Teammate reviews a spec in `draft` or `in-review` status, provides section-by-section feedback, and approves or requests changes.
 
 **Any platform:**
-```
+
+```text
 review login-page
 ```
 
@@ -524,7 +571,8 @@ review login-page
 Spec author revises a spec in response to reviewer feedback marked `changes-requested`.
 
 **Any platform:**
-```
+
+```text
 revise login-page
 ```
 
@@ -539,11 +587,13 @@ revise login-page
 Skip spec creation and jump directly to implementation. Reads an existing spec and executes all tasks sequentially.
 
 **Any platform:**
-```
+
+```text
 implement login-page
 ```
 
 **Implementation gate:**
+
 - If spec review is **enabled** and status is `approved` or `self-approved`: Proceeds, sets status to `implementing`
 - If spec review is **enabled** and status is NOT `approved`/`self-approved`:
   - Interactive platforms (Claude Code, Cursor, Copilot): Warns and asks for confirmation
@@ -557,12 +607,13 @@ implement login-page
 Phase 3 execution adapts based on `implementation.taskDelegation` in `.specops.json` (defaults to `"auto"` if not set):
 
 | Value | Behavior |
-|-------|----------|
+| ------- | ---------- |
 | `"auto"` (default) | Delegates to fresh contexts when 4+ pending tasks (prevents context exhaustion) |
 | `"always"` | Always delegates regardless of task count |
 | `"never"` | Sequential execution in the current context |
 
 Delegation strategy depends on platform capabilities:
+
 - **Claude Code**: Sub-agent delegation (fresh agent per task)
 - **Cursor / Copilot**: Session checkpoint (prompts to continue in new session after each task)
 - **Codex**: Enhanced sequential (standard execution with detailed checkpointing)
@@ -574,7 +625,7 @@ Delegation strategy depends on platform capabilities:
 Use these when viewing a specific section or combining sections:
 
 | Section | File | Notes |
-|---------|------|-------|
+| --------- | ------ | ------- |
 | `requirements` | `requirements.md` | Only for feature specs; bugfix specs use `bugfix` instead |
 | `bugfix` | `bugfix.md` | Only for bugfix-type specs |
 | `refactor` | `refactor.md` | Only for refactor-type specs |
@@ -584,7 +635,8 @@ Use these when viewing a specific section or combining sections:
 | `reviews` | `reviews.md` | Optional; created during team review cycle |
 
 **Multi-section examples:**
-```
+
+```text
 /specops view login-page requirements design
 /specops view login-page design tasks
 ```
@@ -596,7 +648,7 @@ Use these when viewing a specific section or combining sections:
 These are the valid states a spec can be in, usable as filters with the status command:
 
 | Status | Meaning |
-|--------|---------|
+| -------- | --------- |
 | `draft` | Spec created, not yet submitted for review (or review not enabled) |
 | `in-review` | Submitted for team review, awaiting approvals |
 | `approved` | Required approvals met (at least one peer approval), ready for implementation |
@@ -605,7 +657,8 @@ These are the valid states a spec can be in, usable as filters with the status c
 | `completed` | All tasks done, acceptance criteria verified |
 
 **Examples:**
-```
+
+```text
 /specops status draft
 /specops status in-review
 /specops status completed
@@ -616,23 +669,27 @@ These are the valid states a spec can be in, usable as filters with the status c
 ## Platform Notes
 
 ### Claude Code
+
 - **Best for:** Interactive exploration with slash commands
 - **Capabilities:** Full — interviews, interactive questions, built-in progress tracking (TodoWrite), direct file editing
 - **Special features:** `/specops interview` auto-detection, `/specops view` with view type modifiers
 
 ### Cursor
+
 - **Best for:** Natural language in the IDE
 - **Capabilities:** Interactive questions, rules-based triggering
 - **Special features:** Auto-triggers on mention of "specops", "spec-driven", or "create a spec"
 - **Limitation:** Progress tracked in `tasks.md` instead of built-in UI
 
 ### OpenAI Codex
+
 - **Best for:** Non-interactive, autonomous spec generation and implementation
 - **Capabilities:** Full feature set, but non-interactive
 - **Special features:** Interview mode **skipped entirely** (proceeds with assumptions), walkthrough falls back to full+commentary
 - **Limitation:** Cannot ask clarifying questions; user must provide all details upfront
 
 ### GitHub Copilot
+
 - **Best for:** Multi-file context with IDE integration
 - **Capabilities:** Interactive questions (via chat), but cannot directly create/edit files (generates as suggestions)
 - **Special features:** Auto-detect like Cursor
@@ -643,7 +700,7 @@ These are the valid states a spec can be in, usable as filters with the status c
 ## Quick Lookup: What Command Should I Use?
 
 | Scenario | Command |
-|----------|---------|
+| ---------- | --------- |
 | I have a vague idea | Use interview mode (explicit or auto) |
 | I want to create a spec for a feature | `/specops Add <description>` |
 | I want to create a spec for a bug | `/specops Fix: <description>` |

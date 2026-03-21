@@ -5,23 +5,29 @@ Interview mode front-loads a structured Q&A session to gather clear requirements
 ## When Interview Mode Triggers
 
 ### Explicit Trigger
+
 User explicitly requests interview mode:
+
 - `/specops interview I have this idea...`
 - Request keyword contains "interview"
 
 ### Auto-Trigger (Interactive Platforms Only)
+
 SpecOps automatically enters interview mode if the request is **vague**, detected by any of:
+
 - ≤ 5 words in the request
 - **No technical keywords** detected from any vertical (no matches against infrastructure/data/library/frontend/backend/builder keywords)
 - **No action verb** (no add, build, fix, refactor, create, implement, set up, design, architect, etc.)
 - Explicit signals: "help me think about", "idea:", "brainstorm", "need advice on"
 
 **Example vague prompts triggering auto-interview:**
+
 - "I want to build a SaaS" (5 words, no tech keywords, generic)
 - "Something for restaurants" (3 words, no tech keywords)
 - "Help me design a product" (auto-trigger keywords)
 
 **Example clear prompts that skip interview:**
+
 - "Add OAuth authentication to the API" (has action verb + tech keywords)
 - "Refactor the database layer to use repository pattern" (explicit action + tech terms)
 - "Fix 500 errors on checkout" (action verb + specific issue)
@@ -34,36 +40,41 @@ The interview progresses through states: `gathering → clarifying → confirmin
 
 Ask 5 fixed questions in order. Each question has a primary form and optional clarifying follow-up triggered by answer characteristics.
 
-**Question 1: Problem**
-```
+#### Question 1: Problem
+
+```text
 Primary:  "What problem are you solving or what gap are you filling?"
 Trigger:  Answer < 15 words OR uses only generic words (thing, stuff, feature, tool)
 Follow-up: "Who specifically encounters this problem? What's their current workaround or pain point?"
 ```
 
-**Question 2: Users**
-```
+#### Question 2: Users
+
+```text
 Primary:  "Who are the primary users or beneficiaries? Describe them briefly."
 Trigger:  Answer ≤ 2 words OR answer is exactly "developers", "users", "everyone", "anyone"
 Follow-up: "What's their main workflow or context? Are they technical?"
 ```
 
-**Question 3: Core Features**
-```
+#### Question 3: Core Features
+
+```text
 Primary:  "What are the 2–3 core things this needs to do? (Key features, not nice-to-haves)"
 Trigger:  Fewer than 2 distinct features mentioned
 Follow-up: "What happens after [primary feature]? Any secondary workflows or follow-on actions?"
 ```
 
-**Question 4: Constraints**
-```
+#### Question 4: Constraints
+
+```text
 Primary:  "Any hard constraints? (Tech stack preferences, integrations, timeline, must-nots, dependencies)"
 Trigger:  Answer is "none", empty/blank, or only very generic ("fast", "secure")
 Follow-up: "Any existing systems this must integrate with or compatibility concerns?"
 ```
 
-**Question 5: Done Criteria**
-```
+#### Question 5: Done Criteria
+
+```text
 Primary:  "How will you know this is done? (What does success look like?)"
 Trigger:  Answer < 10 words OR no measurable/observable outcome mentioned
 Follow-up: "What's the absolute minimum shippable version of this?"
@@ -76,8 +87,9 @@ When a follow-up is triggered, Use the AskUserQuestion tool for the follow-up qu
 ### Phase: Confirming
 
 1. Display a formatted summary of all 5 gathered answers:
-   ```
-   📋 Interview Summary
+
+   ```text
+   Interview Summary
 
    **Problem:** [answer 1]
    **Users:** [answer 2]

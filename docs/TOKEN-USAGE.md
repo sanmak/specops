@@ -11,7 +11,7 @@ AI coding assistants (Claude Code, Cursor, Codex, Copilot) do not expose token-c
 Each completed spec stores a `metrics` object in `spec.json`:
 
 | Metric | Type | Calculation |
-|--------|------|-------------|
+| -------- | ------ | ------------- |
 | `specArtifactTokensEstimate` | integer | Total characters across all spec artifacts (requirements.md, design.md, tasks.md, implementation.md) divided by 4 |
 | `filesChanged` | integer | Files changed during implementation (from `git diff --stat`) |
 | `linesAdded` | integer | Lines added during implementation |
@@ -25,7 +25,7 @@ Each completed spec stores a `metrics` object in `spec.json`:
 Based on SpecOps dogfooding (13 completed specs building SpecOps itself):
 
 | Spec Type | Typical Tasks | Artifact Size (chars) | Token Estimate | Files Changed |
-|-----------|--------------|----------------------|----------------|---------------|
+| ----------- | -------------- | ---------------------- | ---------------- | --------------- |
 | Small feature | 3-4 | 3,000-5,000 | 750-1,250 | 4-8 |
 | Medium feature | 5-6 | 6,000-10,000 | 1,500-2,500 | 8-15 |
 | Large feature | 7-8 | 10,000-16,000 | 2,500-4,000 | 12-20 |

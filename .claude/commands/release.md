@@ -36,12 +36,14 @@ Run all of these checks. If any fail, report the issue and stop.
 Based on the commits and diffs from Step 3, draft a CHANGELOG section for this version.
 
 **Categorize changes** using commit prefixes and diff analysis:
+
 - `feat:` commits go under `### Added`
 - `fix:` commits go under `### Fixed`
 - `refactor:`, `chore:` (non-version) commits go under `### Changed`
 - Removed functionality goes under `### Removed`
 
 **Writing guidelines**:
+
 - Write meaningful entries describing WHAT was added/changed from a user's perspective, not just repeating commit messages
 - Use bold for the main feature name, then a brief description (e.g., `- **Builder vertical**: new vertical for...`)
 - Group related sub-items under their main feature
@@ -54,6 +56,7 @@ Based on the commits and diffs from Step 3, draft a CHANGELOG section for this v
 ### Step 5: Update CHANGELOG.md
 
 Edit `CHANGELOG.md`:
+
 1. Keep the `## [Unreleased]` header but clear its content
 2. Insert the new version section immediately after `## [Unreleased]`: `## [<version>] - <YYYY-MM-DD>` (use today's date)
 3. Add the categorized entries from Step 4 under the version header
@@ -77,6 +80,7 @@ Run these checks. If any fail, report the failure and stop.
 ### Step 9: Stage and commit
 
 Stage these files:
+
 - `CHANGELOG.md`
 - `platforms/claude/platform.json`, `platforms/cursor/platform.json`, `platforms/codex/platform.json`, `platforms/copilot/platform.json`
 - `CHECKSUMS.sha256`
@@ -85,7 +89,7 @@ Check if any generated files actually changed with `git diff platforms/claude/SK
 
 Run the commit using a heredoc:
 
-```
+```bash
 git commit -m "$(cat <<'EOF'
 chore: release v<version>
 EOF
@@ -93,6 +97,7 @@ EOF
 ```
 
 Do NOT use `--no-verify`. If the pre-commit hook fails:
+
 1. Read the error output
 2. Fix the issue (regenerate files, fix JSON, etc.)
 3. Re-stage changes with `git add`
@@ -111,7 +116,7 @@ Extract the changelog section for this version from `CHANGELOG.md` (everything b
 
 Create the release:
 
-```
+```bash
 gh release create v<version> --title "v<version>" --notes "$(cat <<'EOF'
 <changelog section content>
 EOF
@@ -123,6 +128,7 @@ If the release creation fails, report the error. The commit and push already suc
 ### Step 12: Confirm
 
 Report the release summary:
+
 1. Show the release URL from Step 11
 2. Run `git log --oneline -1` to show the release commit
 3. Run `grep '"version"' platforms/*/platform.json` to confirm version is updated

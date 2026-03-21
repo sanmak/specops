@@ -66,7 +66,7 @@ Format: `<spec-name>-<YYYYMMDD-HHMMSS>.log.md`. The timestamp is captured at Pha
 ### Platform Adaptation
 
 | Capability | Impact |
-|-----------|--------|
+| --- | --- |
 | `canExecuteCode: true` (all platforms) | RUN_COMMAND available for `date` and `mkdir` commands |
 | `canEditFiles: true` (all platforms) | EDIT_FILE available for append operations |
 | `canTrackProgress: false` | No impact — run log is file-based, not progress-bar-based |

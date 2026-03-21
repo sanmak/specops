@@ -5,7 +5,7 @@
 Every task in `tasks.md` has exactly one status:
 
 | Status | Meaning |
-|--------|---------|
+| --- | --- |
 | Pending | Not started |
 | In Progress | Currently being worked on |
 | Completed | Finished and verified |
@@ -13,7 +13,7 @@ Every task in `tasks.md` has exactly one status:
 
 ### Valid Transitions
 
-```
+```text
 Pending ──────► In Progress
 In Progress ──► Completed
 In Progress ──► Blocked
@@ -21,6 +21,7 @@ Blocked ──────► In Progress
 ```
 
 **Prohibited transitions** (protocol breach if attempted):
+
 - Pending → Completed (must pass through In Progress)
 - Pending → Blocked (must start work to discover blockers)
 - Completed → any state (completed is terminal)
@@ -46,6 +47,7 @@ When changing task status, follow this strict sequence:
 3. Then report progress in chat
 
 This means:
+
 - Before starting a task: write `In Progress` to `tasks.md` first
 - Before reporting completion: write `Completed` to `tasks.md` first
 - Before reporting a blocker: write `Blocked` to `tasks.md` first
@@ -55,6 +57,7 @@ Violation of write ordering is a protocol breach. Chat status must never lead pe
 ### Single Active Task
 
 Only **one** task may be `In Progress` at any time. Before setting a new task to `In Progress`:
+
 1. READ_FILE `tasks.md`
 2. Verify no other task has `**Status:** In Progress`
 3. If one does, complete it or set it to `Blocked` first
@@ -62,6 +65,7 @@ Only **one** task may be `In Progress` at any time. Before setting a new task to
 ### Delegation Compatibility
 
 When tasks are executed via delegation (see the Task Delegation module):
+
 - The **Single Active Task** rule still applies — the orchestrator sets one task to In Progress before delegating it
 - The **Write Ordering Protocol** is the delegate's responsibility — the delegate updates tasks.md before and after work
 - The orchestrator **verifies** task status in tasks.md after each delegation returns (conformance gate)
@@ -76,6 +80,7 @@ When a task is blocked:
 3. EDIT_FILE `implementation.md` — add an entry to the "Blockers Encountered" section
 
 When unblocking:
+
 1. Update or clear the `**Blocker:**` line
 2. Set status back to `In Progress` (following write ordering)
 

@@ -16,11 +16,14 @@ When creating a spec file (requirements.md, bugfix.md, refactor.md, design.md, o
 2. **If the template name is `"default"` or not set**, use the hardcoded templates defined in the "Specification Templates" section, with Vertical Adaptation Rules applied if the detected vertical is not `backend` or `fullstack`. Skip the remaining steps.
 
 3. **If the template name is NOT `"default"`**, look for a custom template file at:
-   ```
+
+   ```text
    <specsDir>/templates/<template-name>.md
    ```
+
    For example, if `specsDir` is `.specops` and `templates.feature` is `"detailed"`, look for:
-   ```
+
+   ```text
    .specops/templates/detailed.md
    ```
 
@@ -60,6 +63,7 @@ A custom template file at `.specops/templates/detailed.md` might look like:
 ```
 
 ### Notes on Custom Templates
+
 - Custom templates can be used for **any** spec file: requirements/bugfix/refactor, design.md, and tasks.md.
 - When using a custom template, Vertical Adaptation Rules are NOT applied — the custom template defines its own structure.
 - When NO custom template is set (template name is `"default"`), the hardcoded default template is used with Vertical Adaptation Rules applied.

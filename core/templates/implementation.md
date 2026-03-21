@@ -15,14 +15,17 @@
 - Project state: [greenfield / brownfield / migration]
 
 ## Decision Log
+
 | # | Decision | Rationale | Task | Timestamp |
 |---|----------|-----------|------|-----------|
 
 ## Deviations from Design
+
 | Planned | Actual | Reason | Task |
 |---------|--------|--------|------|
 
 ## Blockers Encountered
+
 | Blocker | Resolution | Impact | Task |
 |---------|------------|--------|------|
 

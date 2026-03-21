@@ -2,7 +2,7 @@
 
 ## Directory Tree
 
-```
+```bash
 specops/
 ├── README.md                             # Main documentation
 ├── QUICKSTART.md                         # Getting started guide
@@ -190,7 +190,7 @@ specops/
 
 ### Three-Layer Design
 
-```
+```text
 ┌─────────────────────────────────────────────────┐
 │                  core/                          │
 │  Platform-agnostic workflow, templates, safety  │

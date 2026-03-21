@@ -17,7 +17,7 @@ inclusion: always
 **Frontmatter fields:**
 
 | Field | Required | Type | Description |
-|-------|----------|------|-------------|
+| --- | --- | --- | --- |
 | `name` | Yes | string | Display name for the steering file |
 | `description` | Yes | string | Brief purpose description |
 | `inclusion` | Yes | enum | Loading mode: `always`, `fileMatch`, or `manual` |
@@ -151,6 +151,7 @@ These must refer to managing SpecOps steering files, NOT to a product feature (e
 2. Check if `<specsDir>/steering/` exists:
 
 **If steering directory does NOT exist:**
+
 - On interactive platforms (`canAskInteractive = true`), ASK_USER: "No steering files found. Would you like to create foundation steering files (product.md, tech.md, structure.md) for persistent project context?"
   - If yes: create the directory and 3 foundation templates using:
     - RUN_COMMAND(`mkdir -p <specsDir>/steering`)
@@ -160,13 +161,14 @@ These must refer to managing SpecOps steering files, NOT to a product feature (e
     (see Foundation File Templates above for `<...Template>` contents), then NOTIFY_USER: "Created 3 steering files in `<specsDir>/steering/`. Edit them to describe your project — the agent will load them automatically before every spec."
   - If no: NOTIFY_USER: "No steering files created. You can create them manually in `<specsDir>/steering/` — see the Foundation File Templates section for the expected format."
 - On non-interactive platforms (`canAskInteractive = false`), create the directory and foundation templates unconditionally:
-    - RUN_COMMAND(`mkdir -p <specsDir>/steering`)
-    - WRITE_FILE(`<specsDir>/steering/product.md`, `<productTemplate>`)
-    - WRITE_FILE(`<specsDir>/steering/tech.md`, `<techTemplate>`)
-    - WRITE_FILE(`<specsDir>/steering/structure.md`, `<structureTemplate>`)
+  - RUN_COMMAND(`mkdir -p <specsDir>/steering`)
+  - WRITE_FILE(`<specsDir>/steering/product.md`, `<productTemplate>`)
+  - WRITE_FILE(`<specsDir>/steering/tech.md`, `<techTemplate>`)
+  - WRITE_FILE(`<specsDir>/steering/structure.md`, `<structureTemplate>`)
     (see Foundation File Templates above for `<...Template>` contents), then NOTIFY_USER: "Created 3 steering files in `<specsDir>/steering/`. Edit them to describe your project."
 
 **If steering directory exists:**
+
 - LIST_DIR(`<specsDir>/steering/`) to find all `.md` files, sort alphabetically, and process up to 20 files (apply the same safety cap used in the loading procedure)
 - For each selected file, READ_FILE(`<specsDir>/steering/<filename>`) and parse YAML frontmatter
 - Present a summary table:

@@ -3,6 +3,7 @@
 ## Runtime Dependencies
 
 **None.** SpecOps has zero runtime dependencies. It consists entirely of:
+
 - Markdown files (agent prompt, documentation)
 - JSON files (configuration schema, skill metadata, examples)
 - Shell scripts (installation, verification)
@@ -14,7 +15,7 @@ This zero-dependency design minimizes supply chain attack surface.
 These are used only in the CI pipeline and test suite, not at runtime:
 
 | Dependency | Purpose | Required |
-|-----------|---------|----------|
+| ----------- | --------- | ---------- |
 | Python 3 | JSON validation, schema testing | Yes (CI) |
 | [jsonschema](https://pypi.org/project/jsonschema/) | Validate configs against JSON Schema | Yes (CI) |
 | [ShellCheck](https://www.shellcheck.net/) | Shell script static analysis | Yes (CI) |
@@ -25,7 +26,7 @@ These are used only in the CI pipeline and test suite, not at runtime:
 When SpecOps is installed, only these files are copied to the target directory:
 
 | File | Purpose |
-|------|---------|
+| ------ | --------- |
 | `SKILL.md` | Claude Code skill file with YAML frontmatter and agent instructions |
 
 ## Integrity Verification

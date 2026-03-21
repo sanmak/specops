@@ -7,7 +7,8 @@ Get up and running with SpecOps in 5 minutes.
 ### Option 0: Plugin Marketplace (Recommended)
 
 **Claude Code:**
-```
+
+```text
 /plugin marketplace add sanmak/specops
 /plugin install specops@specops-marketplace
 /reload-plugins
@@ -43,24 +44,28 @@ The setup script detects your installed AI coding tools and installs SpecOps for
 ### Option 3: Platform-Specific Setup
 
 **Claude Code:**
+
 ```bash
 mkdir -p ~/.claude/skills/specops
 cp platforms/claude/SKILL.md ~/.claude/skills/specops/
 ```
 
 **Cursor:**
+
 ```bash
 mkdir -p /path/to/your/project/.cursor/rules
 cp platforms/cursor/specops.mdc /path/to/your/project/.cursor/rules/
 ```
 
 **OpenAI Codex:**
+
 ```bash
 mkdir -p /path/to/your/project/.codex/skills/specops
 cp platforms/codex/SKILL.md /path/to/your/project/.codex/skills/specops/
 ```
 
 **GitHub Copilot:**
+
 ```bash
 mkdir -p /path/to/your/project/.github/instructions
 cp platforms/copilot/specops.instructions.md /path/to/your/project/.github/instructions/
@@ -78,16 +83,19 @@ cp examples/.specops.json .specops.json
 ### 2. Run SpecOps
 
 **Claude Code:**
-```
+
+```text
 /specops Add a login page with email and password
 ```
 
 **Cursor / Codex:**
-```
+
+```text
 Use specops to add a login page with email and password
 ```
 
 The agent will:
+
 - Create `.specops/login-page/` directory
 - Generate `requirements.md` with user stories
 - Create `design.md` with component structure
@@ -99,7 +107,8 @@ The agent will:
 Once a spec exists, view it directly through the assistant instead of opening raw files:
 
 **Claude Code:**
-```
+
+```text
 /specops view login-page                   # Executive summary
 /specops view login-page design            # Design section only
 /specops view login-page full              # All sections
@@ -108,7 +117,8 @@ Once a spec exists, view it directly through the assistant instead of opening ra
 ```
 
 **Cursor / Codex:**
-```
+
+```text
 View the login-page spec
 Show me the login-page design
 Walk me through the login-page spec
@@ -122,6 +132,7 @@ View modes: `summary` (default), `full`, `status`, `walkthrough`, or specific se
 ## Configuration
 
 ### Minimal
+
 ```json
 {
   "specsDir": ".specops"
@@ -129,6 +140,7 @@ View modes: `summary` (default), `full`, `status`, `walkthrough`, or specific se
 ```
 
 ### Recommended
+
 ```json
 {
   "specsDir": ".specops",
@@ -156,26 +168,32 @@ Save as `.specops.json` in your project root.
 ## Example Workflows
 
 ### Feature Development
-```
+
+```text
 Add user authentication with OAuth
 ```
+
 Agent creates complete spec, reviews with you, implements, creates PR.
 
 ### Bug Fix
-```
+
+```text
 Fix: Users can't submit form with special characters
 ```
+
 Agent investigates, documents root cause, proposes fix, implements with tests.
 
 ### Refactoring
-```
+
+```text
 Refactor API layer to use repository pattern
 ```
+
 Agent analyzes current code, designs refactoring approach, implements incrementally.
 
 ## What Gets Created
 
-```
+```text
 your-project/
   .specops.json                         (config)
   .specops/                             (specs directory)

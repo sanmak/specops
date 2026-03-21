@@ -114,12 +114,14 @@ If the Decision Log table in `implementation.md` is empty (no data rows), skip t
 Pattern detection runs as part of memory writing (Phase 4, step 3). It produces `patterns.json` by analyzing the accumulated decisions and spec artifacts.
 
 **Decision category detection:**
+
 1. READ_FILE(`<specsDir>/memory/decisions.json`) — load all decisions.
 2. Extract category keywords from each decision's `decision` text. Categories are heuristic: look for domain terms like "heading", "marker", "validator", "template", "schema", "workflow", "routing", "safety", "abstraction", "platform".
 3. Group decisions by category keyword. Any category appearing in 2+ distinct specs is a recurring pattern.
 4. For each recurring category, compose a `lesson` by summarizing the common thread across the decisions.
 
 **File overlap detection:**
+
 1. For each completed spec in `<specsDir>/` (read from index.json or scan directories):
    - If FILE_EXISTS(`<specsDir>/<spec>/tasks.md`), READ_FILE it.
    - Extract all file paths from `**Files to Modify:**` sections.
@@ -129,6 +131,7 @@ Pattern detection runs as part of memory writing (Phase 4, step 3). It produces 
 4. Sort by count descending.
 
 **Write patterns.json:**
+
 - WRITE_FILE(`<specsDir>/memory/patterns.json`) with `version: 1`, `decisionCategories` array, and `fileOverlaps` array, formatted with 2-space indentation.
 
 ### Memory Subcommand
@@ -141,6 +144,7 @@ Patterns: "memory", "show memory", "view memory", "memory seed", "seed memory".
 These must refer to SpecOps memory management, NOT a product feature (e.g., "add memory cache" or "optimize memory usage" is NOT memory mode).
 
 **View workflow** (`/specops memory`):
+
 1. If FILE_EXISTS(`.specops.json`), READ_FILE(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
 2. If FILE_EXISTS(`<specsDir>/memory/`) is false: NOTIFY_USER("No memory found. Memory is created automatically after your first spec completes, or run `/specops memory seed` to populate from existing completed specs.") and stop.
 3. If FILE_EXISTS(`<specsDir>/memory/decisions.json`), READ_FILE it and parse.
@@ -175,10 +179,11 @@ These must refer to SpecOps memory management, NOT a product feature (e.g., "add
 | core/workflow.md | ears, bugfix, steering, drift | 4 |
 ```
 
-7. On interactive platforms (`canAskInteractive = true`), ASK_USER("Would you like to drill into a specific decision, or done?")
-8. On non-interactive platforms, display the summary and stop.
+1. On interactive platforms (`canAskInteractive = true`), ASK_USER("Would you like to drill into a specific decision, or done?")
+2. On non-interactive platforms, display the summary and stop.
 
 **Seed workflow** (`/specops memory seed`):
+
 1. If FILE_EXISTS(`.specops.json`), READ_FILE(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
 2. If FILE_EXISTS(`<specsDir>/`) is false: NOTIFY_USER("No specs directory found at `<specsDir>`. Create a spec first or run `/specops init`.") and stop.
 3. If FILE_EXISTS(`<specsDir>/index.json`), READ_FILE(`<specsDir>/index.json`) to get all specs. If the file contains invalid JSON, treat it as missing. If `index.json` does not exist or is invalid, LIST_DIR(`<specsDir>`) to get subdirectories, then for each subdirectory `<dir>` check FILE_EXISTS(`<specsDir>/<dir>/spec.json`), and READ_FILE each found `spec.json` to build the spec list.
@@ -203,7 +208,7 @@ These must refer to SpecOps memory management, NOT a product feature (e.g., "add
 ### Platform Adaptation
 
 | Capability | Impact |
-|-----------|--------|
+| --- | --- |
 | `canAskInteractive: false` | Memory view displays summary only (no drill-down prompt). Memory seed runs without confirmation — results displayed as text. |
 | `canTrackProgress: false` | Skip UPDATE_PROGRESS calls during memory loading and writing. Report progress in response text. |
 | `canExecuteCode: true` (all platforms) | RUN_COMMAND available for `mkdir -p` and `date` commands on all platforms. |

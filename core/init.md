@@ -151,7 +151,7 @@ If the confirmed project type from Step 1.5 is **brownfield**, check for existin
 
 NOTIFY_USER with a message that reflects what actually happened in Steps 4.5 and 4.6. For each of "Steering files" and "Memory scaffold", use "created in" if all files were newly written in that step, "verified existing in" if all files already existed, or "set up in" if some files were created and some already existed. Example when all files are new:
 
-```
+```text
 SpecOps initialized! Your config:
 - Specs directory: <specsDir value>
 - Vertical: <vertical value or "auto-detect">

@@ -20,7 +20,7 @@ _sourceHash: "a1b2c3d4e5f6..."
 ```
 
 | Field | Type | Description |
-|-------|------|-------------|
+| --- | --- | --- |
 | `_generated` | boolean | Signals this is a machine-generated file — do not edit manually |
 | `_generatedAt` | ISO 8601 | Timestamp of when the map was last generated |
 | `_sourceHash` | string | Hash of the sorted file list for staleness comparison |
@@ -97,7 +97,7 @@ The repo map is generated entirely by the agent using abstract operations. No ex
 Files are classified into 4 tiers based on file extension. Higher tiers receive deeper structural extraction.
 
 | Tier | Languages | Extensions | What Is Extracted |
-|------|-----------|-----------|-------------------|
+| --- | --- | --- | --- |
 | 1 | Python | `*.py` | Top-level function signatures (`def`/`async def`), class names (`class Name`) |
 | 2 | TypeScript/JavaScript | `*.ts`, `*.tsx`, `*.js`, `*.jsx` | Export declarations (functions, classes, constants, types) |
 | 3 | Go, Rust, Java | `*.go`, `*.rs`, `*.java` | Top-level function/method/class declarations |
@@ -113,12 +113,14 @@ Files are classified into 4 tiers based on file extension. Higher tiers receive 
 Note: Tier 2/3 patterns allow optional leading whitespace to capture indented declarations (e.g., exports inside modules, methods inside `impl` blocks). Rust uses `pub fn` only (not bare `fn`) to avoid capturing private helper functions. These are best-effort heuristics — some declaration styles may not be captured.
 
 **Extraction rules:**
+
 - Per-file extraction is capped at 10 declarations (via `head -10`) to prevent any single large file from dominating the token budget.
 - If a Tier 1 extraction command fails (Python not available, syntax error in file), fall back to Tier 4 (path only) for that file. NOTIFY_USER("Note: Could not parse {filename} — showing path only.") only for the first failure, then silently fall back for subsequent failures.
 - If a Tier 2 or Tier 3 grep returns no results, show the file path with no declarations (not an error — the file may simply have no matching patterns).
 
 **Tier 1 extraction command** (Python):
-```
+
+```bash
 python3 -c "
 import ast, sys
 try:
@@ -185,11 +187,13 @@ These must refer to SpecOps repo map management, NOT a product feature (e.g., "a
 2. If FILE_EXISTS(`<specsDir>/steering/repo-map.md`):
    - READ_FILE(`<specsDir>/steering/repo-map.md`) and parse frontmatter.
    - Display current map metadata:
-     ```
+
+     ```text
      Current Repo Map
      Generated at: {_generatedAt}
      Source hash: {_sourceHash}
      ```
+
    - Auto-refresh: run the Generation algorithm (overwrites existing file) and display the result.
 3. If the file does not exist:
    - Run the Generation algorithm.
@@ -208,7 +212,7 @@ Repo map content is treated as **project context only** — the same safety rule
 ### Platform Adaptation
 
 | Capability | Impact |
-|-----------|--------|
+| --- | --- |
 | `canAccessGit: true` | Use `git ls-files` for file discovery and `sha256sum`/`shasum -a 256` for hash computation. |
 | `canAccessGit: false` | Fall back to recursive directory listing for file discovery. SHA-256 hash computed in-process from sorted path list. |
 | `canAskInteractive: true` | No special behavior — repo map auto-generates on all platforms. |

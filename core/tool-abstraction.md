@@ -5,6 +5,7 @@ SpecOps requires a set of tool operations that vary by platform. This document d
 ### Required Operations
 
 #### File Operations
+
 - **READ_FILE(path)** → content: Read file at given path
 - **WRITE_FILE(path, content)**: Create or overwrite file with content
 - **EDIT_FILE(path, changes)**: Apply targeted edits to existing file
@@ -12,14 +13,17 @@ SpecOps requires a set of tool operations that vary by platform. This document d
 - **FILE_EXISTS(path)** → boolean: Check if file exists
 
 #### Shell Operations
+
 - **RUN_COMMAND(command)** → output: Execute shell command
 - **GET_SPECOPS_VERSION** → version_string: Extract the installed SpecOps version by running a deterministic command. Never guess or infer the version.
 
 #### User Interaction
+
 - **ASK_USER(question)** → response: Ask user for clarification
 - **NOTIFY_USER(message)**: Display message to user
 
 #### Progress Tracking
+
 - **UPDATE_PROGRESS(task_id, status)**: Track task completion status
 
 ### Platform Capability Flags
@@ -27,7 +31,7 @@ SpecOps requires a set of tool operations that vary by platform. This document d
 Not all platforms support all operations. Use these flags to adapt behavior:
 
 | Flag | Description |
-|------|-------------|
+| --- | --- |
 | `canExecuteCode` | Can the platform run shell commands? |
 | `canEditFiles` | Can the platform modify files directly? |
 | `canCreateFiles` | Can the platform create new files? |
@@ -39,6 +43,7 @@ Not all platforms support all operations. Use these flags to adapt behavior:
 ### Capability-Based Behavior Adaptation
 
 When a capability is unavailable:
+
 - **canExecuteCode = false**: Suggest commands for the user to run manually instead of executing them
 - **canEditFiles = false**: Present file changes as suggestions/diffs for the user to apply
 - **canAskInteractive = false**: Note assumptions in the spec and proceed; list any ambiguities that the user should review

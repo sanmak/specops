@@ -22,7 +22,7 @@ SpecOps brings structured spec-driven development to your AI coding assistant â€
 
 **Install (Claude Code):**
 
-```
+```text
 /plugin marketplace add sanmak/specops
 /plugin install specops@specops-marketplace
 /reload-plugins
@@ -36,7 +36,6 @@ SpecOps brings structured spec-driven development to your AI coding assistant â€
 **Cursor / Codex / Copilot:** `Use specops to add user authentication with OAuth` | `View the spec` | `List all specs`
 
 > Full command reference: [docs/COMMANDS.md](docs/COMMANDS.md) | Troubleshooting: [QUICKSTART.md#troubleshooting](QUICKSTART.md#troubleshooting)
-
 
 ## How It Works
 
@@ -84,7 +83,7 @@ For teams, SpecOps adds a structured review cycle between spec creation and impl
 SpecOps brings multi-platform support, domain-specific templates, team review workflows, and persistent project memory to spec-driven development. Built with 6 features dogfooded using SpecOps itself â€” every spec is [public in `.specops/`](.specops/).
 
 | Capability | SpecOps | Kiro (Amazon) | GitHub Spec Kit |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **Platform support** | 4 platforms | Single IDE | 18+ agents |
 | **EARS notation** | Yes | Yes | No |
 | **Steering files** | Yes (3 modes) | Yes (4 modes) | No |
@@ -169,6 +168,7 @@ See [STRUCTURE.md](docs/STRUCTURE.md) for the full repository layout.
 SpecOps uses context-aware dispatch on Claude Code to reduce context load by 42-88% per invocation. Instead of loading the full ~4,600-line skill into every session, a lightweight dispatcher (~155 lines) routes each invocation to a focused mode file containing only the instructions needed for that specific operation.
 
 **How it works:**
+
 1. The dispatcher loads with routing logic, safety rules, and enforcement gates
 2. It detects the mode from the user's request (13 modes: init, version, update, view, steering, memory, feedback, map, audit, from-plan, pipeline, interview, spec)
 3. It reads the matching mode file and spawns a focused sub-agent with only the relevant instructions

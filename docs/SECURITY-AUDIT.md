@@ -1,7 +1,7 @@
 # Security Audit Report
 
 | Field | Value |
-|-------|-------|
+| ------- | ------- |
 | **Date** | 2026-03-02 |
 | **Tool** | Claude Code `/security-review` |
 | **Scope** | Full codebase (shell scripts, Python, JSON schemas, agent instructions) |
@@ -20,7 +20,7 @@ Three-phase review process:
 5 of 6 initial findings were validated as low-confidence false positives after Phase 2 filtering. Finding #2 (supply chain integrity) has since been remediated with SHA-256 checksum verification for defense-in-depth.
 
 | # | Category | File(s) | Initial Finding | Confidence | Verdict |
-|---|----------|---------|-----------------|-----------|---------|
+| --- | ---------- | --------- | ----------------- | ----------- | --------- |
 | 1 | Code Injection | `verify.sh:156` | `$json_file` interpolated into `python3 -c` string | 3/10 | False positive — all filenames are hardcoded string literals with no path to untrusted input |
 | 2 | Supply Chain | `scripts/remote-install.sh` | Downloads agent instruction files without checksum verification | 3/10 | **Addressed** — SHA-256 checksum verification added to remote installer (v1.3.0). Downloaded files are now verified against `CHECKSUMS.sha256` before installation |
 | 3 | Command Injection | `scripts/run-tests.sh:23`, `hooks/pre-push:33` | `eval` used to execute command strings | 2/10 | False positive — all `eval` arguments are hardcoded string literals within the same file |
@@ -54,7 +54,7 @@ These are not vulnerabilities but optional improvements for defense in depth:
 An external audit by [Agent Trust Hub](https://skills.sh/sanmak/specops/specops/security/agent-trust-hub) flagged SpecOps as HIGH risk across 5 categories. Assessment and resolution status:
 
 | # | Category | Risk | Status | Resolution |
-|---|----------|------|--------|------------|
+| --- | ---------- | ------ | -------- | ------------ |
 | 1 | Remote Code Execution | HIGH | **Addressed** | SHA-256 checksum verification added to remote installer. Downloaded files are verified against published hashes before installation. `--no-verify` flag available for development use. |
 | 2 | External Downloads | MEDIUM | **Documented** | Install trust model documented in SECURITY.md. Manual verification instructions provided. Residual repo-compromise risk acknowledged. |
 | 3 | Command Execution | LOW | **Expected behavior** | Shell commands for file management and git operations are core to a development workflow tool. Not a vulnerability. |

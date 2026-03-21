@@ -6,14 +6,14 @@ Copy-paste-ready content for submitting SpecOps to each platform's marketplace.
 
 ## Claude Code (Anthropic Plugin Marketplace)
 
-**Submission URL**: https://claude.ai/settings/plugins/submit (or platform.claude.com/plugins/submit)
+**Submission URL**: <https://claude.ai/settings/plugins/submit> (or platform.claude.com/plugins/submit)
 
 | Field | Value |
-|-------|-------|
+| ------- | ------- |
 | **Name** | specops |
 | **Version** | 1.1.0 |
-| **Repository** | https://github.com/sanmak/specops |
-| **Homepage** | https://github.com/sanmak/specops |
+| **Repository** | <https://github.com/sanmak/specops> |
+| **Homepage** | <https://github.com/sanmak/specops> |
 | **License** | MIT |
 | **Category** | development-workflows |
 | **Tags** | spec-driven, workflow, planning, requirements, design, tasks |
@@ -25,6 +25,7 @@ Copy-paste-ready content for submitting SpecOps to each platform's marketplace.
 > SpecOps brings structured spec-driven development to Claude Code. One command triggers a 4-phase workflow: understand your codebase, generate a structured spec (requirements, design, tasks), implement it, and verify the result.
 >
 > Features:
+>
 > - Domain-specific templates for backend, frontend, fullstack, infrastructure, data pipelines, libraries, and builder projects
 > - Built-in team review workflow with configurable approval thresholds
 > - Security-hardened spec processing (prompt injection defense, schema validation, path containment)
@@ -34,7 +35,8 @@ Copy-paste-ready content for submitting SpecOps to each platform's marketplace.
 > Commands: `/specops` (subcommands: `init`, `view`, `list`, `interview`)
 
 **Install commands**:
-```
+
+```text
 /plugin marketplace add sanmak/specops
 /plugin install specops@specops-marketplace
 /reload-plugins
@@ -44,14 +46,14 @@ Copy-paste-ready content for submitting SpecOps to each platform's marketplace.
 
 ## Cursor Marketplace
 
-**Submission URL**: https://cursor.com/marketplace/publish
+**Submission URL**: <https://cursor.com/marketplace/publish>
 
 | Field | Value |
-|-------|-------|
+| ------- | ------- |
 | **Name** | SpecOps |
 | **Category** | Development Workflows |
 | **Rule file** | `platforms/cursor/specops.mdc` |
-| **Repository** | https://github.com/sanmak/specops |
+| **Repository** | <https://github.com/sanmak/specops> |
 
 **Short Description**:
 > Spec-driven development workflow — transforms ideas into structured specifications before implementation.
@@ -67,14 +69,14 @@ Copy-paste-ready content for submitting SpecOps to each platform's marketplace.
 
 ## OpenAI Codex Skills Catalog
 
-**Submission URL**: https://developers.openai.com/codex/skills/ (or Codex CLI submission portal)
+**Submission URL**: <https://developers.openai.com/codex/skills/> (or Codex CLI submission portal)
 
 | Field | Value |
-|-------|-------|
+| ------- | ------- |
 | **Name** | specops |
 | **Skill directory** | `.codex/skills/specops/` |
 | **Skill file** | `platforms/codex/SKILL.md` |
-| **Repository** | https://github.com/sanmak/specops |
+| **Repository** | <https://github.com/sanmak/specops> |
 
 **Short Description**:
 > Spec-driven development workflow — transforms ideas into structured specifications before implementation.
@@ -93,11 +95,11 @@ Copy-paste-ready content for submitting SpecOps to each platform's marketplace.
 **Submission URL**: GitHub Copilot Extensions marketplace (via GitHub Marketplace or partner portal)
 
 | Field | Value |
-|-------|-------|
+| ------- | ------- |
 | **Name** | specops |
 | **Instructions file** | `platforms/copilot/specops.instructions.md` |
 | **Install path** | `.github/instructions/specops.instructions.md` |
-| **Repository** | https://github.com/sanmak/specops |
+| **Repository** | <https://github.com/sanmak/specops> |
 
 **Short Description**:
 > Spec-driven development workflow — transforms ideas into structured specifications before implementation.
@@ -114,6 +116,7 @@ Copy-paste-ready content for submitting SpecOps to each platform's marketplace.
 **Logo/Icon**: Use the SpecOps repository social preview or create from repo assets.
 
 **Screenshots to include**:
+
 1. A spec being created (`/specops Add user authentication`)
 2. The generated spec structure (requirements.md, design.md, tasks.md)
 3. The interview mode in action

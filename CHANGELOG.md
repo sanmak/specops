@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.0] - 2026-03-15
 
-### Added
+### Added in 1.3.0
 
 - **AST-based repo map**: Machine-generated structural map of the codebase stored as a steering file (`<specsDir>/steering/repo-map.md`) with `inclusion: always`. 4-tier language extraction (Python AST signatures, TS/JS exports, Go/Rust/Java declarations, other files), staleness detection (time-based 7 days + hash-based file list comparison), scope control (100 files, depth 3, ~3000 token budget)
 - **`/specops map` subcommand**: Generate or refresh the repo map on demand. Auto-detects missing or stale maps during Phase 1 step 3.5
@@ -66,7 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Command routing tightened**: Init and update mode patterns now require SpecOps context — bare "setup" or "update" no longer misclassify product feature requests
 - **README updated**: Competitive comparison with Kiro, EPIC/Reload, and Spec Kit; dogfood proof section
 
-### Fixed
+### Fixed in 1.3.0
 
 - **PR review feedback**: Extensive review-driven fixes across 15 PRs — indentation, resilience, schema, and clarity improvements across core modules
 - **Pre-commit hook portability**: Use POSIX case statement for symlink path check instead of bash-specific syntax
@@ -79,7 +79,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.0] - 2026-03-06
 
-### Added
+### Added in 1.2.0
 
 - **Plugin marketplace distribution**: `.claude-plugin/plugin.json` and `marketplace.json` manifests for distributing SpecOps via Claude Code, Cursor, Codex, and Copilot plugin marketplaces. Install with `/plugin marketplace add sanmak/specops` then `/plugin install specops@specops-marketplace`
 - **`/specops:init` skill**: Interactive config initialization that presents 5 template options (minimal, standard, full, review, builder) and writes `.specops.json` to the user's project
@@ -90,13 +90,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Command reference guide**: Comprehensive `docs/COMMANDS.md` with all commands, triggers, and platform differences
 - **Marketplace submission content**: `docs/MARKETPLACE_SUBMISSIONS.md` with copy-paste-ready content for all 4 platform marketplaces
 
-### Changed
+### Changed in 1.2.0
 
 - **Documentation reorganized**: Moved TEAM_GUIDE.md, REFERENCE.md, STRUCTURE.md into `docs/` folder
 - **README streamlined**: Simplified for first-time visitors with competitive differentiation against Spec Kit, marketplace install as primary method
 - **CI dependencies bumped**: `actions/checkout` v4→v6, `github/codeql-action` v3→v4
 
-### Fixed
+### Fixed in 1.2.0
 
 - **verify.sh file paths**: Updated after docs/ folder reorganization
 - **Gitignore warning**: Warns when `.claude` or platform dirs are gitignored (prevents silent install failures)
@@ -104,7 +104,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.0] - 2026-03-02
 
-### Added
+### Added in 1.1.0
 
 - **Builder vertical**: `builder` vertical for end-to-end product development across all domains (frontend, backend, infrastructure, data, DevOps) with Product Requirements, System Flow, Ship Plan templates, domain-tagged tasks, and scope boundary guardrails
 - **Example builder project**: `examples/specs/feature-task-management-saas/` with full requirements, design, tasks, and spec.json for a SaaS task management product
@@ -136,7 +136,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example review-enabled config (`examples/.specops.review.json`)
 - Example spec.json and reviews.md in feature-user-authentication example
 
-### Changed
+### Changed in 1.1.0
 
 - **Platform output filenames standardized**: Claude (`prompt.md` → `SKILL.md`), Codex (`AGENTS.md` → `SKILL.md`), Copilot (`copilot-instructions.md` → `specops.instructions.md`), legacy skill (`prompt.md` → `SKILL.md`)
 - **Legacy `skill.json` files removed** in favor of SKILL.md frontmatter metadata
@@ -149,7 +149,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0] - 2026-02-28
 
-### Added
+### Added in 1.0.0
 
 - **Multi-platform support**: SpecOps works with Claude Code, Cursor, OpenAI Codex, and GitHub Copilot
 - **Core module architecture**: Platform-agnostic workflow, templates, and safety rules in `core/` directory

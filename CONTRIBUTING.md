@@ -73,7 +73,7 @@ By participating in this project, you agree to maintain a respectful and inclusi
 The following files require extra scrutiny during review:
 
 | File | Risk | Review Focus |
-|------|------|--------------|
+| --- | --- | --- |
 | `core/workflow.md` | Agent behavior | Could alter what the agent does autonomously |
 | `core/safety.md` | Security guardrails | Must be preserved in all platform outputs |
 | `core/review-workflow.md` | Review integrity | Could bypass approval gates |
@@ -86,6 +86,7 @@ The following files require extra scrutiny during review:
 | `hooks/pre-commit`, `hooks/pre-push` | Git hooks | Could skip validation or introduce injection |
 
 Changes to these files should include:
+
 - An explanation of why the change is needed
 - Analysis of security implications
 - Updated tests if applicable
@@ -134,16 +135,17 @@ python3 tests/test_build.py
 
 Prefix commits with a type for clarity in the changelog:
 
-| Prefix      | When to use                                       |
-|-------------|---------------------------------------------------|
-| `feat:`     | New workflow behavior, new platform, new feature   |
-| `fix:`      | Bug fix in generator, validator, or shell scripts  |
-| `chore:`    | Version bumps, dependency updates, CI changes      |
-| `docs:`     | Documentation only                                 |
-| `test:`     | Test additions or fixes                            |
-| `refactor:` | Code restructuring with no behavior change         |
+| Prefix | When to use |
+| --- | --- |
+| `feat:` | New workflow behavior, new platform, new feature |
+| `fix:` | Bug fix in generator, validator, or shell scripts |
+| `chore:` | Version bumps, dependency updates, CI changes |
+| `docs:` | Documentation only |
+| `test:` | Test additions or fixes |
+| `refactor:` | Code restructuring with no behavior change |
 
 Examples:
+
 - `feat: add Gemini platform adapter`
 - `fix: validator false-positive on abstraction section headers`
 - `chore: bump version to 1.2.0`
@@ -160,6 +162,7 @@ Releases are automated via GitHub Actions. To create a new release:
 5. Click **Publish release**
 
 The `release.yml` workflow will automatically:
+
 - Extract the version from the tag (stripping the `v` prefix)
 - Validate it is valid semver
 - Update the version in all JSON files

@@ -15,6 +15,7 @@ Run `git status` to see the current state. If there are no modified, new, or del
 ### Step 2: Identify sensitive files
 
 Before staging, check if any of these patterns appear in the untracked or modified files:
+
 - `.env`, `.env.*`
 - `credentials.json`, `secrets.json`, `*.pem`, `*.key`
 - Any file with "secret", "credential", or "token" in its name
@@ -33,10 +34,12 @@ Then un-stage any sensitive files identified in Step 2 using `git reset HEAD <fi
 Examine the staged files list with `git diff --cached --name-only`.
 
 **If any files under `core/`, `generator/templates/`, `generator/generate.py`, or `platforms/*/platform.json` are staged:**
+
 - Run `python3 generator/generate.py --all` to regenerate platform outputs
 - Stage the regenerated files: `git add platforms/ skills/ .claude-plugin/`
 
 **If any of these checksummed files are staged** (`skills/specops/SKILL.md`, `schema.json`, `platforms/claude/SKILL.md`, `platforms/claude/platform.json`, `platforms/cursor/specops.mdc`, `platforms/cursor/platform.json`, `platforms/codex/SKILL.md`, `platforms/codex/platform.json`, `platforms/copilot/specops.instructions.md`, `platforms/copilot/platform.json`, `core/workflow.md`, `core/safety.md`, `hooks/pre-commit`, `hooks/pre-push`, `scripts/install-hooks.sh`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`):
+
 - Regenerate checksums: run `shasum -a 256 skills/specops/SKILL.md schema.json platforms/claude/SKILL.md platforms/claude/platform.json platforms/cursor/specops.mdc platforms/cursor/platform.json platforms/codex/SKILL.md platforms/codex/platform.json platforms/copilot/specops.instructions.md platforms/copilot/platform.json core/workflow.md core/safety.md hooks/pre-commit hooks/pre-push scripts/install-hooks.sh .claude-plugin/plugin.json .claude-plugin/marketplace.json > CHECKSUMS.sha256`
 - Stage it: `git add CHECKSUMS.sha256`
 
@@ -49,6 +52,7 @@ Run `git diff --cached --stat` for a summary and `git diff --cached` for the ful
 After reviewing the diff, quickly check if the staged changes might affect documentation. Get the staged file list from the `git diff --cached --name-only` output you already have.
 
 Flag potential staleness if ANY of these patterns match staged files:
+
 - `core/` or `generator/` files → `CLAUDE.md`, `README.md`, `docs/STRUCTURE.md` may need updates
 - `schema.json` → `docs/REFERENCE.md`, example configs may need updates
 - `.claude/commands/` files → `CLAUDE.md` commands table may need updates
@@ -70,6 +74,7 @@ If none of the patterns match, or if the commit already includes the affected do
 Based on the actual diff, generate a conventional commit message:
 
 **Prefix** (choose exactly one):
+
 - `feat:` -- new feature or capability
 - `fix:` -- bug fix
 - `chore:` -- version bumps, CI, dependencies, config changes
@@ -83,7 +88,7 @@ Based on the actual diff, generate a conventional commit message:
 
 Run the commit using a heredoc for proper formatting:
 
-```
+```bash
 git commit -m "$(cat <<'EOF'
 <your generated message>
 EOF
@@ -91,6 +96,7 @@ EOF
 ```
 
 Do NOT use `--no-verify`. If the pre-commit hook fails:
+
 1. Read the error output
 2. Fix the issue (regenerate files, fix JSON, etc.)
 3. Re-stage changes with `git add`

@@ -38,7 +38,7 @@ Load configuration from `.specops.json` at project root. If not found, use these
 
 Create specs in this structure:
 
-```
+```text
 <specsDir>/
   index.json             (auto-generated spec index — rebuilt after every spec.json mutation)
   <spec-name>/
@@ -55,17 +55,20 @@ Example: `.specops/user-auth-oauth/requirements.md`
 ## Spec Review Configuration
 
 If `config.team.specReview` is configured:
+
 - **`enabled: true`**: Activate the collaborative review workflow. Specs pause after generation for team review.
 - **`minApprovals`**: Number of approvals required before a spec can proceed to implementation. Default 1.
 - **`allowSelfApproval: true`**: Allow the spec author to self-review and self-approve their own specs. When enabled, solo developers can go through the full review ritual (read spec, provide feedback, approve). Self-approvals are recorded with `selfApproval: true` on the reviewer entry and result in a `"self-approved"` status (distinct from peer `"approved"`). Default false.
 
 If `specReview` is not configured, fall back to `reviewRequired`:
+
 - `reviewRequired: true` enables review with `minApprovals = 1`.
 - `reviewRequired: false` (default) disables the review workflow.
 
 When both `specReview.enabled` and `reviewRequired` are set, `specReview.enabled` takes precedence.
 
 ### Workflow Impact: specReview / reviewRequired
+
 - **Phase 2 step 7**: If enabled, set status to `in-review` and pause for review cycle.
 - **Phase 2.5**: Full review/revision/self-review workflow activates.
 - **Phase 3 step 1 (review gate)**: Blocks implementation until `approved` or `self-approved` status.
@@ -73,6 +76,7 @@ When both `specReview.enabled` and `reviewRequired` are set, `specReview.enabled
 ## Index Regeneration
 
 The agent rebuilds `<specsDir>/index.json` after every `spec.json` creation or update:
+
 1. Scan all subdirectories of `<specsDir>` for `spec.json` files
 2. Collect summary fields from each: `id`, `type`, `status`, `version`, `author` (name), `updated`
 3. Write the summaries as a JSON array to `<specsDir>/index.json`
@@ -103,7 +107,7 @@ For each eligible task, READ_FILE `<specsDir>/<spec-name>/requirements.md` (or `
 
 Compose `<IssueBody>` using this template:
 
-```
+```text
 ## Context
 
 <1-3 sentence summary from requirements.md/bugfix.md/refactor.md Overview explaining why this work exists>
@@ -148,6 +152,7 @@ Every section above (except Tests Required) is mandatory. If a section's source 
 When `taskTracking` is `"github"`, apply labels to each created issue. Labels make issues searchable and categorizable.
 
 **Label set per issue:**
+
 - **Priority label**: `P-high` or `P-medium` (matching the task's `**Priority:**` field; Low tasks are not created as issues)
 - **Spec label**: `spec:<spec-id>` where `<spec-id>` is the `id` from `spec.json` (e.g., `spec:proxy-metrics`)
 - **Type label**: `<typeLabel>` where `<typeLabel>` is derived from the `type` field in `spec.json` using this mapping: `feature` → `feat`, `bugfix` → `fix`, `refactor` → `refactor`
@@ -161,6 +166,7 @@ RUN_COMMAND(`gh label create "<label>" --force --description "<description>"`)
 The `--force` flag creates the label if it is missing and updates/overwrites its metadata (name/description/color) if it already exists. It is effectively idempotent only when you re-run it with the same arguments. Run this once per unique label definition, not once per issue.
 
 Label descriptions:
+
 - `P-high`: "High priority task"
 - `P-medium`: "Medium priority task"
 - `spec:<spec-id>`: "SpecOps spec: <spec-id>"
@@ -173,6 +179,7 @@ Label descriptions:
 **Shell safety**: `<TaskTitle>` and `<IssueBody>` contain user-controlled text. Before interpolating into shell commands, write the title and body to temporary files and pass via file-based arguments (e.g., `--body-file`). If file-based arguments are unavailable for the tracker CLI, single-quote the values with internal single-quotes escaped (`'` → `'\''`). Never pass unescaped user text directly in shell command strings. In command templates below, `<EscapedTaskTitle>` denotes the title after applying this escaping.
 
 **GitHub** (`taskTracking: "github"`):
+
 1. Compose `<IssueBody>` following the Issue Body Composition template above
 2. WRITE_FILE a temp file with `<IssueBody>` as content
 3. RUN_COMMAND(`gh issue create --title '<taskPrefix><EscapedTaskTitle>' --body-file <tempFile> --label '<priorityLabel>' --label 'spec:<spec-id>' --label '<typeLabel>'`)
@@ -180,6 +187,7 @@ Label descriptions:
 5. EDIT_FILE `tasks.md` — set the task's `**IssueID:**` to the returned issue identifier (e.g., `#42`)
 
 **Jira** (`taskTracking: "jira"`):
+
 1. Compose `<IssueBody>` following the Issue Body Composition template above
 2. WRITE_FILE a temp file with `<IssueBody>` as content
 3. RUN_COMMAND(`jira issue create --type=Task --summary='<taskPrefix><EscapedTaskTitle>' --description-file <tempFile> --label '<priorityLabel>' --label 'spec:<spec-id>' --label '<typeLabel>'`)
@@ -187,6 +195,7 @@ Label descriptions:
 5. EDIT_FILE `tasks.md` — set the task's `**IssueID:**` to the returned key
 
 **Linear** (`taskTracking: "linear"`):
+
 1. Compose `<IssueBody>` following the Issue Body Composition template above
 2. WRITE_FILE a temp file with `<IssueBody>` as content
 3. RUN_COMMAND(`linear issue create --title '<taskPrefix><EscapedTaskTitle>' --description-file <tempFile> --label '<priorityLabel>' --label 'spec:<spec-id>' --label '<typeLabel>'`)
@@ -198,6 +207,7 @@ If `config.team.taskPrefix` is set, prepend it to the issue title.
 ### Graceful Degradation
 
 If the CLI tool is not installed or the command fails:
+
 1. NOTIFY_USER("Warning: Could not create external issue for Task <N> — <error>. Continuing without external tracking for this task.")
 2. EDIT_FILE `tasks.md` — set `**IssueID:**` to `FAILED — <reason>` on the affected task
 3. Do NOT block implementation — proceed with the internal state machine
@@ -228,10 +238,12 @@ Status Sync failures are warned (NOTIFY_USER), not blocking.
 ### Commit Linking
 
 When `taskTracking` is not `"none"` and the current task has a valid IssueID (neither `None` nor prefixed with `FAILED`):
+
 - If `autoCommit` is true: include the IssueID in the commit message (e.g., `feat: implement login form (#42)` or `feat: implement login form (PROJ-123)`)
 - If `autoCommit` is false: suggest the commit format to the user: "Suggested commit: `<message> (<IssueID>)`"
 
 ### Workflow Impact: taskTracking
+
 - **Phase 2 step 6**: If not `"none"`, create external issues for High/Medium tasks via Issue Creation Protocol.
 - **Phase 3 step 1 (task tracking gate)**: Verifies issue creation was attempted — skipping is a protocol breach.
 - **Phase 3 step 3**: On every task status transition, sync to external tracker via Status Sync.
@@ -254,6 +266,7 @@ At the start of Phase 3, after the review gate check, verify external issue crea
 ## Team Conventions
 
 Always incorporate `config.team.conventions` into:
+
 - Requirements (add "Team Conventions" section)
 - Design decisions (validate against conventions)
 - Implementation (follow conventions strictly)
@@ -262,32 +275,38 @@ Always incorporate `config.team.conventions` into:
 ## Code Review Integration
 
 If `config.team.codeReview` is configured:
+
 - **`required: true`**: After implementation, summarize changes for review and note that code review is required before merging
 - **`minApprovals`**: Include the required approval count in PR description
 - **`requireTests: true`**: Ensure all tasks include tests; block completion if test coverage is insufficient
 - **`requireDocs: true`**: Ensure public APIs have documentation; add JSDoc/docstrings as part of implementation
 
 ### Workflow Impact: codeReview
+
 - **Phase 3 step 6**: If `requireTests`, run tests for every task; block completion on insufficient coverage.
 - **Phase 4 step 7**: If `required`, include review requirement and `minApprovals` count in PR description.
 
 ## Linting & Formatting
 
 If `config.implementation.linting` is configured:
+
 - **`enabled: true`**: Run the project's linter after implementing each task. Fix any violations before marking the task complete.
 - **`fixOnSave: true`**: Note in implementation that auto-fix is expected; don't manually fix auto-fixable issues.
 
 If `config.implementation.formatting` is configured:
+
 - **`enabled: true`**: Run the configured formatting tool (`prettier`, `black`, `rustfmt`, `gofmt`) before committing.
 - **`tool`**: Use the specified formatter. If not specified, detect from project config files (e.g., `.prettierrc`, `pyproject.toml`).
 
 ### Workflow Impact: linting / formatting
+
 - **Phase 3 step 6**: If `linting.enabled`, run linter after each task and fix violations before marking complete.
 - **Phase 3 step 7**: If `formatting.enabled`, run formatter before committing.
 
 ## Test Framework
 
 If `config.implementation.testFramework` is set (e.g., `jest`, `mocha`, `pytest`, `vitest`):
+
 - Use the specified framework when generating test files
 - Use the framework's assertion style and conventions
 - Run tests with the appropriate command (e.g., `npx jest`, `pytest`, `npx vitest`)
@@ -295,19 +314,23 @@ If `config.implementation.testFramework` is set (e.g., `jest`, `mocha`, `pytest`
 If not set, detect the test framework from the project's existing test files and `package.json`/`pyproject.toml`.
 
 ### Workflow Impact: testing / testFramework
+
 - **Phase 3 step 6**: If `testing` is `"auto"`, run tests after each task. If `"skip"`, skip testing (with safety warning). If `"manual"`, note that tests should be run.
 - **Phase 3 step 6**: If `testFramework` is set, use that framework for test generation and execution.
 
 ### Workflow Impact: autoCommit / createPR
+
 - **Phase 3 step 7**: If `autoCommit`, commit changes after each task. If false, suggest commit format.
 - **Phase 4 step 7**: If `createPR`, create a pull request after implementation completes.
 
 ### Workflow Impact: taskDelegation
+
 - **Phase 3 step 2**: If `"auto"`, compute a complexity score from pending tasks (effort weights + file count) and activate delegation when score >= 6. If `"always"`, activate regardless. If `"never"`, use sequential execution.
 
 ## Module-Specific Configuration
 
 If `config.modules` is configured (for monorepo/multi-module projects):
+
 - Each module can define its own `specsDir` and `conventions`
 - Module conventions **merge with** root `team.conventions` (module-specific conventions take priority on conflicts)
 - Create specs in the module-specific specsDir: `<module.specsDir>/<spec-name>/`
@@ -317,6 +340,7 @@ If `config.modules` is configured (for monorepo/multi-module projects):
 ## Integrations
 
 If `config.integrations` is configured, use these as **contextual information**:
+
 - **`ci`**: Reference the CI system in rollout plans (e.g., "Run in GitHub Actions pipeline")
 - **`deployment`**: Include deployment target in rollout plans (e.g., "Deploy to Vercel")
 - **`monitoring`**: Reference monitoring in risk mitigations (e.g., "Monitor errors in Sentry")
@@ -325,6 +349,7 @@ If `config.integrations` is configured, use these as **contextual information**:
 These are informational — the agent uses them to generate more accurate specs, not to directly invoke the tools.
 
 ### Workflow Impact: integrations
+
 - **Informational only**: Referenced in Phase 2 spec generation (rollout plans, risk mitigations, acceptance criteria). No workflow conditionals — context enrichment only.
 
 ## System-Managed Fields

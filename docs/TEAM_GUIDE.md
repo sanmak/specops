@@ -7,6 +7,7 @@ SpecOps includes a built-in spec review workflow designed for teams — structur
 ### 1. Designate a Team Champion
 
 Choose someone to:
+
 - Set up the initial configuration
 - Define team conventions
 - Train other team members
@@ -30,6 +31,7 @@ Create a shared `.specops.json` template with your team's conventions:
 ```
 
 **Example Team Conventions:**
+
 - "Use TypeScript for all new code"
 - "Write unit tests with minimum 80% coverage"
 - "Document all public APIs"
@@ -41,6 +43,7 @@ Create a shared `.specops.json` template with your team's conventions:
 ### 3. Choose a Distribution Method
 
 #### Option A: Git Repository (Recommended)
+
 1. Fork or clone this repository
 2. Customize for your team
 3. Share repository URL with team
@@ -50,6 +53,7 @@ Create a shared `.specops.json` template with your team's conventions:
 **Cons:** Requires git access
 
 #### Option B: Shared Network Drive
+
 1. Copy `skills/specops/` to shared drive
 2. Team members copy from shared location
 3. Update centrally
@@ -58,6 +62,7 @@ Create a shared `.specops.json` template with your team's conventions:
 **Cons:** Manual updates, no version control
 
 #### Option C: Package Distribution
+
 1. Package as npm/pip package
 2. Publish to private registry
 3. Team installs via package manager
@@ -70,6 +75,7 @@ Create a shared `.specops.json` template with your team's conventions:
 Create a **team configuration template** that all projects use:
 
 **`team-specops-config.json`**
+
 ```json
 {
   "specsDir": ".specops",
@@ -89,6 +95,7 @@ Create a **team configuration template** that all projects use:
 ```
 
 Add to project setup:
+
 ```bash
 cp team-specops-config.json .specops.json
 ```
@@ -98,7 +105,8 @@ cp team-specops-config.json .specops.json
 Add SpecOps config to your project templates:
 
 **Project scaffold:**
-```
+
+```text
 new-project/
   .specops.json          (from team template)
   .specops/              (empty, ready for specs)
@@ -115,6 +123,7 @@ bash scripts/install-hooks.sh
 ```
 
 This installs two hooks:
+
 - **Pre-commit** (~1-2s): JSON syntax validation, ShellCheck on staged `.sh` files, stale generated files detection, stale checksums detection
 - **Pre-push** (~5-8s): Full platform validation, checksum verification, generated file freshness, schema checks, full test suite, ShellCheck on all scripts
 
@@ -197,6 +206,7 @@ Self-approvals produce a distinct `self-approved` status (vs peer `approved`) fo
 ### How Identity Detection Works
 
 The agent runs `git config user.email` to identify the current user:
+
 - If the current user is **not** the spec author → **Review mode** (provide feedback and verdict)
 - If the current user **is** the author and changes were requested → **Revision mode** (address feedback)
 - If the current user **is** the author and `allowSelfApproval: true` → **Self-review mode** (review and self-approve own spec)
@@ -205,6 +215,7 @@ The agent runs `git config user.email` to identify the current user:
 ### Implementation Gate
 
 When review is enabled, Phase 3 (Implementation) checks `spec.json` before proceeding:
+
 - If status is `approved` or `self-approved` → proceed to implementation (self-approved specs show a note about no peer review)
 - If not approved → warn the user and ask whether to override (interactive) or stop (non-interactive)
 
@@ -212,12 +223,12 @@ When review is enabled, Phase 3 (Implementation) checks `spec.json` before proce
 
 View all specs and their review status:
 
-```
+```text
 /specops status              # Show all specs
 /specops status in-review    # Filter by status
 ```
 
-```
+```text
 Spec Status Dashboard
 ═══════════════════════════════════════════════════════════
 Spec                   Status         Approvals  Version
@@ -235,7 +246,7 @@ Total: 4 specs | 1 approved | 1 in-review | 1 draft | 1 implementing
 Review works across all platforms, with behavior adapted to each platform's capabilities.
 
 | Capability | Claude Code | Cursor | Codex | Copilot |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | Spec creation + spec.json | Full | Full | Full | Full |
 | Interactive review (ask questions) | Yes | Yes | No | Yes |
 | Review feedback collection | Section-by-section | Section-by-section | All-in-prompt | Section-by-section |
@@ -246,7 +257,7 @@ Review works across all platforms, with behavior adapted to each platform's capa
 
 ### Claude Code Examples
 
-```
+```text
 /specops Add OAuth authentication          # Create spec
 /specops review oauth-auth                 # Review someone's spec
 /specops revise oauth-auth                 # Revise after feedback
@@ -261,7 +272,7 @@ Review works across all platforms, with behavior adapted to each platform's capa
 
 ### Cursor Examples
 
-```
+```text
 "Use specops to add OAuth authentication"
 "Review the oauth-auth spec"
 "Revise the oauth-auth spec based on feedback"
@@ -275,7 +286,7 @@ Review works across all platforms, with behavior adapted to each platform's capa
 
 ### Codex Examples
 
-```
+```text
 "Use specops to add OAuth authentication"
 "Review the oauth-auth spec — token refresh is missing from Story 3,
  increase session limit to 50k. Request changes."
@@ -289,7 +300,7 @@ Review works across all platforms, with behavior adapted to each platform's capa
 
 ### Copilot Examples
 
-```
+```text
 "Use specops to add OAuth authentication"
 "Review the oauth-auth spec"
 "Approve the oauth-auth spec with suggestion: add load testing"
@@ -310,7 +321,7 @@ Review works across all platforms, with behavior adapted to each platform's capa
 
 Three engineers collaborating on `feature-user-authentication`:
 
-```
+```bash
 Timeline:
 ─────────────────────────────────────────────────────────
 
@@ -367,12 +378,14 @@ Day 3 - Alice (Claude Code):
 Enable `specReview` and require approvals from at least 2 team members before implementation begins. This catches design issues early and ensures team alignment.
 
 ### 2. Commit Specs to Git
+
 ```bash
 git add .specops/
 git commit -m "Add spec for user authentication"
 ```
 
 **Benefits:**
+
 - Team visibility
 - Change history
 - Review in PRs
@@ -381,7 +394,8 @@ git commit -m "Add spec for user authentication"
 ### 3. Review Specs in PRs
 
 Include spec files in PR:
-```
+
+```text
 PR: Add OAuth Authentication
 Files:
   - .specops/oauth-auth/requirements.md
@@ -391,6 +405,7 @@ Files:
 ```
 
 **Review checklist:**
+
 - [ ] Requirements are clear
 - [ ] Design matches team architecture
 - [ ] Tasks are well-scoped
@@ -400,7 +415,8 @@ Files:
 ### 4. Use Consistent Naming
 
 **Spec directory naming convention:**
-```
+
+```text
 .specops/
   feature-user-auth/
   feature-payment-gateway/
@@ -414,6 +430,7 @@ Pattern: `<type>-<brief-description>`
 ### 5. Maintain Spec Quality
 
 **Good spec characteristics:**
+
 - Clear acceptance criteria
 - Detailed design rationale
 - Task breakdown with dependencies
@@ -421,6 +438,7 @@ Pattern: `<type>-<brief-description>`
 - Test coverage plan
 
 **Review specs regularly:**
+
 - Update as requirements change
 - Archive completed specs
 - Learn from past specs
@@ -428,6 +446,7 @@ Pattern: `<type>-<brief-description>`
 ### 6. Follow the Simplicity Principle
 
 SpecOps specs and implementations should be proportional to the task:
+
 - Small features get lean specs — skip irrelevant design.md sections
 - Implementations use existing patterns rather than inventing new abstractions
 - The agent avoids speculative features, unnecessary configuration, and premature optimization
@@ -437,6 +456,7 @@ When reviewing specs, watch for over-engineering: abstractions used once, error 
 ### 7. Track Metrics
 
 Monitor team usage:
+
 - Number of specs created per sprint
 - Spec → implementation time
 - Spec deviation rate
@@ -447,6 +467,7 @@ Monitor team usage:
 ### Jira/Linear Integration
 
 Configure task tracking:
+
 ```json
 {
   "team": {
@@ -457,6 +478,7 @@ Configure task tracking:
 ```
 
 Agent will:
+
 - Reference tickets in tasks
 - Update ticket status
 - Link commits to tickets
@@ -475,6 +497,7 @@ Agent will:
 ```
 
 Agent will:
+
 - Create issues for tasks
 - Link commits to issues
 - Auto-create PR with spec reference
@@ -482,6 +505,7 @@ Agent will:
 ### CI/CD Integration
 
 Add spec validation to CI:
+
 ```yaml
 # .github/workflows/validate-specs.yml
 name: Validate Specs
@@ -519,22 +543,26 @@ jobs:
 **For new team members:**
 
 1. **Show existing spec**
-   ```
+
+   ```text
    /specops view existing-feature                # Summary overview
    /specops view existing-feature walkthrough     # Guided tour
    /specops list                                  # See all specs
    ```
 
 2. **Create sample spec together**
-   ```
+
+   ```text
    /specops Add a simple feature (guided)
    ```
 
 3. **Review generated spec**
-   ```
+
+   ```text
    /specops view simple-feature                  # Quick summary
    /specops view simple-feature design           # Dive into design
    ```
+
    - Discuss requirements clarity
    - Review design decisions
    - Understand task breakdown
@@ -547,6 +575,7 @@ jobs:
 ### Training Materials
 
 Create team-specific materials:
+
 - **Video walkthrough** of SpecOps workflow
 - **Example specs** from your projects
 - **Common patterns** documentation
@@ -557,7 +586,8 @@ Create team-specific materials:
 ### Custom Templates
 
 Create team templates:
-```
+
+```text
 .specops/templates/
   feature-api.md       (API feature template)
   feature-ui.md        (UI feature template)
@@ -568,6 +598,7 @@ Create team templates:
 Custom templates support `{{variable}}` placeholders: `{{title}}`, `{{stories}}`, `{{criteria}}`, `{{conventions}}`, `{{date}}`, `{{type}}`. Any other `{{variable}}` is filled contextually.
 
 Reference in config:
+
 ```json
 {
   "templates": {
@@ -580,6 +611,7 @@ Reference in config:
 ### Module-Specific Configuration
 
 For monorepo/multi-module projects:
+
 ```json
 {
   "modules": {
@@ -600,6 +632,7 @@ Module conventions **merge with** root `team.conventions`. Module-specific conve
 ### Extend with Team Tools
 
 Add team-specific integrations:
+
 ```json
 {
   "integrations": {
@@ -640,18 +673,23 @@ Example templates are provided in `examples/templates/` for infrastructure, data
 ## Troubleshooting Common Issues
 
 ### Specs inconsistent across team
+
 **Solution:** Create and share team template config
 
 ### Too much/too little detail in specs
+
 **Solution:** Review example specs as team, define standards
 
 ### Implementation deviates from specs
+
 **Solution:** Enable `reviewRequired: true`, review specs in PRs
 
 ### Specs become stale
+
 **Solution:** Include spec updates in definition of done
 
 ### Team finds process too slow
+
 **Solution:** Reduce `reviewRequired` for small changes, use minimal config
 
 ## Security & Compliance for Enterprise Teams
@@ -669,6 +707,7 @@ SpecOps includes security features designed for enterprise adoption:
 ### Vulnerability Reporting
 
 See [SECURITY.md](../SECURITY.md) for the full security policy, including:
+
 - How to report vulnerabilities (GitHub Security Advisories)
 - Response timeline (48h acknowledgment, 7-day triage)
 - Scope of security issues
@@ -677,9 +716,11 @@ See [SECURITY.md](../SECURITY.md) for the full security policy, including:
 
 - **Zero runtime dependencies** — see [SBOM.md](SBOM.md) for the complete Software Bill of Materials
 - **File integrity verification** — use `CHECKSUMS.sha256` to verify installed files have not been tampered with:
+
   ```bash
   shasum -a 256 -c CHECKSUMS.sha256
   ```
+
 - **Automated testing** — the CI pipeline validates all JSON files, runs schema constraint tests, and lints shell scripts
 
 ### Trust Model
@@ -709,6 +750,7 @@ Anyone with write access to a project's `.specops.json` can influence agent beha
 ## Measuring Success
 
 Track these metrics:
+
 - **Adoption rate:** % of features with specs
 - **Quality:** Fewer bugs after spec-driven development
 - **Speed:** Faster development with clear plans

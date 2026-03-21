@@ -15,7 +15,7 @@ When the user invokes SpecOps, check for feedback intent:
 Six categories, each mapping to a GitHub issue label:
 
 | Category | Label | When to use |
-|----------|-------|-------------|
+| --- | --- | --- |
 | `bug` | `bug` | Something is broken or behaving incorrectly |
 | `feature` | `enhancement` | A new capability or behavior |
 | `friction` | `friction` | UX issue, workflow annoyance, or confusing behavior |
@@ -68,6 +68,7 @@ Compose the GitHub issue with these fields:
 **Title**: `[{category}] {first 70 characters of description}`
 
 **Title sanitization**: Before using the title in any shell command or URL, sanitize it:
+
 1. Generate the title from the *redacted* description (after Privacy Safety Rules scanning), not the raw input.
 2. Strip characters that are unsafe in shell contexts: remove `"`, `` ` ``, `$`, `\`, `!`, `(`, `)`, `{`, `}`, `|`, `;`, `&`, `<`, `>`, and newlines.
 3. Truncate to 70 characters after sanitization.
@@ -98,12 +99,14 @@ Compose the GitHub issue with these fields:
 **These rules are mandatory and must not be circumvented.**
 
 The issue body MUST contain ONLY:
+
 - The user's typed feedback description
 - SpecOps version string
 - Platform name (claude, cursor, codex, copilot)
 - Vertical name (from config, or "default")
 
 The issue body MUST NOT contain:
+
 - File paths from the user's project
 - File contents or code snippets from the user's project
 - The user's `.specops.json` configuration beyond the vertical field
@@ -113,6 +116,7 @@ The issue body MUST NOT contain:
 - The user's name, email, or other PII (unless they explicitly typed it in the feedback)
 
 **Sensitive content scan**: Before composing the issue body, scan the user's description for:
+
 - File paths (starting with `/`, `./`, or containing directory separators with structure like `src/components/`)
 - Credential patterns (strings matching API key formats, connection strings, bearer tokens)
 - Code blocks containing what appears to be project-specific code (function definitions, class declarations with project-specific names)
@@ -120,10 +124,12 @@ The issue body MUST NOT contain:
 If sensitive content is detected:
 
 **Credential patterns (hard block)**: If credential patterns (API keys, tokens, connection strings, bearer tokens) are found, block submission on all platforms:
+
 - Display a message to the user("Credentials detected in feedback. Submission blocked for security. Please remove sensitive data and retry.")
 - Stop. Do not proceed to Submission.
 
 **File paths / code (redaction required)**:
+
 - On interactive platforms: Use the AskUserQuestion tool("Your feedback appears to contain {file paths / code}. This will be submitted publicly to GitHub. Would you like to redact these before submitting?"). If the user declines redaction, cancel submission and save as local draft only (Tier 3).
 - On non-interactive platforms: Do not auto-submit. Save as local draft (Tier 3) and Display a message to the user("Feedback may contain project-specific content. Saved as local draft for manual review before submission. Review and redact sensitive content, then submit manually.")
 
@@ -132,6 +138,7 @@ If sensitive content is detected:
 **Shell safety**: The feedback description contains user-controlled text. Never interpolate unescaped user text directly in shell command strings. Write the issue body to a temporary file and use `--body-file`. Pass the title via an environment variable to prevent shell injection.
 
 **Tier 1 — `gh` CLI**:
+
 1. Create a unique temporary file: Use the Bash tool to run(`mktemp /tmp/specops-feedback-XXXXXX.md`) and capture the output as `{tmpfile}`.
 2. Use the Write tool to create({tmpfile}, composed issue body).
 3. Use the Bash tool to run(`SPECOPS_TITLE="[{category}] {sanitized_title}" gh issue create --repo sanmak/specops --title "$SPECOPS_TITLE" --label "{label}" --body-file "{tmpfile}"`)
@@ -142,6 +149,7 @@ If sensitive content is detected:
 8. Stop.
 
 **Tier 2 — Pre-filled browser URL** (if `gh` CLI is not installed, not authenticated, or fails):
+
 1. URL-encode the title, label, and body.
 2. Compose the URL: `https://github.com/sanmak/specops/issues/new?title={encoded_title}&labels={encoded_label}&body={encoded_body}`
 3. If the composed URL exceeds 8000 characters, skip to Tier 3 instead (GitHub truncates long URLs).
@@ -150,16 +158,17 @@ If sensitive content is detected:
 ### Feedback Graceful Degradation
 
 **Tier 3 — Local draft file** (if both Tier 1 and Tier 2 fail, or if the URL would be too long):
+
 1. Determine the save path:
    - If Use the Bash tool to check if the file exists at(`.specops.json`), Use the Read tool to read(`.specops.json`) to get `specsDir`; otherwise use default `.specops`.
    - Save to `<specsDir>/feedback-draft.md`. If `<specsDir>` does not exist, save to `.specops-feedback-draft.md` in the project root.
 2. Use the Write tool to create the save path with the composed issue content.
-3. Display a message to the user("Your feedback has been saved to `{path}`. You can submit it manually:\n\n1. Go to https://github.com/sanmak/specops/issues/new\n2. Copy the content from `{path}`\n3. Select the '{category}' label\n4. Submit the issue")
+3. Display a message to the user("Your feedback has been saved to `{path}`. You can submit it manually:\n\n1. Go to <https://github.com/sanmak/specops/issues/new\n2>. Copy the content from `{path}`\n3. Select the '{category}' label\n4. Submit the issue")
 
 ### Platform Adaptation
 
 | Capability | Impact |
-|-----------|--------|
+| --- | --- |
 | `canAskInteractive: false` | Feedback must be provided inline. No category prompt, no edit/confirm cycle. Draft displayed to stdout, then submitted. |
 | `canAskInteractive: true` | Full interactive flow: category selection, description prompt, draft review, edit/confirm. |
 | `canExecuteCode: true` (all platforms) | Use the Bash tool to run available for `gh issue create` on all platforms. |

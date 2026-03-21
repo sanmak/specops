@@ -26,7 +26,7 @@ Combine all results into a single deduplicated list of changed files.
 For each changed file, check which documentation may be affected using this mapping:
 
 | Source files changed | Docs to check |
-|---|---|
+| --- | --- |
 | `.claude/commands/*.md` | `CLAUDE.md` (Custom Slash Commands table), `docs/COMMANDS.md` |
 | `schema.json` | `docs/REFERENCE.md` (config options), `README.md` (Configuration section), example configs `examples/*.json` |
 | `spec-schema.json`, `index-schema.json` | `docs/REFERENCE.md` (spec structure), example specs `examples/specs/` |
@@ -78,9 +78,11 @@ If any files were renamed or deleted (from the `--diff-filter=RD` output in Step
 
 1. Get the old file paths from the rename/delete list
 2. Search ALL markdown files in the repo for references to these old paths:
+
    ```bash
    grep -rl "old/path/filename" *.md docs/*.md CLAUDE.md README.md QUICKSTART.md CONTRIBUTING.md
    ```
+
 3. Add any files with stale references to the target docs list
 
 ### Step 4: Check CHANGELOG staleness
@@ -114,7 +116,7 @@ For each stale doc, prepare the specific edits needed. Draft the updated section
 
 Present a summary to the user:
 
-```
+```text
 Documentation Sync Report
 =========================
 
@@ -142,6 +144,7 @@ If stale docs were found, ask the user using AskUserQuestion:
 **Question**: "How would you like to apply documentation updates?"
 
 **Options**:
+
 - **Apply all** — Apply all proposed updates at once
 - **Review individually** — Step through each doc one at a time, approving or skipping each
 - **Skip** — Don't apply any changes right now
@@ -161,6 +164,7 @@ After applying, report: "Updated N documentation files: `<list>`"
 If `schema.json` was among the changed files:
 
 1. For each example config in `examples/*.json`:
+
    ```bash
    python3 -c "
    import json, jsonschema
@@ -170,12 +174,14 @@ If `schema.json` was among the changed files:
    print('VALID: examples/<file>')
    " 2>&1
    ```
+
 2. Report any validation failures — these example configs need manual fixes
 3. If any fail, list them with the specific validation error
 
 ### Step 10: Summary
 
 Report the final status:
+
 - Number of docs updated
 - Number of docs already up to date
 - Any example validation failures that need manual attention

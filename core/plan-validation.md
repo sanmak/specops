@@ -5,11 +5,13 @@ Code-grounded plan validation verifies that file paths and code references in sp
 ### Validation Scope
 
 What gets validated:
+
 1. File paths from `**Files to Modify:**` sections in `tasks.md` — each path is the text after the colon, trimmed, with leading/trailing backticks removed
 2. File paths from sections in `design.md` containing "Files" or "Affected Files" in the heading
 3. Function/class/method references in backtick code spans in design.md and tasks.md (e.g., `UserService.authenticate()`, `formatDate()`)
 
 Exclusions:
+
 - Paths marked as NEW files to create. Detection heuristic: if the task's Implementation Steps contain "create", "add new file", "scaffold", or "new" referencing that path, skip validation for it.
 - References in spec templates (requirement descriptions, acceptance criteria text) — only design.md and tasks.md are validated.
 - Paths that are clearly directory references (ending with `/`) — these are informational, not file references.
@@ -37,6 +39,7 @@ For each extracted reference:
 3. **Prefix normalization**: If the path starts with `./`, strip the prefix and retry. If the path does not match, attempt common prefix adjustments (e.g., strip leading `src/` if the project root contains the file directly).
 
 Classification:
+
 - **Resolved**: Found in repo map or confirmed via FILE_EXISTS
 - **Unresolved**: Not found in repo map AND FILE_EXISTS returns false AND not a new-file path
 - **New file**: Detected by the new-file heuristic (skip validation)
@@ -46,7 +49,7 @@ Classification:
 
 Record results in `implementation.md` under `## Phase 1 Context Summary`:
 
-```
+```text
 - Plan validation: [pass — N references validated / warn — M unresolved of N / strict-blocked — M unresolved of N, user intervention required]
 ```
 
@@ -62,7 +65,7 @@ For `"warn"` mode with unresolved references, the notification includes each unr
 ### Platform Adaptation
 
 | Capability | Impact |
-|-----------|--------|
+| --- | --- |
 | `canAskInteractive: true` | In strict mode, ASK_USER before blocking |
 | `canAskInteractive: false` | In strict mode, note unresolved references as assumptions and proceed |
 | `canAccessGit: true` | No special impact — validation uses FILE_EXISTS and repo map, not git |
