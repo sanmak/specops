@@ -148,6 +148,7 @@ CHECKSUMMED_FILES=(
   "platforms/copilot/platform.json"
   "core/workflow.md"
   "core/safety.md"
+  "core/engineering-discipline.md"
   "hooks/pre-commit"
   "hooks/pre-push"
   "scripts/install-hooks.sh"
@@ -176,7 +177,8 @@ if [ "$CHECKSUMMED_STAGED" = true ] && [ "$CHECKSUMS_FILE_STAGED" = false ]; the
   printf '%b' "  ${BOLD}  platforms/cursor/platform.json platforms/codex/SKILL.md \\\\${RESET}\n"
   printf '%b' "  ${BOLD}  platforms/codex/platform.json platforms/copilot/specops.instructions.md \\\\${RESET}\n"
   printf '%b' "  ${BOLD}  platforms/copilot/platform.json core/workflow.md core/safety.md \\\\${RESET}\n"
-  printf '%b' "  ${BOLD}  hooks/pre-commit hooks/pre-push scripts/install-hooks.sh \\\\${RESET}\n"
+  printf '%b' "  ${BOLD}  core/engineering-discipline.md hooks/pre-commit hooks/pre-push \\\\${RESET}\n"
+  printf '%b' "  ${BOLD}  scripts/install-hooks.sh \\\\${RESET}\n"
   printf '%b' "  ${BOLD}  .claude-plugin/plugin.json .claude-plugin/marketplace.json > CHECKSUMS.sha256${RESET}\n"
   printf '%b' "  Then: ${BOLD}git add CHECKSUMS.sha256${RESET}\n"
   ERRORS=$((ERRORS + 1))

@@ -251,8 +251,8 @@ ENGINEERING_DISCIPLINE_MARKERS = [
     "### Testing and Validation Philosophy",
     "### Reliability and Failure Reasoning",
     "### Constraints and Quality Gates",
-    "### Self-Check",
-    "### Sources",
+    "silently verify",
+    "Distilled from: Fred Brooks",
     "substitutability",
     "characterization test",
 ]

@@ -64,8 +64,8 @@ For each changed file, check which documentation may be affected using this mapp
 | `core/task-delegation.md` | `docs/REFERENCE.md` (Configuration Options) |
 | `core/task-tracking.md` | `docs/REFERENCE.md` |
 | `core/tool-abstraction.md` | `CLAUDE.md` (Tool Abstraction) |
-| `core/writing-quality.md` | `CLAUDE.md` (Writing Quality), `README.md` (Writing and Engineering Philosophy) |
-| `core/engineering-discipline.md` | `CLAUDE.md` (Engineering Discipline), `README.md` (Writing and Engineering Philosophy), `docs/STRUCTURE.md` |
+| `core/writing-quality.md` | `CLAUDE.md`, `README.md` (Writing and Engineering Philosophy) |
+| `core/engineering-discipline.md` | `CLAUDE.md`, `README.md` (Writing and Engineering Philosophy), `docs/STRUCTURE.md` |
 | `core/update.md` | `docs/COMMANDS.md` (Update) |
 | `core/view.md` | `docs/COMMANDS.md` (View/List) |
 | `core/dispatcher.md` | `CLAUDE.md` (Architecture), `docs/STRUCTURE.md`, `README.md` (Context-Aware Dispatch) |
