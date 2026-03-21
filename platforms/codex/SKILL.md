@@ -137,8 +137,8 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 5.6. **Vocabulary Verification**: If the detected vertical is not `backend`, `fullstack`, or `frontend`, and no custom template is used, scan generated spec files for prohibited default terms (see the Vocabulary Verification subsection in the Vertical Adaptation Rules module). Replace any found terms with vertical-specific vocabulary. Record the result in implementation.md Phase 1 Context Summary.
 5.7. **Code-grounded plan validation**: If `config.implementation.validateReferences` is not `"off"`, validate file paths and code references in design.md and tasks.md against the codebase following the Code-Grounded Plan Validation module. Use the repo map (loaded in Phase 1 step 3.5) as the primary reference. Record the result in implementation.md Phase 1 Context Summary.
 6. **External issue creation (mandatory when taskTracking configured)**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. Read the file at `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`. For each eligible task, compose the issue body using the Issue Body Composition template (reading spec artifacts for context), create issues via the Issue Creation Protocol (with labels for GitHub), and write IssueIDs back to `tasks.md`. If issue creation is skipped or all IssueIDs remain `None`, the Phase 3 task tracking gate will catch the omission — the spec artifact linter validates IssueIDs on completed specs and fails CI when they are missing.
-6.5. **Git checkpoint (spec-created)**: If `config.implementation.gitCheckpointing` is true for this run, commit spec artifacts following the Git Checkpointing module: Execute the command(`git add <specsDir>/<spec-name>/`) then Execute the command(`git commit -m "specops(checkpoint): spec-created -- <spec-name>"`). If the commit fails, Print to stdout and continue.
-6.7. **Dependency safety gate (mandatory)**: If `config.dependencySafety.enabled` is not `false` (default: true), execute the dependency safety verification following the Dependency Safety module. This is a Phase 2 completion gate — specs cannot proceed to review or implementation without passing. Skipping this gate when dependency safety is enabled is a protocol breach.
+6.5. **Dependency safety gate (mandatory)**: If `config.dependencySafety.enabled` is not `false` (default: true), execute the dependency safety verification following the Dependency Safety module. This is a Phase 2 completion gate — specs cannot proceed to review or implementation without passing. Skipping this gate when dependency safety is enabled is a protocol breach.
+6.7. **Git checkpoint (spec-created)**: If `config.implementation.gitCheckpointing` is true for this run, commit spec artifacts following the Git Checkpointing module: Execute the command(`git add <specsDir>/<spec-name>/`) then Execute the command(`git commit -m "specops(checkpoint): spec-created -- <spec-name>"`). If the commit fails, Print to stdout and continue.
 7. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow.
 
 **Phase 2.5: Review Cycle** (if spec review enabled)
@@ -2913,7 +2913,7 @@ If the audit tool is not installed: Print to stdout("Audit tool '<tool>' not fou
 
 6. **Filter allowedAdvisories** — if `config.dependencySafety.allowedAdvisories` contains CVE IDs that match findings, mark those findings as acknowledged. They are recorded in the audit artifact but do not count toward the blocking threshold.
 
-7. **Auto-fix** — if `config.dependencySafety.autoFix` is `true`:
+7. **Auto-fix** — if `config.dependencySafety.autoFix` is `true` AND remaining findings (after allowedAdvisories filter) would exceed the severity threshold:
    - Node.js: Execute the command(`npm audit fix`)
    - Rust: Execute the command(`cargo update -p <vulnerable-package>`) for each blocking package, or Execute the command(`cargo audit fix`) if cargo-audit >= 0.17 is available
    - Other ecosystems: Print to stdout("Auto-fix not available for <ecosystem>.")
@@ -3067,7 +3067,7 @@ Team-maintained sections (preserved across regeneration — agent must not overw
 [Team-maintained: acknowledged vulnerabilities with justification]
 ```
 
-**Staleness**: During Phase 1 steering file loading, if `dependencies.md` exists and `_generatedAt` is more than 30 days old, Print to stdout("Dependency safety data in `dependencies.md` is over 30 days old. It will be refreshed during the next dependency safety gate run.").
+**Staleness**: During Phase 1 steering file loading, if `dependencies.md` exists and `_generatedAt` is a valid ISO 8601 timestamp (not the placeholder `"YYYY-MM-DDTHH:MM:SSZ"`) and is more than 30 days old, Print to stdout("Dependency safety data in `dependencies.md` is over 30 days old. It will be refreshed during the next dependency safety gate run."). If `_generatedAt` is the placeholder or not a valid timestamp, skip the staleness check — the dependency safety gate will populate it on first run.
 
 ### Platform Adaptation
 

@@ -1188,7 +1188,7 @@ If the audit tool is not installed: Display a message to the user("Audit tool '<
 
 6. **Filter allowedAdvisories** — if `config.dependencySafety.allowedAdvisories` contains CVE IDs that match findings, mark those findings as acknowledged. They are recorded in the audit artifact but do not count toward the blocking threshold.
 
-7. **Auto-fix** — if `config.dependencySafety.autoFix` is `true`:
+7. **Auto-fix** — if `config.dependencySafety.autoFix` is `true` AND remaining findings (after allowedAdvisories filter) would exceed the severity threshold:
    - Node.js: Use the Bash tool to run(`npm audit fix`)
    - Rust: Use the Bash tool to run(`cargo update -p <vulnerable-package>`) for each blocking package, or Use the Bash tool to run(`cargo audit fix`) if cargo-audit >= 0.17 is available
    - Other ecosystems: Display a message to the user("Auto-fix not available for <ecosystem>.")
@@ -1342,7 +1342,7 @@ Team-maintained sections (preserved across regeneration — agent must not overw
 [Team-maintained: acknowledged vulnerabilities with justification]
 ```
 
-**Staleness**: During Phase 1 steering file loading, if `dependencies.md` exists and `_generatedAt` is more than 30 days old, Display a message to the user("Dependency safety data in `dependencies.md` is over 30 days old. It will be refreshed during the next dependency safety gate run.").
+**Staleness**: During Phase 1 steering file loading, if `dependencies.md` exists and `_generatedAt` is a valid ISO 8601 timestamp (not the placeholder `"YYYY-MM-DDTHH:MM:SSZ"`) and is more than 30 days old, Display a message to the user("Dependency safety data in `dependencies.md` is over 30 days old. It will be refreshed during the next dependency safety gate run."). If `_generatedAt` is the placeholder or not a valid timestamp, skip the staleness check — the dependency safety gate will populate it on first run.
 
 ### Platform Adaptation
 
