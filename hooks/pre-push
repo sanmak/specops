@@ -69,6 +69,14 @@ else
   printf '%b' "  %-45s ${YELLOW}SKIP${RESET} (not installed)\n" "ShellCheck"
 fi
 
+# Check 7: Markdown lint (if npx available)
+if command -v npx &>/dev/null; then
+  run_check "Markdown lint" \
+    "npx markdownlint-cli2 'core/**/*.md' 'docs/**/*.md' '.claude/commands/**/*.md' 'README.md' 'CLAUDE.md' 'QUICKSTART.md' 'CONTRIBUTING.md' 'CHANGELOG.md'"
+else
+  printf '%b' "  %-45s ${YELLOW}SKIP${RESET} (npx not installed)\n" "Markdown lint"
+fi
+
 # --- Summary ---
 printf "\n=======================\n"
 if [ "$ERRORS" -gt 0 ]; then

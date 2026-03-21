@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 SpecOps is a multi-platform spec-driven development workflow system inspired by [Kiro](https://kiro.dev). It provides a `/specops` slash command (and equivalents for other AI coding assistants) that transforms ideas into structured specifications (requirements, design, tasks) before implementation begins.
 
-**Repository**: https://github.com/sanmak/specops.git
+**Repository**: <https://github.com/sanmak/specops.git>
 
 ## Key Commands
 
@@ -55,7 +55,7 @@ bash scripts/bump-version.sh 1.2.0 --checksums  # also regenerate checksums
 Project-local Claude Code commands in `.claude/commands/` for git workflow automation:
 
 | Command | Description |
-|---------|-------------|
+| ------- | ----------- |
 | `/commit` | Auto-stage all changes, regenerate derived files if needed, commit with conventional message (no Claude attribution) |
 | `/push` | Validate pre-push checks, push to remote |
 | `/ship` | Combined commit + push in one operation |
@@ -84,13 +84,14 @@ SpecOps embeds a simplicity principle throughout: prefer the simplest solution t
 
 ### Three-Layer Design
 
-```
+```text
 core/           Platform-agnostic source of truth (workflow, safety, templates)
 platforms/      Platform-specific adapters + generated output files
 generator/      Generates platform outputs from core + platform adapters
 ```
 
 The `core/` directory defines the workflow, safety rules, templates, and vertical adaptations once. The `generator/generate.py` script assembles platform-specific instruction files by:
+
 1. Loading all `core/*.md` modules (workflow, safety, config-handling, steering, memory, metrics, verticals, simplicity, writing-quality, data-handling, error-handling, custom-templates, view, interview, init, update, review-workflow, task-tracking, task-delegation, reconciliation, from-plan, feedback, dispatcher, and spec templates from `core/templates/`) plus `core/mode-manifest.json` for Claude's per-mode file generation
 2. Loading `platforms/{name}/platform.json` for tool mappings and capabilities
 3. Rendering through `generator/templates/{name}.j2` Jinja2-style templates
@@ -110,7 +111,7 @@ Each `platform.json` declares capability flags (`canExecuteCode`, `canEditFiles`
 ### Platform Outputs (generated — do NOT edit directly)
 
 | Platform | Generated Files | Entry Point |
-|----------|----------------|-------------|
+| -------- | --------------- | ----------- |
 | Claude Code | `platforms/claude/SKILL.md` (dispatcher), `modes/*.md` (13 files), `SKILL.monolithic.md` (backup) | `/specops`, `/specops view`, `/specops list` |
 | Cursor | `platforms/cursor/specops.mdc` | `Use specops to ...`, `View the ... spec`, `List all specops specs` |
 | OpenAI Codex | `platforms/codex/SKILL.md` | `Use specops to ...`, `View the ... spec`, `List all specops specs` |
@@ -121,12 +122,14 @@ Claude Code uses **context-aware dispatch**: `SKILL.md` is a lightweight dispatc
 ### Plugin Distribution
 
 SpecOps is distributed as a Claude Code plugin via `.claude-plugin/` at the repo root. Users install with:
-```
+
+```text
 /plugin marketplace add sanmak/specops
 /plugin install specops@specops-marketplace
 ```
 
 The plugin provides one skill:
+
 - `/specops` — spec-driven development workflow with subcommands: `init`, `view`, `list`, `interview`, `update`, `steering`, `audit`, `reconcile`, `from-plan`, `feedback`, `memory`, `version`, `status` (from `skills/specops/SKILL.md`)
 
 Plugin manifests (`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`) are **generated** by `generator/generate.py` — do not edit directly. Version is synced from `platforms/claude/platform.json`.
@@ -144,6 +147,7 @@ Plugin manifests (`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json
 - **`schema.json`** is the single source of truth for `.specops.json` configuration validation. Run `python3 tests/check_schema_sync.py` to verify it is well-formed.
 - **All JSON schema objects** must use `"additionalProperties": false`, strings must have `maxLength`, arrays must have `maxItems`.
 - **Shell scripts** must pass ShellCheck without warnings, use `set -e`, and quote all variable expansions.
+- **When adding a new CI job**, ensure the corresponding local check is also added to `hooks/pre-push`, `.claude/commands/push.md`, and `.claude/commands/ship-pr.md` to maintain CI-local parity.
 
 ### Security-Sensitive Files
 
@@ -152,7 +156,7 @@ These files require extra scrutiny when modified — they can alter agent behavi
 ## What to Do After Changes
 
 | What you changed | Required follow-up |
-|---|---|
+| --- | --- |
 | `core/*.md` or `core/templates/*.md` | `python3 generator/generate.py --all` then `python3 generator/validate.py` |
 | `core/dispatcher.md` or `core/mode-manifest.json` | `python3 generator/generate.py --all` then `python3 generator/validate.py` (regenerates dispatcher + all mode files) |
 | `generator/templates/*.j2` | `python3 generator/generate.py --all` then `python3 generator/validate.py` |
@@ -179,6 +183,7 @@ CI verifies generated files aren't stale — after regenerating, the diff of `pl
 ## Validation
 
 `python3 generator/validate.py` checks all generated platform outputs for:
+
 - **No raw abstract operations** — ensures `READ_FILE(`, `WRITE_FILE(` etc. were properly substituted
 - **Safety markers present** — convention sanitization, template safety, path containment rules
 - **Template markers present** — all spec templates (feature-requirements, bugfix, refactor, design, tasks, implementation)

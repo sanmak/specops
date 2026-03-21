@@ -243,6 +243,25 @@ if [ -n "$STAGED_SPECS" ] && [ -f "$ROOT_DIR/scripts/lint-specs.sh" ]; then
   fi
 fi
 
+# --- Check 7: Markdown lint for staged .md files ---
+STAGED_MD="$(echo "$STAGED_FILES" | grep -E '^(core/|docs/|\.claude/commands/|README\.md$|CLAUDE\.md$|QUICKSTART\.md$|CONTRIBUTING\.md$|CHANGELOG\.md$)' | grep '\.md$' || true)"
+if [ -n "$STAGED_MD" ] && command -v npx &>/dev/null; then
+  MD_ARGS=()
+  while IFS= read -r md_file; do
+    if [ -f "$ROOT_DIR/$md_file" ]; then
+      MD_ARGS+=("$ROOT_DIR/$md_file")
+    fi
+  done <<< "$STAGED_MD"
+  if [ "${#MD_ARGS[@]}" -gt 0 ]; then
+    if ! npx markdownlint-cli2 "${MD_ARGS[@]}" 2>/dev/null; then
+      printf '%b' "${RED}FAIL${RESET} Markdown lint errors in staged .md files.\n"
+      ERRORS=$((ERRORS + 1))
+    fi
+  fi
+elif [ -n "$STAGED_MD" ]; then
+  printf '%b' "${YELLOW}SKIP${RESET} Markdown lint (npx not installed)\n"
+fi
+
 # --- Summary ---
 if [ "$ERRORS" -gt 0 ]; then
   printf '%b' "\n${RED}${BOLD}Pre-commit failed with ${ERRORS} error(s).${RESET}\n"

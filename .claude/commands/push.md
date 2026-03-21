@@ -25,8 +25,10 @@ Before pushing, proactively run the same checks the pre-push hook will run, so w
 3. `python3 generator/generate.py --all && git diff --exit-code platforms/ skills/ .claude-plugin/` -- generated files freshness
 4. `python3 tests/check_schema_sync.py` -- schema structure
 5. `bash scripts/run-tests.sh` -- full test suite
+6. `npx markdownlint-cli2 "core/**/*.md" "docs/**/*.md" ".claude/commands/**/*.md" "README.md" "CLAUDE.md" "QUICKSTART.md" "CONTRIBUTING.md" "CHANGELOG.md"` -- markdown lint (skip if npx not available)
 
 If any check fails:
+
 - Report which check failed and the error output
 - If the failure is fixable (stale generated files, stale checksums), explain what the user needs to do
 - Do NOT push. Stop and let the user fix the issue.
@@ -36,12 +38,14 @@ If any check fails:
 Determine the current branch: `git rev-parse --abbrev-ref HEAD`
 
 If the branch has an upstream, run:
-```
+
+```bash
 git push
 ```
 
 If the branch does not have an upstream, run:
-```
+
+```bash
 git push -u origin <branch-name>
 ```
 
