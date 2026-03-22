@@ -212,7 +212,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - Update `initiative.updated` with the current timestamp.
    - WRITE_FILE(`<specsDir>/initiatives/<partOf>.json`) with the updated initiative.
    - If the initiative is now completed, append a completion entry to the initiative log (`<specsDir>/initiatives/<partOf>-log.md`).
-6.5. **Git checkpoint (completed) and run log finalization**: If `config.implementation.gitCheckpointing` is true for this run, commit final metadata following the Git Checkpointing module: RUN_COMMAND(`git add -A`) then RUN_COMMAND(`git commit -m "specops(checkpoint): completed -- <spec-name>"`). If the commit fails, NOTIFY_USER and continue. Then finalize the run log following the Run Logging module: EDIT_FILE the run log to update frontmatter with `completedAt` and `finalStatus`.
+6.5. **Run log finalization and git checkpoint (completed)**: First finalize the run log following the Run Logging module: EDIT_FILE the run log to update frontmatter with `completedAt` and `finalStatus`. Then, if `config.implementation.gitCheckpointing` is true for this run, commit final metadata following the Git Checkpointing module: RUN_COMMAND(`git add -A`) then RUN_COMMAND(`git commit -m "specops(checkpoint): completed -- <spec-name>"`). If the commit fails, NOTIFY_USER and continue.
 7. Create PR if `createPR` is true
 8. Summarize completed work
 

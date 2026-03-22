@@ -338,7 +338,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - Update `initiative.updated` with the current timestamp.
    - Use the Write tool to create(`<specsDir>/initiatives/<partOf>.json`) with the updated initiative.
    - If the initiative is now completed, append a completion entry to the initiative log (`<specsDir>/initiatives/<partOf>-log.md`).
-6.5. **Git checkpoint (completed) and run log finalization**: If `config.implementation.gitCheckpointing` is true for this run, commit final metadata following the Git Checkpointing module: Use the Bash tool to run(`git add -A`) then Use the Bash tool to run(`git commit -m "specops(checkpoint): completed -- <spec-name>"`). If the commit fails, Display a message to the user and continue. Then finalize the run log following the Run Logging module: Use the Edit tool to modify the run log to update frontmatter with `completedAt` and `finalStatus`.
+6.5. **Run log finalization and git checkpoint (completed)**: First finalize the run log following the Run Logging module: Use the Edit tool to modify the run log to update frontmatter with `completedAt` and `finalStatus`. Then, if `config.implementation.gitCheckpointing` is true for this run, commit final metadata following the Git Checkpointing module: Use the Bash tool to run(`git add -A`) then Use the Bash tool to run(`git commit -m "specops(checkpoint): completed -- <spec-name>"`). If the commit fails, Display a message to the user and continue.
 7. Create PR if `createPR` is true
 8. Summarize completed work
 
@@ -480,7 +480,10 @@ Load configuration from `.specops.json` at project root. If not found, use these
   "implementation": {
     "autoCommit": false,
     "createPR": false,
-    "delegationThreshold": 4
+    "delegationThreshold": 4,
+    "validateReferences": "warn",
+    "gitCheckpointing": false,
+    "pipelineMaxCycles": 3
   },
   "dependencySafety": {
     "enabled": true,
@@ -766,7 +769,7 @@ Run tests automatically after implementing each task. Detect the test framework 
 - **Phase 3 step 7**: If `autoCommit`, commit changes after each task. If false, suggest commit format.
 - **Phase 4 step 7**: If `createPR`, create a pull request after implementation completes.
 
-### Workflow Impact: taskDelegation / delegationThreshold
+### Workflow Impact: Task delegation (auto) / delegationThreshold
 
 - **Phase 3 step 2**: Compute a complexity score from pending tasks (effort weights + file count) and activate delegation when score >= `config.implementation.delegationThreshold` (integer, default 4). Lower values activate delegation more aggressively. The score formula is: `sum(effort_weights) + floor(distinct_files / 5)` where effort weights are S=1, M=2, L=3. Examples at threshold 4: 4 small tasks (score 4), 2 medium tasks (score 4), 1 large + 1 small task (score 4).
 
@@ -994,10 +997,11 @@ At the start of Phase 3, after the implementation gate (step 1), determine wheth
    - Determine the activation threshold: if `config.implementation.delegationThreshold` is set (integer), use that value; otherwise use the default threshold of 4.
    - If score >= threshold, activate delegation. Otherwise, use standard sequential execution.
    Examples: 4 small tasks (score 4), 2 medium tasks (score 4), 2 medium tasks touching 10 files (4+2=6), 1 large + 1 small task (score 4).
-2. Check platform capability `canDelegateTask`:
+2. If score >= threshold, choose the execution strategy based on platform capability:
    - `canDelegateTask = true` → **Strategy A** (Sub-Agent Delegation)
    - `canDelegateTask = false` and `canAskInteractive = true` → **Strategy B** (Session Checkpoint)
    - `canDelegateTask = false` and `canAskInteractive = false` → **Strategy C** (Enhanced Sequential)
+   If score < threshold, skip Strategies A/B/C and use standard sequential execution.
 
 ### Handoff Bundle
 

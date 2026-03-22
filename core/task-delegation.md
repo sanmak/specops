@@ -14,10 +14,11 @@ At the start of Phase 3, after the implementation gate (step 1), determine wheth
    - Determine the activation threshold: if `config.implementation.delegationThreshold` is set (integer), use that value; otherwise use the default threshold of 4.
    - If score >= threshold, activate delegation. Otherwise, use standard sequential execution.
    Examples: 4 small tasks (score 4), 2 medium tasks (score 4), 2 medium tasks touching 10 files (4+2=6), 1 large + 1 small task (score 4).
-2. Check platform capability `canDelegateTask`:
+2. If score >= threshold, choose the execution strategy based on platform capability:
    - `canDelegateTask = true` → **Strategy A** (Sub-Agent Delegation)
    - `canDelegateTask = false` and `canAskInteractive = true` → **Strategy B** (Session Checkpoint)
    - `canDelegateTask = false` and `canAskInteractive = false` → **Strategy C** (Enhanced Sequential)
+   If score < threshold, skip Strategies A/B/C and use standard sequential execution.
 
 ### Handoff Bundle
 

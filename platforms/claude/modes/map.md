@@ -249,7 +249,10 @@ Load configuration from `.specops.json` at project root. If not found, use these
   "implementation": {
     "autoCommit": false,
     "createPR": false,
-    "delegationThreshold": 4
+    "delegationThreshold": 4,
+    "validateReferences": "warn",
+    "gitCheckpointing": false,
+    "pipelineMaxCycles": 3
   },
   "dependencySafety": {
     "enabled": true,
@@ -535,7 +538,7 @@ Run tests automatically after implementing each task. Detect the test framework 
 - **Phase 3 step 7**: If `autoCommit`, commit changes after each task. If false, suggest commit format.
 - **Phase 4 step 7**: If `createPR`, create a pull request after implementation completes.
 
-### Workflow Impact: taskDelegation / delegationThreshold
+### Workflow Impact: Task delegation (auto) / delegationThreshold
 
 - **Phase 3 step 2**: Compute a complexity score from pending tasks (effort weights + file count) and activate delegation when score >= `config.implementation.delegationThreshold` (integer, default 4). Lower values activate delegation more aggressively. The score formula is: `sum(effort_weights) + floor(distinct_files / 5)` where effort weights are S=1, M=2, L=3. Examples at threshold 4: 4 small tasks (score 4), 2 medium tasks (score 4), 1 large + 1 small task (score 4).
 

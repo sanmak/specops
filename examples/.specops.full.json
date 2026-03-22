@@ -39,9 +39,9 @@
   "implementation": {
     "autoCommit": false,
     "createPR": true,
-    "validateReferences": "strict",
+    "validateReferences": "warn",
     "gitCheckpointing": true,
-    "pipelineMaxCycles": 5
+    "pipelineMaxCycles": 3
   },
   "modules": {
     "backend": {
