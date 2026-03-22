@@ -61,6 +61,16 @@ An external audit by [Agent Trust Hub](https://skills.sh/sanmak/specops/specops/
 | 4 | Data Exfiltration | LOW | **Expected behavior** | Reading git config for author names is standard. No sensitive data is transmitted externally. |
 | 5 | Prompt Injection | LOW | **Non-issue** | The audit itself acknowledges these are "constraints rather than security bypasses." `CRITICAL`/`IMPORTANT` directives are standard instruction formatting. |
 
+## Decomposition Feature — Audit Notes (v1.5.0)
+
+The spec decomposition feature introduces new path construction patterns that should be reviewed in the next audit:
+
+- **Initiative ID in path construction**: Initiative IDs are used to construct directory paths (`<specsDir>/initiatives/<id>/`). The ID pattern is constrained by `initiative-schema.json` to `^[a-zA-Z0-9._-]+$`, which prevents path traversal. Runtime validation should also apply containment checks (no `..`, no absolute paths).
+- **Spec dependency references**: `specDependencies[].specId` values reference other spec directories. These are validated against the same pattern constraint.
+- **Cycle detection**: The DFS-based cycle detection algorithm processes user-influenced data (spec IDs and dependency graphs). Malformed dependency graphs are bounded by `maxItems: 50` on the `specDependencies` array.
+
+**Status**: Re-audit recommended before v1.5.0 release.
+
 ## Next Audit
 
 Recommended before the next minor or major release, or after significant changes to [security-sensitive files](../CLAUDE.md).

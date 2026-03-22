@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SpecOps Initiative",
+  "description": "Initiative metadata file (initiative.json) tracking multi-spec features, execution waves, and progress",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "maxLength": 100,
+      "pattern": "^[a-zA-Z0-9._-]+$",
+      "description": "Initiative identifier matching the file name"
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Human-readable initiative title"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Detailed description of the initiative scope and goals"
+    },
+    "created": {
+      "type": "string",
+      "maxLength": 30,
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(Z|[+-]\\d{2}:\\d{2})$",
+      "description": "ISO 8601 timestamp when the initiative was created"
+    },
+    "updated": {
+      "type": "string",
+      "maxLength": 30,
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(Z|[+-]\\d{2}:\\d{2})$",
+      "description": "ISO 8601 timestamp when the initiative was last modified"
+    },
+    "author": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "Author name (from git config or user input)"
+    },
+    "specs": {
+      "type": "array",
+      "maxItems": 50,
+      "description": "Array of spec IDs belonging to this initiative",
+      "items": {
+        "type": "string",
+        "maxLength": 100,
+        "pattern": "^[a-zA-Z0-9._-]+$"
+      }
+    },
+    "order": {
+      "type": "array",
+      "maxItems": 20,
+      "description": "Execution waves — each inner array is a wave of spec IDs that can execute in parallel",
+      "items": {
+        "type": "array",
+        "maxItems": 50,
+        "items": {
+          "type": "string",
+          "maxLength": 100,
+          "pattern": "^[a-zA-Z0-9._-]+$"
+        }
+      }
+    },
+    "skeleton": {
+      "type": "string",
+      "maxLength": 100,
+      "pattern": "^[a-zA-Z0-9._-]+$",
+      "description": "Spec ID of the walking skeleton (first wave-1 spec establishing the end-to-end integration path)"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "completed"],
+      "description": "Initiative status — active when any member spec is incomplete, completed when all are done"
+    }
+  },
+  "required": ["id", "title", "created", "updated", "author", "specs", "order", "status"],
+  "additionalProperties": false
+}

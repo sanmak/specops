@@ -24,6 +24,22 @@ Detailed analysis of what's causing the bug.
 - **Users Affected:** [Number/Percentage]
 - **Frequency:** [Always/Often/Sometimes/Rarely]
 
+## Dependencies & Blockers
+
+### Spec Dependencies
+
+| Dependent Spec | Reason | Required | Status |
+| -------------- | ------ | -------- | ------ |
+| —              | —      | —        | —      |
+
+### Cross-Spec Blockers
+
+<!-- Resolution types: scope_cut, interface_defined, completed, escalated, deferred -->
+
+| Blocker | Blocking Spec | Resolution Type | Resolution Detail | Status |
+| ------- | ------------- | --------------- | ----------------- | ------ |
+| —       | —             | —               | —                 | —      |
+
 ## Reproduction Steps
 
 1. Step 1

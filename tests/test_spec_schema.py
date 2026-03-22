@@ -601,6 +601,322 @@ def main():
         }
     ], "Rejects additional properties in index entry"))
 
+    # --- partOf field tests ---
+    print("\n--- partOf Field Validation ---")
+
+    # Valid: spec with partOf
+    check(expect_valid(spec_schema, {
+        "id": "child-spec",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": {"name": "Alice"},
+        "partOf": "my-initiative"
+    }, "Valid spec.json with partOf"))
+
+    # Valid: partOf with dots and numbers
+    check(expect_valid(spec_schema, {
+        "id": "child-spec-2",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": {"name": "Alice"},
+        "partOf": "init.1"
+    }, "Valid spec.json with partOf using dots and numbers"))
+
+    # Invalid: partOf with path traversal
+    check(expect_invalid(spec_schema, {
+        "id": "hack-spec",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": {"name": "Alice"},
+        "partOf": "../hack"
+    }, "Rejects partOf with path traversal"))
+
+    # Invalid: partOf empty string
+    check(expect_invalid(spec_schema, {
+        "id": "empty-partof",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": {"name": "Alice"},
+        "partOf": ""
+    }, "Rejects partOf with empty string"))
+
+    # Invalid: partOf too long
+    check(expect_invalid(spec_schema, {
+        "id": "long-partof",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": {"name": "Alice"},
+        "partOf": "a" * 101
+    }, "Rejects partOf exceeding maxLength"))
+
+    # --- relatedSpecs field tests ---
+    print("\n--- relatedSpecs Field Validation ---")
+
+    # Valid: spec with relatedSpecs
+    check(expect_valid(spec_schema, {
+        "id": "related-spec",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": {"name": "Alice"},
+        "relatedSpecs": ["spec-a", "spec-b", "spec.c"]
+    }, "Valid spec.json with relatedSpecs"))
+
+    # Valid: empty relatedSpecs array
+    check(expect_valid(spec_schema, {
+        "id": "no-related",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": {"name": "Alice"},
+        "relatedSpecs": []
+    }, "Valid spec.json with empty relatedSpecs"))
+
+    # Invalid: relatedSpecs exceeds maxItems (>20)
+    check(expect_invalid(spec_schema, {
+        "id": "too-many-related",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": {"name": "Alice"},
+        "relatedSpecs": [f"spec-{i}" for i in range(21)]
+    }, "Rejects relatedSpecs exceeding maxItems (>20)"))
+
+    # Invalid: relatedSpecs with bad pattern
+    check(expect_invalid(spec_schema, {
+        "id": "bad-related",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": {"name": "Alice"},
+        "relatedSpecs": ["../hack"]
+    }, "Rejects relatedSpecs with path traversal pattern"))
+
+    # --- specDependencies field tests ---
+    print("\n--- specDependencies Field Validation ---")
+
+    # Valid: specDependencies with required field
+    check(expect_valid(spec_schema, {
+        "id": "dep-spec",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": {"name": "Alice"},
+        "specDependencies": [
+            {
+                "specId": "auth-service",
+                "reason": "Needs auth API contract",
+                "required": True,
+                "contractRef": "docs/auth-api.md"
+            }
+        ]
+    }, "Valid spec.json with specDependencies (all fields)"))
+
+    # Valid: specDependencies without optional required field
+    check(expect_valid(spec_schema, {
+        "id": "dep-spec-minimal",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": {"name": "Alice"},
+        "specDependencies": [
+            {
+                "specId": "data-layer",
+                "reason": "Depends on data model"
+            }
+        ]
+    }, "Valid spec.json with specDependencies (required fields only)"))
+
+    # Valid: empty specDependencies array
+    check(expect_valid(spec_schema, {
+        "id": "no-deps",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": {"name": "Alice"},
+        "specDependencies": []
+    }, "Valid spec.json with empty specDependencies"))
+
+    # Invalid: specDependencies with bad specId pattern
+    check(expect_invalid(spec_schema, {
+        "id": "bad-dep-id",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": {"name": "Alice"},
+        "specDependencies": [
+            {
+                "specId": "../hack",
+                "reason": "Malicious dependency"
+            }
+        ]
+    }, "Rejects specDependencies with bad specId pattern"))
+
+    # Invalid: specDependencies exceeds maxItems (>50)
+    check(expect_invalid(spec_schema, {
+        "id": "too-many-deps",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": {"name": "Alice"},
+        "specDependencies": [
+            {"specId": f"dep-{i}", "reason": f"Reason {i}"} for i in range(51)
+        ]
+    }, "Rejects specDependencies exceeding maxItems (>50)"))
+
+    # Invalid: specDependencies with extra properties (additionalProperties: false)
+    check(expect_invalid(spec_schema, {
+        "id": "extra-dep-props",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": {"name": "Alice"},
+        "specDependencies": [
+            {
+                "specId": "auth-service",
+                "reason": "Needs auth API",
+                "extraField": "should fail"
+            }
+        ]
+    }, "Rejects specDependencies with additional properties"))
+
+    # Invalid: specDependencies missing required specId
+    check(expect_invalid(spec_schema, {
+        "id": "missing-specid",
+        "type": "feature",
+        "status": "draft",
+        "version": 1,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": {"name": "Alice"},
+        "specDependencies": [
+            {
+                "reason": "Missing specId"
+            }
+        ]
+    }, "Rejects specDependencies missing required specId"))
+
+    # --- Backward compatibility ---
+    print("\n--- Decomposition Backward Compatibility ---")
+
+    # Valid: existing spec without any new fields still validates
+    check(expect_valid(spec_schema, {
+        "id": "legacy-spec",
+        "type": "bugfix",
+        "status": "implementing",
+        "version": 3,
+        "created": "2026-03-01T10:00:00Z",
+        "updated": "2026-03-15T14:00:00Z",
+        "author": {"name": "Bob"},
+        "reviewers": [
+            {
+                "name": "Carol",
+                "status": "approved",
+                "reviewedAt": "2026-03-10T12:00:00Z",
+                "round": 1
+            }
+        ],
+        "reviewRounds": 1,
+        "approvals": 1,
+        "requiredApprovals": 1
+    }, "Existing spec without new fields still validates (backward compat)"))
+
+    # Valid: spec with all three new fields combined
+    check(expect_valid(spec_schema, {
+        "id": "full-decomp",
+        "type": "feature",
+        "status": "implementing",
+        "version": 2,
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T12:00:00Z",
+        "author": {"name": "Alice"},
+        "partOf": "my-initiative",
+        "relatedSpecs": ["sibling-spec-a", "sibling-spec-b"],
+        "specDependencies": [
+            {
+                "specId": "auth-service",
+                "reason": "Needs auth API contract",
+                "required": True
+            }
+        ]
+    }, "Valid spec.json with all three decomposition fields"))
+
+    # --- Index partOf field tests ---
+    print("\n--- Index partOf Field Validation ---")
+
+    # Valid: index entry with partOf
+    check(expect_valid(index_schema, [
+        {
+            "id": "child-spec",
+            "type": "feature",
+            "status": "implementing",
+            "version": 1,
+            "author": "Alice",
+            "updated": "2026-03-20T10:00:00Z",
+            "partOf": "my-initiative"
+        }
+    ], "Valid index entry with partOf"))
+
+    # Valid: index entry without partOf (backward compat)
+    check(expect_valid(index_schema, [
+        {
+            "id": "standalone-spec",
+            "type": "feature",
+            "status": "draft",
+            "version": 1,
+            "author": "Alice",
+            "updated": "2026-03-20T10:00:00Z"
+        }
+    ], "Valid index entry without partOf (backward compat)"))
+
+    # Invalid: index entry with bad partOf pattern
+    check(expect_invalid(index_schema, [
+        {
+            "id": "bad-index-partof",
+            "type": "feature",
+            "status": "draft",
+            "version": 1,
+            "author": "Alice",
+            "updated": "2026-03-20T10:00:00Z",
+            "partOf": "../hack"
+        }
+    ], "Rejects index entry with bad partOf pattern"))
+
     # --- Summary ---
     print(f"\n{'=' * 40}")
     print(f"{passed} passed, {failed} failed out of {passed + failed} tests")

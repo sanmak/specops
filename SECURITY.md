@@ -4,6 +4,8 @@
 
 | Version | Supported |
 |---------|-----------|
+| 1.5.x   | Yes       |
+| 1.4.x   | Yes       |
 | 1.3.x   | Yes       |
 | 1.2.x   | Yes       |
 | 1.1.x   | Yes       |
@@ -49,6 +51,7 @@ We take security seriously. If you discover a security vulnerability in SpecOps,
 
 - **Prompt injection** via `.specops.json` configuration (especially `team.conventions` and custom templates)
 - **Path traversal** in `specsDir` or template paths
+- **Path construction** for `initiatives/` directory (initiative ID used in path construction must be validated against `^[a-zA-Z0-9._-]+$` pattern)
 - **Shell script vulnerabilities** in `setup.sh` and `verify.sh` (command injection, unsafe variable handling)
 - **Schema bypass** allowing invalid or dangerous configuration values
 - **Data leakage** through generated specification files

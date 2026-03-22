@@ -236,6 +236,18 @@ REQUIRED_MARKERS = {
         "P-medium",
         "gh label create",
     ],
+    "decomposition": [
+        "Scope Assessment",
+        "Split Detection",
+        "initiative",
+        "specDependencies",
+        "Dependency Gate",
+        "Cycle Detection",
+        "Execution Waves",
+        "Walking Skeleton",
+        "decomposition",
+        "relatedSpecs",
+    ],
 }
 
 

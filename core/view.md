@@ -8,9 +8,13 @@ When the user invokes SpecOps, check for view or list intent **before** entering
 
 1. **List mode**: The user's request matches patterns like "list specs", "show all specs", "list", or "what specs exist". Proceed to the **List Specs** section below.
 
-2. **View mode**: The user's request references an existing spec name AND includes a view intent — patterns like "view <spec-name>", "show me <spec-name>", "look at <spec-name>", "walk me through <spec-name>", or "<spec-name> design". Proceed to the **View Spec** section below.
+2. **Initiative list mode**: The user's request matches patterns like "list initiatives", "show initiatives", "what initiatives exist". Proceed to the **List Initiatives** section below.
 
-3. If neither view nor list intent is detected, continue to the standard SpecOps workflow (Phase 1).
+3. **Initiative view mode**: The user's request matches patterns like "view initiative <id>", "show initiative <id>", "initiative <id> status". Proceed to the **View: Initiative** section below. Note: bare "initiative <id>" without view/show intent is handled by the initiative mode in the dispatcher, not the view module.
+
+4. **View mode**: The user's request references an existing spec name AND includes a view intent — patterns like "view <spec-name>", "show me <spec-name>", "look at <spec-name>", "walk me through <spec-name>", or "<spec-name> design". Proceed to the **View Spec** section below.
+
+5. If no view or list intent is detected, continue to the standard SpecOps workflow (Phase 1).
 
 ### View Command Parsing
 
@@ -86,8 +90,37 @@ If the list contains more than 10 specs, group them by status:
 **Summary**: 8 specs total
 ```
 
+#### Initiative-Grouped List
+
+If any specs have a `partOf` field in their spec.json, group them by initiative in the list display. Specs without a `partOf` field appear under "Standalone Specs".
+
+```text
+# Specs Overview
+
+## Initiative: user-auth-overhaul (active)
+| Spec | Type | Status | Wave | Version | Author | Last Updated |
+|------|------|--------|------|---------|--------|--------------|
+| auth-oauth | feature | implementing | 1 (skeleton) | v2 | Jane Doe | 2025-03-01 |
+| auth-sessions | feature | draft | 2 | v1 | Jane Doe | 2025-03-02 |
+| auth-permissions | feature | draft | 2 | v1 | Jane Doe | 2025-03-02 |
+
+## Standalone Specs
+| Spec | Type | Status | Version | Author | Last Updated |
+|------|------|--------|---------|--------|--------------|
+| bugfix-checkout | bugfix | completed | v1 | John Smith | 2025-02-28 |
+
+**Summary**: 4 specs total — 1 initiative (3 specs), 1 standalone
+```
+
+To build the initiative-grouped view:
+
+1. For each spec with a `partOf` field, READ_FILE(`<specsDir>/initiatives/<partOf>.json`) to get the initiative title, status, order (waves), and skeleton.
+2. Group specs by `partOf` value. For each group, show the initiative title and status as the section header.
+3. Add a "Wave" column showing which execution wave the spec belongs to (from `initiative.order`). If the spec is the skeleton, append "(skeleton)" to the wave number.
+4. Specs without `partOf` go under "Standalone Specs".
+
 On interactive platforms (`canAskInteractive: true`), after showing the list:
-ASK_USER "Would you like to view any of these specs in detail?"
+ASK_USER "Would you like to view any of these specs in detail, or view an initiative?"
 
 ### View: Summary
 
@@ -352,6 +385,112 @@ Fall back to the Full view with AI commentary. Present all sections sequentially
 
 [...remaining sections with commentary...]
 ```
+
+### View: Initiative
+
+When the user requests to view a specific initiative (`view initiative <id>`, `show initiative <id>`):
+
+1. READ_FILE(`.specops.json`) to get `specsDir` (default: `.specops`). Apply path containment rules.
+2. Validate the initiative ID matches pattern `^[a-zA-Z0-9._-]+$`.
+3. If FILE_EXISTS(`<specsDir>/initiatives/<id>.json`), READ_FILE it. If not found, NOTIFY_USER("Initiative '{id}' not found.") and show available initiatives.
+4. For each spec ID in `initiative.specs`, READ_FILE(`<specsDir>/<spec-id>/spec.json`) if it exists to get current status and metadata.
+
+Present using this format:
+
+```text
+# Initiative: <title>
+
+**ID**: <id> | **Status**: active | **Created**: 2025-03-01 | **Updated**: 2025-03-10
+**Author**: Jane Doe | **Skeleton**: auth-oauth
+
+## Execution Waves
+
+### Wave 1
+| Spec | Status | Type | Skeleton |
+|------|--------|------|----------|
+| auth-oauth | implementing | feature | Yes |
+
+### Wave 2
+| Spec | Status | Type | Dependencies |
+|------|--------|------|-------------|
+| auth-sessions | draft | feature | auth-oauth |
+| auth-permissions | draft | feature | auth-oauth |
+
+## Progress
+
+Completed: 0/3 specs (0%)
+[........................................] 0%
+
+## Execution Log
+
+[Last 10 entries from <specsDir>/initiatives/<id>-log.md if it exists]
+```
+
+### List Initiatives
+
+When the user requests a list of all initiatives (`list initiatives`, `show initiatives`):
+
+1. READ_FILE(`.specops.json`) to get `specsDir` (default: `.specops`).
+2. If FILE_EXISTS(`<specsDir>/initiatives/`), LIST_DIR(`<specsDir>/initiatives/`) to find all `.json` files (excluding `-log.md` files).
+3. For each initiative JSON file, READ_FILE it and collect summary fields: id, title, status, spec count, completed spec count.
+4. If no initiatives exist, NOTIFY_USER("No initiatives found.") and stop.
+
+Present using this format:
+
+```text
+# Initiatives Overview
+
+| Initiative | Status | Specs | Completed | Last Updated |
+|-----------|--------|-------|-----------|--------------|
+| user-auth-overhaul | active | 3 | 0/3 | 2025-03-10 |
+| payment-refactor | completed | 2 | 2/2 | 2025-03-05 |
+
+**Summary**: 2 initiatives — 1 active, 1 completed
+```
+
+On interactive platforms (`canAskInteractive: true`), after showing the list:
+ASK_USER "Would you like to view any of these initiatives in detail?"
+
+### Dependency Display in Spec Views
+
+When displaying a spec in summary, full, or status views, include dependency information if the spec has `specDependencies` or `relatedSpecs` in its spec.json.
+
+**In summary view**, add a "Dependencies" subsection after "Key Decisions":
+
+```text
+## Dependencies
+
+**Part of**: user-auth-overhaul (Wave 2)
+
+| Dependency | Required | Status |
+|-----------|----------|--------|
+| auth-oauth | Yes | completed |
+| auth-sessions | No (advisory) | implementing |
+
+**Related specs**: auth-permissions, payment-flow
+```
+
+**In status view**, add a "Dependencies" section after "Task Progress":
+
+```text
+## Dependencies
+
+| Spec | Required | Status | Reason |
+|------|----------|--------|--------|
+| auth-oauth | Yes | completed | OAuth provider must be set up first |
+| auth-sessions | No | implementing | Session storage is shared |
+
+Related: auth-permissions
+```
+
+**In full view**, include the dependency display after the metadata header, before the Requirements section.
+
+To build the dependency display:
+
+1. READ_FILE the spec's `spec.json` for `specDependencies`, `relatedSpecs`, and `partOf`.
+2. For each entry in `specDependencies`, READ_FILE the dependency's `spec.json` to get its current status.
+3. If `partOf` is set, READ_FILE the initiative JSON to get wave information.
+4. If neither `specDependencies` nor `relatedSpecs` is present and `partOf` is not set, omit the Dependencies section entirely.
 
 ### Task Progress Parsing
 

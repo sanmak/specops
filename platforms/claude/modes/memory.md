@@ -254,7 +254,8 @@ Load configuration from `.specops.json` at project root. If not found, use these
     "createPR": false,
     "testing": "auto",
     "linting": { "enabled": true, "fixOnSave": false },
-    "formatting": { "enabled": true }
+    "formatting": { "enabled": true },
+    "delegationThreshold": 4
   },
   "dependencySafety": {
     "enabled": true,
@@ -273,6 +274,9 @@ Create specs in this structure:
 ```text
 <specsDir>/
   index.json             (auto-generated spec index — rebuilt after every spec.json mutation)
+  initiatives/           (initiative tracking — created when decomposition is approved)
+    <initiative-id>.json (initiative definition — specs, waves, status)
+    <initiative-id>-log.md (chronological execution log)
   <spec-name>/
     spec.json            (per-spec lifecycle metadata — always created)
     requirements.md      (or bugfix.md for bugs, refactor.md for refactors)
@@ -309,8 +313,8 @@ When both `specReview.enabled` and `reviewRequired` are set, `specReview.enabled
 
 The agent rebuilds `<specsDir>/index.json` after every `spec.json` creation or update:
 
-1. Scan all subdirectories of `<specsDir>` for `spec.json` files
-2. Collect summary fields from each: `id`, `type`, `status`, `version`, `author` (name), `updated`
+1. Scan all subdirectories of `<specsDir>` for `spec.json` files (skip the `initiatives/` subdirectory — it contains initiative files, not spec files)
+2. Collect summary fields from each: `id`, `type`, `status`, `version`, `author` (name), `updated`, and `partOf` (if present — the initiative ID this spec belongs to)
 3. Write the summaries as a JSON array to `<specsDir>/index.json`
 
 The index is a derived file — per-spec `spec.json` files are always the source of truth. If `index.json` is missing or has merge conflicts, regenerate it from per-spec files.
@@ -557,7 +561,11 @@ If not set, detect the test framework from the project's existing test files and
 
 ### Workflow Impact: taskDelegation
 
-- **Phase 3 step 2**: If `"auto"`, compute a complexity score from pending tasks (effort weights + file count) and activate delegation when score >= 6. If `"always"`, activate regardless. If `"never"`, use sequential execution.
+- **Phase 3 step 2**: If `"auto"`, compute a complexity score from pending tasks (effort weights + file count) and activate delegation when score >= threshold. The threshold is determined by `config.implementation.delegationThreshold` (integer, default 4). If `"always"`, activate regardless. If `"never"`, use sequential execution.
+
+### Workflow Impact: delegationThreshold
+
+- **Phase 3 step 2 (auto mode)**: The `delegationThreshold` config (integer, default 4) sets the complexity score at which task delegation auto-activates. Lower values activate delegation more aggressively (more specs benefit from fresh-context task execution). The score formula is: `sum(effort_weights) + floor(distinct_files / 5)` where effort weights are S=1, M=2, L=3. Examples at threshold 4: 4 small tasks (score 4), 2 medium tasks (score 4), 1 large + 1 small task (score 4).
 
 ## Module-Specific Configuration
 

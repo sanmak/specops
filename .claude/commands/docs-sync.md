@@ -68,8 +68,11 @@ For each changed file, check which documentation may be affected using this mapp
 | `core/engineering-discipline.md` | `CLAUDE.md`, `README.md` (Writing and Engineering Philosophy), `docs/STRUCTURE.md` |
 | `core/update.md` | `docs/COMMANDS.md` (Update) |
 | `core/view.md` | `docs/COMMANDS.md` (View/List) |
+| `core/decomposition.md` | `docs/COMMANDS.md` (Initiative Management), `docs/REFERENCE.md` (Spec Structure), `docs/STRUCTURE.md`, `docs/DIAGRAMS.md`, `README.md` (Multi-Spec Features), `CLAUDE.md` (Architecture) |
+| `core/initiative-orchestration.md` | `docs/COMMANDS.md` (Initiative Management), `docs/REFERENCE.md`, `docs/STRUCTURE.md`, `docs/DIAGRAMS.md`, `CLAUDE.md` (Architecture) |
 | `core/dispatcher.md` | `CLAUDE.md` (Architecture), `docs/STRUCTURE.md`, `README.md` (Context-Aware Dispatch) |
 | `core/mode-manifest.json` | `CLAUDE.md` (Architecture), `docs/STRUCTURE.md` |
+| `initiative-schema.json` | `docs/REFERENCE.md` (Spec Structure), `docs/STRUCTURE.md` |
 | New `core/*.md` (not in table) | `docs/STRUCTURE.md`, determine target docs from module content |
 
 Collect all matched target docs into a deduplicated list. If no matches found, report "No documentation impact detected" and skip to Step 4.

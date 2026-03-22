@@ -30,6 +30,9 @@ All supported commands across Claude Code, Cursor, OpenAI Codex, and GitHub Copi
 | Seed memory from specs | `/specops memory seed` | `Use specops memory seed` |
 | Generate/refresh repo map | `/specops map` | `Use specops map` |
 | Auto-implement spec (pipeline) | `/specops pipeline <name>` | `Use specops pipeline for <name>` |
+| View initiative | `/specops view initiative <id>` | `View initiative <id>` |
+| List initiatives | `/specops list initiatives` | `List all initiatives` |
+| Run initiative | `/specops initiative <id>` | `Use specops initiative <id>` |
 | Check version | `/specops version` | `Use specops version` |
 | Update SpecOps | `/specops update` | `Use specops update` |
 | Review a spec | `review <spec-name>` | `review <spec-name>` |
@@ -61,6 +64,8 @@ Build a payment processing system using specops
 ```
 
 **Output:** `requirements.md`, `design.md`, `tasks.md`, `spec.json`
+
+**Note:** Large features may trigger automatic scope assessment (Phase 1.5). If the feature exceeds single-spec complexity thresholds, SpecOps proposes splitting it into multiple specs tracked as an initiative. See [Initiative Management](#initiative-management) below.
 
 ---
 
@@ -399,6 +404,77 @@ Use specops feedback bug The interview mode skips my follow-up answers
 
 ---
 
+## Initiative Management
+
+Initiatives track large features that span multiple specs. When a feature request triggers scope assessment (Phase 1.5) and is split into multiple specs, SpecOps creates an initiative to coordinate them.
+
+### How Decomposition Works
+
+1. **Scope assessment (Phase 1.5)** — After Phase 1 context analysis, SpecOps evaluates complexity signals (multiple bounded contexts, cross-cutting concerns, estimated task count). If thresholds are exceeded, it proposes splitting the feature into multiple specs.
+2. **Approval** — On interactive platforms, you approve or reject the decomposition. On non-interactive platforms, decomposition proceeds automatically with a summary.
+3. **Initiative creation** — An `initiative.json` file is created in `<specsDir>/initiatives/<id>/` tracking all member specs, their execution order (waves derived via topological sort), and the walking skeleton.
+4. **Cross-spec dependencies** — Each spec's `spec.json` includes `specDependencies` (required and advisory) and `partOf` (initiative membership). A dependency gate in Phase 3 blocks implementation when required dependencies are incomplete.
+
+### View an Initiative
+
+**Claude Code:**
+
+```text
+/specops view initiative oauth-payments
+```
+
+**Other platforms:**
+
+```text
+View initiative oauth-payments
+```
+
+**Output:** Initiative summary with member specs, execution waves, dependency graph, completion status, and the walking skeleton spec.
+
+### List All Initiatives
+
+**Claude Code:**
+
+```text
+/specops list initiatives
+```
+
+**Other platforms:**
+
+```text
+List all initiatives
+```
+
+**Output:** Table of all initiatives with ID, title, status (active/completed), member spec count, and completion percentage.
+
+### Run an Initiative
+
+Execute all specs in an initiative autonomously, respecting execution wave order and dependency gates.
+
+**Claude Code:**
+
+```text
+/specops initiative oauth-payments
+```
+
+**Other platforms:**
+
+```text
+Use specops initiative oauth-payments
+```
+
+**Workflow:**
+
+1. Reads `initiative.json` and computes execution waves
+2. For each wave, dispatches member specs sequentially through the normal SpecOps workflow
+3. Each spec gets a fresh context with a handoff bundle (initiative context, spec identity, dependency context, scope constraints)
+4. After each spec completes, verifies completion and updates initiative status
+5. When all specs complete, marks the initiative as completed
+
+**Notes:** Only triggers for SpecOps initiative execution. The orchestrator uses file-based state management (no in-memory accumulation). An `initiative-log.md` records the chronological execution trace.
+
+---
+
 ## View a Spec
 
 Display an existing spec in a structured, readable format.
@@ -723,3 +799,7 @@ These are the valid states a spec can be in, usable as filters with the status c
 | I want to control how Phase 3 executes tasks | Set `implementation.taskDelegation` in `.specops.json` (`auto`/`always`/`never`) |
 | I want to report a bug or suggest a SpecOps improvement | `/specops feedback` |
 | I want to update SpecOps | `/specops update` |
+| I have a large feature that should be split into specs | Start with `/specops Add <description>` — scope assessment triggers automatically |
+| I want to see all multi-spec initiatives | `/specops list initiatives` |
+| I want to view an initiative's status and dependency graph | `/specops view initiative <id>` |
+| I want to execute all specs in an initiative | `/specops initiative <id>` |

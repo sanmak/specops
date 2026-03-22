@@ -60,6 +60,12 @@ Track metrics across completed specs to identify:
 - **Code change density**: Ratio of `linesAdded` to `tasksCompleted` trending up may indicate tasks are too coarse
 - **Duration patterns**: Consistent `specDurationMinutes` across similar spec types indicates a stable workflow
 
+## Decomposition and Initiative Overhead
+
+- **Phase 1.5 (Scope Assessment)**: Adds approximately 50-100 tokens of output per spec creation. The assessment evaluates complexity signals and produces a brief pass/fail result. When decomposition is triggered, the proposal format adds another 100-200 tokens.
+- **Initiative management**: Negligible overhead. Reading and writing `initiative.json` and `initiative-log.md` involves small structured data files (typically under 1KB).
+- **Cross-spec dependency checks**: The Phase 3 dependency gate reads `spec.json` files for referenced specs. With typical initiative sizes (2-5 specs), this adds fewer than 50 tokens per gate check.
+
 ## Limitations
 
 - **Token estimates are approximate**: Characters/4 is a rough proxy. Actual tokenization varies by model and encoding.

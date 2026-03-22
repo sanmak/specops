@@ -44,13 +44,13 @@ bash scripts/bump-version.sh <new-version> --checksums
 
 ## Three-Tier Architecture
 
-**Tier 1 — Core Modules** (`core/*.md`): Platform-agnostic workflow logic using abstract operations (`READ_FILE`, `WRITE_FILE`, `RUN_COMMAND`, etc. defined in `core/tool-abstraction.md`). Never use platform-specific tool names here.
+**Tier 1 — Core Modules** (`core/*.md`): Platform-agnostic workflow logic using abstract operations (`READ_FILE`, `WRITE_FILE`, `RUN_COMMAND`, etc. defined in `core/tool-abstraction.md`). Never use platform-specific tool names here. Key modules include `core/workflow.md` (4-phase workflow), `core/decomposition.md` (scope assessment, split detection, initiative model, cross-spec dependencies), and `core/initiative-orchestration.md` (autonomous multi-spec execution).
 
 **Tier 2 — Platform Adapters** (`platforms/<platform>/platform.json`): Maps abstract operations to platform-specific tool invocations (e.g., `READ_FILE` → `Use the Read tool to read(...)` for Claude).
 
 **Tier 3 — Generated Outputs** (`platforms/<platform>/SKILL.md` etc.): Built by `generator/generate.py` using Jinja2 templates (`generator/templates/*.j2`) that combine core modules + platform adapters. **Never edit generated output files directly** — edit `core/` or `generator/templates/` then regenerate.
 
-The generator produces: Claude (`SKILL.md` dispatcher + 13 mode files in `modes/`), Cursor (`specops.mdc`), Codex (`SKILL.md`), Copilot (`specops.instructions.md`).
+The generator produces: Claude (`SKILL.md` dispatcher + 14 mode files in `modes/`, including `initiative`), Cursor (`specops.mdc`), Codex (`SKILL.md`), Copilot (`specops.instructions.md`).
 
 ## Critical Development Rules
 
@@ -66,14 +66,14 @@ The generator produces: Claude (`SKILL.md` dispatcher + 13 mode files in `modes/
 
 1. Contain no unsubstituted abstract operations (e.g., `READ_FILE(` must not appear)
 2. Include all safety markers from `core/safety.md`
-3. Include all template markers and workflow markers
+3. Include all template markers, workflow markers, DECOMPOSITION_MARKERS, and INITIATIVE_MARKERS
 4. Meet platform-specific format requirements
 
 The pre-commit hook (`hooks/pre-commit`) runs 7 checks: JSON syntax, ShellCheck, stale generated files, stale checksums, PII/absolute-path detection, spec checkbox staleness, and markdown lint.
 
 ## Mode Architecture (Claude Platform)
 
-The Claude platform uses a dispatcher (`platforms/claude/SKILL.md`) that loads one of 13 modes on demand from `platforms/claude/modes/`. The primary mode is `spec` (full 4-phase workflow in `core/workflow.md`). Other modes: init, view, interview, steering, memory, map, audit, pipeline, from-plan, feedback, update, version.
+The Claude platform uses a dispatcher (`platforms/claude/SKILL.md`) that loads one of 14 modes on demand from `platforms/claude/modes/`. The primary mode is `spec` (full 4-phase workflow in `core/workflow.md`). Other modes: init, view, interview, steering, memory, map, audit, pipeline, from-plan, feedback, update, version, initiative.
 
 ## Testing
 
@@ -84,5 +84,6 @@ Tests use Python's `unittest` module (no external test framework). The `jsonsche
 - `skills/specops/` mirrors `platforms/claude/` (symlinks for dev, copies for distribution)
 - `.claude-plugin/` contains plugin marketplace metadata (also generated)
 - `.specops/` contains this project's own specs (dogfood) — not part of the distributed tool
+- `.specops/initiatives/` contains initiative tracking files for multi-spec features (initiative.json, initiative-log.md)
 - `core/templates/` holds spec document templates (requirements, bugfix, design, tasks, etc.)
 - `generator/templates/` holds Jinja2 build templates (different purpose than core/templates)

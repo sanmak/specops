@@ -1,0 +1,17 @@
+{
+  "id": "unified-spec-decomposition",
+  "type": "feature",
+  "status": "implementing",
+  "version": 1,
+  "created": "2026-03-22T00:00:00Z",
+  "updated": "2026-03-22T00:00:00Z",
+  "specopsCreatedWith": "1.4.1",
+  "specopsUpdatedWith": "1.4.1",
+  "author": {
+    "name": "sanmak"
+  },
+  "reviewers": [],
+  "reviewRounds": 0,
+  "approvals": 0,
+  "requiredApprovals": 0
+}

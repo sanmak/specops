@@ -54,6 +54,12 @@ By participating in this project, you agree to maintain a respectful and inclusi
 - Preserve all safety mechanisms (convention sanitization, template safety, path containment)
 - Use abstract operations from `core/tool-abstraction.md` (e.g., `READ_FILE`, `WRITE_FILE`)
 - After changing core modules, regenerate platform outputs: `python3 generator/generate.py --all`
+- When adding a new core module, register it in `generator/generate.py` (add to core reading logic and context dict) and update the relevant Jinja2 templates in `generator/templates/` to include the new template variable
+- When adding a new mode, register it in `core/mode-manifest.json` with its required module list
+
+### Validator Guidelines
+
+- When adding `*_MARKERS` constants to `generator/validate.py`, add to **both** `validate_platform()` AND the cross-platform consistency check loop in the **same commit**. This prevents marker validation from passing on one surface while being absent on the other.
 
 ### Platform Adapters (`platforms/`)
 

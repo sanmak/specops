@@ -371,6 +371,36 @@ Day 3 - Alice (Claude Code):
   → spec.json: { status: "completed" }
 ```
 
+## Managing Large Multi-Team Features
+
+When a feature spans multiple bounded contexts or requires coordination across team members, SpecOps can decompose it into multiple specs tracked as an initiative.
+
+### How It Works
+
+1. **Scope assessment (Phase 1.5)** triggers automatically when complexity signals are detected (multiple subsystems, cross-cutting concerns, high estimated task count)
+2. SpecOps proposes a split into multiple specs, each with its own requirements, design, and tasks
+3. An `initiative.json` tracks all member specs, their execution order (waves), and cross-spec dependencies
+4. A dependency gate in Phase 3 prevents implementation of downstream specs until their required dependencies complete
+
+### Team Coordination with Initiatives
+
+- **Assign specs to different developers**: Each spec in an initiative is independent. Team members can work on different specs within the same initiative, respecting wave ordering.
+- **Track progress centrally**: Use `/specops view initiative <id>` to see completion status across all member specs.
+- **Dependency visibility**: `specDependencies` in each `spec.json` makes cross-spec relationships explicit. Reviewers can see which specs block others.
+- **Walking skeleton**: The first wave-1 spec is flagged as the walking skeleton — it establishes the integration path that all subsequent specs build on.
+
+### Example: Multi-Team Feature
+
+```text
+Initiative: user-dashboard
+  Wave 1: auth-service (Alice — backend)
+  Wave 2: dashboard-api (Bob — backend, depends on auth-service)
+  Wave 2: dashboard-ui (Carol — frontend, depends on auth-service)
+  Wave 3: analytics-integration (Alice — backend, depends on dashboard-api)
+```
+
+Each developer runs the normal SpecOps workflow on their assigned spec. The dependency gate ensures Bob and Carol cannot start implementation until Alice completes `auth-service`.
+
 ## Best Practices for Teams
 
 ### 1. Review Specs Collaboratively Before Implementing

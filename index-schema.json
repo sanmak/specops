@@ -37,6 +37,12 @@
         "maxLength": 30,
         "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(Z|[+-]\\d{2}:\\d{2})$",
         "description": "ISO 8601 timestamp of last spec.json update"
+      },
+      "partOf": {
+        "type": "string",
+        "maxLength": 100,
+        "pattern": "^[a-zA-Z0-9._-]+$",
+        "description": "Initiative ID this spec belongs to"
       }
     },
     "required": ["id", "type", "status", "version", "author", "updated"],

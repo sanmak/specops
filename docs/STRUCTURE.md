@@ -37,6 +37,7 @@ specops/
 ├── schema.json                           # JSON Schema for .specops.json
 ├── spec-schema.json                      # JSON Schema for spec.json validation
 ├── index-schema.json                     # JSON Schema for index.json validation
+├── initiative-schema.json                # JSON Schema for initiative.json validation
 ├── setup.sh                              # Universal installer (multi-platform)
 ├── verify.sh                             # Post-installation verification
 │
@@ -90,6 +91,8 @@ specops/
 │   ├── repo-map.md                       # Agent-driven codebase structural map
 │   ├── task-tracking.md                  # Task state machine and ordering
 │   ├── task-delegation.md                # Task delegation for Phase 3 context management
+│   ├── decomposition.md                  # Spec decomposition, scope assessment, initiative model, cross-spec dependencies
+│   ├── initiative-orchestration.md       # Autonomous multi-spec initiative execution
 │   ├── writing-quality.md                # Writing quality rules for spec artifacts
 │   ├── run-logging.md                    # Per-run execution trace logging
 │   ├── plan-validation.md                # Code-grounded spec reference validation
@@ -230,7 +233,30 @@ Generated files are checked into git so end users never need to run the build.
 5. Run `python3 generator/generate.py --platform {name}`
 6. Add to `generator/validate.py` and `tests/test_platform_consistency.py`
 
+## Spec Directory Structure
+
+The `<specsDir>` (default `.specops/`) contains spec artifacts and supporting data:
+
+```text
+.specops/
+  .specops.json                           # Project configuration (at project root)
+  index.json                              # Auto-generated spec dashboard
+  steering/                               # Persistent project context (steering files)
+  memory/                                 # Local memory layer (decisions, context, patterns)
+  initiatives/                            # Initiative tracking for multi-spec features
+    <initiative-id>/
+      initiative.json                     # Initiative metadata, member specs, execution waves
+      initiative-log.md                   # Chronological execution trace
+  <spec-name>/
+    spec.json                             # Spec lifecycle metadata
+    requirements.md                       # Requirements (feature specs)
+    design.md                             # Design document
+    tasks.md                              # Task breakdown
+    implementation.md                     # Decision journal (created during Phase 3)
+    reviews.md                            # Review feedback (created during review)
+```
+
 ## Version
 
-**Version**: 1.3.0
-**Last Updated**: 2026-03-18
+**Version**: 1.5.0
+**Last Updated**: 2026-03-22
