@@ -48,6 +48,7 @@ For each changed file, check which documentation may be affected using this mapp
 | `core/custom-templates.md` | `docs/REFERENCE.md` (Spec Templates) |
 | `core/data-handling.md` | `CLAUDE.md` (Security-Sensitive Files) |
 | `core/dependency-safety.md` | `CLAUDE.md` (Security-Sensitive Files, core modules list), `docs/REFERENCE.md` (Configuration Options), `docs/STRUCTURE.md` |
+| `core/learnings.md` | `CLAUDE.md` (core modules list), `docs/REFERENCE.md` (Configuration Options), `docs/STRUCTURE.md`, `docs/COMMANDS.md` (Learn) |
 | `core/error-handling.md` | `docs/REFERENCE.md` |
 | `core/feedback.md` | `docs/COMMANDS.md` (Send Feedback) |
 | `core/from-plan.md` | `docs/COMMANDS.md` (From Plan) |
@@ -71,7 +72,7 @@ For each changed file, check which documentation may be affected using this mapp
 | `core/decomposition.md` | `docs/COMMANDS.md` (Initiative Management), `docs/REFERENCE.md` (Spec Structure), `docs/STRUCTURE.md`, `docs/DIAGRAMS.md`, `README.md` (Multi-Spec Features), `CLAUDE.md` (Architecture) |
 | `core/initiative-orchestration.md` | `docs/COMMANDS.md` (Initiative Management), `docs/REFERENCE.md`, `docs/STRUCTURE.md`, `docs/DIAGRAMS.md`, `CLAUDE.md` (Architecture) |
 | `core/dispatcher.md` | `CLAUDE.md` (Architecture), `docs/STRUCTURE.md`, `README.md` (Context-Aware Dispatch) |
-| `core/mode-manifest.json` | `CLAUDE.md` (Architecture), `docs/STRUCTURE.md` |
+| `core/mode-manifest.json` | `CLAUDE.md` (Architecture, Mode Architecture — update mode count), `docs/STRUCTURE.md` |
 | `initiative-schema.json` | `docs/REFERENCE.md` (Spec Structure), `docs/STRUCTURE.md` |
 | New `core/*.md` (not in table) | `docs/STRUCTURE.md`, determine target docs from module content |
 

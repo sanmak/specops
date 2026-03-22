@@ -1,13 +1,5 @@
 [
   {
-    "id": "unified-spec-decomposition",
-    "type": "feature",
-    "status": "completed",
-    "version": 1,
-    "author": "sanmak",
-    "updated": "2026-03-22T09:48:49Z"
-  },
-  {
     "id": "ast-based-repo-map",
     "type": "feature",
     "status": "completed",
@@ -80,6 +72,14 @@
     "updated": "2026-03-21T14:51:50Z"
   },
   {
+    "id": "from-plan-enforcement-checklist",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-22T17:25:35Z"
+  },
+  {
     "id": "install-integrity-verification",
     "type": "feature",
     "status": "completed",
@@ -110,6 +110,14 @@
     "version": 1,
     "author": "sanmak",
     "updated": "2026-03-21T06:05:51Z"
+  },
+  {
+    "id": "production-learnings",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-22T17:10:00Z"
   },
   {
     "id": "project-type-awareness",
@@ -150,6 +158,14 @@
     "version": 1,
     "author": "sanmak",
     "updated": "2026-03-18T02:34:12Z"
+  },
+  {
+    "id": "unified-spec-decomposition",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-22T09:48:49Z"
   },
   {
     "id": "workflow-automation-suite",

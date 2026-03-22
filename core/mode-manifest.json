@@ -31,6 +31,11 @@
       "modules": ["memory", "config-handling"],
       "templates": []
     },
+    "learn": {
+      "description": "Capture production learnings linked to specs",
+      "modules": ["learnings", "memory", "config-handling", "safety"],
+      "templates": []
+    },
     "feedback": {
       "description": "Send feedback about SpecOps via GitHub issue",
       "modules": ["feedback"],
@@ -43,7 +48,7 @@
     },
     "audit": {
       "description": "Drift detection and reconciliation for spec artifacts",
-      "modules": ["reconciliation", "config-handling", "decomposition"],
+      "modules": ["reconciliation", "learnings", "config-handling", "decomposition"],
       "templates": []
     },
     "from-plan": {
@@ -59,6 +64,7 @@
         "review-workflow",
         "task-tracking",
         "dependency-safety",
+        "learnings",
         "decomposition"
       ],
       "templates": [
@@ -129,6 +135,7 @@
         "from-plan",
         "feedback",
         "dependency-safety",
+        "learnings",
         "decomposition"
       ],
       "templates": [

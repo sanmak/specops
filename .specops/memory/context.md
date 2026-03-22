@@ -2,6 +2,12 @@
 
 ## Completed Specs
 
+### from-plan-enforcement-checklist (feature) — 2026-03-22
+4 tasks completed, 0 deviations from design, 0 blockers. Added step 6.5 "Post-conversion enforcement pass" to `core/from-plan.md` containing all 8 checks from the dispatcher's Pre-Phase-3 Enforcement Checklist (spec.json, implementation.md with context summary, tasks.md, design.md, IssueID population, steering directory, memory directory, spec dependencies). Adapted with auto-remediation strategy (creates missing directories/files rather than stopping). Added "Post-conversion enforcement" marker to `FROM_PLAN_MARKERS` in `generator/validate.py` (Gap 31 compliant). All 4 platform outputs regenerated. Validator passes with 0 errors.
+
+### production-learnings (feature) — 2026-03-22
+10 tasks completed, 0 deviations from design, 0 blockers. New `core/learnings.md` module (~200 lines) with immutable learning records (ADR supersession chains), five-layer retrieval filtering (proximity, recurrence, severity, decay/validity, category matching), three capture mechanisms (explicit `/specops learn`, agent-proposed during bugfix, reconciliation-based from git history), "Reconsider When" validity triggers, and learning pattern detection extending patterns.json. Config schema extended with `implementation.learnings` object (4 properties). Generator pipeline wired for all 4 platforms with 10 LEARNINGS_MARKERS. New `learn` mode (15th mode) in dispatcher. Seeded 5 learnings from project history. All 8 tests pass, validator passes all checks including docs coverage.
+
 ### ears-notation (feature) — 2026-03-07
 4 tasks completed. EARS notation added to feature requirements template (5 patterns with inline guidance, progress checklist as optional derivative), bugfix template updated with SHALL CONTINUE TO section and three-category testing plan. All 4 platform outputs regenerated and validated. All 7 tests pass. No deviations from design. No blockers.
 

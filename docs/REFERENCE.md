@@ -169,6 +169,10 @@ Metrics are captured automatically at Phase 4 completion. See [TOKEN-USAGE.md](T
 | `implementation.validateReferences` | `off`/`warn`/`strict` | `warn` | enum | Validate file paths and code references in spec against codebase before implementation. `off`: skip. `warn`: notify and continue. `strict`: block on unresolved. |
 | `implementation.gitCheckpointing` | boolean | `false` | | Commit at phase boundaries (spec-created, implemented, completed). Three commits max per run. Complements `autoCommit` (per-task). |
 | `implementation.pipelineMaxCycles` | integer | `3` | min 1, max 10 | Maximum Phase 3→4 iteration cycles in pipeline mode. |
+| `implementation.learnings` | object | | | Production learnings configuration. Controls capture and surfacing of post-deployment discoveries. |
+| `implementation.learnings.maxSurfaced` | integer | `3` | min 1, max 10 | Maximum number of learnings surfaced during Phase 1 loading. |
+| `implementation.learnings.severityThreshold` | string | `"medium"` | `all`, `medium`, `high`, `critical` | Minimum severity level to surface learnings. Critical/high always surface regardless. |
+| `implementation.learnings.capturePrompt` | string | `"auto"` | `auto`, `manual`, `off` | When to prompt for learning capture. auto: Phase 4 + bugfix. manual: only /specops learn. off: disabled. |
 | `dependencySafety.enabled` | boolean | `true` | | Enable dependency safety gate in Phase 2 step 6.7. Scans for CVEs, EOL status, and best practices. |
 | `dependencySafety.severityThreshold` | `strict`/`medium`/`low` | `medium` | enum, max 10 chars | Severity that blocks implementation. strict: any finding. medium: Critical/High. low: warn only. |
 | `dependencySafety.autoFix` | boolean | `false` | | Attempt automatic remediation (npm audit fix, cargo update) before re-evaluating. |

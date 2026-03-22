@@ -87,6 +87,7 @@ specops/
 │   ├── from-plan.md                      # Convert plan mode output to spec
 │   ├── feedback.md                       # User feedback submission to SpecOps repo
 │   ├── memory.md                         # Local memory layer
+│   ├── learnings.md                      # Production learnings (post-deployment discovery capture and retrieval)
 │   ├── metrics.md                        # Proxy metrics collection at completion
 │   ├── repo-map.md                       # Agent-driven codebase structural map
 │   ├── task-tracking.md                  # Task state machine and ordering
@@ -100,7 +101,7 @@ specops/
 │   ├── pipeline.md                       # Automated pipeline mode (implement-verify cycling)
 │   ├── dispatcher.md                     # Dispatcher routing, enforcement gates, dispatch protocol (Claude only)
 │   ├── tool-abstraction.md               # Abstract tool operations and capability flags
-│   ├── mode-manifest.json                # Maps 13 modes to their required core module lists
+│   ├── mode-manifest.json                # Maps 15 modes to their required core module lists
 │   └── templates/                        # Default spec templates
 │       ├── feature-requirements.md       # Feature requirements template
 │       ├── bugfix.md                     # Bug fix template

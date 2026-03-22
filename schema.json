@@ -167,6 +167,34 @@
           "maximum": 10,
           "default": 3,
           "description": "Maximum Phase 3 to Phase 4 iteration cycles in pipeline mode. Pipeline stops after this many cycles even if criteria are unmet."
+        },
+        "learnings": {
+          "type": "object",
+          "description": "Production learnings configuration. Controls capture and surfacing of post-deployment discoveries.",
+          "properties": {
+            "maxSurfaced": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10,
+              "default": 3,
+              "description": "Maximum number of learnings surfaced during Phase 1 loading"
+            },
+            "severityThreshold": {
+              "type": "string",
+              "enum": ["all", "medium", "high", "critical"],
+              "default": "medium",
+              "maxLength": 10,
+              "description": "Minimum severity level to surface learnings. Critical/high always surface regardless."
+            },
+            "capturePrompt": {
+              "type": "string",
+              "enum": ["auto", "manual", "off"],
+              "default": "auto",
+              "maxLength": 10,
+              "description": "When to prompt for learning capture. auto: Phase 4 + bugfix. manual: only /specops learn. off: disabled."
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false

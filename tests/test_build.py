@@ -5,7 +5,7 @@ Validates:
 2. No raw abstract tool operations remain in outputs
 3. Platform-specific format requirements are met
 4. Generated files are non-empty
-5. Claude split output: dispatcher + monolithic backup + 14 mode files
+5. Claude split output: dispatcher + monolithic backup + 15 mode files
 6. Skills directory synced with platform output
 """
 
@@ -26,7 +26,7 @@ EXPECTED_OUTPUTS = {
     "copilot": "specops.instructions.md",
 }
 
-# Claude split output: 14 mode files (from core/mode-manifest.json)
+# Claude split output: 15 mode files (from core/mode-manifest.json)
 EXPECTED_CLAUDE_MODES = [
     "audit.md",
     "feedback.md",
@@ -34,6 +34,7 @@ EXPECTED_CLAUDE_MODES = [
     "init.md",
     "initiative.md",
     "interview.md",
+    "learn.md",
     "map.md",
     "memory.md",
     "pipeline.md",

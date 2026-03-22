@@ -140,6 +140,16 @@
       "task": "Task 1",
       "date": "2026-03-21",
       "completedAt": "2026-03-21T14:46:03Z"
+    },
+    {
+      "specId": "from-plan-enforcement-checklist",
+      "specType": "feature",
+      "number": 1,
+      "decision": "Inline enforcement checks in from-plan.md rather than shared module",
+      "rationale": "Dispatcher checks stop on failure; from-plan checks auto-remediate. Same 8 categories but divergent behavior at each call site. Shared module would be abstraction used twice with different behavior.",
+      "task": "Task 1",
+      "date": "2026-03-22",
+      "completedAt": "2026-03-22T17:18:51Z"
     }
   ]
 }
