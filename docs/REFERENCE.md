@@ -90,8 +90,7 @@ list
   },
   "implementation": {
     "autoCommit": false,
-    "createPR": true,
-    "testing": "auto"
+    "createPR": true
   }
 }
 ```
@@ -164,19 +163,10 @@ Metrics are captured automatically at Phase 4 completion. See [TOKEN-USAGE.md](T
 | `team.specReview.minApprovals` | integer | `1` | min 1, max 10 | Approvals required before implementation |
 | `team.specReview.allowSelfApproval` | boolean | `false` | | Allow authors to self-review and self-approve (produces `self-approved` status) |
 | `team.taskTracking` | `github`/`jira`/`linear`/`none` | `none` | enum | Task tracking integration |
-| `team.taskPrefix` | string | | max 20 chars | Task/ticket prefix (e.g., `PROJ-`) |
 | `implementation.autoCommit` | boolean | `false` | | Auto-commit after tasks |
 | `implementation.createPR` | boolean | `false` | | Auto-create PR when done |
-| `implementation.testing` | `auto`/`manual`/`skip` | `auto` | enum | Testing strategy |
-| `implementation.testFramework` | string | (auto-detect) | max 50 chars | Test framework (jest, pytest, etc.) |
-| `implementation.linting.enabled` | boolean | `true` | | Run linter after tasks |
-| `implementation.linting.fixOnSave` | boolean | `false` | | Auto-fix lint issues on save |
-| `implementation.formatting.enabled` | boolean | `true` | | Run formatter before commits |
-| `implementation.formatting.tool` | `prettier`/`black`/`rustfmt`/`gofmt` | (auto-detect) | enum | Formatting tool |
-| `implementation.taskDelegation` | `auto`/`always`/`never` | `auto` | enum | Task delegation strategy for Phase 3. `auto`: delegate when complexity score reaches threshold (based on effort sizing and file breadth). `always`: always delegate. `never`: sequential. Strategy adapts to platform capabilities. |
-| `implementation.delegationThreshold` | integer | `4` | min 1 | Complexity score threshold for auto task delegation. Lower values delegate more aggressively. |
-| `implementation.runLogging` | `on`/`off` | `on` | enum | Per-run execution logging to `<specsDir>/runs/`. Captures phase transitions, decisions, errors as a chronological trace. |
-| `implementation.validateReferences` | `off`/`warn`/`strict` | `off` | enum | Validate file paths and code references in spec against codebase before implementation. `off`: skip. `warn`: notify and continue. `strict`: block on unresolved. |
+| `implementation.delegationThreshold` | integer | `4` | min 1, max 20 | Complexity score threshold for auto task delegation. Lower values delegate more aggressively. |
+| `implementation.validateReferences` | `off`/`warn`/`strict` | `warn` | enum | Validate file paths and code references in spec against codebase before implementation. `off`: skip. `warn`: notify and continue. `strict`: block on unresolved. |
 | `implementation.gitCheckpointing` | boolean | `false` | | Commit at phase boundaries (spec-created, implemented, completed). Three commits max per run. Complements `autoCommit` (per-task). |
 | `implementation.pipelineMaxCycles` | integer | `3` | min 1, max 10 | Maximum Phase 3→4 iteration cycles in pipeline mode. |
 | `dependencySafety.enabled` | boolean | `true` | | Enable dependency safety gate in Phase 2 step 6.7. Scans for CVEs, EOL status, and best practices. |
@@ -187,13 +177,7 @@ Metrics are captured automatically at Phase 4 completion. See [TOKEN-USAGE.md](T
 | `team.codeReview.required` | boolean | `false` | | Require code review |
 | `team.codeReview.minApprovals` | integer | `1` | min 1 | Minimum approvals needed |
 | `team.codeReview.requireTests` | boolean | `true` | | Require tests in implementation |
-| `team.codeReview.requireDocs` | boolean | `false` | | Require docs for public APIs |
 | `modules` | object | | pattern-keyed | Module-specific configuration for monorepo/multi-module projects |
-| `integrations` | object | | | External tool integrations |
-| `integrations.ci` | string | | max 50 chars | CI system (github-actions, gitlab-ci, jenkins, etc.) |
-| `integrations.deployment` | string | | max 50 chars | Deployment platform (vercel, netlify, aws, etc.) |
-| `integrations.monitoring` | string | | max 50 chars | Monitoring service (sentry, datadog, newrelic, etc.) |
-| `integrations.analytics` | string | | max 50 chars | Analytics service (mixpanel, amplitude, etc.) |
 
 > **Note:** All configuration objects enforce `additionalProperties: false` — unknown keys will be rejected during schema validation.
 >
@@ -330,8 +314,7 @@ git push
 ```json
 {
   "team": {
-    "taskTracking": "jira",
-    "taskPrefix": "PROJ-"
+    "taskTracking": "jira"
   }
 }
 ```
@@ -479,8 +462,7 @@ Agent:
 {
   "specsDir": ".specops",
   "implementation": {
-    "autoCommit": true,
-    "testing": "auto"
+    "autoCommit": true
   }
 }
 ```
@@ -497,8 +479,7 @@ Agent:
   },
   "implementation": {
     "autoCommit": false,
-    "createPR": true,
-    "testing": "auto"
+    "createPR": true
   }
 }
 ```

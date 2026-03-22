@@ -9,7 +9,6 @@
     }
   },
   "implementation": {
-    "autoCommit": false,
-    "testing": "auto"
+    "autoCommit": false
   }
 }

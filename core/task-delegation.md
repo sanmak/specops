@@ -6,10 +6,7 @@ Task delegation executes each Phase 3 task in a fresh context to prevent context
 
 At the start of Phase 3, after the implementation gate (step 1), determine whether to use delegation:
 
-1. Read `config.implementation.taskDelegation` (default: `"auto"`)
-2. If `"never"`: skip delegation, use standard sequential execution (Phase 3 step 2 as-is)
-3. If `"always"`: activate delegation regardless of task count
-4. If `"auto"`: READ_FILE `tasks.md` and compute a complexity score for pending tasks:
+1. READ_FILE `tasks.md` and compute a complexity score for pending tasks:
    - Parse each task with `**Status:** Pending`
    - For each pending task, read its `**Estimated Effort:**` field and convert to a weight: S=1, M=2, L=3 (if missing, default to M=2)
    - Count distinct file paths across all pending tasks' `**Files to Modify:**` sections
@@ -17,7 +14,7 @@ At the start of Phase 3, after the implementation gate (step 1), determine wheth
    - Determine the activation threshold: if `config.implementation.delegationThreshold` is set (integer), use that value; otherwise use the default threshold of 4.
    - If score >= threshold, activate delegation. Otherwise, use standard sequential execution.
    Examples: 4 small tasks (score 4), 2 medium tasks (score 4), 2 medium tasks touching 10 files (4+2=6), 1 large + 1 small task (score 4).
-5. Check platform capability `canDelegateTask`:
+2. Check platform capability `canDelegateTask`:
    - `canDelegateTask = true` → **Strategy A** (Sub-Agent Delegation)
    - `canDelegateTask = false` and `canAskInteractive = true` → **Strategy B** (Session Checkpoint)
    - `canDelegateTask = false` and `canAskInteractive = false` → **Strategy C** (Enhanced Sequential)
@@ -67,7 +64,7 @@ The delegate receives the handoff bundle and executes the single assigned task:
 
 - READ_FILE each file listed in "Files to Modify" to understand current state
 - Implement the changes described in Implementation Steps
-- Run tests relevant to the task (matching "Tests Required") before marking Completed. If `config.implementation.testing` is `"auto"`, run the tests. If `"skip"`, skip testing. If `"manual"`, note that tests should be run.
+- Run tests relevant to the task (matching "Tests Required") before marking Completed.
 - If tests fail: keep the task `In Progress` and attempt to fix. If unfixable, set to `Blocked` with the failure as the blocker reason.
 - Check off Acceptance Criteria checkboxes in tasks.md as they are satisfied: `- [ ]` → `- [x]`
 - Check off Tests Required checkboxes: `- [ ]` → `- [x]`

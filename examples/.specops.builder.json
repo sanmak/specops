@@ -3,7 +3,6 @@
   "vertical": "builder",
   "implementation": {
     "autoCommit": false,
-    "createPR": true,
-    "testing": "auto"
+    "createPR": true
   }
 }
