@@ -33,25 +33,12 @@
     "codeReview": {
       "required": true,
       "minApprovals": 2,
-      "requireTests": true,
-      "requireDocs": true
+      "requireTests": true
     }
   },
   "implementation": {
     "autoCommit": false,
     "createPR": true,
-    "testing": "auto",
-    "testFramework": "jest",
-    "linting": {
-      "enabled": true,
-      "fixOnSave": true
-    },
-    "formatting": {
-      "enabled": true,
-      "tool": "prettier"
-    },
-    "taskDelegation": "auto",
-    "runLogging": "on",
     "validateReferences": "warn",
     "gitCheckpointing": true,
     "pipelineMaxCycles": 3
@@ -80,10 +67,5 @@
     "autoFix": false,
     "allowedAdvisories": [],
     "scanScope": "spec"
-  },
-  "integrations": {
-    "ci": "github-actions",
-    "deployment": "vercel",
-    "monitoring": "sentry"
   }
 }

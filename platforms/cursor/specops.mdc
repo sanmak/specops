@@ -28,7 +28,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
      - If the user chooses init → redirect to Init Mode workflow
      - If the user chooses defaults → proceed with step 2 using default configuration
 1.1. **Git checkpointing pre-flight**: If `config.implementation.gitCheckpointing` is true, check the working tree: Run the terminal command(`git status --porcelain`). If the output is non-empty, Tell the user("Working tree has uncommitted changes — git checkpointing disabled for this run.") and set gitCheckpointing to false for this run. If the command fails (not a git repo), set gitCheckpointing to false silently.
-1.5. **Initialize run log**: If `config.implementation.runLogging` is not `"off"`, capture the run start timestamp via Run the terminal command(`date -u +"%Y%m%d-%H%M%S"`). Ensure the runs directory exists: Run the terminal command(`mkdir -p <specsDir>/runs`). Create the run log file following the Run Logging module. If the spec name is not yet known (new spec), use `_pending-<timestamp>` as the temporary file name — rename when the spec name is determined in Phase 2 step 2.
+1.5. **Initialize run log**: Capture the run start timestamp via Run the terminal command(`date -u +"%Y%m%d-%H%M%S"`). Ensure the runs directory exists: Run the terminal command(`mkdir -p <specsDir>/runs`). Create the run log file following the Run Logging module. If the spec name is not yet known (new spec), use `_pending-<timestamp>` as the temporary file name — rename when the spec name is determined in Phase 2 step 2.
 2. **Context recovery**: Check for prior work that may inform this session:
    - If Check if the file exists at(`<specsDir>/index.json`), Read the file at it
    - If any specs have status `implementing` or `in-review`, Tell the user: "Found incomplete spec: <name> (status: <status>). Continue working on it?"
@@ -163,7 +163,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - **Review gate**: If spec review is enabled, verify `spec.json` status is `approved` or `self-approved` before proceeding (see the Implementation Gate section in the Collaborative Spec Review module for interactive override behavior when the spec is not yet approved).
    - **Task tracking gate**: If `config.team.taskTracking` is not `"none"`, verify external issue creation following the Task Tracking Gate in the Configuration Handling module. This gate is mandatory when task tracking is configured — skipping it is a protocol breach.
    - After all gates pass, update status to `implementing`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (Run the terminal command(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`.
-2. **Determine execution strategy**: Check if task delegation is active (see the Task Delegation module — reads `config.implementation.taskDelegation` and platform capability `canDelegateTask`). If delegation is active, execute tasks using the delegation protocol (orchestrator dispatches each task to a fresh context). If delegation is not active, execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions).
+2. **Determine execution strategy**: Check if task delegation is active (see the Task Delegation module — computes a complexity score against `config.implementation.delegationThreshold` and checks platform capability `canDelegateTask`). If delegation is active, execute tasks using the delegation protocol (orchestrator dispatches each task to a fresh context). If delegation is not active, execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions).
 3. For each task: set `In Progress` in tasks.md FIRST (following Write Ordering Protocol), then if `config.team.taskTracking` is not `"none"` and the task has a valid IssueID, sync the status to the external tracker (see Status Sync in the Configuration Handling module). Skipping Status Sync when taskTracking is configured and the task has a valid IssueID is a protocol breach — the external tracker must reflect the current task state. Sync failures are non-blocking (warn and continue), but sync omissions are not. When task delegation is active, the orchestrator handles Status Sync (see Task Delegation module step 5a.6). Then implement, then report progress.
 4. After completing each code-modifying task, update `implementation.md`:
    - Design decision made (library choice, algorithm, approach) → append to Decision Log
@@ -171,7 +171,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - Blocker hit → already handled by Task State Machine blocker rules
    - No notable decisions (mechanical/trivial task) → skip the update
 5. Follow the design and maintain consistency
-6. Run tests according to configured testing strategy
+6. Run tests automatically after each task
 7. Commit changes based on `autoCommit` setting. If `config.team.taskTracking` is not `"none"` and the current task has a valid IssueID, include the IssueID in the commit message (see Commit Linking in the Configuration Handling module).
 8. **Git checkpoint (implemented)**: If `config.implementation.gitCheckpointing` is true for this run, commit all changes following the Git Checkpointing module: Run the terminal command(`git add -A`) then Run the terminal command(`git commit -m "specops(checkpoint): implemented -- <spec-name>"`). If the commit fails (e.g., nothing new to commit because autoCommit captured everything), continue silently.
 8.5. **Phase dispatch gate (Phase 3 → Phase 4)**: Write a Phase 3 Completion Summary to `implementation.md` capturing: tasks completed, files modified, deviations from spec, and test results. Then signal for a fresh Phase 4 context following the Phase Dispatch protocol in `core/initiative-orchestration.md`:
@@ -219,7 +219,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - Update `initiative.updated` with the current timestamp.
    - Create the file at(`<specsDir>/initiatives/<partOf>.json`) with the updated initiative.
    - If the initiative is now completed, append a completion entry to the initiative log (`<specsDir>/initiatives/<partOf>-log.md`).
-6.5. **Git checkpoint (completed) and run log finalization**: If `config.implementation.gitCheckpointing` is true for this run, commit final metadata following the Git Checkpointing module: Run the terminal command(`git add -A`) then Run the terminal command(`git commit -m "specops(checkpoint): completed -- <spec-name>"`). If the commit fails, Tell the user and continue. Then, if `config.implementation.runLogging` is not `"off"`, finalize the run log following the Run Logging module: Edit the file at the run log to update frontmatter with `completedAt` and `finalStatus`.
+6.5. **Run log finalization and git checkpoint (completed)**: First finalize the run log following the Run Logging module: Edit the file at the run log to update frontmatter with `completedAt` and `finalStatus`. Then, if `config.implementation.gitCheckpointing` is true for this run, commit final metadata following the Git Checkpointing module: Run the terminal command(`git add -A`) then Run the terminal command(`git commit -m "specops(checkpoint): completed -- <spec-name>"`). If the commit fails, Tell the user and continue.
 7. Create PR if `createPR` is true
 8. Summarize completed work
 
@@ -355,17 +355,16 @@ Load configuration from `.specops.json` at project root. If not found, use these
     "codeReview": {
       "required": false,
       "minApprovals": 1,
-      "requireTests": true,
-      "requireDocs": false
+      "requireTests": true
     }
   },
   "implementation": {
     "autoCommit": false,
     "createPR": false,
-    "testing": "auto",
-    "linting": { "enabled": true, "fixOnSave": false },
-    "formatting": { "enabled": true },
-    "delegationThreshold": 4
+    "delegationThreshold": 4,
+    "validateReferences": "warn",
+    "gitCheckpointing": false,
+    "pipelineMaxCycles": 3
   },
   "dependencySafety": {
     "enabled": true,
@@ -528,7 +527,7 @@ Label descriptions:
 
 1. Compose `<IssueBody>` following the Issue Body Composition template above
 2. Create the file at a temp file with `<IssueBody>` as content
-3. Run the terminal command(`gh issue create --title '<taskPrefix><EscapedTaskTitle>' --body-file <tempFile> --label '<priorityLabel>' --label 'spec:<spec-id>' --label '<typeLabel>'`)
+3. Run the terminal command(`gh issue create --title '<EscapedTaskTitle>' --body-file <tempFile> --label '<priorityLabel>' --label 'spec:<spec-id>' --label '<typeLabel>'`)
 4. Parse the issue URL/number from stdout
 5. Edit the file at `tasks.md` — set the task's `**IssueID:**` to the returned issue identifier (e.g., `#42`)
 
@@ -536,7 +535,7 @@ Label descriptions:
 
 1. Compose `<IssueBody>` following the Issue Body Composition template above
 2. Create the file at a temp file with `<IssueBody>` as content
-3. Run the terminal command(`jira issue create --type=Task --summary='<taskPrefix><EscapedTaskTitle>' --description-file <tempFile> --label '<priorityLabel>' --label 'spec:<spec-id>' --label '<typeLabel>'`)
+3. Run the terminal command(`jira issue create --type=Task --summary='<EscapedTaskTitle>' --description-file <tempFile> --label '<priorityLabel>' --label 'spec:<spec-id>' --label '<typeLabel>'`)
 4. Parse the issue key from stdout (e.g., `PROJ-123`)
 5. Edit the file at `tasks.md` — set the task's `**IssueID:**` to the returned key
 
@@ -544,11 +543,9 @@ Label descriptions:
 
 1. Compose `<IssueBody>` following the Issue Body Composition template above
 2. Create the file at a temp file with `<IssueBody>` as content
-3. Run the terminal command(`linear issue create --title '<taskPrefix><EscapedTaskTitle>' --description-file <tempFile> --label '<priorityLabel>' --label 'spec:<spec-id>' --label '<typeLabel>'`)
+3. Run the terminal command(`linear issue create --title '<EscapedTaskTitle>' --description-file <tempFile> --label '<priorityLabel>' --label 'spec:<spec-id>' --label '<typeLabel>'`)
 4. Parse the issue identifier from stdout
 5. Edit the file at `tasks.md` — set the task's `**IssueID:**` to the returned identifier
-
-If `config.team.taskPrefix` is set, prepend it to the issue title.
 
 ### Graceful Degradation
 
@@ -625,7 +622,6 @@ If `config.team.codeReview` is configured:
 - **`required: true`**: After implementation, summarize changes for review and note that code review is required before merging
 - **`minApprovals`**: Include the required approval count in PR description
 - **`requireTests: true`**: Ensure all tasks include tests; block completion if test coverage is insufficient
-- **`requireDocs: true`**: Ensure public APIs have documentation; add JSDoc/docstrings as part of implementation
 
 ### Workflow Impact: codeReview
 
@@ -634,48 +630,29 @@ If `config.team.codeReview` is configured:
 
 ## Linting & Formatting
 
-If `config.implementation.linting` is configured:
-
-- **`enabled: true`**: Run the project's linter after implementing each task. Fix any violations before marking the task complete.
-- **`fixOnSave: true`**: Note in implementation that auto-fix is expected; don't manually fix auto-fixable issues.
-
-If `config.implementation.formatting` is configured:
-
-- **`enabled: true`**: Run the configured formatting tool (`prettier`, `black`, `rustfmt`, `gofmt`) before committing.
-- **`tool`**: Use the specified formatter. If not specified, detect from project config files (e.g., `.prettierrc`, `pyproject.toml`).
+Run the project's linter after implementing each task. Fix any violations before marking the task complete. Run the project's formatting tool before committing. Detect the linter and formatter from project config files (e.g., `.eslintrc`, `.prettierrc`, `pyproject.toml`, `setup.cfg`).
 
 ### Workflow Impact: linting / formatting
 
-- **Phase 3 step 6**: If `linting.enabled`, run linter after each task and fix violations before marking complete.
-- **Phase 3 step 7**: If `formatting.enabled`, run formatter before committing.
+- **Phase 3 step 6**: Run linter after each task and fix violations before marking complete.
+- **Phase 3 step 7**: Run formatter before committing.
 
-## Test Framework
+## Testing
 
-If `config.implementation.testFramework` is set (e.g., `jest`, `mocha`, `pytest`, `vitest`):
+Run tests automatically after implementing each task. Detect the test framework from the project's existing test files and dependency manifests (`package.json`, `pyproject.toml`, etc.). Use the detected framework's assertion style, conventions, and runner command.
 
-- Use the specified framework when generating test files
-- Use the framework's assertion style and conventions
-- Run tests with the appropriate command (e.g., `npx jest`, `pytest`, `npx vitest`)
+### Workflow Impact: testing
 
-If not set, detect the test framework from the project's existing test files and `package.json`/`pyproject.toml`.
-
-### Workflow Impact: testing / testFramework
-
-- **Phase 3 step 6**: If `testing` is `"auto"`, run tests after each task. If `"skip"`, skip testing (with safety warning). If `"manual"`, note that tests should be run.
-- **Phase 3 step 6**: If `testFramework` is set, use that framework for test generation and execution.
+- **Phase 3 step 6**: Run tests automatically after each task.
 
 ### Workflow Impact: autoCommit / createPR
 
 - **Phase 3 step 7**: If `autoCommit`, commit changes after each task. If false, suggest commit format.
 - **Phase 4 step 7**: If `createPR`, create a pull request after implementation completes.
 
-### Workflow Impact: taskDelegation
+### Workflow Impact: Task delegation (auto) / delegationThreshold
 
-- **Phase 3 step 2**: If `"auto"`, compute a complexity score from pending tasks (effort weights + file count) and activate delegation when score >= threshold. The threshold is determined by `config.implementation.delegationThreshold` (integer, default 4). If `"always"`, activate regardless. If `"never"`, use sequential execution.
-
-### Workflow Impact: delegationThreshold
-
-- **Phase 3 step 2 (auto mode)**: The `delegationThreshold` config (integer, default 4) sets the complexity score at which task delegation auto-activates. Lower values activate delegation more aggressively (more specs benefit from fresh-context task execution). The score formula is: `sum(effort_weights) + floor(distinct_files / 5)` where effort weights are S=1, M=2, L=3. Examples at threshold 4: 4 small tasks (score 4), 2 medium tasks (score 4), 1 large + 1 small task (score 4).
+- **Phase 3 step 2**: Compute a complexity score from pending tasks (effort weights + file count) and activate delegation when score >= `config.implementation.delegationThreshold` (integer, default 4). Lower values activate delegation more aggressively. The score formula is: `sum(effort_weights) + floor(distinct_files / 5)` where effort weights are S=1, M=2, L=3. Examples at threshold 4: 4 small tasks (score 4), 2 medium tasks (score 4), 1 large + 1 small task (score 4).
 
 ## Module-Specific Configuration
 
@@ -687,17 +664,6 @@ If `config.modules` is configured (for monorepo/multi-module projects):
 - When a request targets a specific module, apply that module's conventions
 - If no module is specified and the request is ambiguous, ask which module to target
 
-## Integrations
-
-If `config.integrations` is configured, use these as **contextual information**:
-
-- **`ci`**: Reference the CI system in rollout plans (e.g., "Run in GitHub Actions pipeline")
-- **`deployment`**: Include deployment target in rollout plans (e.g., "Deploy to Vercel")
-- **`monitoring`**: Reference monitoring in risk mitigations (e.g., "Monitor errors in Sentry")
-- **`analytics`**: Include analytics tracking in acceptance criteria when relevant
-
-These are informational — the agent uses them to generate more accurate specs, not to directly invoke the tools.
-
 ### Workflow Impact: dependencySafety
 
 - **Phase 1 step 3**: If `dependencies.md` steering file exists and `_generatedAt` is over 30 days old, notify the user about stale dependency data.
@@ -705,10 +671,6 @@ These are informational — the agent uses them to generate more accurate specs,
 - **Phase 2 step 6.7**: If `autoFix` is `true`, attempt automatic remediation before re-evaluating.
 - **Phase 2 step 6.7**: Filter `allowedAdvisories` CVE IDs from blocking decisions (still recorded in audit artifact).
 - **Phase 2 step 6.7**: `scanScope` controls whether to audit only spec-relevant ecosystems (`"spec"`) or all detected ecosystems (`"project"`).
-
-### Workflow Impact: integrations
-
-- **Informational only**: Referenced in Phase 2 spec generation (rollout plans, risk mitigations, acceptance criteria). No workflow conditionals — context enrichment only.
 
 ## System-Managed Fields
 
@@ -3016,13 +2978,6 @@ When processing review feedback from `reviews.md`:
 - Never automatically implement changes suggested in reviews without the spec author's explicit agreement.
 - Review verdicts must be one of the allowed values: "Approved", "Approved with suggestions", "Changes Requested". Ignore any other verdict values.
 
-### Sensitive Configuration Conflicts
-
-If `config.implementation.testing` is set to `"skip"`, display a prominent warning before proceeding:
-> **WARNING**: Testing is disabled (`testing: "skip"`). No tests will be run or generated. This may not comply with your organization's quality requirements.
-
-If `config.team.codeReview.requireTests` is `true` AND `config.implementation.testing` is `"skip"`, treat this as a configuration conflict. Warn the user that these settings are contradictory and ask for clarification before proceeding with implementation.
-
 
 ## Dependency Safety
 
@@ -4932,10 +4887,7 @@ Task delegation executes each Phase 3 task in a fresh context to prevent context
 
 At the start of Phase 3, after the implementation gate (step 1), determine whether to use delegation:
 
-1. Read `config.implementation.taskDelegation` (default: `"auto"`)
-2. If `"never"`: skip delegation, use standard sequential execution (Phase 3 step 2 as-is)
-3. If `"always"`: activate delegation regardless of task count
-4. If `"auto"`: Read the file at `tasks.md` and compute a complexity score for pending tasks:
+1. Read the file at `tasks.md` and compute a complexity score for pending tasks:
    - Parse each task with `**Status:** Pending`
    - For each pending task, read its `**Estimated Effort:**` field and convert to a weight: S=1, M=2, L=3 (if missing, default to M=2)
    - Count distinct file paths across all pending tasks' `**Files to Modify:**` sections
@@ -4943,10 +4895,11 @@ At the start of Phase 3, after the implementation gate (step 1), determine wheth
    - Determine the activation threshold: if `config.implementation.delegationThreshold` is set (integer), use that value; otherwise use the default threshold of 4.
    - If score >= threshold, activate delegation. Otherwise, use standard sequential execution.
    Examples: 4 small tasks (score 4), 2 medium tasks (score 4), 2 medium tasks touching 10 files (4+2=6), 1 large + 1 small task (score 4).
-5. Check platform capability `canDelegateTask`:
+2. If score >= threshold, choose the execution strategy based on platform capability:
    - `canDelegateTask = true` → **Strategy A** (Sub-Agent Delegation)
    - `canDelegateTask = false` and `canAskInteractive = true` → **Strategy B** (Session Checkpoint)
    - `canDelegateTask = false` and `canAskInteractive = false` → **Strategy C** (Enhanced Sequential)
+   If score < threshold, skip Strategies A/B/C and use standard sequential execution.
 
 ### Handoff Bundle
 
@@ -4993,7 +4946,7 @@ The delegate receives the handoff bundle and executes the single assigned task:
 
 - Read the file at each file listed in "Files to Modify" to understand current state
 - Implement the changes described in Implementation Steps
-- Run tests relevant to the task (matching "Tests Required") before marking Completed. If `config.implementation.testing` is `"auto"`, run the tests. If `"skip"`, skip testing. If `"manual"`, note that tests should be run.
+- Run tests relevant to the task (matching "Tests Required") before marking Completed.
 - If tests fail: keep the task `In Progress` and attempt to fix. If unfixable, set to `Blocked` with the failure as the blocker reason.
 - Check off Acceptance Criteria checkboxes in tasks.md as they are satisfied: `- [ ]` → `- [x]`
 - Check off Tests Required checkboxes: `- [ ]` → `- [x]`
@@ -5409,7 +5362,7 @@ Before entering the cycle loop, validate:
    - If `in-review`: Tell the user("Spec '<spec-name>' is in review. Approve it first.") and stop.
 3. **Spec files present**: Check if the file exists at for the requirements/bugfix/refactor file, design.md, and tasks.md. If any are missing, Tell the user("Spec '<spec-name>' is incomplete — missing <file>. Generate the spec first.") and stop.
 4. **Read config**: Determine `maxCycles` from `config.implementation.pipelineMaxCycles` (default: 3).
-5. **Initialize run log**: If `config.implementation.runLogging` is not `"off"`, initialize a run log following the Run Logging module (using the known spec name directly — no `_pending` workaround needed since the spec already exists).
+5. **Initialize run log**: Initialize a run log following the Run Logging module (using the known spec name directly — no `_pending` workaround needed since the spec already exists).
 
 ### Pipeline Cycle
 
@@ -5431,7 +5384,7 @@ while cycle < maxCycles:
     // Execute Phase 3 (existing logic)
     // - Implementation gates (review gate, task tracking gate) — run on first cycle only
     // - Set status to "implementing" if not already
-    // - Task execution: sequential or delegated per config.implementation.taskDelegation
+    // - Task execution: sequential or delegated per complexity score vs config.implementation.delegationThreshold
     // - autoCommit per task (if enabled)
 
     // Git checkpoint: implemented (if gitCheckpointing enabled)
@@ -5489,7 +5442,7 @@ Pipeline mode connects to other SpecOps features:
 | --- | --- |
 | **Run logging** | Each cycle writes a `## Cycle N` section in the run log with cycle-specific entries |
 | **Git checkpointing** | "implemented" checkpoint fires after each cycle's Phase 3. "completed" checkpoint fires once at final completion. |
-| **Task delegation** | Within each cycle, task execution respects `config.implementation.taskDelegation`. If delegation is active, the pipeline orchestrator delegates tasks the same way Phase 3 does. |
+| **Task delegation** | Within each cycle, task execution uses auto-delegation (complexity score vs `config.implementation.delegationThreshold`). If delegation is active, the pipeline orchestrator delegates tasks the same way Phase 3 does. |
 | **Plan validation** | Runs once in Phase 2 (before pipeline starts). Not repeated per cycle — the spec references don't change between cycles. |
 | **Metrics** | Captured once at final completion (Phase 4 step 2.5), not per cycle. `specDurationMinutes` includes all cycle time. |
 | **autoCommit** | Fires per-task within each cycle (Phase 3 step 7). Composes with checkpointing as usual. |

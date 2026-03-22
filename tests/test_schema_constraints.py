@@ -71,15 +71,6 @@ def main():
     check(expect_invalid(schema, {
         "templates": {"feature": "a" * 101}
     }, "Rejects template name exceeding maxLength"))
-    check(expect_invalid(schema, {
-        "team": {"taskPrefix": "a" * 21}
-    }, "Rejects taskPrefix exceeding maxLength"))
-    check(expect_invalid(schema, {
-        "implementation": {"testFramework": "a" * 51}
-    }, "Rejects testFramework exceeding maxLength"))
-    check(expect_invalid(schema, {
-        "integrations": {"ci": "a" * 51}
-    }, "Rejects integration string exceeding maxLength"))
 
     # --- Convention constraints ---
     check(expect_invalid(schema, {
@@ -105,15 +96,6 @@ def main():
     check(expect_invalid(schema, {
         "implementation": {"autoCommit": False, "unknownField": "value"}
     }, "Rejects unknown property in implementation"))
-    check(expect_invalid(schema, {
-        "implementation": {"linting": {"enabled": True, "unknownField": "value"}}
-    }, "Rejects unknown property in implementation.linting"))
-    check(expect_invalid(schema, {
-        "implementation": {"formatting": {"enabled": True, "unknownField": "value"}}
-    }, "Rejects unknown property in implementation.formatting"))
-    check(expect_invalid(schema, {
-        "integrations": {"ci": "github-actions", "unknownField": "value"}
-    }, "Rejects unknown property in integrations"))
 
     # --- specReview constraints ---
     check(expect_valid(schema, {
@@ -144,16 +126,6 @@ def main():
     }, "Rejects non-boolean allowSelfApproval"))
 
     # --- Workflow automation config constraints ---
-    check(expect_valid(schema, {
-        "implementation": {"runLogging": "on"}
-    }, "Valid runLogging on"))
-    check(expect_valid(schema, {
-        "implementation": {"runLogging": "off"}
-    }, "Valid runLogging off"))
-    check(expect_invalid(schema, {
-        "implementation": {"runLogging": "maybe"}
-    }, "Rejects invalid runLogging enum value"))
-
     check(expect_valid(schema, {
         "implementation": {"validateReferences": "off"}
     }, "Valid validateReferences off"))
@@ -192,6 +164,25 @@ def main():
     check(expect_invalid(schema, {
         "implementation": {"pipelineMaxCycles": 3.5}
     }, "Rejects non-integer pipelineMaxCycles"))
+
+    check(expect_valid(schema, {
+        "implementation": {"delegationThreshold": 1}
+    }, "Valid delegationThreshold min"))
+    check(expect_valid(schema, {
+        "implementation": {"delegationThreshold": 4}
+    }, "Valid delegationThreshold default"))
+    check(expect_valid(schema, {
+        "implementation": {"delegationThreshold": 20}
+    }, "Valid delegationThreshold max"))
+    check(expect_invalid(schema, {
+        "implementation": {"delegationThreshold": 0}
+    }, "Rejects delegationThreshold < 1"))
+    check(expect_invalid(schema, {
+        "implementation": {"delegationThreshold": 21}
+    }, "Rejects delegationThreshold > 20"))
+    check(expect_invalid(schema, {
+        "implementation": {"delegationThreshold": 3.5}
+    }, "Rejects non-integer delegationThreshold"))
 
     # --- Module constraints ---
     check(expect_invalid(schema, {
