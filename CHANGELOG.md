@@ -7,11 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-03-22
+
 ### Added
 
 - **Production learnings system**: `core/learnings.md` module captures post-deployment discoveries and links them to originating specs. Learnings stored in `<specsDir>/memory/learnings.json` with severity, category, and supersession protocol. Three capture mechanisms: explicit (`/specops learn`), agent-proposed, and reconciliation-based extraction.
-- **Learn mode**: New `/specops learn <spec-name>` command for structured learning capture via 5-question interactive workflow. Added as 16th dispatcher mode in `core/mode-manifest.json`.
+- **Learn mode**: New `/specops learn <spec-name>` command for structured learning capture via 5-question interactive workflow. Added as 15th dispatcher mode in `core/mode-manifest.json`.
 - **From-plan enforcement**: Post-conversion enforcement pass in `core/from-plan.md` validates converted specs against the Pre-Phase-3 enforcement checklist (IssueIDs, spec.json fields, index.json sync).
+- **Superpowers comparison**: New competitive analysis section in documentation with fresh research across all competitor platforms.
+- **CLAUDE.md**: Fresh project instructions file for Claude Code integration.
+
+### Changed
+
+- **Slimmer config surface**: Removed 12 optional keys from `.specops.json` schema that had no workflow impact. Added `implementation.delegationThreshold` to schema with always-on and max-ceiling guidance.
 
 ## [1.5.0] - 2026-03-22
 

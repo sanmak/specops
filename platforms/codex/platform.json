@@ -1,7 +1,7 @@
 {
   "name": "codex",
   "displayName": "OpenAI Codex",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "instructionFormat": "skill_md",
   "outputFiles": {
     "skill": "SKILL.md"
