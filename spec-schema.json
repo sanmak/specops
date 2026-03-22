@@ -162,6 +162,7 @@
     "relatedSpecs": {
       "type": "array",
       "maxItems": 20,
+      "uniqueItems": true,
       "description": "Informational cross-references to related specs",
       "items": {
         "type": "string",

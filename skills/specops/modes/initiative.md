@@ -31,7 +31,8 @@ The orchestrator executes the following 9-step loop. All state is read from disk
 1. Verify all required fields are present: `id`, `title`, `created`, `updated`, `author`, `specs`, `order`, `status`.
 2. Verify consistency: for each spec ID in `initiative.specs`, confirm it appears in at least one wave in `initiative.order`. If any spec ID is missing from all waves, Display a message to the user("Initiative '{id}' is invalid: spec '{spec-id}' is listed in 'specs' but does not appear in any execution wave in 'order'. Add it to the appropriate wave before continuing.") and stop.
 3. Verify no spec ID appears more than once across all waves in `initiative.order`. If duplicates are found, Display a message to the user("Initiative '{id}' is invalid: spec '{spec-id}' appears in multiple waves. Each spec must appear in exactly one wave.") and stop.
-4. If `status` is `completed`, Display a message to the user("Initiative '{id}' is already completed. All {N} specs are done.") and stop.
+4. If `skeleton` is present, verify it appears in `initiative.specs`. If not, Display a message to the user("Initiative '{id}' is invalid: skeleton spec '{skeleton}' is not listed in 'specs'.") and stop.
+5. If `status` is `completed`, Display a message to the user("Initiative '{id}' is already completed. All {N} specs are done.") and stop.
 
 #### Step 3: Compute current state
 
@@ -98,8 +99,8 @@ For completed dependency specs, include key outputs by reading the Summary secti
 After the dispatched spec execution returns (sub-agent completes or user confirms completion):
 
 1. Use the Read tool to read(`<specsDir>/<spec-id>/spec.json`) to verify the spec's current status.
-2. If `status == "completed"`: spec is done. Proceed to step 8.
-3. If `status != "completed"`: the spec is still in progress. Log the current status and continue to step 8 (the next iteration will re-evaluate).
+2. If `status == "completed"`: spec is done. Reset dispatch count for this spec. Proceed to step 8.
+3. If `status != "completed"`: increment the dispatch count for this spec (tracked in the initiative log). If the dispatch count >= 3 (max retries), Display a message to the user("Spec '{spec-id}' has been dispatched 3 times without completing. Initiative paused for manual review.") and STOP. Otherwise, log the current status and continue to step 8 (the next iteration will re-evaluate).
 
 #### Step 8: Update initiative
 
