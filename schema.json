@@ -81,11 +81,6 @@
           "default": "none",
           "description": "Task tracking system integration"
         },
-        "taskPrefix": {
-          "type": "string",
-          "maxLength": 20,
-          "description": "Optional task/ticket prefix (for example, PROJ-) used when referencing external trackers"
-        },
         "codeReview": {
           "type": "object",
           "description": "Code review requirements",
@@ -102,10 +97,6 @@
             "requireTests": {
               "type": "boolean",
               "default": true
-            },
-            "requireDocs": {
-              "type": "boolean",
-              "default": false
             }
           },
           "additionalProperties": false
@@ -151,63 +142,17 @@
           "default": false,
           "description": "Automatically create pull request when implementation is complete"
         },
-        "testing": {
-          "type": "string",
-          "enum": ["auto", "manual", "skip"],
-          "default": "auto",
-          "description": "Testing strategy (auto: run tests automatically, manual: prompt for testing, skip: no testing)"
-        },
-        "testFramework": {
-          "type": "string",
-          "maxLength": 50,
-          "description": "Preferred test framework (jest, mocha, pytest, etc.)"
-        },
-        "linting": {
-          "type": "object",
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": true
-            },
-            "fixOnSave": {
-              "type": "boolean",
-              "default": false
-            }
-          },
-          "additionalProperties": false
-        },
-        "formatting": {
-          "type": "object",
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": true
-            },
-            "tool": {
-              "type": "string",
-              "enum": ["prettier", "black", "rustfmt", "gofmt"],
-              "description": "Formatting tool to use"
-            }
-          },
-          "additionalProperties": false
-        },
-        "taskDelegation": {
-          "type": "string",
-          "enum": ["auto", "always", "never"],
-          "default": "auto",
-          "description": "Task delegation strategy for Phase 3. auto: delegate when complexity score reaches threshold (based on effort sizing and file breadth). always: always delegate. never: sequential execution. Strategy adapts to platform capabilities (sub-agents, checkpoints, or sequential fallback)."
-        },
-        "runLogging": {
-          "type": "string",
-          "enum": ["on", "off"],
-          "default": "on",
-          "maxLength": 10,
-          "description": "Per-run execution logging to <specsDir>/runs/. Captures phase transitions, decisions, file operations, and errors as a chronological trace."
+        "delegationThreshold": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20,
+          "default": 4,
+          "description": "Complexity score threshold for auto task delegation. Score formula: sum(effort_weights) + floor(distinct_files / 5). Set to 1 to delegate on every spec (always-on equivalent). Max 20 -- see docs for disabling delegation."
         },
         "validateReferences": {
           "type": "string",
           "enum": ["off", "warn", "strict"],
-          "default": "off",
+          "default": "warn",
           "maxLength": 10,
           "description": "Validate file paths and code references in spec against codebase before implementation. off: skip. warn: notify and continue. strict: block on unresolved references."
         },
@@ -337,33 +282,6 @@
           "default": "spec",
           "maxLength": 10,
           "description": "Scope of dependency scan. spec: only ecosystems relevant to current spec. project: all detected ecosystems."
-        }
-      },
-      "additionalProperties": false
-    },
-    "integrations": {
-      "type": "object",
-      "description": "External tool integrations",
-      "properties": {
-        "ci": {
-          "type": "string",
-          "maxLength": 50,
-          "description": "CI system (github-actions, gitlab-ci, jenkins, etc.)"
-        },
-        "deployment": {
-          "type": "string",
-          "maxLength": 50,
-          "description": "Deployment platform (vercel, netlify, aws, etc.)"
-        },
-        "monitoring": {
-          "type": "string",
-          "maxLength": 50,
-          "description": "Monitoring service (sentry, datadog, newrelic, etc.)"
-        },
-        "analytics": {
-          "type": "string",
-          "maxLength": 50,
-          "description": "Analytics service (mixpanel, amplitude, etc.)"
         }
       },
       "additionalProperties": false

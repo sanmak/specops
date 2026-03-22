@@ -13,7 +13,6 @@
   },
   "implementation": {
     "autoCommit": false,
-    "createPR": false,
-    "testing": "auto"
+    "createPR": false
   }
 }

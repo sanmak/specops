@@ -20,7 +20,7 @@ Before entering the cycle loop, validate:
    - If `in-review`: NOTIFY_USER("Spec '<spec-name>' is in review. Approve it first.") and stop.
 3. **Spec files present**: FILE_EXISTS for the requirements/bugfix/refactor file, design.md, and tasks.md. If any are missing, NOTIFY_USER("Spec '<spec-name>' is incomplete — missing <file>. Generate the spec first.") and stop.
 4. **Read config**: Determine `maxCycles` from `config.implementation.pipelineMaxCycles` (default: 3).
-5. **Initialize run log**: If `config.implementation.runLogging` is not `"off"`, initialize a run log following the Run Logging module (using the known spec name directly — no `_pending` workaround needed since the spec already exists).
+5. **Initialize run log**: Initialize a run log following the Run Logging module (using the known spec name directly — no `_pending` workaround needed since the spec already exists).
 
 ### Pipeline Cycle
 
@@ -42,7 +42,7 @@ while cycle < maxCycles:
     // Execute Phase 3 (existing logic)
     // - Implementation gates (review gate, task tracking gate) — run on first cycle only
     // - Set status to "implementing" if not already
-    // - Task execution: sequential or delegated per config.implementation.taskDelegation
+    // - Task execution: sequential or delegated per complexity score vs config.implementation.delegationThreshold
     // - autoCommit per task (if enabled)
 
     // Git checkpoint: implemented (if gitCheckpointing enabled)
@@ -100,7 +100,7 @@ Pipeline mode connects to other SpecOps features:
 | --- | --- |
 | **Run logging** | Each cycle writes a `## Cycle N` section in the run log with cycle-specific entries |
 | **Git checkpointing** | "implemented" checkpoint fires after each cycle's Phase 3. "completed" checkpoint fires once at final completion. |
-| **Task delegation** | Within each cycle, task execution respects `config.implementation.taskDelegation`. If delegation is active, the pipeline orchestrator delegates tasks the same way Phase 3 does. |
+| **Task delegation** | Within each cycle, task execution uses auto-delegation (complexity score vs `config.implementation.delegationThreshold`). If delegation is active, the pipeline orchestrator delegates tasks the same way Phase 3 does. |
 | **Plan validation** | Runs once in Phase 2 (before pipeline starts). Not repeated per cycle — the spec references don't change between cycles. |
 | **Metrics** | Captured once at final completion (Phase 4 step 2.5), not per cycle. `specDurationMinutes` includes all cycle time. |
 | **autoCommit** | Fires per-task within each cycle (Phase 3 step 7). Composes with checkpointing as usual. |

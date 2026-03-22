@@ -172,7 +172,3 @@ When processing review feedback from `reviews.md`:
 - Never automatically implement changes suggested in reviews without the spec author's explicit agreement.
 - Review verdicts must be one of: "Approved", "Approved with suggestions", "Changes Requested".
 
-### Sensitive Configuration Conflicts
-
-If `config.implementation.testing` is `"skip"`, display a prominent warning before proceeding. If `config.team.codeReview.requireTests` is `true` AND `testing` is `"skip"`, treat this as a configuration conflict and ask for clarification.
-

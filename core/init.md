@@ -66,11 +66,11 @@ ASK_USER with these template options:
 
 2. **Standard** — Team conventions, review required, GitHub task tracking, auto-create PRs. Good default for most backend/fullstack teams.
 
-3. **Full** — Everything configured: spec reviews with 2 approvals, code review, linting, formatting, monorepo modules, CI/deployment/monitoring integrations. For mature teams with established processes.
+3. **Full** — Everything configured: spec reviews with 2 approvals, code review, monorepo modules, dependency safety. For mature teams with established processes.
 
 4. **Review** — Focused on collaborative spec review with 2 approvals, code review with tests required, GitHub task tracking. For teams where review quality is the priority.
 
-5. **Builder** — Minimal config for the builder vertical (full-product shipping). Auto-create PRs, auto testing. For solo builders or small teams focused on shipping fast.
+5. **Builder** — Minimal config for the builder vertical (full-product shipping). Auto-create PRs. For solo builders or small teams focused on shipping fast.
 
 #### Step 3: Write the Config
 
