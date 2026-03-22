@@ -24,7 +24,7 @@ specops/
 │   ├── DIAGRAMS.md                       # Mermaid sequence diagrams for all workflows
 │   ├── PLAN-VS-SPEC.md                   # Plan Mode vs Spec Mode comparison
 │   ├── SECURITY-AUDIT.md                 # Security audit results
-│   ├── COMPARISON.md                     # Competitive comparison (vs Kiro, EPIC/Reload, Spec Kit)
+│   ├── COMPARISON.md                     # Competitive comparison (vs Superpowers, Kiro, EPIC/Reload, Spec Kit)
 │   └── MARKETPLACE_SUBMISSIONS.md        # Marketplace submission content
 │
 ├── assets/                               # Visual assets (SVG diagrams)

@@ -128,7 +128,7 @@ SpecOps handles the coordination: dependency gates block implementation until re
 - **Enforcement, not suggestions**: CI-integrated drift detection, checkbox completion gates, dependency gates, and approval workflows that block implementation until specs are approved
 - **Open source, local, no lock-in**: everything is git-tracked markdown. No cloud service, no account required. MIT license.
 
-> [Full comparison with Kiro, EPIC/Reload, and Spec Kit](docs/COMPARISON.md) | [Plan Mode vs Spec Mode](docs/PLAN-VS-SPEC.md)
+> [Full comparison with Superpowers, Kiro, EPIC/Reload, and Spec Kit](docs/COMPARISON.md) | [Plan Mode vs Spec Mode](docs/PLAN-VS-SPEC.md)
 
 ## Platforms
 
