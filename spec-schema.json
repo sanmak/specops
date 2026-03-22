@@ -195,7 +195,7 @@
           "contractRef": {
             "type": "string",
             "maxLength": 200,
-            "pattern": "^(?!/)(?!.*\\.\\.)(?!.*//)[a-zA-Z0-9._/ -]+$",
+            "pattern": "^(?!/)(?!.*\\.\\.)(?!.*//)[a-zA-Z0-9._/-]+$",
             "description": "Relative path to an interface contract or shared artifact (no absolute paths or .. segments)"
           }
         },

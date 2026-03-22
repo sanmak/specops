@@ -83,7 +83,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 
 0. **Phase 2 entry gate**: After creating `<specsDir>/<spec-name>/` and `implementation.md` (step 2 below), Read the file at `<specsDir>/<spec-name>/implementation.md` and verify it contains `## Phase 1 Context Summary`. If missing (new spec), write the context summary now using the data captured in Phase 1 step 5.5. If the section still cannot be written, STOP — return to Phase 1 step 5.5. Proceeding without the Context Summary is a protocol breach.
 1. Generate a structured spec directory in the configured `specsDir`
-1.5. **Split Detection checkpoint**: If Phase 1 step 9.5 (Scope Assessment) did NOT recommend decomposition, run the Split Detection safety net from the Spec Decomposition module (`core/decomposition.md` section 2). After drafting requirements in step 1, review the drafted criteria for independent clusters. If independent clusters are detected, follow the same proposal and decision flow as Phase 1.5. This check fires only when Phase 1.5 did not trigger — it does not run if decomposition was already approved.
+1.5. **Split Detection checkpoint**: If Phase 1 step 9.5 (Scope Assessment) did NOT recommend decomposition, run the Split Detection safety net from the Spec Decomposition module (`core/decomposition.md` section 2). After creating the core spec files in step 2, review the drafted requirements for independent clusters. If independent clusters are detected, follow the same proposal and decision flow as Phase 1.5. This check fires only when Phase 1.5 did not trigger — it does not run if decomposition was already approved.
 2. Create four core files:
    - `requirements.md` (or `bugfix.md` for bugs, `refactor.md` for refactors) - User stories with EARS acceptance criteria, bug analysis, or refactoring rationale
    - `design.md` - Technical architecture, sequence diagrams, implementation approach
@@ -117,7 +117,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 
 3. Create `spec.json` with metadata (author from git config, type, status, version, created date). Set status to `draft`. Additionally, populate cross-spec fields from the Spec Decomposition module (`core/decomposition.md` sections 4 and 10):
    - If this spec belongs to an initiative (decomposition was approved), set `partOf` to the initiative ID.
-   - Populate `specDependencies` based on the initiative's execution wave ordering — specs in wave N depend on specs in wave N-1. For each dependency, include `specId`, `reason`, and `required: true` for intra-wave dependencies.
+   - Populate `specDependencies` based on the initiative's execution wave ordering — specs in wave N depend on specs in wave N-1. For each inter-wave dependency, include `specId`, `reason`, and `required: true`. Only add dependencies where actual coupling exists (shared data, API contracts, or integration points) — do not blindly depend on every spec in the prior wave.
    - Populate `relatedSpecs` with other specs in the same initiative, specs modifying overlapping files (from memory patterns), or specs explicitly mentioned in the request.
    - Run cycle detection (`core/decomposition.md` section 5) before writing spec.json. If a cycle is detected, Tell the user with the cycle chain and STOP — do not write the file.
 4. Regenerate `<specsDir>/index.json` from all `*/spec.json` files.
