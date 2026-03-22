@@ -114,6 +114,8 @@ Once a spec exists, view it directly through the assistant instead of opening ra
 /specops view login-page full              # All sections
 /specops view login-page walkthrough       # Interactive guided tour
 /specops list                              # Overview of all specs
+/specops view initiative oauth-payments    # Initiative progress
+/specops list initiatives                  # All initiatives
 ```
 
 **Cursor / Codex:**
@@ -191,17 +193,43 @@ Refactor API layer to use repository pattern
 
 Agent analyzes current code, designs refactoring approach, implements incrementally.
 
+### Example: Large Feature
+
+```text
+Add OAuth authentication and payment processing
+```
+
+If the feature spans multiple bounded contexts, SpecOps automatically detects this during scope assessment (Phase 1.5) and proposes splitting it into coordinated specs:
+
+```text
+Agent:
+  Scope assessment → 2 bounded contexts detected
+  Proposed split:
+    Spec 1: oauth-authentication (wave 1)
+    Spec 2: payment-processing (wave 2, depends on auth)
+  Initiative created: oauth-payments
+
+You approve → 2 specs created with cross-spec dependencies
+/specops initiative oauth-payments → executes both in wave order
+/specops view initiative oauth-payments → see progress across all specs
+```
+
 ## What Gets Created
 
 ```text
 your-project/
   .specops.json                         (config)
   .specops/                             (specs directory)
+    index.json                          (auto-generated spec dashboard)
     feature-user-auth/
+      spec.json                         (lifecycle metadata)
       requirements.md                   (user stories, acceptance criteria)
       design.md                         (architecture, decisions, diagrams)
       tasks.md                          (implementation task breakdown)
       implementation.md                 (optional: notes during implementation)
+    initiatives/                        (created for multi-spec features)
+      oauth-payments.json               (member specs, execution waves, status)
+      oauth-payments-log.md             (execution trace)
 ```
 
 ## Team Review

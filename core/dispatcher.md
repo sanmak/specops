@@ -50,6 +50,7 @@ When invoked, evaluate the user's request against the following detection patter
 | 10 | **from-plan** | "from-plan", "from plan", "import plan", "convert plan", "convert my plan", "from my plan", "use this plan", "turn this plan into a spec", "make a spec from this plan", "implement the plan", "implement my plan", "go ahead with the plan", "proceed with plan" | Must refer to converting an AI plan into a spec. NOT "import plan data from external system". |
 | 10.5 | **from-plan** (post-plan acceptance gate) | Short acceptance phrases: "go ahead", "do it", "proceed", "implement this", "looks good", "yes, implement", "let's build it", "yes", "approved, implement" — AND conversation context contains a structured plan — AND FILE_EXISTS(`.specops.json`) is true | All three conditions must be met. Implementing a plan without converting it to a SpecOps spec first in a SpecOps-configured project is a protocol breach. |
 | 11 | **pipeline** | "pipeline \<spec-name\>", "auto-implement \<spec-name\>", "run pipeline for \<spec-name\>" | Must refer to SpecOps automated implementation. "create CI pipeline", "build data pipeline" are NOT pipeline mode. |
+| 11.5 | **initiative** | "initiative \<id\>", "run initiative \<id\>", "execute initiative \<id\>", "resume initiative \<id\>" | Must refer to SpecOps initiative orchestration. "create initiative tracker", "add initiative page", "initiative dashboard" are NOT initiative mode. |
 | 12 | **interview** | Explicit: "interview" keyword. Auto (interactive platforms only): request is vague (≤5 words, no technical keywords, no action verb) | Vague requests auto-trigger on interactive platforms only. |
 | — | **spec** | Default — no pattern matched above | Full Phase 1-4 workflow. |
 
@@ -71,6 +72,8 @@ When the **spec** mode is dispatched AND the user's request references an existi
 
 7. **Memory directory exists**: FILE_EXISTS(`<specsDir>/memory/`). If false, NOTIFY_USER("Memory directory not found at `<specsDir>/memory/`. Run the spec workflow from Phase 1 to create it.") and STOP.
 
+8. **Spec dependency gate**: READ_FILE(`<specsDir>/<spec-name>/spec.json`) and check the `specDependencies` array. For each entry with `required: true`, READ_FILE(`<specsDir>/<entry.specId>/spec.json`) and verify `status == "completed"`. If any required dependency is not completed, NOTIFY_USER("Spec '<spec-name>' has unmet required dependency: '<entry.specId>' (status: <status>). Complete the dependency spec first, or use scope hammering to resolve the blocker.") and STOP. If `specDependencies` is absent or empty, this check passes trivially. Note: full-graph cycle detection runs at write time (Phase 2 step 3) and during reconciliation (check 6) — it is not repeated here to avoid redundant I/O on every dispatch.
+
 IF ANY CHECK FAILS: NOTIFY_USER with the specific failure message and STOP. Do not spawn the sub-agent.
 
 IF ALL CHECKS PASS: Proceed to the Dispatch Protocol.
@@ -88,6 +91,13 @@ After mode detection (and enforcement checks if applicable), dispatch the mode:
 4. **Post-dispatch verification**: After the sub-agent returns:
    - If the mode was **spec** or **pipeline**: READ_FILE(`<specsDir>/<spec-name>/tasks.md`) and verify task statuses conform to the Task State Machine rules (no invalid transitions, no multiple tasks in `In Progress`).
    - For all other modes: no post-dispatch verification needed.
+
+5. **Phase dispatch signal handling**: When a sub-agent writes a Phase Completion Summary to `implementation.md` and signals for a fresh phase context (Phase 2 → Phase 3 or Phase 3 → Phase 4), the dispatcher handles the transition:
+   - READ_FILE(`<specsDir>/<spec-name>/implementation.md`) and check for `## Phase 2 Completion Summary` or `## Phase 3 Completion Summary`.
+   - If a completion summary is present and the corresponding next phase has not started:
+     - `canDelegateTask: true`: build the appropriate handoff bundle (Phase 3 or Phase 4) from the completion summary and dispatch a fresh sub-agent with the bundle as its context. Route to the **spec** mode with an instruction to resume at the indicated phase.
+     - `canDelegateTask: false` and `canAskInteractive: true`: the completion summary is already written to `implementation.md` — prompt the user to start a fresh session.
+     - `canDelegateTask: false` and `canAskInteractive: false`: no action needed — the workflow continues sequentially in the current context.
 
 ## Shared Context Block
 

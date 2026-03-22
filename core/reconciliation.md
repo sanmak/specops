@@ -1,6 +1,6 @@
 ## Audit Mode
 
-SpecOps `audit` detects drift between spec artifacts and the live codebase. It runs 5 checks and produces a health report. `reconcile` guides interactive repair of findings.
+SpecOps `audit` detects drift between spec artifacts and the live codebase. It runs 6 checks and produces a health report. `reconcile` guides interactive repair of findings.
 
 ### Mode Detection
 
@@ -20,11 +20,11 @@ If neither pattern matches, continue to interview check and the standard phases.
 3. For each target spec:
    a. If FILE_EXISTS(`<specsDir>/<name>/spec.json`), READ_FILE(`<specsDir>/<name>/spec.json`) to load metadata. If not found, NOTIFY_USER(`"Spec '<name>' not found in <specsDir>. Run '/specops list' to see available specs."`) and stop.
    b. If FILE_EXISTS(`<specsDir>/<name>/tasks.md`), READ_FILE(`<specsDir>/<name>/tasks.md`) to load tasks.
-   c. Run the 5 drift checks below. Record each result as `Healthy`, `Warning`, or `Drift`.
+   c. Run the 6 drift checks below. Record each result as `Healthy`, `Warning`, or `Drift`.
    d. Overall health = worst result across all checks.
 4. Present the Audit Report (format below).
 
-### Five Drift Checks
+### Six Drift Checks
 
 ### File Drift
 
@@ -79,9 +79,21 @@ Detect multiple active (non-completed) specs referencing the same files.
 - Any file with 2+ distinct specs → **Warning** (no repair available — informational only)
 - For single-spec audit: still load all active specs to detect conflicts involving the target
 
+### Dependency Health
+
+Validate cross-spec dependency integrity.
+
+- **Invalid references**: For each spec with a `specDependencies` array in its spec.json, verify that each `specId` references a spec that actually exists in `<specsDir>`. READ_FILE(`<specsDir>/index.json`) to get the full list of spec IDs. For each `specId` in `specDependencies`, check that it appears in the index. Missing spec reference → **Warning** with details of which dependency points to a non-existent spec.
+
+- **Cycle detection**: Run cycle detection across all specs using DFS with white/gray/black coloring (see `core/decomposition.md` section 5). Build the adjacency list from all specs' `specDependencies` arrays. If a cycle is detected → **Drift** with the cycle chain (e.g., "spec-a → spec-b → spec-c → spec-a"). If no cycles → continue.
+
+- **Unmet required dependencies on implementing specs**: For each spec with `status == "implementing"`, check its `specDependencies` for entries with `required: true`. For each required dependency, READ_FILE the dependency's spec.json and verify `status == "completed"`. If any required dependency is not completed → **Warning** ("Spec '{spec-id}' is implementing but required dependency '{dep-id}' has status '{status}'"). This flags specs that may have bypassed the dependency gate.
+
+- If no issues found across all three sub-checks → **Healthy**
+
 ### Health Summary
 
-Overall health = worst result across all 5 checks (Drift > Warning > Healthy).
+Overall health = worst result across all 6 checks (Drift > Warning > Healthy).
 
 Report each check as:
 
@@ -92,6 +104,7 @@ Report each check as:
 | Task Consistency | Healthy / Warning / Drift | N tasks checked, M issues |
 | Staleness | Healthy / Warning / Drift | N days since last activity |
 | Cross-Spec Conflicts | Healthy / Warning | N shared files |
+| Dependency Health | Healthy / Warning / Drift | N dependency issues |
 
 **Overall Health**: Healthy / Warning / Drift
 
@@ -152,7 +165,7 @@ Guided interactive repair for drifted specs. Available only on platforms with `c
 1. If FILE_EXISTS(`.specops.json`), READ_FILE(`.specops.json`) to get `specsDir`; otherwise use default `.specops`
 2. Parse target spec name from the request. Reconcile requires a target — if no name given, NOTIFY_USER(`"Reconcile requires a specific spec name. Example: 'reconcile <spec-name>'. Run 'audit' to see all specs."`) and stop.
 3. **Platform check**: If `canAskInteractive` is false, NOTIFY_USER(`"Reconcile mode requires interactive input. Run audit to see findings. Manual fixes can be applied to tasks.md and spec.json directly."`) and stop.
-4. Run full audit on the target spec (all 5 checks).
+4. Run full audit on the target spec (all 6 checks).
 5. If all checks Healthy → NOTIFY_USER(`"No drift detected in <spec-name>. No reconciliation needed."`) and stop.
 6. Present numbered findings list to the user.
 7. Prompt the user: "Which findings to fix? Enter 'all', comma-separated numbers (e.g. '1,3'), or 'skip' to exit."

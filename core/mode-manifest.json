@@ -18,7 +18,7 @@
     },
     "view": {
       "description": "View or list existing spec artifacts",
-      "modules": ["view", "config-handling"],
+      "modules": ["view", "config-handling", "decomposition"],
       "templates": []
     },
     "steering": {
@@ -43,7 +43,7 @@
     },
     "audit": {
       "description": "Drift detection and reconciliation for spec artifacts",
-      "modules": ["reconciliation", "config-handling"],
+      "modules": ["reconciliation", "config-handling", "decomposition"],
       "templates": []
     },
     "from-plan": {
@@ -58,7 +58,8 @@
         "engineering-discipline",
         "review-workflow",
         "task-tracking",
-        "dependency-safety"
+        "dependency-safety",
+        "decomposition"
       ],
       "templates": [
         "feature-requirements",
@@ -89,6 +90,11 @@
     "interview": {
       "description": "Structured Q&A session to refine vague requests before spec generation",
       "modules": ["interview"],
+      "templates": []
+    },
+    "initiative": {
+      "description": "Autonomous execution of multi-spec initiatives",
+      "modules": ["initiative-orchestration", "config-handling", "safety", "memory"],
       "templates": []
     },
     "spec": {
@@ -122,7 +128,8 @@
         "reconciliation",
         "from-plan",
         "feedback",
-        "dependency-safety"
+        "dependency-safety",
+        "decomposition"
       ],
       "templates": [
         "feature-requirements",

@@ -8,9 +8,13 @@ When the user invokes SpecOps, check for view or list intent **before** entering
 
 1. **List mode**: The user's request matches patterns like "list specs", "show all specs", "list", or "what specs exist". Proceed to the **List Specs** section below.
 
-2. **View mode**: The user's request references an existing spec name AND includes a view intent — patterns like "view <spec-name>", "show me <spec-name>", "look at <spec-name>", "walk me through <spec-name>", or "<spec-name> design". Proceed to the **View Spec** section below.
+2. **Initiative list mode**: The user's request matches patterns like "list initiatives", "show initiatives", "what initiatives exist". Proceed to the **List Initiatives** section below.
 
-3. If neither view nor list intent is detected, continue to the standard SpecOps workflow (Phase 1).
+3. **Initiative view mode**: The user's request matches patterns like "view initiative <id>", "show initiative <id>", "initiative <id> status". Proceed to the **View: Initiative** section below. Note: bare "initiative <id>" without view/show intent is handled by the initiative mode in the dispatcher, not the view module.
+
+4. **View mode**: The user's request references an existing spec name AND includes a view intent — patterns like "view <spec-name>", "show me <spec-name>", "look at <spec-name>", "walk me through <spec-name>", or "<spec-name> design". Proceed to the **View Spec** section below.
+
+5. If no view or list intent is detected, continue to the standard SpecOps workflow (Phase 1).
 
 ### View Command Parsing
 
@@ -86,8 +90,37 @@ If the list contains more than 10 specs, group them by status:
 **Summary**: 8 specs total
 ```
 
+#### Initiative-Grouped List
+
+If any specs have a `partOf` field in their spec.json, group them by initiative in the list display. Specs without a `partOf` field appear under "Standalone Specs".
+
+```text
+# Specs Overview
+
+## Initiative: user-auth-overhaul (active)
+| Spec | Type | Status | Wave | Version | Author | Last Updated |
+|------|------|--------|------|---------|--------|--------------|
+| auth-oauth | feature | implementing | 1 (skeleton) | v2 | Jane Doe | 2025-03-01 |
+| auth-sessions | feature | draft | 2 | v1 | Jane Doe | 2025-03-02 |
+| auth-permissions | feature | draft | 2 | v1 | Jane Doe | 2025-03-02 |
+
+## Standalone Specs
+| Spec | Type | Status | Version | Author | Last Updated |
+|------|------|--------|---------|--------|--------------|
+| bugfix-checkout | bugfix | completed | v1 | John Smith | 2025-02-28 |
+
+**Summary**: 4 specs total — 1 initiative (3 specs), 1 standalone
+```
+
+To build the initiative-grouped view:
+
+1. For each spec with a `partOf` field, if Use the Bash tool to check if the file exists at(`<specsDir>/initiatives/<partOf>.json`), Use the Read tool to read it to get the initiative title, status, order (waves), and skeleton. If the initiative file does not exist, treat the spec as standalone (log a warning but do not fail).
+2. Group specs by `partOf` value. For each group, show the initiative title and status as the section header.
+3. Add a "Wave" column showing which execution wave the spec belongs to (from `initiative.order`). If the spec is the skeleton, append "(skeleton)" to the wave number.
+4. Specs without `partOf` go under "Standalone Specs".
+
 On interactive platforms (`canAskInteractive: true`), after showing the list:
-Use the AskUserQuestion tool "Would you like to view any of these specs in detail?"
+Use the AskUserQuestion tool "Would you like to view any of these specs in detail, or view an initiative?"
 
 ### View: Summary
 
@@ -353,6 +386,112 @@ Fall back to the Full view with AI commentary. Present all sections sequentially
 [...remaining sections with commentary...]
 ```
 
+### View: Initiative
+
+When the user requests to view a specific initiative (`view initiative <id>`, `show initiative <id>`):
+
+1. Use the Read tool to read(`.specops.json`) to get `specsDir` (default: `.specops`). Apply path containment rules.
+2. Validate the initiative ID matches pattern `^(?!\\.{1,2}$)[a-zA-Z0-9._-]+$` (rejects `.` and `..` to prevent path traversal).
+3. If Use the Bash tool to check if the file exists at(`<specsDir>/initiatives/<id>.json`), Use the Read tool to read it. If not found, Display a message to the user("Initiative '{id}' not found.") and show available initiatives.
+4. For each spec ID in `initiative.specs`, Use the Read tool to read(`<specsDir>/<spec-id>/spec.json`) if it exists to get current status and metadata.
+
+Present using this format:
+
+```text
+# Initiative: <title>
+
+**ID**: <id> | **Status**: active | **Created**: 2025-03-01 | **Updated**: 2025-03-10
+**Author**: Jane Doe | **Skeleton**: auth-oauth
+
+## Execution Waves
+
+### Wave 1
+| Spec | Status | Type | Skeleton |
+|------|--------|------|----------|
+| auth-oauth | implementing | feature | Yes |
+
+### Wave 2
+| Spec | Status | Type | Dependencies |
+|------|--------|------|-------------|
+| auth-sessions | draft | feature | auth-oauth |
+| auth-permissions | draft | feature | auth-oauth |
+
+## Progress
+
+Completed: 0/3 specs (0%)
+[........................................] 0%
+
+## Execution Log
+
+[Last 10 entries from <specsDir>/initiatives/<id>-log.md if it exists]
+```
+
+### List Initiatives
+
+When the user requests a list of all initiatives (`list initiatives`, `show initiatives`):
+
+1. Use the Read tool to read(`.specops.json`) to get `specsDir` (default: `.specops`).
+2. If Use the Bash tool to check if the file exists at(`<specsDir>/initiatives/`), Use the Glob tool to list(`<specsDir>/initiatives/`) to find all `.json` files (excluding `-log.md` files).
+3. For each initiative JSON file, Use the Read tool to read it and collect summary fields: id, title, status, spec count, completed spec count.
+4. If no initiatives exist, Display a message to the user("No initiatives found.") and stop.
+
+Present using this format:
+
+```text
+# Initiatives Overview
+
+| Initiative | Status | Specs | Completed | Last Updated |
+|-----------|--------|-------|-----------|--------------|
+| user-auth-overhaul | active | 3 | 0/3 | 2025-03-10 |
+| payment-refactor | completed | 2 | 2/2 | 2025-03-05 |
+
+**Summary**: 2 initiatives — 1 active, 1 completed
+```
+
+On interactive platforms (`canAskInteractive: true`), after showing the list:
+Use the AskUserQuestion tool "Would you like to view any of these initiatives in detail?"
+
+### Dependency Display in Spec Views
+
+When displaying a spec in summary, full, or status views, include dependency information if the spec has `specDependencies` or `relatedSpecs` in its spec.json.
+
+**In summary view**, add a "Dependencies" subsection after "Key Decisions":
+
+```text
+## Dependencies
+
+**Part of**: user-auth-overhaul (Wave 2)
+
+| Dependency | Required | Status |
+|-----------|----------|--------|
+| auth-oauth | Yes | completed |
+| auth-sessions | No (advisory) | implementing |
+
+**Related specs**: auth-permissions, payment-flow
+```
+
+**In status view**, add a "Dependencies" section after "Task Progress":
+
+```text
+## Dependencies
+
+| Spec | Required | Status | Reason |
+|------|----------|--------|--------|
+| auth-oauth | Yes | completed | OAuth provider must be set up first |
+| auth-sessions | No | implementing | Session storage is shared |
+
+Related: auth-permissions
+```
+
+**In full view**, include the dependency display after the metadata header, before the Requirements section.
+
+To build the dependency display:
+
+1. Use the Read tool to read the spec's `spec.json` for `specDependencies`, `relatedSpecs`, and `partOf`.
+2. For each entry in `specDependencies`, if Use the Bash tool to check if the file exists at(`<specsDir>/<dep-spec-id>/spec.json`), Use the Read tool to read it to get its current status. If the file does not exist, show the dependency as "not-created".
+3. If `partOf` is set and Use the Bash tool to check if the file exists at(`<specsDir>/initiatives/<partOf>.json`), Use the Read tool to read the initiative JSON to get wave information. If the file does not exist, omit initiative context from the display.
+4. If neither `specDependencies` nor `relatedSpecs` is present and `partOf` is not set, omit the Dependencies section entirely.
+
 ### Task Progress Parsing
 
 To calculate task progress from tasks.md:
@@ -449,7 +588,8 @@ Load configuration from `.specops.json` at project root. If not found, use these
     "createPR": false,
     "testing": "auto",
     "linting": { "enabled": true, "fixOnSave": false },
-    "formatting": { "enabled": true }
+    "formatting": { "enabled": true },
+    "delegationThreshold": 4
   },
   "dependencySafety": {
     "enabled": true,
@@ -468,6 +608,9 @@ Create specs in this structure:
 ```text
 <specsDir>/
   index.json             (auto-generated spec index — rebuilt after every spec.json mutation)
+  initiatives/           (initiative tracking — created when decomposition is approved)
+    <initiative-id>.json (initiative definition — specs, waves, status)
+    <initiative-id>-log.md (chronological execution log)
   <spec-name>/
     spec.json            (per-spec lifecycle metadata — always created)
     requirements.md      (or bugfix.md for bugs, refactor.md for refactors)
@@ -504,8 +647,8 @@ When both `specReview.enabled` and `reviewRequired` are set, `specReview.enabled
 
 The agent rebuilds `<specsDir>/index.json` after every `spec.json` creation or update:
 
-1. Scan all subdirectories of `<specsDir>` for `spec.json` files
-2. Collect summary fields from each: `id`, `type`, `status`, `version`, `author` (name), `updated`
+1. Scan all subdirectories of `<specsDir>` for `spec.json` files (skip the `initiatives/` subdirectory — it contains initiative files, not spec files)
+2. Collect summary fields from each: `id`, `type`, `status`, `version`, `author` (name), `updated`, and `partOf` (if present — the initiative ID this spec belongs to)
 3. Write the summaries as a JSON array to `<specsDir>/index.json`
 
 The index is a derived file — per-spec `spec.json` files are always the source of truth. If `index.json` is missing or has merge conflicts, regenerate it from per-spec files.
@@ -752,7 +895,11 @@ If not set, detect the test framework from the project's existing test files and
 
 ### Workflow Impact: taskDelegation
 
-- **Phase 3 step 2**: If `"auto"`, compute a complexity score from pending tasks (effort weights + file count) and activate delegation when score >= 6. If `"always"`, activate regardless. If `"never"`, use sequential execution.
+- **Phase 3 step 2**: If `"auto"`, compute a complexity score from pending tasks (effort weights + file count) and activate delegation when score >= threshold. The threshold is determined by `config.implementation.delegationThreshold` (integer, default 4). If `"always"`, activate regardless. If `"never"`, use sequential execution.
+
+### Workflow Impact: delegationThreshold
+
+- **Phase 3 step 2 (auto mode)**: The `delegationThreshold` config (integer, default 4) sets the complexity score at which task delegation auto-activates. Lower values activate delegation more aggressively (more specs benefit from fresh-context task execution). The score formula is: `sum(effort_weights) + floor(distinct_files / 5)` where effort weights are S=1, M=2, L=3. Examples at threshold 4: 4 small tasks (score 4), 2 medium tasks (score 4), 1 large + 1 small task (score 4).
 
 ## Module-Specific Configuration
 
@@ -795,3 +942,286 @@ The following `.specops.json` fields are written by installers and must not be p
 - **`_installedAt`**: ISO 8601 timestamp of when SpecOps was installed.
 
 When modifying `.specops.json` (e.g., during `/specops init`), preserve these fields if they already exist. Do not include them in configuration prompts or templates shown to users.
+
+
+## Spec Decomposition
+
+Spec Decomposition provides multi-spec intelligence: automatic scope assessment, split detection, an initiative data model for tracking related specs, cross-spec dependencies with enforcement, cycle detection, dependency gates, scope hammering for blocker resolution, and the walking skeleton principle. All behavior is always-on — no configuration flag to enable or disable.
+
+### 1. Scope Assessment Gate (Phase 1.5)
+
+After Phase 1 step 9 (context summary), before Phase 2, run the Scope Assessment Gate. This gate is always-on and runs unconditionally for every spec.
+
+**Complexity signals** — check the user's feature request for the following indicators:
+
+| Signal | Detection Method |
+| --- | --- |
+| Independent deliverables | 2+ distinct functional units that could ship separately |
+| Distinct code domains | >2 separate code areas (e.g., API + UI + database) |
+| Language signals | Phrases like "and also", "plus", "additionally", "as well as" joining unrelated capabilities |
+| Estimated task count | >8-10 tasks estimated from the request scope |
+| Independent criteria clusters | Acceptance criteria that group into separable clusters with no cross-references |
+
+**Assessment procedure:**
+
+1. Evaluate the feature request against all 5 complexity signals.
+2. If 2 or more signals are present, decomposition is recommended.
+3. If fewer than 2 signals are present, proceed as a single spec — no decomposition needed.
+
+**When decomposition is recommended:**
+
+1. Build a decomposition proposal with the following fields for each proposed spec:
+
+| Field | Description |
+| --- | --- |
+| Name | Descriptive spec identifier (kebab-case) |
+| Description | 1-2 sentence summary of scope |
+| Estimated tasks | Rough count (S: 1-3, M: 4-6, L: 7-10) |
+| Execution order | Which wave this spec belongs to (wave 1 = no dependencies, wave 2 = depends on wave 1, etc.) |
+| Dependency rationale | Why this spec depends on or is independent of others |
+
+1. If `canAskInteractive` is true: Use the AskUserQuestion tool("This feature request has multiple independent components. I recommend splitting into {N} specs:\n\n{proposal table}\n\nApprove decomposition? (yes/no/modify)")
+   - If approved: proceed to initiative creation (step 3).
+   - If declined: proceed as a single spec — continue to Phase 2.
+   - If modified: adjust the proposal per user feedback and re-present.
+
+2. If `canAskInteractive` is false: Display a message to the user("Scope assessment detected {N} independent components. Proceeding as a single spec in non-interactive mode. Consider splitting manually:\n\n{proposal table}") and continue to Phase 2 as a single spec.
+
+**When decomposition is approved (interactive mode):**
+
+1. Create the initiative:
+   - Generate an initiative ID from the feature name (kebab-case, matching pattern `^[a-zA-Z0-9._-]+$`).
+   - Compute execution waves from the proposed dependency rationale (see section 6: Initiative Order Derivation).
+   - Identify the walking skeleton (see section 9: Walking Skeleton Principle).
+   - Use the Bash tool to run(`mkdir -p <specsDir>/initiatives`)
+   - Use the Bash tool to run(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) to capture the current timestamp.
+   - Use the Write tool to create(`<specsDir>/initiatives/<initiative-id>.json`) with the initiative data model (see section 3).
+   - Display a message to the user("Created initiative '{initiative-id}' with {N} specs in {W} execution waves.")
+
+2. Continue with the first spec (wave 1, walking skeleton) — proceed to Phase 2. The current spec's `partOf` field in spec.json will be set to the initiative ID during Phase 2 step 3.
+
+### 2. Split Detection (Phase 2 Safety Net)
+
+After Phase 2 step 1 (requirements drafting), if Phase 1.5 did NOT recommend decomposition, run a second-pass split detection as a safety net.
+
+**Procedure:**
+
+1. Review the drafted requirements for criteria clustering:
+   - Group acceptance criteria by functional area.
+   - If criteria cluster into 2+ independent groups (groups with no cross-references between them), decomposition may have been missed.
+
+2. If independent clusters are detected:
+   - Follow the same proposal format as Phase 1.5 (step 4).
+   - Follow the same interactive/non-interactive decision flow as Phase 1.5 (steps 5-6).
+   - If approved: create the initiative (Phase 1.5 step 7) and continue with the current spec as the first spec in the initiative.
+
+3. If no independent clusters are detected, continue with Phase 2 as normal.
+
+This check fires only when Phase 1.5 did not trigger (either because signals were below threshold or because the user declined). It does not run if decomposition was already approved.
+
+### 3. Initiative Data Model
+
+An initiative groups related specs created through decomposition (or manually) into a tracked unit with execution ordering.
+
+**Location:** `<specsDir>/initiatives/<initiative-id>.json`
+
+**Fields:**
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `id` | string | Yes | Initiative identifier, pattern `^[a-zA-Z0-9._-]+$` |
+| `title` | string | Yes | Human-readable title (maxLength 200) |
+| `description` | string | No | Detailed description (maxLength 2000) |
+| `created` | string | Yes | ISO 8601 timestamp of creation |
+| `updated` | string | Yes | ISO 8601 timestamp of last modification |
+| `author` | string | Yes | Author name (maxLength 100) |
+| `specs` | string[] | Yes | Array of spec IDs belonging to this initiative (maxItems 50) |
+| `order` | string[][] | Yes | Execution waves — array of arrays where each inner array is a wave of spec IDs that can execute in parallel (maxItems 20 waves, inner maxItems 50) |
+| `skeleton` | string | No | Spec ID of the walking skeleton (first wave-1 spec) |
+| `status` | string | Yes | `active` or `completed` — derived from member spec statuses |
+
+**Schema:** Validated against `initiative-schema.json` (draft-07, `additionalProperties: false` at all object levels).
+
+**Status derivation:**
+
+- `active`: At least one member spec has `status` other than `completed`.
+- `completed`: All member specs have `status == "completed"`.
+
+Status is recomputed whenever a member spec's status changes (Phase 4 step 6.3).
+
+### 4. Cross-Spec Dependencies
+
+Cross-spec dependencies declare explicit relationships between specs, enabling enforcement of execution ordering and blocker tracking.
+
+**Declaration format in spec.json:**
+
+The `specDependencies` array (optional, maxItems 50) contains dependency entries:
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `specId` | string | Yes | ID of the dependency spec (maxLength 100, pattern `^[a-zA-Z0-9._-]+$`) |
+| `reason` | string | Yes | Why this spec depends on the other (maxLength 500) |
+| `required` | boolean | No | If `true`, this is a hard dependency — Phase 3 is blocked until the dependency is completed. If `false` or omitted, this is an advisory dependency — a warning is shown but Phase 3 proceeds. |
+| `contractRef` | string | No | Path to an interface contract or shared artifact (maxLength 200) |
+
+**Population:** During Phase 2 step 3, when writing spec.json:
+
+- If the spec belongs to an initiative (`partOf` is set), populate `specDependencies` based on the initiative's execution wave ordering. Only add dependencies where actual coupling exists (shared data, API contracts, or integration points) — do not blindly depend on every spec in the prior wave.
+- The `relatedSpecs` array (optional, maxItems 20) lists informational references to specs that are related but not dependencies (see section 10: Cross-Linking).
+- Run cycle detection (section 5) before writing spec.json. If a cycle is detected, do not write and STOP with the cycle chain.
+
+### 5. Cycle Detection
+
+Cycle detection prevents circular dependencies across specs. It uses depth-first search (DFS) with three-color marking (white/gray/black).
+
+**Algorithm:**
+
+1. Use the Read tool to read(`<specsDir>/index.json`) to enumerate all specs. For each spec, if Use the Bash tool to check if the file exists at(`<specsDir>/<spec-id>/spec.json`), Use the Read tool to read it to get its `specDependencies` array.
+
+2. Build an adjacency list: for each spec with `specDependencies`, create edges from the spec to each `specId` in its dependencies.
+
+3. Initialize all nodes as white (unvisited).
+
+4. For each white node, run DFS:
+   - Mark node gray (in progress).
+   - For each neighbor (dependency):
+     - If gray: cycle detected — record the cycle chain from the current node back through the gray nodes.
+     - If white: recurse.
+   - Mark node black (completed).
+
+5. If any cycle is detected:
+   - Display a message to the user("Circular dependency detected: {cycle chain, e.g., spec-a → spec-b → spec-c → spec-a}. Resolve by removing or making one dependency advisory (required: false).")
+   - STOP — do not proceed. Circular dependencies are a protocol breach.
+
+6. If no cycles: continue.
+
+**When cycle detection runs:**
+
+- Phase 2 step 3: Before writing `specDependencies` to spec.json.
+- Phase 3 step 1: As part of the dependency gate (section 7).
+- Reconciliation: Check 6 (Dependency Health).
+
+### 6. Initiative Order Derivation
+
+Execution waves are derived from the dependency graph via topological sort.
+
+**Algorithm:**
+
+1. Build the dependency graph from all specs in the initiative:
+   - For each spec in `initiative.specs`, read its `specDependencies` from spec.json.
+   - Only consider dependencies where the `specId` is also in `initiative.specs` (ignore external dependencies for wave ordering).
+
+2. Topological sort with wave assignment:
+   - Wave 1: All specs with no intra-initiative dependencies.
+   - Wave N: All specs whose intra-initiative dependencies are all in waves 1 through N-1.
+
+3. Run cycle detection (section 5) on the intra-initiative graph. If a cycle is detected, STOP.
+
+4. Write the computed waves to `initiative.order` as an array of arrays.
+
+5. Update `initiative.updated` timestamp: Use the Bash tool to run(`date -u +"%Y-%m-%dT%H:%M:%SZ"`).
+
+6. Use the Write tool to create(`<specsDir>/initiatives/<initiative-id>.json`) with the updated order.
+
+**Recomputation trigger:** Whenever `specDependencies` change for any spec in the initiative (Phase 2 step 3 writes, reconciliation updates, manual edits).
+
+### 7. Phase 3 Dependency Gate
+
+At Phase 3 step 1, before any implementation work begins, run the dependency gate. This gate is mandatory — skipping it is a protocol breach.
+
+**Procedure:**
+
+1. Use the Read tool to read(`<specsDir>/<spec-name>/spec.json`) to get `specDependencies`.
+
+2. If `specDependencies` is absent or empty, the gate passes — proceed to implementation.
+
+3. For each entry in `specDependencies`:
+   a. Use the Read tool to read(`<specsDir>/<entry.specId>/spec.json`) to get the dependency's status.
+   b. If the dependency spec.json does not exist: Display a message to the user("Warning: Dependency '{entry.specId}' not found. Treating as unmet.") and treat as unmet.
+
+4. **Required dependencies** (`required: true`):
+   - If any required dependency has `status` other than `completed`: STOP.
+   - Display a message to the user("Phase 3 BLOCKED: Required dependency '{entry.specId}' has status '{status}'. Cannot proceed until it is completed.")
+   - Present scope hammering options (section 8).
+
+5. **Advisory dependencies** (`required: false` or `required` omitted):
+   - If an advisory dependency is not completed: Display a message to the user("Advisory: Dependency '{entry.specId}' is not yet completed (status: {status}). Proceeding with implementation, but be aware of potential integration issues.")
+   - Continue — advisory dependencies do not block.
+
+6. Run cycle detection (section 5) as a safety net — even if cycles were checked at write time, re-verify before implementation.
+
+7. If all required dependencies are completed (or no required dependencies exist), the gate passes — proceed to implementation.
+
+### 8. Scope Hammering
+
+When a spec encounters a dependency blocker (Phase 3 dependency gate fails), present structured resolution options instead of indefinite waiting.
+
+**Options:**
+
+| Option | Resolution Type | Description |
+| --- | --- | --- |
+| Cut scope | `scope_cut` | Remove the blocked functionality from this spec. Update requirements and tasks to exclude the dependent feature. |
+| Define interface contract | `interface_defined` | Define the expected interface or contract for the dependency, create a stub implementation, and proceed. Record the contract path in `contractRef`. |
+| Wait | `deferred` | Defer this spec until the dependency completes. Do not proceed to Phase 3. |
+| Escalate | `escalated` | Flag the blocker for human decision. Record the escalation in the blockers table. |
+
+**Procedure:**
+
+1. If `canAskInteractive` is true: Use the AskUserQuestion tool("Dependency '{entry.specId}' is blocking Phase 3. Options:\n1. Cut scope — remove dependent functionality\n2. Define interface — create contract + stub, proceed\n3. Wait — defer until dependency completes\n4. Escalate — flag for human decision\n\nChoose an option:")
+
+2. If `canAskInteractive` is false: Display a message to the user("Dependency '{entry.specId}' is blocking Phase 3. Deferring until dependency completes.") and use `deferred` as the resolution type.
+
+3. Record the resolution in the Cross-Spec Blockers table in the spec's `tasks.md` (and `requirements.md` / `design.md` if present):
+
+| Blocker | Blocking Spec | Resolution Type | Resolution Detail | Status |
+| --- | --- | --- | --- | --- |
+| {description} | {specId} | {scope_cut/interface_defined/deferred/escalated} | {detail} | {open/resolved} |
+
+1. If `scope_cut`: Update requirements.md and tasks.md to remove the blocked functionality. Use the Read tool to read spec.json, remove the dependency entry from `specDependencies` (or set `required: false`), Use the Write tool to create spec.json. Proceed to Phase 3 with reduced scope.
+2. If `interface_defined`: Use the Write tool to create the interface contract. Use the Read tool to read spec.json, update the specDependency entry's `contractRef` field with the contract path, Use the Write tool to create spec.json. Proceed to Phase 3 with stub implementation.
+3. If `deferred`: Do not proceed to Phase 3. The spec remains in its current status until the dependency completes.
+4. If `escalated`: Do not proceed to Phase 3. Display a message to the user("Blocker escalated. Awaiting human decision.")
+
+### 9. Walking Skeleton Principle
+
+When an initiative is created, the first spec in wave 1 is designated as the walking skeleton.
+
+**Purpose:** The walking skeleton establishes an end-to-end integration path across all architectural layers touched by the initiative. Subsequent specs build on this proven foundation.
+
+**Designation:**
+
+1. From the initiative's execution waves (section 6), identify wave 1 specs.
+2. If wave 1 has a single spec, it is the skeleton.
+3. If wave 1 has multiple specs, select the one that touches the most architectural layers (based on the decomposition proposal's domain analysis).
+4. Record the skeleton spec ID in `initiative.skeleton`.
+
+**Skeleton spec guidance:**
+
+- The skeleton spec should prioritize breadth over depth — it establishes the integration path, not full feature implementation.
+- During Phase 2 of the skeleton spec, include a requirement that the implementation proves the end-to-end path works (e.g., data flows from input to output through all layers).
+- Display a message to the user("Spec '{skeleton-id}' is the walking skeleton for initiative '{initiative-id}'. It should establish the end-to-end integration path.")
+
+### 10. Cross-Linking
+
+The `relatedSpecs` array in spec.json provides informational cross-references between specs.
+
+**Format:** Array of spec ID strings (maxItems 20, each maxLength 100, pattern `^[a-zA-Z0-9._-]+$`).
+
+**Population:** During Phase 2 step 3, populate `relatedSpecs` with:
+
+- Other specs in the same initiative (if `partOf` is set).
+- Specs that modify overlapping files (detected from memory patterns if available).
+- Specs explicitly mentioned in the feature request.
+
+**Usage:** `relatedSpecs` is informational only — it does not affect execution ordering or gates. It appears in spec view output (core/view.md) and audit reports (core/reconciliation.md) to help developers understand the broader context.
+
+### Platform Adaptation
+
+| Capability | Impact |
+| --- | --- |
+| `canAskInteractive: true` | Full interactive decomposition approval, scope hammering options presented as choices |
+| `canAskInteractive: false` | Decomposition notified but not applied (proceed as single spec). Scope hammering defaults to `deferred`. |
+| `canExecuteCode: true` (all platforms) | Shell commands available for `mkdir -p`, `date`, cycle detection graph traversal via file reads |
+| `canTrackProgress: false` | Report decomposition and dependency status in response text |
+| `canDelegateTask: true` | Initiative orchestrator can dispatch specs as fresh sub-agents (see core/initiative-orchestration.md) |
+| `canDelegateTask: false` | Initiative specs executed sequentially or via checkpoint+prompt |

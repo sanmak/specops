@@ -72,11 +72,13 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
    - If not greenfield, proceed with the original steps 8 and 9 below.
 8. **(Brownfield/migration only)** Explore codebase to understand existing patterns and architecture
 9. **(Brownfield/migration only)** Identify affected files, components, and dependencies — produce a concrete list of affected file paths for `fileMatch` steering file evaluation
+9.5. **Scope Assessment (always runs)**: Run the Scope Assessment Gate from the Spec Decomposition module (`core/decomposition.md` section 1). This step is unconditional — it runs for every spec regardless of project size, vertical, or configuration. The gate evaluates the user's feature request against 5 complexity signals (independent deliverables, distinct code domains, language signals, estimated task count, independent criteria clusters). If 2+ signals are present, decomposition is recommended and the interactive/non-interactive flow from the decomposition module is followed. If decomposition is approved, an initiative is created and the current spec becomes the first spec in the initiative. If decomposition is not recommended or is declined, proceed as a single spec.
 
 ### Phase 2: Create Specification
 
 0. **Phase 2 entry gate**: After creating `<specsDir>/<spec-name>/` and `implementation.md` (step 2 below), READ_FILE `<specsDir>/<spec-name>/implementation.md` and verify it contains `## Phase 1 Context Summary`. If missing (new spec), write the context summary now using the data captured in Phase 1 step 5.5. If the section still cannot be written, STOP — return to Phase 1 step 5.5. Proceeding without the Context Summary is a protocol breach.
 1. Generate a structured spec directory in the configured `specsDir`
+1.5. **Split Detection checkpoint**: If Phase 1 step 9.5 (Scope Assessment) did NOT recommend decomposition, run the Split Detection safety net from the Spec Decomposition module (`core/decomposition.md` section 2). After creating the core spec files in step 2, review the drafted requirements for independent clusters. If independent clusters are detected, follow the same proposal and decision flow as Phase 1.5. This check fires only when Phase 1.5 did not trigger — it does not run if decomposition was already approved.
 2. Create four core files:
    - `requirements.md` (or `bugfix.md` for bugs, `refactor.md` for refactors) - User stories with EARS acceptance criteria, bug analysis, or refactoring rationale
    - `design.md` - Technical architecture, sequence diagrams, implementation approach
@@ -108,7 +110,11 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 
    After the Regression Risk Analysis, populate the "Unchanged Behavior" section from the Must-Test behaviors. For Low severity with no Must-Test behaviors identified, note "N/A — isolated change with no caller-visible behavior to preserve" in the Unchanged Behavior section and record why the regression/coverage criteria will be trivially satisfied at verification time. Structure the Testing Plan into three categories: Current Behavior (verify bug exists), Expected Behavior (verify fix works), Unchanged Behavior (verify no regressions using Must-Test items from the analysis; for Low severity with no Must-Test items, this section may be empty).
 
-3. Create `spec.json` with metadata (author from git config, type, status, version, created date). Set status to `draft`.
+3. Create `spec.json` with metadata (author from git config, type, status, version, created date). Set status to `draft`. Additionally, populate cross-spec fields from the Spec Decomposition module (`core/decomposition.md` sections 4 and 10):
+   - If this spec belongs to an initiative (decomposition was approved), set `partOf` to the initiative ID.
+   - Populate `specDependencies` based on the initiative's execution wave ordering — specs in wave N depend on specs in wave N-1. For each inter-wave dependency, include `specId`, `reason`, and `required: true`. Only add dependencies where actual coupling exists (shared data, API contracts, or integration points) — do not blindly depend on every spec in the prior wave.
+   - Populate `relatedSpecs` with other specs in the same initiative, specs modifying overlapping files (from memory patterns), or specs explicitly mentioned in the request.
+   - Run cycle detection (`core/decomposition.md` section 5) before writing spec.json. If a cycle is detected, NOTIFY_USER with the cycle chain and STOP — do not write the file.
 4. Regenerate `<specsDir>/index.json` from all `*/spec.json` files.
 5. **First-spec README prompt**: If `index.json` contains exactly one spec entry (this is the project's first spec):
    - If FILE_EXISTS(`README.md`) is false, skip this step
@@ -133,7 +139,12 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 6. **External issue creation (mandatory when taskTracking configured)**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. READ_FILE `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`. For each eligible task, compose the issue body using the Issue Body Composition template (reading spec artifacts for context), create issues via the Issue Creation Protocol (with labels for GitHub), and write IssueIDs back to `tasks.md`. If issue creation is skipped or all IssueIDs remain `None`, the Phase 3 task tracking gate will catch the omission — the spec artifact linter validates IssueIDs on completed specs and fails CI when they are missing.
 6.5. **Dependency safety gate (mandatory)**: If `config.dependencySafety.enabled` is not `false` (default: true), execute the dependency safety verification following the Dependency Safety module. This is a Phase 2 completion gate — specs cannot proceed to review or implementation without passing. Skipping this gate when dependency safety is enabled is a protocol breach.
 6.7. **Git checkpoint (spec-created)**: If `config.implementation.gitCheckpointing` is true for this run, commit spec artifacts following the Git Checkpointing module: RUN_COMMAND(`git add <specsDir>/<spec-name>/`) then RUN_COMMAND(`git commit -m "specops(checkpoint): spec-created -- <spec-name>"`). If the commit fails, NOTIFY_USER and continue.
-7. If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow.
+6.8. **Spec review gate**: If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow. This step must run before phase dispatch so the review invitation is sent before the current context ends.
+6.9. **Phase dispatch gate (Phase 2 → Phase 3)**: Write a Phase 2 Completion Summary to `implementation.md` capturing: key requirements decided, design decisions made, task breakdown summary, and dependencies identified. Then signal for a fresh Phase 3 context following the Phase Dispatch protocol in `core/initiative-orchestration.md`:
+
+- If `canDelegateTask` is true: build a Phase 3 Handoff Bundle (spec name, artifact paths — requirements.md, design.md, tasks.md, spec.json — Phase 1 Context Summary from implementation.md, Phase 2 Completion Summary, and config) and dispatch Phase 3 as a fresh sub-agent. The current context ends here.
+- If `canDelegateTask` is false and `canAskInteractive` is true: write the handoff bundle to `implementation.md` and prompt the user: "Phase 2 complete. Start a fresh session to begin Phase 3 implementation."
+- If `canDelegateTask` is false and `canAskInteractive` is false: continue sequentially with enhanced checkpointing (no dispatch, Phase 3 executes in the current context).
 
 **Phase 2.5: Review Cycle** (if spec review enabled)
 See "Collaborative Spec Review" module for the full review workflow including review mode, revision mode, and approval tracking.
@@ -141,9 +152,10 @@ See "Collaborative Spec Review" module for the full review workflow including re
 ### Phase 3: Implement
 
 1. **Implementation gates** — run these checks before any implementation begins:
+   - **Dependency gate (always runs)**: Run the Phase 3 Dependency Gate from the Spec Decomposition module (`core/decomposition.md` section 7). READ_FILE the spec's `spec.json` and check its `specDependencies` array. For each `required: true` dependency, verify the dependency spec has `status == "completed"`. If any required dependency is not completed, STOP — present the Scope Hammering options from `core/decomposition.md` section 8. For `required: false` (advisory) dependencies, NOTIFY_USER with a warning and continue. Run cycle detection as a safety net. **Skipping the dependency gate is a protocol breach** — it runs unconditionally for every spec, even specs with no dependencies (gate passes trivially when `specDependencies` is empty or absent).
    - **Review gate**: If spec review is enabled, verify `spec.json` status is `approved` or `self-approved` before proceeding (see the Implementation Gate section in the Collaborative Spec Review module for interactive override behavior when the spec is not yet approved).
    - **Task tracking gate**: If `config.team.taskTracking` is not `"none"`, verify external issue creation following the Task Tracking Gate in the Configuration Handling module. This gate is mandatory when task tracking is configured — skipping it is a protocol breach.
-   - After both gates pass, update status to `implementing`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`.
+   - After all gates pass, update status to `implementing`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`.
 2. **Determine execution strategy**: Check if task delegation is active (see the Task Delegation module — reads `config.implementation.taskDelegation` and platform capability `canDelegateTask`). If delegation is active, execute tasks using the delegation protocol (orchestrator dispatches each task to a fresh context). If delegation is not active, execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions).
 3. For each task: set `In Progress` in tasks.md FIRST (following Write Ordering Protocol), then if `config.team.taskTracking` is not `"none"` and the task has a valid IssueID, sync the status to the external tracker (see Status Sync in the Configuration Handling module). Skipping Status Sync when taskTracking is configured and the task has a valid IssueID is a protocol breach — the external tracker must reflect the current task state. Sync failures are non-blocking (warn and continue), but sync omissions are not. When task delegation is active, the orchestrator handles Status Sync (see Task Delegation module step 5a.6). Then implement, then report progress.
 4. After completing each code-modifying task, update `implementation.md`:
@@ -155,6 +167,10 @@ See "Collaborative Spec Review" module for the full review workflow including re
 6. Run tests according to configured testing strategy
 7. Commit changes based on `autoCommit` setting. If `config.team.taskTracking` is not `"none"` and the current task has a valid IssueID, include the IssueID in the commit message (see Commit Linking in the Configuration Handling module).
 8. **Git checkpoint (implemented)**: If `config.implementation.gitCheckpointing` is true for this run, commit all changes following the Git Checkpointing module: RUN_COMMAND(`git add -A`) then RUN_COMMAND(`git commit -m "specops(checkpoint): implemented -- <spec-name>"`). If the commit fails (e.g., nothing new to commit because autoCommit captured everything), continue silently.
+8.5. **Phase dispatch gate (Phase 3 → Phase 4)**: Write a Phase 3 Completion Summary to `implementation.md` capturing: tasks completed, files modified, deviations from spec, and test results. Then signal for a fresh Phase 4 context following the Phase Dispatch protocol in `core/initiative-orchestration.md`:
+   - If `canDelegateTask` is true: build a Phase 4 Handoff Bundle (spec name, artifact paths — tasks.md, spec.json, implementation.md — full implementation.md content, and config) and dispatch Phase 4 as a fresh sub-agent. The current context ends here.
+   - If `canDelegateTask` is false and `canAskInteractive` is true: write the handoff bundle to `implementation.md` and prompt the user: "Phase 3 complete. Start a fresh session to begin Phase 4 verification."
+   - If `canDelegateTask` is false and `canAskInteractive` is false: continue sequentially with enhanced checkpointing (no dispatch, Phase 4 executes in the current context).
 
 ### Phase 4: Complete
 
@@ -188,6 +204,14 @@ See "Collaborative Spec Review" module for the full review workflow including re
 4.5. **Repo map refresh**: If FILE_EXISTS(`<specsDir>/steering/repo-map.md`), refresh the repo map by running the Generation algorithm from the Repo Map module. This ensures the structural map reflects any files added, removed, or reorganized during implementation. If the repo map file does not exist, skip this step (the map will be auto-generated in Phase 1 of the next spec if steering is configured).
 5. **Completion gate**: Before marking the spec as completed, verify that memory was updated. READ_FILE(`<specsDir>/memory/context.md`) and confirm it contains a section heading `### <spec-name>`. If missing, go back to step 3 and execute it — do not mark the spec as completed without memory being updated.
 6. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`
+6.3. **Initiative status update**: If this spec has a `partOf` field in spec.json (belongs to an initiative):
+   - READ_FILE(`<specsDir>/initiatives/<partOf>.json`) to load the initiative.
+   - For each spec ID in `initiative.specs`, READ_FILE its spec.json and collect statuses.
+   - If all member specs have `status == "completed"`: set `initiative.status` to `completed` and NOTIFY_USER("Initiative '{partOf}' completed! All {N} specs are done.").
+   - Otherwise: keep `initiative.status` as `active`.
+   - Update `initiative.updated` with the current timestamp.
+   - WRITE_FILE(`<specsDir>/initiatives/<partOf>.json`) with the updated initiative.
+   - If the initiative is now completed, append a completion entry to the initiative log (`<specsDir>/initiatives/<partOf>-log.md`).
 6.5. **Git checkpoint (completed) and run log finalization**: If `config.implementation.gitCheckpointing` is true for this run, commit final metadata following the Git Checkpointing module: RUN_COMMAND(`git add -A`) then RUN_COMMAND(`git commit -m "specops(checkpoint): completed -- <spec-name>"`). If the commit fails, NOTIFY_USER and continue. Then, if `config.implementation.runLogging` is not `"off"`, finalize the run log following the Run Logging module: EDIT_FILE the run log to update frontmatter with `completedAt` and `finalStatus`.
 7. Create PR if `createPR` is true
 8. Summarize completed work

@@ -1,5 +1,13 @@
 [
   {
+    "id": "unified-spec-decomposition",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-22T09:48:49Z"
+  },
+  {
     "id": "ast-based-repo-map",
     "type": "feature",
     "status": "completed",

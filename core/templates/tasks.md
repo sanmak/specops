@@ -1,5 +1,19 @@
 # Implementation Tasks: [Title]
 
+## Spec-Level Dependencies
+
+| Dependent Spec | Reason | Required | Status |
+| -------------- | ------ | -------- | ------ |
+| —              | —      | —        | —      |
+
+## Dependency Resolution Log
+
+<!-- Resolution types: scope_cut, interface_defined, completed, escalated, deferred -->
+
+| Blocker | Resolution Type | Resolution Detail | Date |
+| ------- | --------------- | ----------------- | ---- |
+| —       | —               | —                 | —    |
+
 ## Task Breakdown
 
 ### Task 1: [Title]

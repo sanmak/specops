@@ -28,6 +28,22 @@ Description of the desired end state after refactoring.
 - **Out of scope:** [What will NOT be touched]
 - **Behavioral changes:** None (refactoring preserves external behavior)
 
+## Dependencies & Blockers
+
+### Spec Dependencies
+
+| Dependent Spec | Reason | Required | Status |
+| -------------- | ------ | -------- | ------ |
+| —              | —      | —        | —      |
+
+### Cross-Spec Blockers
+
+<!-- Resolution types: scope_cut, interface_defined, completed, escalated, deferred -->
+
+| Blocker | Blocking Spec | Resolution Type | Resolution Detail | Status |
+| ------- | ------------- | --------------- | ----------------- | ------ |
+| —       | —             | —               | —                 | —      |
+
 ## Migration Strategy
 
 **Approach:** [Incremental (parallel implementation, gradual switchover) / Big-bang (single replacement)]

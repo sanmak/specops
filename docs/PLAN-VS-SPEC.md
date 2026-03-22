@@ -30,6 +30,7 @@ SpecOps creates git-tracked specification files that persist across sessions, de
 - **Regression safety** — bugfix specs include Regression Risk Analysis (blast radius, behavior inventory, test coverage gaps) before any code is written
 - **Context recovery** — resume where you left off across sessions without re-explaining the problem
 - **Team review** — structured review workflow with approval gates before implementation begins
+- **Spec decomposition** — large features automatically split into multiple coordinated specs with dependency tracking, execution waves, and initiative orchestration
 
 ## Side-by-Side
 
@@ -54,6 +55,7 @@ SpecOps creates git-tracked specification files that persist across sessions, de
 | Quick bug fix (< 30 min) | Plan mode | Lightweight, no overhead needed |
 | Small feature (1-2 files) | Plan mode | Spec would be heavier than the code |
 | Team feature (multi-day) | SpecOps | Needs review, tracking, cross-session persistence |
+| Large feature (multiple subsystems) | SpecOps | Automatic decomposition into coordinated specs with dependency tracking |
 | Complex bugfix (regression risk) | SpecOps | Regression Risk Analysis prevents breaking existing behavior |
 | Refactor (preserve behavior) | SpecOps | Scope boundaries and acceptance criteria prevent scope creep |
 | Cross-session work | SpecOps | Context recovery picks up where you left off |

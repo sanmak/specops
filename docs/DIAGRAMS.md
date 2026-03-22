@@ -537,3 +537,79 @@ sequenceDiagram
 ```
 
 **Source:** [`core/init.md`](../core/init.md)
+
+---
+
+## Spec Decomposition Workflow
+
+Automatic scope assessment, split detection, and initiative orchestration for large features.
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant A as Agent
+    participant S as .specops/
+    participant I as .specops/initiatives/
+
+    U->>A: /specops Add OAuth + payment processing
+
+    Note over A: Phase 1 — Understand Context
+    A->>S: Read config, steering files, memory
+    A->>A: Analyze codebase and request scope
+
+    Note over A: Phase 1.5 — Scope Assessment
+    A->>A: Evaluate complexity signals
+    A->>A: Detect multiple bounded contexts (auth, payments)
+    A->>A: Estimate task count exceeds threshold
+
+    alt Interactive platform
+        A-->>U: "This feature spans 2 bounded contexts. Split into 2 specs?"
+        A-->>U: "Spec 1: oauth-auth, Spec 2: payment-processing"
+        U->>A: Approve split
+    else Non-interactive platform
+        A->>A: Continue as single spec with summary
+    end
+
+    Note over A: Create initiative
+    A->>I: Write initiative.json (specs, waves, skeleton)
+
+    Note over A: Phase 2 — Create Specs (for each member spec)
+
+    loop For each spec in initiative
+        A->>S: Write requirements.md, design.md, tasks.md
+        A->>S: Write spec.json (partOf, specDependencies)
+    end
+
+    A->>A: Run cycle detection (DFS with coloring)
+    A->>A: Derive execution waves (topological sort)
+    A->>I: Update initiative.json with order
+
+    Note over A: Initiative Orchestration
+
+    loop For each wave
+        loop For each spec in wave
+            Note over A: Phase 3 — Dependency Gate
+            A->>S: Read spec.json.specDependencies
+            A->>A: Verify required deps completed
+
+            alt Required dep incomplete
+                A-->>U: "Blocked: <dep-spec> not completed"
+                A->>A: Scope hammering options
+            else All deps satisfied
+                Note over A: Phase 3 — Implement
+                A->>A: Dispatch spec to fresh sub-agent
+                A->>S: Execute tasks, update status
+            end
+
+            Note over A: Phase 4 — Complete
+            A->>S: Verify criteria, set completed
+            A->>I: Update initiative status
+        end
+    end
+
+    A->>I: All specs completed → initiative status = completed
+    A->>I: Write initiative-log.md
+    A-->>U: "Initiative complete. All specs implemented."
+```
+
+**Source:** [`core/decomposition.md`](../core/decomposition.md), [`core/initiative-orchestration.md`](../core/initiative-orchestration.md)

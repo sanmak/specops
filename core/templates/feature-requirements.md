@@ -43,6 +43,22 @@ Brief description of the feature and its purpose.
 - [List any constraints]
 - [List any assumptions]
 
+## Dependencies & Blockers
+
+### Spec Dependencies
+
+| Dependent Spec | Reason | Required | Status |
+| -------------- | ------ | -------- | ------ |
+| —              | —      | —        | —      |
+
+### Cross-Spec Blockers
+
+<!-- Resolution types: scope_cut, interface_defined, completed, escalated, deferred -->
+
+| Blocker | Blocking Spec | Resolution Type | Resolution Detail | Status |
+| ------- | ------------- | --------------- | ----------------- | ------ |
+| —       | —             | —               | —                 | —      |
+
 ## Success Metrics
 
 - [Measurable outcome 1]

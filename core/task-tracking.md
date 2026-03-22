@@ -137,6 +137,7 @@ Issue creation uses the Issue Body Composition template from the Configuration H
 
 ### Conformance Rules
 
+- **Spec-level dependency gate first**: When a spec has `specDependencies` in its spec.json, the spec-level dependency gate (see `core/decomposition.md` section 7) must pass before any task-level dependencies are evaluated. The ordering is: (1) verify all required spec-level dependencies are completed, (2) then evaluate task-level dependencies within the spec. A task cannot be set to `In Progress` if the spec-level dependency gate has not passed, regardless of whether the task's own `**Dependencies:**` field shows `None`.
 - **File-chat consistency**: reported status in chat must match what is persisted in `tasks.md`
 - **Checkbox-status consistency**: a `Completed` task must have all acceptance criteria and test items checked off
 - **Deferred-item tracking**: deferred acceptance criteria must be moved to a Deferred Criteria subsection, not left unchecked in the main list

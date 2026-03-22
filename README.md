@@ -101,11 +101,31 @@ Agent:
 
 Every feature of SpecOps was specified, designed, and implemented using the SpecOps workflow. All specs are [public in `.specops/`](.specops/). The friction log captures 42 lessons learned that shaped the tool.
 
+## Multi-Spec Features
+
+Large features that span multiple bounded contexts are automatically detected and split into coordinated specs.
+
+```text
+You: "/specops Add OAuth authentication and payment processing"
+Agent:
+  Scope assessment → 2 bounded contexts detected (auth, payments)
+  Proposed split:
+    Spec 1: oauth-authentication (wave 1 — walking skeleton)
+    Spec 2: payment-processing (wave 2 — depends on auth)
+  Initiative: oauth-payments (tracks both specs)
+
+  You approve → 2 specs created, linked via specDependencies
+  /specops initiative oauth-payments → executes both in order
+```
+
+SpecOps handles the coordination: dependency gates block implementation until required specs complete, execution waves ensure correct ordering, and initiative tracking provides a single dashboard across all member specs.
+
 ## What Only SpecOps Does
 
 - **Multi-platform**: the only spec-driven development tool that works across Claude Code, Cursor, OpenAI Codex, and GitHub Copilot from a single source
+- **Spec decomposition**: automatic scope assessment splits large features into multiple coordinated specs with dependency tracking and initiative orchestration
 - **Vertical awareness**: domain-specific spec templates. Infrastructure specs include rollback steps and resource definitions. Data pipeline specs include data contracts and backfill strategy.
-- **Enforcement, not suggestions**: CI-integrated drift detection, checkbox completion gates, and approval workflows that block implementation until specs are approved
+- **Enforcement, not suggestions**: CI-integrated drift detection, checkbox completion gates, dependency gates, and approval workflows that block implementation until specs are approved
 - **Open source, local, no lock-in**: everything is git-tracked markdown. No cloud service, no account required. MIT license.
 
 > [Full comparison with Kiro, EPIC/Reload, and Spec Kit](docs/COMPARISON.md) | [Plan Mode vs Spec Mode](docs/PLAN-VS-SPEC.md)

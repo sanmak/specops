@@ -37,6 +37,15 @@ I have an idea
 # Implement existing spec
 implement auth-feature
 
+# View an initiative
+view initiative oauth-payments
+
+# List all initiatives
+list initiatives
+
+# Execute all specs in an initiative
+initiative oauth-payments
+
 # Review a teammate's spec
 review user-auth
 
@@ -92,6 +101,9 @@ list
 ```text
 .specops/
   index.json             # Auto-generated spec dashboard
+  initiatives/           # Multi-spec feature tracking
+    <initiative-id>.json       # Member specs, execution waves, status
+    <initiative-id>-log.md     # Chronological execution trace
   feature-name/
     spec.json            # Lifecycle metadata (always created)
     requirements.md      # What (user stories, acceptance criteria)
@@ -162,6 +174,7 @@ Metrics are captured automatically at Phase 4 completion. See [TOKEN-USAGE.md](T
 | `implementation.formatting.enabled` | boolean | `true` | | Run formatter before commits |
 | `implementation.formatting.tool` | `prettier`/`black`/`rustfmt`/`gofmt` | (auto-detect) | enum | Formatting tool |
 | `implementation.taskDelegation` | `auto`/`always`/`never` | `auto` | enum | Task delegation strategy for Phase 3. `auto`: delegate when complexity score reaches threshold (based on effort sizing and file breadth). `always`: always delegate. `never`: sequential. Strategy adapts to platform capabilities. |
+| `implementation.delegationThreshold` | integer | `4` | min 1 | Complexity score threshold for auto task delegation. Lower values delegate more aggressively. |
 | `implementation.runLogging` | `on`/`off` | `on` | enum | Per-run execution logging to `<specsDir>/runs/`. Captures phase transitions, decisions, errors as a chronological trace. |
 | `implementation.validateReferences` | `off`/`warn`/`strict` | `off` | enum | Validate file paths and code references in spec against codebase before implementation. `off`: skip. `warn`: notify and continue. `strict`: block on unresolved. |
 | `implementation.gitCheckpointing` | boolean | `false` | | Commit at phase boundaries (spec-created, implemented, completed). Three commits max per run. Complements `autoCommit` (per-task). |
@@ -501,5 +514,5 @@ Agent:
 
 ---
 
-**Version**: 1.2.0
+**Version**: 1.5.0
 **Keep this reference handy for daily development!**

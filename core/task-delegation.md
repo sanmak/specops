@@ -14,8 +14,9 @@ At the start of Phase 3, after the implementation gate (step 1), determine wheth
    - For each pending task, read its `**Estimated Effort:**` field and convert to a weight: S=1, M=2, L=3 (if missing, default to M=2)
    - Count distinct file paths across all pending tasks' `**Files to Modify:**` sections
    - Compute: `score = sum(effort_weights) + floor(distinct_files / 5)`
-   - If score >= 6, activate delegation. Otherwise, use standard sequential execution.
-   Examples: 6 small tasks (score 6), 3 medium tasks (score 6), 2 large tasks (score 6), 4 medium tasks touching 12 files (8+2=10).
+   - Determine the activation threshold: if `config.implementation.delegationThreshold` is set (integer), use that value; otherwise use the default threshold of 4.
+   - If score >= threshold, activate delegation. Otherwise, use standard sequential execution.
+   Examples: 4 small tasks (score 4), 2 medium tasks (score 4), 2 medium tasks touching 10 files (4+2=6), 1 large + 1 small task (score 4).
 5. Check platform capability `canDelegateTask`:
    - `canDelegateTask = true` → **Strategy A** (Sub-Agent Delegation)
    - `canDelegateTask = false` and `canAskInteractive = true` → **Strategy B** (Session Checkpoint)

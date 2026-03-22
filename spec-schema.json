@@ -7,7 +7,7 @@
     "id": {
       "type": "string",
       "maxLength": 100,
-      "pattern": "^[a-zA-Z0-9._-]+$",
+      "pattern": "^(?!\\.{1,2}$)[a-zA-Z0-9._-]+$",
       "description": "Spec identifier matching the directory name"
     },
     "type": {
@@ -152,6 +152,57 @@
         }
       },
       "additionalProperties": false
+    },
+    "partOf": {
+      "type": "string",
+      "maxLength": 100,
+      "pattern": "^(?!\\.{1,2}$)[a-zA-Z0-9._-]+$",
+      "description": "Initiative ID this spec belongs to"
+    },
+    "relatedSpecs": {
+      "type": "array",
+      "maxItems": 20,
+      "uniqueItems": true,
+      "description": "Informational cross-references to related specs",
+      "items": {
+        "type": "string",
+        "maxLength": 100,
+        "pattern": "^(?!\\.{1,2}$)[a-zA-Z0-9._-]+$"
+      }
+    },
+    "specDependencies": {
+      "type": "array",
+      "maxItems": 50,
+      "description": "Explicit dependencies on other specs with enforcement",
+      "items": {
+        "type": "object",
+        "properties": {
+          "specId": {
+            "type": "string",
+            "maxLength": 100,
+            "pattern": "^(?!\\.{1,2}$)[a-zA-Z0-9._-]+$",
+            "description": "ID of the dependency spec"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500,
+            "description": "Why this spec depends on the other"
+          },
+          "required": {
+            "type": "boolean",
+            "description": "If true, Phase 3 is blocked until the dependency is completed"
+          },
+          "contractRef": {
+            "type": "string",
+            "maxLength": 200,
+            "pattern": "^(?!/)(?!.*\\.\\.)(?!.*//)[a-zA-Z0-9._/-]+$",
+            "description": "Relative path to an interface contract or shared artifact (no absolute paths or .. segments)"
+          }
+        },
+        "required": ["specId", "reason"],
+        "additionalProperties": false
+      }
     }
   },
   "required": ["id", "type", "status", "version", "created", "updated", "author"],

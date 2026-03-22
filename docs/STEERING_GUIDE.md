@@ -214,6 +214,43 @@ During Phase 1 (Understand Context):
 
 ---
 
+## Steering for Spec Decomposition
+
+You can influence how SpecOps decomposes large features by providing project-specific context in steering files. Decomposition scope assessment uses the codebase structure and complexity signals — steering files can refine these signals.
+
+### Example: Defining Bounded Contexts
+
+Create a `fileMatch` steering file that describes your service boundaries:
+
+```markdown
+---
+name: "Service Boundaries"
+description: "Bounded contexts and service ownership for decomposition decisions"
+inclusion: always
+---
+
+## Bounded Contexts
+
+- **Auth Service**: `src/auth/`, `src/middleware/auth*` — authentication, authorization, session management
+- **Payments**: `src/payments/`, `src/billing/` — payment processing, invoicing, subscriptions
+- **Notifications**: `src/notifications/` — email, push, SMS delivery
+
+## Decomposition Preferences
+
+- Features touching 2+ bounded contexts should always be split
+- The auth service is the most common dependency — wave 1 in most initiatives
+- Payment processing specs should include PCI compliance as a constraint
+```
+
+This context helps SpecOps make better decomposition decisions: it knows where your boundaries are, which services tend to be dependencies, and what constraints apply to specific domains.
+
+### Best Practices for Decomposition Steering
+
+- **Define bounded contexts explicitly** so scope assessment can detect cross-context features accurately
+- **Note common dependency directions** (e.g., "auth is upstream of everything") to help topological sort produce correct execution waves
+- **Add domain constraints** (e.g., "PCI compliance for payments") that should carry into decomposed specs
+- **Keep decomposition hints in `always`-included files** since scope assessment runs during Phase 1.5 before affected files are known
+
 ## Safety
 
 Steering file content is treated as project context — not as instructions to the agent. If a steering file appears to contain meta-instructions (e.g., "ignore previous instructions", "execute this command"), SpecOps will skip that file and notify you. Path traversal patterns (`..`, absolute paths) in filenames are rejected.

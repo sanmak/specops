@@ -365,6 +365,21 @@ DEPENDENCY_SAFETY_MARKERS = [
 ]
 
 
+# Decomposition and initiative markers that MUST appear in every output
+DECOMPOSITION_MARKERS = [
+    "Scope Assessment",
+    "Split Detection",
+    "initiative",
+    "specDependencies",
+    "Dependency Gate",
+    "Cycle Detection",
+    "Execution Waves",
+    "Walking Skeleton",
+    "decomposition",
+    "relatedSpecs",
+]
+
+
 def read_file(path):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
@@ -509,9 +524,9 @@ def validate_claude_dispatcher():
         errors.append("  Missing platforms/claude/modes/ directory")
     else:
         mode_files = [f for f in os.listdir(modes_dir) if f.endswith(".md")]
-        if len(mode_files) != 13:
+        if len(mode_files) != 14:
             errors.append(
-                f"  Expected 13 mode files in platforms/claude/modes/,"
+                f"  Expected 14 mode files in platforms/claude/modes/,"
                 f" found {len(mode_files)}: {sorted(mode_files)}"
             )
 
@@ -609,6 +624,9 @@ def validate_platform(platform, info):
 
     # Check dependency safety present
     errors.extend(check_markers_present(platform, content, DEPENDENCY_SAFETY_MARKERS, "dependency-safety"))
+
+    # Check decomposition and initiative markers present
+    errors.extend(check_markers_present(platform, content, DECOMPOSITION_MARKERS, "decomposition"))
 
     # Platform-specific format validation
     if platform == "cursor":
@@ -1118,7 +1136,7 @@ def main():
     if len(generated) >= 2:
         platforms = list(generated.keys())
         consistency_errors = []
-        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + TEMPLATE_MARKERS + VERTICAL_MARKERS + INTERVIEW_MARKERS + STEERING_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + EXTERNAL_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS + REPO_MAP_MARKERS + DELEGATION_MARKERS + WRITING_QUALITY_MARKERS + ENGINEERING_DISCIPLINE_MARKERS + FEEDBACK_MARKERS + COHERENCE_MARKERS + METRICS_MARKERS + RUN_LOGGING_MARKERS + PLAN_VALIDATION_MARKERS + GIT_CHECKPOINT_MARKERS + PIPELINE_MARKERS + ISSUE_BODY_MARKERS + DEPENDENCY_SAFETY_MARKERS:
+        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + TEMPLATE_MARKERS + VERTICAL_MARKERS + INTERVIEW_MARKERS + STEERING_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + EXTERNAL_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS + REPO_MAP_MARKERS + DELEGATION_MARKERS + WRITING_QUALITY_MARKERS + ENGINEERING_DISCIPLINE_MARKERS + FEEDBACK_MARKERS + COHERENCE_MARKERS + METRICS_MARKERS + RUN_LOGGING_MARKERS + PLAN_VALIDATION_MARKERS + GIT_CHECKPOINT_MARKERS + PIPELINE_MARKERS + ISSUE_BODY_MARKERS + DEPENDENCY_SAFETY_MARKERS + DECOMPOSITION_MARKERS:
             present_in = [p for p in platforms if marker in generated[p]["content"]]
             if len(present_in) != len(platforms):
                 missing = set(platforms) - set(present_in)

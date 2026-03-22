@@ -14,6 +14,8 @@ How SpecOps compares to other spec-driven and agent-context tools.
 | **Local memory** | Yes (decisions, context, patterns) | No | Yes (cloud-based) | No |
 | **Repo map** | Yes (AST-based, auto-refresh) | No | No | No |
 | **Drift detection** | Yes (5 drift checks, audit/reconcile) | No | No | No |
+| **Spec decomposition** | Yes (scope assessment, split detection, initiatives) | No | No | No |
+| **Initiative orchestration** | Yes (multi-spec execution with dependency gates) | No | No | No |
 | **Vertical adaptations** | 7 project types | None | None | Generic templates |
 | **Team review workflow** | Built-in (draft, review, approve, gate) | No | No | No |
 | **Agent hooks** | Yes (ExitPlanMode) | Yes (10 trigger types) | No | No |
@@ -36,6 +38,7 @@ How SpecOps compares to other spec-driven and agent-context tools.
 - **Multi-platform**: 4 platforms from a single source of truth vs Kiro's single IDE
 - **Vertical adaptations**: 7 domain-specific template sets (infra, data, library, backend, frontend, fullstack, builder) vs none
 - **Drift detection**: 5 automated drift checks with audit/reconcile subcommands
+- **Spec decomposition**: Automatic scope assessment splits large features into coordinated specs with initiative tracking and dependency gates
 - **Team review**: Structured review workflow with approval gates, self-review for solo devs
 - **Refactor specs**: Dedicated spec type Kiro doesn't offer
 - **Security**: Convention sanitization, prompt injection defense, path containment, PII prevention
