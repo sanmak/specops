@@ -13,6 +13,7 @@ How SpecOps compares to other spec-driven and agent-context tools.
 | **Steering files** | Yes (always, fileMatch, manual modes) | No (SessionStart hook only) | Yes (+ auto mode) | No | No |
 | **Local memory** | Yes (decisions, context, patterns) | No (fresh context each session) | Autonomous agent retains context (no structured memory files) | Yes (cloud-based) | Constitution (project principles, not cross-session learning) |
 | **Repo map** | Yes (AST-based, auto-refresh) | No | Code Intelligence with AST navigation (Tree-sitter, 18 languages) | No | No |
+| **Production learnings** | Yes (capture, supersession chains, 5-layer retrieval, reconsider-when triggers) | No | No | No | No |
 | **Drift detection** | Yes (5 drift checks, audit/reconcile) | No | No | No | Community extensions ("reconcile", "sync") |
 | **Spec decomposition** | Yes (scope assessment, split detection, initiatives) | No | No | No | No |
 | **Initiative orchestration** | Yes (multi-spec execution with dependency gates) | No | No | No | No |

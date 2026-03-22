@@ -83,7 +83,43 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
 
 6. **Gap-fill rule**: If a section could not be extracted (e.g., no acceptance criteria in the plan), add `[To be defined]` placeholder text rather than inventing content. Note the gap in the mapping summary.
 
-7. **Complete**: Proceed to Phase 2 spec review gate (if `config.team.specReview.enabled` or `config.team.reviewRequired`) or NOTIFY_USER that the spec is ready and they can begin implementation.
+6.5. **Post-conversion enforcement pass (mandatory)**: After generating all spec artifacts, run the same structural checks the dispatcher's Pre-Phase-3 Enforcement Checklist defines. From-plan mode skips Phase 1 setup, so these checks verify and auto-remediate the structural prerequisites that Phase 1 would normally create. Skipping this enforcement pass is a protocol breach — from-plan specs must pass the same structural checks as dispatcher-routed specs before being declared ready for implementation.
+
+   Run all 8 checks in order. Auto-remediate where possible; STOP only when remediation fails or is not applicable.
+
+   1. **spec.json exists and status is valid**: FILE_EXISTS(`<specsDir>/<specName>/spec.json`). Verify it was created in step 5 and `status` is `draft`. If the file is missing, NOTIFY_USER("Internal error: spec.json was not created during conversion.") and STOP.
+
+   2. **implementation.md exists with context summary**: FILE_EXISTS(`<specsDir>/<specName>/implementation.md`). If the file exists, READ_FILE it and check for the heading `## Phase 1 Context Summary`. If the heading is missing, EDIT_FILE to add the following context summary section after the `## Summary` section:
+
+      ```text
+      ## Phase 1 Context Summary
+      - Config: [loaded from `.specops.json` or defaults — vertical, specsDir, taskTracking]
+      - Context recovery: none (from-plan conversion)
+      - Conversion source: [inline / file path / auto-discovered — include source identifier]
+      - Steering directory: [verified / created]
+      - Memory directory: [verified / created]
+      - Vertical: [detected vertical from step 3]
+      - Affected files: [file paths identified from the plan]
+      - Project state: [brownfield / greenfield — based on codebase scan from step 3]
+      ```
+
+      If the file does not exist, WRITE_FILE it with template headers and the context summary above.
+
+   3. **tasks.md exists**: FILE_EXISTS(`<specsDir>/<specName>/tasks.md`). Verify it was created in step 5. If missing, NOTIFY_USER("Internal error: tasks.md was not created during conversion.") and STOP.
+
+   4. **design.md exists**: FILE_EXISTS(`<specsDir>/<specName>/design.md`). Verify it was created in step 5. If missing, NOTIFY_USER("Internal error: design.md was not created during conversion.") and STOP.
+
+   5. **IssueID population**: READ_FILE(`.specops.json`) and check `team.taskTracking`. If taskTracking is not `"none"`, READ_FILE(`<specsDir>/<specName>/tasks.md`) and find all tasks with `**Priority:** High` or `**Priority:** Medium`. For each, check that `**IssueID:**` is set to a valid tracker identifier — reject `None`, empty values, and placeholders (`TBD`, `TBA`, `N/A`). If any High/Medium task has an invalid or missing IssueID, create external issues following the Task Tracking Integration protocol (see Configuration Handling module), then EDIT_FILE to write the IssueIDs back to `tasks.md`. If issue creation fails, NOTIFY_USER("Task tracking is configured but external issues could not be created for the following tasks: <list>. Create them manually before implementation.") and STOP.
+
+   6. **Steering directory exists**: FILE_EXISTS(`<specsDir>/steering/`). If false, create it with foundation templates: RUN_COMMAND(`mkdir -p <specsDir>/steering`), then for each of product.md, tech.md, structure.md — if FILE_EXISTS(`<specsDir>/steering/<file>`) is false, WRITE_FILE it with the corresponding foundation template from the Steering Files module. NOTIFY_USER("Created steering files in `<specsDir>/steering/` — edit them to describe your project."). Update the context summary (check 2 above) to record `Steering directory: created`.
+
+   7. **Memory directory exists**: FILE_EXISTS(`<specsDir>/memory/`). If false, RUN_COMMAND(`mkdir -p <specsDir>/memory`). Update the context summary (check 2 above) to record `Memory directory: created`.
+
+   8. **Spec dependency gate**: READ_FILE(`<specsDir>/<specName>/spec.json`) and check the `specDependencies` array. For each entry with `required: true`, READ_FILE(`<specsDir>/<entry.specId>/spec.json`) and verify `status == "completed"`. If any required dependency is not completed, NOTIFY_USER("Spec '<specName>' has unmet required dependency: '<entry.specId>' (status: <status>). Complete the dependency spec first.") and STOP. If `specDependencies` is absent or empty, this check passes trivially.
+
+   After all 8 checks pass, proceed to step 7.
+
+1. **Complete**: Proceed to Phase 2 spec review gate (if `config.team.specReview.enabled` or `config.team.reviewRequired`) or NOTIFY_USER that the spec is ready and they can begin implementation.
 
 ## Faithful Conversion Principle
 

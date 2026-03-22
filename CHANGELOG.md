@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Production learnings system**: `core/learnings.md` module captures post-deployment discoveries and links them to originating specs. Learnings stored in `<specsDir>/memory/learnings.json` with severity, category, and supersession protocol. Three capture mechanisms: explicit (`/specops learn`), agent-proposed, and reconciliation-based extraction.
+- **Learn mode**: New `/specops learn <spec-name>` command for structured learning capture via 5-question interactive workflow. Added as 16th dispatcher mode in `core/mode-manifest.json`.
+- **From-plan enforcement**: Post-conversion enforcement pass in `core/from-plan.md` validates converted specs against the Pre-Phase-3 enforcement checklist (IssueIDs, spec.json fields, index.json sync).
+
 ## [1.5.0] - 2026-03-22
 
 ### Added

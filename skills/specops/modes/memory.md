@@ -130,9 +130,13 @@ Pattern detection runs as part of memory writing (Phase 4, step 3). It produces 
 3. Any file modified by 2+ specs is a file overlap pattern.
 4. Sort by count descending.
 
+**Learning pattern detection:**
+
+If Use the Bash tool to check if the file exists at(`<specsDir>/memory/learnings.json`), also run learning pattern detection following the Production Learnings module. This adds a `learningPatterns` array to `patterns.json` capturing recurring learning categories across specs.
+
 **Write patterns.json:**
 
-- Use the Write tool to create(`<specsDir>/memory/patterns.json`) with `version: 1`, `decisionCategories` array, and `fileOverlaps` array, formatted with 2-space indentation.
+- Use the Write tool to create(`<specsDir>/memory/patterns.json`) with `version: 1`, `decisionCategories` array, `fileOverlaps` array, and `learningPatterns` array (if learnings exist), formatted with 2-space indentation.
 
 ### Memory Subcommand
 

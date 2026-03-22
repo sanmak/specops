@@ -95,6 +95,7 @@ Agent:
 | No way to review specs before coding starts | Built-in team review workflow with configurable approval gates |
 | Agent hallucinates vague acceptance criteria | EARS notation for precise requirements: `WHEN [event] THE SYSTEM SHALL [behavior]` |
 | Specs drift from codebase after implementation | 5 automated drift checks with audit and reconcile commands |
+| Production reveals things specs missed | Production learnings layer: capture discoveries, link to specs, surface in future work |
 | Locked into one AI coding tool | One source of truth, 4 platform outputs |
 
 ## Built With SpecOps
@@ -120,8 +121,36 @@ Agent:
 
 SpecOps handles the coordination: dependency gates block implementation until required specs complete, execution waves ensure correct ordering, and initiative tracking provides a single dashboard across all member specs.
 
+## Production Learnings
+
+Specs end at "completed." But production reveals things specs never anticipated — performance cliffs, implicit contracts, scaling limits. Those learnings typically live in git commits, incident tickets, and tribal knowledge, disconnected from the specs that created the code.
+
+SpecOps closes this loop. Production discoveries are captured, linked to originating specs, and surfaced when working on future specs that touch the same code.
+
+```text
+# During a production incident fix:
+/specops learn batch-processing
+→ Category: performance
+→ Learning: "Concurrent writes above 500 connections degrade P99"
+→ Prevention: "Design docs must include concurrency limits for write-heavy ops"
+→ Reconsider when: "PostgreSQL upgraded past v15"
+
+# Later, starting a new spec that touches the same files:
+/specops Add real-time data export
+→ Phase 1 loads relevant learnings automatically:
+  "1 production learning relevant to this work:
+   [high] (spec: batch-processing) Concurrent writes above 500 connections degrade P99
+   Prevention rule: Design docs must include concurrency limits"
+→ The agent factors this into its design before writing a single line
+```
+
+Three capture mechanisms keep it zero-friction: explicit capture at the moment of discovery (`/specops learn`), agent-proposed extraction during bugfix workflows (approve/reject, zero writing), and passive extraction from git history (`/specops reconcile --learnings`). Learnings are immutable records with supersession chains — they can't go stale because they're point-in-time snapshots. "Reconsider When" conditions are evaluated by the agent to flag invalidated learnings automatically.
+
+Design informed by ADR immutability (Netflix), fitness functions (ThoughtWorks), and trigger-based review patterns from the architecture decision record community.
+
 ## What Only SpecOps Does
 
+- **Production learnings**: the only spec tool that captures post-deployment discoveries, links them to originating specs, and surfaces relevant learnings in future work. No competitor closes the spec-to-production feedback loop.
 - **Multi-platform**: the only spec-driven development tool that works across Claude Code, Cursor, OpenAI Codex, and GitHub Copilot from a single source
 - **Spec decomposition**: automatic scope assessment splits large features into multiple coordinated specs with dependency tracking and initiative orchestration
 - **Vertical awareness**: domain-specific spec templates. Infrastructure specs include rollback steps and resource definitions. Data pipeline specs include data contracts and backfill strategy.

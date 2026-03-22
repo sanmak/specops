@@ -34,6 +34,7 @@ EXPECTED_CLAUDE_MODES = [
     "init.md",
     "initiative.md",
     "interview.md",
+    "learn.md",
     "map.md",
     "memory.md",
     "pipeline.md",

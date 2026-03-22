@@ -1,0 +1,22 @@
+{
+  "id": "from-plan-enforcement-checklist",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "created": "2026-03-22T17:15:00Z",
+  "updated": "2026-03-22T17:25:35Z",
+  "specopsCreatedWith": "1.5.0",
+  "specopsUpdatedWith": "1.5.0",
+  "author": {
+    "name": "sanmak"
+  },
+  "reviewers": [],
+  "reviewRounds": 0,
+  "approvals": 0,
+  "requiredApprovals": 0,
+  "relatedSpecs": [
+    "workflow-enforcement-gates",
+    "plan-to-specops-automation",
+    "context-aware-dispatch"
+  ]
+}

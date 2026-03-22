@@ -170,6 +170,39 @@
         "pattern": "^(?!\\.{1,2}$)[a-zA-Z0-9._-]+$"
       }
     },
+    "productionLearnings": {
+      "type": "array",
+      "maxItems": 50,
+      "description": "Production learnings discovered post-deployment linked to this spec",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 100,
+            "pattern": "^L-[a-zA-Z0-9._-]+-[0-9]+$",
+            "description": "Learning ID (references learnings.json)"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["performance", "scaling", "security", "reliability", "ux", "design", "other"],
+            "description": "Category of learning"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["critical", "high", "medium", "low"],
+            "description": "Severity level"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["discovered", "investigating", "resolved", "deferred"],
+            "description": "Current resolution status"
+          }
+        },
+        "required": ["id", "category"],
+        "additionalProperties": false
+      }
+    },
     "specDependencies": {
       "type": "array",
       "maxItems": 50,

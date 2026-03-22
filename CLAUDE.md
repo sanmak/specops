@@ -44,20 +44,20 @@ bash scripts/bump-version.sh <new-version> --checksums
 
 ## Three-Tier Architecture
 
-**Tier 1 — Core Modules** (`core/*.md`): Platform-agnostic workflow logic using abstract operations (`READ_FILE`, `WRITE_FILE`, `RUN_COMMAND`, etc. defined in `core/tool-abstraction.md`). Never use platform-specific tool names here. Key modules include `core/workflow.md` (4-phase workflow), `core/decomposition.md` (scope assessment, split detection, initiative model, cross-spec dependencies), and `core/initiative-orchestration.md` (autonomous multi-spec execution).
+**Tier 1 — Core Modules** (`core/*.md`): Platform-agnostic workflow logic using abstract operations (`READ_FILE`, `WRITE_FILE`, `RUN_COMMAND`, etc. defined in `core/tool-abstraction.md`). Never use platform-specific tool names here. Key modules include `core/workflow.md` (4-phase workflow), `core/decomposition.md` (scope assessment, split detection, initiative model, cross-spec dependencies), `core/initiative-orchestration.md` (autonomous multi-spec execution), `core/dispatcher.md` (context-aware mode routing and enforcement gates), and `core/learnings.md` (production learnings capture and retrieval).
 
 **Tier 2 — Platform Adapters** (`platforms/<platform>/platform.json`): Maps abstract operations to platform-specific tool invocations (e.g., `READ_FILE` → `Use the Read tool to read(...)` for Claude).
 
 **Tier 3 — Generated Outputs** (`platforms/<platform>/SKILL.md` etc.): Built by `generator/generate.py` using Jinja2 templates (`generator/templates/*.j2`) that combine core modules + platform adapters. **Never edit generated output files directly** — edit `core/` or `generator/templates/` then regenerate.
 
-The generator produces: Claude (`SKILL.md` dispatcher + 14 mode files in `modes/`, including `initiative`), Cursor (`specops.mdc`), Codex (`SKILL.md`), Copilot (`specops.instructions.md`).
+The generator produces: Claude (`SKILL.md` dispatcher + 16 mode files in `modes/`, including `initiative` and `learn`), Cursor (`specops.mdc`), Codex (`SKILL.md`), Copilot (`specops.instructions.md`).
 
 ## Critical Development Rules
 
 - **After changing `core/`, `generator/templates/`, or any `platform.json`**: run `python3 generator/generate.py --all` and commit the regenerated files alongside your changes. The pre-commit hook enforces this.
 - **After changing checksummed files** (listed in `CHECKSUMS.sha256`): regenerate checksums and stage `CHECKSUMS.sha256`. The pre-commit hook enforces this.
 - **JSON schema objects** must use `additionalProperties: false`. String fields need `maxLength`, arrays need `maxItems`.
-- **When adding `*_MARKERS` constants to `validate.py`**: add to both `validate_platform()` AND the cross-platform consistency check loop in the same commit.
+- **When adding `*_MARKERS` constants to `validate.py`**: add to `validate_platform()`, the cross-platform consistency check loop, AND import it in `tests/test_platform_consistency.py` (which imports markers from validate.py as the single source of truth) in the same commit.
 - **Commit convention**: `feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:` prefixes.
 
 ## Key Validation Pipeline
@@ -73,7 +73,7 @@ The pre-commit hook (`hooks/pre-commit`) runs 7 checks: JSON syntax, ShellCheck,
 
 ## Mode Architecture (Claude Platform)
 
-The Claude platform uses a dispatcher (`platforms/claude/SKILL.md`) that loads one of 14 modes on demand from `platforms/claude/modes/`. The primary mode is `spec` (full 4-phase workflow in `core/workflow.md`). Other modes: init, view, interview, steering, memory, map, audit, pipeline, from-plan, feedback, update, version, initiative.
+The Claude platform uses a dispatcher (`platforms/claude/SKILL.md`) that loads one of 16 modes on demand from `platforms/claude/modes/`. The primary mode is `spec` (full 4-phase workflow in `core/workflow.md`). Other modes: init, view, interview, steering, memory, learn, map, audit, pipeline, from-plan, feedback, update, version, initiative.
 
 ## Testing
 

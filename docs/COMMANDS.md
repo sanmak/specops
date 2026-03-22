@@ -28,6 +28,7 @@ All supported commands across Claude Code, Cursor, OpenAI Codex, and GitHub Copi
 | Reconcile a drifted spec | `/specops reconcile <name>` | `reconcile <name>` or `fix <name>` |
 | View memory | `/specops memory` | `Use specops memory` |
 | Seed memory from specs | `/specops memory seed` | `Use specops memory seed` |
+| Capture production learning | `/specops learn <name>` | `Use specops learn <name>` |
 | Generate/refresh repo map | `/specops map` | `Use specops map` |
 | Auto-implement spec (pipeline) | `/specops pipeline <name>` | `Use specops pipeline for <name>` |
 | View initiative | `/specops view initiative <id>` | `View initiative <id>` |
@@ -242,6 +243,45 @@ Use specops memory seed
 ```
 
 **Output:** Creates/rebuilds `<specsDir>/memory/decisions.json`, `context.md`, and `patterns.json` from completed specs.
+
+---
+
+## Production Learnings
+
+Capture post-deployment discoveries and link them back to the originating spec. Learnings are stored in `<specsDir>/memory/learnings.json` and surfaced during future spec work when relevant.
+
+### Capture a Learning
+
+**Claude Code:**
+
+```text
+/specops learn <spec-name>
+```
+
+**Other platforms:**
+
+```text
+Use specops learn <spec-name>
+```
+
+**Workflow:**
+
+1. Identifies the target spec (must be `completed` status)
+2. Asks 5 structured questions: what was discovered, impact severity, category (performance, security, scalability, UX, architecture, integration, operational), root cause, and what the spec should have included
+3. Creates a learning entry in `learnings.json` with metadata (spec ID, timestamp, severity, category)
+4. Optionally proposes updates to the originating spec's requirements or design
+
+**Capture mechanisms:**
+
+| Mechanism | Trigger |
+| --- | --- |
+| Explicit | `/specops learn <spec-name>` |
+| Agent-proposed | Agent detects production issue pattern during spec work |
+| Reconciliation-based | `/specops reconcile --learnings` extracts learnings from recent hotfixes |
+
+**Learning retrieval:** During Phase 1, learnings from related specs are automatically loaded and surfaced as context. Filtering uses spec ID, category, and severity to show only relevant learnings.
+
+**Notes:** Only triggers when referring to SpecOps production learnings, not product features like "learn from data". Learnings follow a supersession protocol where newer learnings on the same topic replace older ones.
 
 ---
 
@@ -796,6 +836,8 @@ These are the valid states a spec can be in, usable as filters with the status c
 | I want to check my SpecOps version | `/specops version` |
 | I want to see project decisions and patterns | `/specops memory` |
 | I want to populate memory from existing specs | `/specops memory seed` |
+| I want to capture a production learning from a deployed spec | `/specops learn <spec-name>` |
+| I want to extract learnings from recent hotfixes | `/specops reconcile --learnings` |
 | I want to control how Phase 3 executes tasks | Set `implementation.taskDelegation` in `.specops.json` (`auto`/`always`/`never`) |
 | I want to report a bug or suggest a SpecOps improvement | `/specops feedback` |
 | I want to update SpecOps | `/specops update` |

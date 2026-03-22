@@ -1,0 +1,16 @@
+{
+  "id": "production-learnings",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "created": "2026-03-22T16:51:28Z",
+  "updated": "2026-03-22T17:10:00Z",
+  "specopsCreatedWith": "1.5.0",
+  "specopsUpdatedWith": "1.5.0",
+  "author": "sanmak",
+  "reviewers": [],
+  "reviewRounds": 0,
+  "approvals": [],
+  "requiredApprovals": 0,
+  "specDependencies": []
+}
