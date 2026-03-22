@@ -147,7 +147,7 @@
           "minimum": 1,
           "maximum": 20,
           "default": 4,
-          "description": "Complexity score threshold for auto task delegation. Score formula: sum(effort_weights) + floor(distinct_files / 5)."
+          "description": "Complexity score threshold for auto task delegation. Score formula: sum(effort_weights) + floor(distinct_files / 5). Set to 1 to delegate on every spec (always-on equivalent). Max 20 -- see docs for disabling delegation."
         },
         "validateReferences": {
           "type": "string",
