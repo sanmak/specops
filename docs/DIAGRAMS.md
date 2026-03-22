@@ -567,7 +567,7 @@ sequenceDiagram
         A-->>U: "Spec 1: oauth-auth, Spec 2: payment-processing"
         U->>A: Approve split
     else Non-interactive platform
-        A->>A: Auto-split with summary
+        A->>A: Continue as single spec with summary
     end
 
     Note over A: Create initiative

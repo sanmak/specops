@@ -3550,7 +3550,7 @@ If any specs have a `partOf` field in their spec.json, group them by initiative 
 
 To build the initiative-grouped view:
 
-1. For each spec with a `partOf` field, Use the Read tool to read(`<specsDir>/initiatives/<partOf>.json`) to get the initiative title, status, order (waves), and skeleton.
+1. For each spec with a `partOf` field, if Use the Bash tool to check if the file exists at(`<specsDir>/initiatives/<partOf>.json`), Use the Read tool to read it to get the initiative title, status, order (waves), and skeleton. If the initiative file does not exist, treat the spec as standalone (log a warning but do not fail).
 2. Group specs by `partOf` value. For each group, show the initiative title and status as the section header.
 3. Add a "Wave" column showing which execution wave the spec belongs to (from `initiative.order`). If the spec is the skeleton, append "(skeleton)" to the wave number.
 4. Specs without `partOf` go under "Standalone Specs".
@@ -3827,7 +3827,7 @@ Fall back to the Full view with AI commentary. Present all sections sequentially
 When the user requests to view a specific initiative (`view initiative <id>`, `show initiative <id>`):
 
 1. Use the Read tool to read(`.specops.json`) to get `specsDir` (default: `.specops`). Apply path containment rules.
-2. Validate the initiative ID matches pattern `^[a-zA-Z0-9._-]+$`.
+2. Validate the initiative ID matches pattern `^(?!\\.{1,2}$)[a-zA-Z0-9._-]+$` (rejects `.` and `..` to prevent path traversal).
 3. If Use the Bash tool to check if the file exists at(`<specsDir>/initiatives/<id>.json`), Use the Read tool to read it. If not found, Display a message to the user("Initiative '{id}' not found.") and show available initiatives.
 4. For each spec ID in `initiative.specs`, Use the Read tool to read(`<specsDir>/<spec-id>/spec.json`) if it exists to get current status and metadata.
 
@@ -3924,8 +3924,8 @@ Related: auth-permissions
 To build the dependency display:
 
 1. Use the Read tool to read the spec's `spec.json` for `specDependencies`, `relatedSpecs`, and `partOf`.
-2. For each entry in `specDependencies`, Use the Read tool to read the dependency's `spec.json` to get its current status.
-3. If `partOf` is set, Use the Read tool to read the initiative JSON to get wave information.
+2. For each entry in `specDependencies`, if Use the Bash tool to check if the file exists at(`<specsDir>/<dep-spec-id>/spec.json`), Use the Read tool to read it to get its current status. If the file does not exist, show the dependency as "not-created".
+3. If `partOf` is set and Use the Bash tool to check if the file exists at(`<specsDir>/initiatives/<partOf>.json`), Use the Read tool to read the initiative JSON to get wave information. If the file does not exist, omit initiative context from the display.
 4. If neither `specDependencies` nor `relatedSpecs` is present and `partOf` is not set, omit the Dependencies section entirely.
 
 ### Task Progress Parsing
