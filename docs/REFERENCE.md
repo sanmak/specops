@@ -170,7 +170,6 @@ Metrics are captured automatically at Phase 4 completion. See [TOKEN-USAGE.md](T
 | `implementation.gitCheckpointing` | boolean | `false` | | Commit at phase boundaries (spec-created, implemented, completed). Three commits max per run. Complements `autoCommit` (per-task). |
 | `implementation.pipelineMaxCycles` | integer | `3` | min 1, max 10 | Maximum Phase 3→4 iteration cycles in pipeline mode. |
 | `implementation.learnings` | object | | | Production learnings configuration. Controls capture and surfacing of post-deployment discoveries. |
-| `implementation.learnings.enabled` | boolean | `true` | | Enable or disable the production learnings system. |
 | `implementation.learnings.maxSurfaced` | integer | `3` | min 1, max 10 | Maximum number of learnings surfaced during Phase 1 loading. |
 | `implementation.learnings.severityThreshold` | string | `"medium"` | `all`, `medium`, `high`, `critical` | Minimum severity level to surface learnings. Critical/high always surface regardless. |
 | `implementation.learnings.capturePrompt` | string | `"auto"` | `auto`, `manual`, `off` | When to prompt for learning capture. auto: Phase 4 + bugfix. manual: only /specops learn. off: disabled. |

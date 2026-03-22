@@ -267,7 +267,7 @@ Use specops learn <spec-name>
 **Workflow:**
 
 1. Identifies the target spec (must be `completed` status)
-2. Asks 5 structured questions: what was discovered, impact severity, category (performance, security, scalability, UX, architecture, integration, operational), root cause, and what the spec should have included
+2. Asks a set of structured questions about the learning (for example: what was discovered, impact severity, category (performance, security, scalability, UX, architecture, integration, operational), root cause, and what the spec should have included)
 3. Creates a learning entry in `learnings.json` with metadata (spec ID, timestamp, severity, category)
 4. Optionally proposes updates to the originating spec's requirements or design
 

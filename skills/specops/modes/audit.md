@@ -197,17 +197,16 @@ Guided interactive repair for drifted specs. Available only on platforms with `c
 
 When reconciliation mode is invoked with `--learnings` (e.g., `/specops reconcile --learnings`), scan recent git history for hotfix patterns and propose production learnings. This extends the standard reconciliation with a learning discovery pass.
 
-1. If `config.implementation.learnings.enabled` is explicitly `false`, Display a message to the user("Production learnings are disabled in .specops.json.") and stop.
-2. If `canAccessGit` is false, Display a message to the user("Git access required for reconciliation-based learning extraction.") and stop.
-3. Use the Bash tool to run(`git log --oneline --since="30 days ago" -- .`) to get recent commits.
-4. Filter for commits matching hotfix patterns: commit messages containing `fix:`, `hotfix:`, `patch:`, `revert:`, or `incident`.
-5. For each matching commit, Use the Bash tool to run(`git show --stat <hash>`) to get affected files.
-6. Cross-reference affected files against completed specs: Use the Read tool to read(`<specsDir>/index.json`), then for each completed spec Use the Read tool to read its `tasks.md` and collect "Files to Modify" paths. Match commit files against spec file sets.
-7. For each match, propose a learning: "Commit `<hash>` (`<message>`) touches files from spec '<specId>'. Capture as learning?"
-8. If `canAskInteractive`: for each proposed learning, Use the AskUserQuestion tool for category, severity, and prevention rule. Capture following the Production Learnings module Learn Subcommand (step 4 onwards).
-9. If not interactive: display the list of proposed learnings and Display a message to the user("Reconciliation found {N} potential learnings. Run `/specops learn <spec-name>` to capture each.") and stop.
-10. After all captures, run learning pattern detection following the Production Learnings module.
-11. Display a message to the user("Reconciliation complete. Captured {N} learnings from {M} hotfix commits.")
+1. If `canAccessGit` is false, Display a message to the user("Git access required for reconciliation-based learning extraction.") and stop.
+2. Use the Bash tool to run(`git log --oneline --since="30 days ago" -- .`) to get recent commits.
+3. Filter for commits matching hotfix patterns: commit messages containing `fix:`, `hotfix:`, `patch:`, `revert:`, or `incident`.
+4. For each matching commit, Use the Bash tool to run(`git show --stat <hash>`) to get affected files.
+5. Cross-reference affected files against completed specs: Use the Read tool to read(`<specsDir>/index.json`), then for each completed spec Use the Read tool to read its `tasks.md` and collect "Files to Modify" paths. Match commit files against spec file sets.
+6. For each match, propose a learning: "Commit `<hash>` (`<message>`) touches files from spec '<specId>'. Capture as learning?"
+7. If `canAskInteractive`: for each proposed learning, Use the AskUserQuestion tool for category, severity, and prevention rule. Capture following the Production Learnings module Learn Subcommand (step 4 onwards).
+8. If not interactive: display the list of proposed learnings and Display a message to the user("Reconciliation found {N} potential learnings. Run `/specops learn <spec-name>` to capture each.") and stop.
+9. After all captures, run learning pattern detection following the Production Learnings module.
+10. Display a message to the user("Reconciliation complete. Captured {N} learnings from {M} hotfix commits.")
 
 
 ## Production Learnings
@@ -359,9 +358,9 @@ These must refer to SpecOps production learning capture, NOT a product feature (
 
 **Capture workflow** (`/specops learn <spec-name>`):
 
-1. If Use the Bash tool to check if the file exists at(`.specops.json`), Use the Read tool to read(`.specops.json`) to get `specsDir` and check `implementation.learnings.enabled`. If `enabled` is explicitly `false`, Display a message to the user("Production learnings are disabled in .specops.json.") and stop. Otherwise use default `.specops`.
+1. If Use the Bash tool to check if the file exists at(`.specops.json`), Use the Read tool to read(`.specops.json`) to get `specsDir`. Otherwise use default `.specops`.
 2. Validate `<spec-name>`: check Use the Bash tool to check if the file exists at(`<specsDir>/<spec-name>/spec.json`). If not found, Display a message to the user("Spec '<spec-name>' not found.") and stop.
-3. Use the Read tool to read(`<specsDir>/<spec-name>/spec.json`) to get spec metadata.
+3. Use the Read tool to read(`<specsDir>/<spec-name>/spec.json`) to get spec metadata. If `spec.status` is not `"completed"`, Display a message to the user("Production learnings can only be captured for completed specs.") and stop.
 4. If `canAskInteractive`:
    - Use the AskUserQuestion tool("What did you discover? Describe the learning in 1-2 sentences.")
    - Use the AskUserQuestion tool("Category? (performance / scaling / security / reliability / ux / design / other)")

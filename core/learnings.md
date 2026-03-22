@@ -147,9 +147,9 @@ These must refer to SpecOps production learning capture, NOT a product feature (
 
 **Capture workflow** (`/specops learn <spec-name>`):
 
-1. If FILE_EXISTS(`.specops.json`), READ_FILE(`.specops.json`) to get `specsDir` and check `implementation.learnings.enabled`. If `enabled` is explicitly `false`, NOTIFY_USER("Production learnings are disabled in .specops.json.") and stop. Otherwise use default `.specops`.
+1. If FILE_EXISTS(`.specops.json`), READ_FILE(`.specops.json`) to get `specsDir`. Otherwise use default `.specops`.
 2. Validate `<spec-name>`: check FILE_EXISTS(`<specsDir>/<spec-name>/spec.json`). If not found, NOTIFY_USER("Spec '<spec-name>' not found.") and stop.
-3. READ_FILE(`<specsDir>/<spec-name>/spec.json`) to get spec metadata.
+3. READ_FILE(`<specsDir>/<spec-name>/spec.json`) to get spec metadata. If `spec.status` is not `"completed"`, NOTIFY_USER("Production learnings can only be captured for completed specs.") and stop.
 4. If `canAskInteractive`:
    - ASK_USER("What did you discover? Describe the learning in 1-2 sentences.")
    - ASK_USER("Category? (performance / scaling / security / reliability / ux / design / other)")

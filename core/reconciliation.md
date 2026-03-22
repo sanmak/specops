@@ -197,14 +197,13 @@ Guided interactive repair for drifted specs. Available only on platforms with `c
 
 When reconciliation mode is invoked with `--learnings` (e.g., `/specops reconcile --learnings`), scan recent git history for hotfix patterns and propose production learnings. This extends the standard reconciliation with a learning discovery pass.
 
-1. If `config.implementation.learnings.enabled` is explicitly `false`, NOTIFY_USER("Production learnings are disabled in .specops.json.") and stop.
-2. If `canAccessGit` is false, NOTIFY_USER("Git access required for reconciliation-based learning extraction.") and stop.
-3. RUN_COMMAND(`git log --oneline --since="30 days ago" -- .`) to get recent commits.
-4. Filter for commits matching hotfix patterns: commit messages containing `fix:`, `hotfix:`, `patch:`, `revert:`, or `incident`.
-5. For each matching commit, RUN_COMMAND(`git show --stat <hash>`) to get affected files.
-6. Cross-reference affected files against completed specs: READ_FILE(`<specsDir>/index.json`), then for each completed spec READ_FILE its `tasks.md` and collect "Files to Modify" paths. Match commit files against spec file sets.
-7. For each match, propose a learning: "Commit `<hash>` (`<message>`) touches files from spec '<specId>'. Capture as learning?"
-8. If `canAskInteractive`: for each proposed learning, ASK_USER for category, severity, and prevention rule. Capture following the Production Learnings module Learn Subcommand (step 4 onwards).
-9. If not interactive: display the list of proposed learnings and NOTIFY_USER("Reconciliation found {N} potential learnings. Run `/specops learn <spec-name>` to capture each.") and stop.
-10. After all captures, run learning pattern detection following the Production Learnings module.
-11. NOTIFY_USER("Reconciliation complete. Captured {N} learnings from {M} hotfix commits.")
+1. If `canAccessGit` is false, NOTIFY_USER("Git access required for reconciliation-based learning extraction.") and stop.
+2. RUN_COMMAND(`git log --oneline --since="30 days ago" -- .`) to get recent commits.
+3. Filter for commits matching hotfix patterns: commit messages containing `fix:`, `hotfix:`, `patch:`, `revert:`, or `incident`.
+4. For each matching commit, RUN_COMMAND(`git show --stat <hash>`) to get affected files.
+5. Cross-reference affected files against completed specs: READ_FILE(`<specsDir>/index.json`), then for each completed spec READ_FILE its `tasks.md` and collect "Files to Modify" paths. Match commit files against spec file sets.
+6. For each match, propose a learning: "Commit `<hash>` (`<message>`) touches files from spec '<specId>'. Capture as learning?"
+7. If `canAskInteractive`: for each proposed learning, ASK_USER for category, severity, and prevention rule. Capture following the Production Learnings module Learn Subcommand (step 4 onwards).
+8. If not interactive: display the list of proposed learnings and NOTIFY_USER("Reconciliation found {N} potential learnings. Run `/specops learn <spec-name>` to capture each.") and stop.
+9. After all captures, run learning pattern detection following the Production Learnings module.
+10. NOTIFY_USER("Reconciliation complete. Captured {N} learnings from {M} hotfix commits.")

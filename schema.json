@@ -172,11 +172,6 @@
           "type": "object",
           "description": "Production learnings configuration. Controls capture and surfacing of post-deployment discoveries.",
           "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": true,
-              "description": "Enable or disable the production learnings system"
-            },
             "maxSurfaced": {
               "type": "integer",
               "minimum": 1,

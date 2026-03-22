@@ -57,7 +57,7 @@
       "affectedFiles": ["generator/validate.py"],
       "reconsiderWhen": ["validate.py is refactored to auto-discover marker constants"],
       "supersedes": null,
-      "supersededBy": null,
+      "supersededBy": "L-production-learnings-1",
       "discoveredAt": "2026-03-21T07:22:29Z",
       "resolvedAt": "2026-03-21T07:22:29Z"
     },
@@ -85,7 +85,7 @@
       "resolution": "Added all missing categories to test_platform_consistency.py (coherence, delegation, engineering_discipline, dependency_safety, interview, task_tracking, regression) and to validate.py (simplicity, data_handling). Aligned from_plan and writing_quality markers.",
       "preventionRule": "Extend Gap 31 rule to three-way sync: when adding *_MARKERS to validate.py, add to (1) validate_platform(), (2) cross-platform consistency loop, AND (3) test_platform_consistency.py REQUIRED_MARKERS in the same commit",
       "affectedFiles": ["generator/validate.py", "tests/test_platform_consistency.py"],
-      "reconsiderWhen": ["test_platform_consistency.py is refactored to import markers from validate.py directly"],
+      "reconsiderWhen": [],
       "supersedes": "L-context-aware-dispatch-1",
       "supersededBy": null,
       "discoveredAt": "2026-03-22T18:00:00Z",
@@ -94,7 +94,7 @@
     {
       "id": "L-production-learnings-2",
       "specId": "production-learnings",
-      "category": "process",
+      "category": "other",
       "severity": "medium",
       "description": "Completed specs can pass all existing checks while missing the Documentation Review section in implementation.md. The lint-spec-artifacts.py check exists but was added after earlier specs were completed, creating a gap for newly completed specs that skip Phase 4 docs review.",
       "resolution": "Added Documentation Review section to production-learnings/implementation.md. The lint-spec-artifacts.py check now catches this for all completed specs.",
@@ -109,7 +109,7 @@
     {
       "id": "L-production-learnings-3",
       "specId": "production-learnings",
-      "category": "process",
+      "category": "other",
       "severity": "medium",
       "description": "CLAUDE.md mode count (15 vs 16) and key modules list fell out of sync when the learn mode was added. These are manually maintained values that drift when new modes are added.",
       "resolution": "Updated CLAUDE.md to say 16 modes and added core/learnings.md and core/dispatcher.md to key modules list.",
