@@ -6,18 +6,18 @@ How SpecOps compares to other spec-driven and agent-context tools.
 
 | Capability | SpecOps | Superpowers | Kiro (Amazon) | EPIC/Reload | GitHub Spec Kit |
 | --- | --- | --- | --- | --- | --- |
-| **Spec-driven workflow** | 4-phase (Understand, Spec, Implement, Complete) | Implicit skill chain (brainstorm, plan, execute; no phases or state tracking) | 3-phase (Requirements, Design, Tasks) | Memory layer (no spec workflow) | 5 core commands + 3 optional (specify, plan, tasks, implement, constitution) |
+| **Spec-driven workflow** | 4-phase (Understand, Spec, Implement, Complete) | Implicit skill chain (brainstorm, plan, execute; no phases or state tracking) | 3-phase (Requirements, Design, Tasks) | Memory layer (no spec workflow) | 5 core commands (specify, plan, tasks, implement, constitution) + 3 optional commands |
 | **Platform support** | Claude Code, Cursor, Codex, Copilot | Claude Code, Cursor, Codex, OpenCode, Gemini CLI | IDE + CLI + ACP-compatible editors (JetBrains, Zed) | Cursor, Windsurf | 26+ named agents + generic |
 | **EARS notation** | Yes (5 patterns, HTML comment guidance) | No | Yes | No | No |
 | **Regression analysis** | Yes (severity-scaled discovery) | No | Yes (SHALL CONTINUE TO) | No | No |
 | **Steering files** | Yes (always, fileMatch, manual modes) | No (SessionStart hook only) | Yes (+ auto mode) | No | No |
 | **Local memory** | Yes (decisions, context, patterns) | No (fresh context each session) | Autonomous agent retains context (no structured memory files) | Yes (cloud-based) | Constitution (project principles, not cross-session learning) |
 | **Repo map** | Yes (AST-based, auto-refresh) | No | Code Intelligence with AST navigation (Tree-sitter, 18 languages) | No | No |
-| **Drift detection** | Yes (5 drift checks, audit/reconcile) | No | No | No | No |
+| **Drift detection** | Yes (5 drift checks, audit/reconcile) | No | No | No | Community extensions ("reconcile", "sync") |
 | **Spec decomposition** | Yes (scope assessment, split detection, initiatives) | No | No | No | No |
 | **Initiative orchestration** | Yes (multi-spec execution with dependency gates) | No | No | No | No |
 | **Vertical adaptations** | 7 project types | None | None | None | Generic templates |
-| **Team review workflow** | Built-in (draft, review, approve, gate) | No | No | No | No |
+| **Team review workflow** | Built-in (draft, review, approve, gate) | No | No | No | Community extension ("review") |
 | **Agent hooks** | Yes (ExitPlanMode) | Yes (SessionStart hook injection) | Yes (10 trigger types) | No | Yes (before/after hooks on all core commands) |
 | **Subagent architecture** | Phase dispatch + initiative orchestrator | Dispatcher + spec reviewer + code reviewer per task | Up to 4 parallel subagents, isolated contexts | No | Community extension ("conduct") |
 | **TDD enforcement** | Acceptance criteria as completion gates | Anti-rationalization tables, strict test-first mandate | No | No | Yes (TDD in core implement command) |
@@ -30,7 +30,7 @@ How SpecOps compares to other spec-driven and agent-context tools.
 
 ## SpecOps vs Superpowers
 
-[Superpowers](https://github.com/obra/superpowers) is a behavioral methodology framework for AI coding agents with 103k+ GitHub stars, officially listed in the Claude Code plugin marketplace. Both tools make AI agents think before coding, but they deliver different things to the developer. SpecOps gives you structured spec documents (requirements, design, tasks) that persist in git, track progress across sessions, and catch drift between what was specified and what was built. Superpowers gives you behavioral guardrails: strict TDD enforcement, systematic debugging methodology, and multi-agent code review where separate agents check spec compliance and code quality. They are complementary: a team could use Superpowers' TDD discipline during implementation and SpecOps' structured specs as the planning foundation.
+[Superpowers](https://github.com/obra/superpowers) is a behavioral methodology framework for AI coding agents with 103k+ GitHub stars (as of 2026-03-22)[^sp-stars], officially listed in the Claude Code plugin marketplace[^sp-marketplace]. Both tools make AI agents think before coding, but they deliver different things to the developer. SpecOps gives you structured spec documents (requirements, design, tasks) that persist in git, track progress across sessions, and catch drift between what was specified and what was built. Superpowers gives you behavioral guardrails: strict TDD enforcement, systematic debugging methodology, and multi-agent code review where separate agents check spec compliance and code quality. They are complementary: a team could use Superpowers' TDD discipline during implementation and SpecOps' structured specs as the planning foundation.
 
 **Choose Superpowers** if you want your agent to follow strict TDD (test before code, no exceptions), run systematic debugging workflows, dispatch separate reviewer agents for each task, or brainstorm visually in the browser.
 
@@ -44,7 +44,7 @@ How SpecOps compares to other spec-driven and agent-context tools.
 - **Parallel task execution**: independent tasks run simultaneously in separate git worktrees, each handled by a fresh agent. SpecOps' initiative orchestrator runs specs in dependency order but executes them sequentially within each wave.
 - **Systematic debugging**: when you hit a bug, the agent follows a structured 4-phase process (investigate, analyze patterns, test hypotheses, implement fix) instead of guessing. SpecOps has a bugfix spec template focused on regression analysis, not a debugging methodology.
 - **Platform breadth**: runs on 5 platforms (Claude Code, Cursor, Codex, OpenCode, Gemini CLI). SpecOps runs on 4 (Claude Code, Cursor, Codex, Copilot).
-- **Adoption**: 103k+ GitHub stars, officially listed in the Claude Code plugin marketplace.
+- **Adoption**: 103k+ GitHub stars (as of 2026-03-22)[^sp-stars], officially listed in the Claude Code plugin marketplace[^sp-marketplace].
 
 ### Where SpecOps leads
 
@@ -54,7 +54,7 @@ How SpecOps compares to other spec-driven and agent-context tools.
 - **EARS requirements**: acceptance criteria use five patterns (event-driven, state-driven, optional, unwanted, ubiquitous) that produce testable statements like `WHEN [event] THE SYSTEM SHALL [behavior]`. Superpowers uses free-form requirements.
 - **Domain-specific templates**: seven project types (backend, frontend, infra, data pipeline, library, fullstack, builder) generate spec sections relevant to your domain. An infra spec includes rollback steps; a data pipeline spec includes data contracts. Superpowers applies the same workflow regardless of project type.
 - **Team review before coding**: specs go through a draft/review/approve cycle with configurable approval counts before implementation begins. Superpowers has no team review mechanism.
-- **Multi-spec coordination**: large features are automatically assessed for scope and split into multiple specs with dependency tracking, execution waves, and initiative dashboards. Superpowers handles one task at a time.
+- **Multi-spec coordination**: large features are automatically assessed for scope and split into multiple specs with dependency tracking, execution waves, and initiative dashboards. Superpowers can parallelize independent tasks but has no initiative-level planning, dependency gates, or execution waves across specs.
 - **Writing and engineering discipline**: spec artifacts follow traceable rules grounded in named thought leaders (Orwell on clarity, Kent Beck on testing, Dijkstra on proof limits, Brooks on design integrity). Every requirement is ANT-tested for falsifiability. Superpowers' anti-rationalization tables enforce agent behavior but do not apply a writing or engineering methodology to the artifacts produced.
 
 ## SpecOps vs Kiro
@@ -92,7 +92,7 @@ How SpecOps compares to other spec-driven and agent-context tools.
 
 ## SpecOps vs EPIC/Reload
 
-[EPIC/Reload](https://www.epicai.dev/) is a funded startup ($2.275M pre-seed) building a "memory and architecture layer for coding agents." EPIC launched in February 2026 and currently supports Cursor and Windsurf.
+[EPIC/Reload](https://www.epicai.dev/) is a funded startup ($2.275M pre-seed)[^epic-funding] building a "memory and architecture layer for coding agents." EPIC launched in February 2026 and currently supports Cursor and Windsurf.
 
 **Choose EPIC** if you want a managed cloud service for agent memory.
 
@@ -102,12 +102,12 @@ How SpecOps compares to other spec-driven and agent-context tools.
 
 - **Scope**: SpecOps is a complete spec workflow (requirements, design, tasks, review, implementation). EPIC is a memory/context layer without a spec workflow.
 - **Storage**: SpecOps stores everything in local files committed to git. EPIC uses a cloud service.
-- **Memory**: both offer persistent memory across sessions. SpecOps stores decisions, context, and patterns locally. EPIC stores memories in the cloud.
+- **Memory**: Both offer persistent memory across sessions. SpecOps stores decisions, context, and patterns locally. EPIC stores memories in the cloud.
 - **Vendor lock-in**: SpecOps is MIT-licensed, file-based, no account required. EPIC requires a cloud account.
 
 ## SpecOps vs GitHub Spec Kit
 
-[Spec Kit](https://github.com/github/spec-kit) is GitHub's open-source spec-driven development framework with 80k+ stars and 100+ contributors. It has evolved rapidly, adding an extension marketplace (22 community extensions), a hook lifecycle, a preset system, and a constitution command for persistent project principles.
+[Spec Kit](https://github.com/github/spec-kit) is GitHub's open-source spec-driven development framework with 80k+ stars and 100+ contributors (as of 2026-03-22)[^sk-stats]. It has evolved rapidly, adding an extension marketplace (22 community extensions), a hook lifecycle, a preset system, and a constitution command for persistent project principles.
 
 **Choose Spec Kit** if you need the broadest agent support (26+), a community extension ecosystem, or are exploring spec-driven development as an individual or small team.
 
@@ -132,7 +132,7 @@ How SpecOps compares to other spec-driven and agent-context tools.
 - **Agent breadth**: 26+ named agents and a generic option for bring-your-own-agent. SpecOps supports 4 platforms.
 - **Extension marketplace**: 22 community extensions covering drift detection, code review, sub-agent delegation, fleet orchestration, and issue tracker integrations (Jira, Azure DevOps). SpecOps has no extension system.
 - **Hook lifecycle**: before/after hooks on all core commands. SpecOps has one hook (ExitPlanMode).
-- **Community**: 80k+ stars, 100+ contributors, active release cadence (v0.3.2, shipping every 2-3 days).
+- **Community**: 80k+ stars, 100+ contributors, active release cadence (v0.3.2, shipping every 2-3 days) (as of 2026-03-22)[^sk-stats].
 - **Preset system**: customize templates without writing extensions.
 - **TDD in core**: implement command follows a TDD approach by default.
 
@@ -150,3 +150,8 @@ How SpecOps compares to other spec-driven and agent-context tools.
 ## Dogfood Proof
 
 SpecOps was used to build itself across 6 features in a public dogfood cycle. Every feature (EARS notation, regression analysis, steering files, drift detection, local memory, and AST-based repo map) was specified, designed, implemented, and verified using the SpecOps workflow. The specs live in [`.specops/`](../.specops/) and the friction log documenting 42 lessons learned is in [`internal/dogfood-friction.md`](../internal/dogfood-friction.md).
+
+[^sp-stars]: <https://github.com/obra/superpowers> (retrieved 2026-03-22)
+[^sp-marketplace]: <https://claude.com/plugins/superpowers> (retrieved 2026-03-22)
+[^epic-funding]: <https://theaiinsider.tech/2026/02/24/reload-closes-2-275m-in-funding-and-launches-epic-to-manage-ai-agents-as-a-digital-workforce/> (retrieved 2026-03-22)
+[^sk-stats]: <https://github.com/github/spec-kit> (retrieved 2026-03-22)
