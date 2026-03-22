@@ -1474,7 +1474,7 @@ After Phase 1 step 9 (context summary), before Phase 2, run the Scope Assessment
 
 1. Create the initiative:
    - Generate an initiative ID from the feature name (kebab-case, matching pattern `^[a-zA-Z0-9._-]+$`).
-   - Compute execution waves from the proposed dependency rationale (see section 7: Initiative Order Derivation).
+   - Compute execution waves from the proposed dependency rationale (see section 6: Initiative Order Derivation).
    - Identify the walking skeleton (see section 9: Walking Skeleton Principle).
    - Use the Bash tool to run(`mkdir -p <specsDir>/initiatives`)
    - Use the Bash tool to run(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) to capture the current timestamp.
@@ -1549,7 +1549,7 @@ The `specDependencies` array (optional, maxItems 50) contains dependency entries
 
 **Population:** During Phase 2 step 3, when writing spec.json:
 
-- If the spec belongs to an initiative (`partOf` is set), populate `specDependencies` based on the initiative's execution wave ordering — specs in wave N depend on specs in wave N-1.
+- If the spec belongs to an initiative (`partOf` is set), populate `specDependencies` based on the initiative's execution wave ordering. Only add dependencies where actual coupling exists (shared data, API contracts, or integration points) — do not blindly depend on every spec in the prior wave.
 - The `relatedSpecs` array (optional, maxItems 20) lists informational references to specs that are related but not dependencies (see section 10: Cross-Linking).
 - Run cycle detection (section 5) before writing spec.json. If a cycle is detected, do not write and STOP with the cycle chain.
 
@@ -1660,8 +1660,8 @@ When a spec encounters a dependency blocker (Phase 3 dependency gate fails), pre
 | --- | --- | --- | --- | --- |
 | {description} | {specId} | {scope_cut/interface_defined/deferred/escalated} | {detail} | {open/resolved} |
 
-1. If `scope_cut`: Update requirements.md and tasks.md to remove the blocked functionality. Proceed to Phase 3 with reduced scope.
-2. If `interface_defined`: Use the Write tool to create the interface contract, update `contractRef` in the specDependency entry, proceed to Phase 3 with stub implementation.
+1. If `scope_cut`: Update requirements.md and tasks.md to remove the blocked functionality. Use the Read tool to read spec.json, remove the dependency entry from `specDependencies` (or set `required: false`), Use the Write tool to create spec.json. Proceed to Phase 3 with reduced scope.
+2. If `interface_defined`: Use the Write tool to create the interface contract. Use the Read tool to read spec.json, update the specDependency entry's `contractRef` field with the contract path, Use the Write tool to create spec.json. Proceed to Phase 3 with stub implementation.
 3. If `deferred`: Do not proceed to Phase 3. The spec remains in its current status until the dependency completes.
 4. If `escalated`: Do not proceed to Phase 3. Display a message to the user("Blocker escalated. Awaiting human decision.")
 

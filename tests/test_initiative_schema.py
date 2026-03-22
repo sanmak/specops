@@ -142,8 +142,8 @@ def main():
     # --- Edge case tests ---
     print("\n--- Edge Case Validation ---")
 
-    # Valid: empty specs array
-    check(expect_valid(initiative_schema, {
+    # Invalid: empty specs array (minItems: 1 required)
+    check(expect_invalid(initiative_schema, {
         "id": "empty-specs",
         "title": "Initiative with No Specs Yet",
         "created": "2026-03-20T10:00:00Z",
@@ -152,7 +152,7 @@ def main():
         "specs": [],
         "order": [],
         "status": "active"
-    }, "Valid initiative with empty specs array"))
+    }, "Invalid initiative with empty specs array"))
 
     # Valid: single spec in single wave
     check(expect_valid(initiative_schema, {
@@ -168,6 +168,42 @@ def main():
 
     # --- Invalid initiative tests ---
     print("\n--- Invalid Initiative Validation ---")
+
+    # Invalid: duplicate spec IDs (uniqueItems: true)
+    check(expect_invalid(initiative_schema, {
+        "id": "dup-specs",
+        "title": "Duplicate Specs",
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": "Alice",
+        "specs": ["auth-api", "auth-api"],
+        "order": [["auth-api"]],
+        "status": "active"
+    }, "Rejects initiative with duplicate spec IDs"))
+
+    # Invalid: duplicate spec IDs in order wave (uniqueItems: true)
+    check(expect_invalid(initiative_schema, {
+        "id": "dup-wave",
+        "title": "Duplicate Wave Specs",
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": "Alice",
+        "specs": ["auth-api"],
+        "order": [["auth-api", "auth-api"]],
+        "status": "active"
+    }, "Rejects initiative with duplicate spec IDs in wave"))
+
+    # Invalid: empty author string (minLength: 1)
+    check(expect_invalid(initiative_schema, {
+        "id": "empty-author",
+        "title": "Empty Author",
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": "",
+        "specs": ["spec-1"],
+        "order": [["spec-1"]],
+        "status": "active"
+    }, "Rejects initiative with empty author"))
 
     # Invalid: missing required field - id
     check(expect_invalid(initiative_schema, {

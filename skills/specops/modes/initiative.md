@@ -29,7 +29,9 @@ The orchestrator executes the following 9-step loop. All state is read from disk
 #### Step 2: Validate initiative
 
 1. Verify all required fields are present: `id`, `title`, `created`, `updated`, `author`, `specs`, `order`, `status`.
-2. If `status` is `completed`, Display a message to the user("Initiative '{id}' is already completed. All {N} specs are done.") and stop.
+2. Verify consistency: for each spec ID in `initiative.specs`, confirm it appears in at least one wave in `initiative.order`. If any spec ID is missing from all waves, Display a message to the user("Initiative '{id}' is invalid: spec '{spec-id}' is listed in 'specs' but does not appear in any execution wave in 'order'. Add it to the appropriate wave before continuing.") and stop.
+3. Verify no spec ID appears more than once across all waves in `initiative.order`. If duplicates are found, Display a message to the user("Initiative '{id}' is invalid: spec '{spec-id}' appears in multiple waves. Each spec must appear in exactly one wave.") and stop.
+4. If `status` is `completed`, Display a message to the user("Initiative '{id}' is already completed. All {N} specs are done.") and stop.
 
 #### Step 3: Compute current state
 
@@ -217,7 +219,7 @@ The initiative log is a chronological execution record stored alongside the init
 
 Phase dispatch ensures Phase 3 (Implementation) and Phase 4 (Completion) execute in fresh contexts for maximum context window utilization.
 
-**Phase 2 → Phase 3 dispatch (after Phase 2 step 6.7):**
+**Phase 2 → Phase 3 dispatch (after Phase 2 step 6.9):**
 
 1. Write a Phase 2 Completion Summary to `implementation.md`:
    - Key requirements decided

@@ -3331,7 +3331,7 @@ After Phase 1 step 9 (context summary), before Phase 2, run the Scope Assessment
 
 1. Create the initiative:
    - Generate an initiative ID from the feature name (kebab-case, matching pattern `^[a-zA-Z0-9._-]+$`).
-   - Compute execution waves from the proposed dependency rationale (see section 7: Initiative Order Derivation).
+   - Compute execution waves from the proposed dependency rationale (see section 6: Initiative Order Derivation).
    - Identify the walking skeleton (see section 9: Walking Skeleton Principle).
    - Run the terminal command(`mkdir -p <specsDir>/initiatives`)
    - Run the terminal command(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) to capture the current timestamp.
@@ -3406,7 +3406,7 @@ The `specDependencies` array (optional, maxItems 50) contains dependency entries
 
 **Population:** During Phase 2 step 3, when writing spec.json:
 
-- If the spec belongs to an initiative (`partOf` is set), populate `specDependencies` based on the initiative's execution wave ordering — specs in wave N depend on specs in wave N-1.
+- If the spec belongs to an initiative (`partOf` is set), populate `specDependencies` based on the initiative's execution wave ordering. Only add dependencies where actual coupling exists (shared data, API contracts, or integration points) — do not blindly depend on every spec in the prior wave.
 - The `relatedSpecs` array (optional, maxItems 20) lists informational references to specs that are related but not dependencies (see section 10: Cross-Linking).
 - Run cycle detection (section 5) before writing spec.json. If a cycle is detected, do not write and STOP with the cycle chain.
 
@@ -3517,8 +3517,8 @@ When a spec encounters a dependency blocker (Phase 3 dependency gate fails), pre
 | --- | --- | --- | --- | --- |
 | {description} | {specId} | {scope_cut/interface_defined/deferred/escalated} | {detail} | {open/resolved} |
 
-1. If `scope_cut`: Update requirements.md and tasks.md to remove the blocked functionality. Proceed to Phase 3 with reduced scope.
-2. If `interface_defined`: Create the file at the interface contract, update `contractRef` in the specDependency entry, proceed to Phase 3 with stub implementation.
+1. If `scope_cut`: Update requirements.md and tasks.md to remove the blocked functionality. Read the file at spec.json, remove the dependency entry from `specDependencies` (or set `required: false`), Create the file at spec.json. Proceed to Phase 3 with reduced scope.
+2. If `interface_defined`: Create the file at the interface contract. Read the file at spec.json, update the specDependency entry's `contractRef` field with the contract path, Create the file at spec.json. Proceed to Phase 3 with stub implementation.
 3. If `deferred`: Do not proceed to Phase 3. The spec remains in its current status until the dependency completes.
 4. If `escalated`: Do not proceed to Phase 3. Tell the user("Blocker escalated. Awaiting human decision.")
 
@@ -3598,7 +3598,9 @@ The orchestrator executes the following 9-step loop. All state is read from disk
 #### Step 2: Validate initiative
 
 1. Verify all required fields are present: `id`, `title`, `created`, `updated`, `author`, `specs`, `order`, `status`.
-2. If `status` is `completed`, Tell the user("Initiative '{id}' is already completed. All {N} specs are done.") and stop.
+2. Verify consistency: for each spec ID in `initiative.specs`, confirm it appears in at least one wave in `initiative.order`. If any spec ID is missing from all waves, Tell the user("Initiative '{id}' is invalid: spec '{spec-id}' is listed in 'specs' but does not appear in any execution wave in 'order'. Add it to the appropriate wave before continuing.") and stop.
+3. Verify no spec ID appears more than once across all waves in `initiative.order`. If duplicates are found, Tell the user("Initiative '{id}' is invalid: spec '{spec-id}' appears in multiple waves. Each spec must appear in exactly one wave.") and stop.
+4. If `status` is `completed`, Tell the user("Initiative '{id}' is already completed. All {N} specs are done.") and stop.
 
 #### Step 3: Compute current state
 
@@ -3786,7 +3788,7 @@ The initiative log is a chronological execution record stored alongside the init
 
 Phase dispatch ensures Phase 3 (Implementation) and Phase 4 (Completion) execute in fresh contexts for maximum context window utilization.
 
-**Phase 2 → Phase 3 dispatch (after Phase 2 step 6.7):**
+**Phase 2 → Phase 3 dispatch (after Phase 2 step 6.9):**
 
 1. Write a Phase 2 Completion Summary to `implementation.md`:
    - Key requirements decided
