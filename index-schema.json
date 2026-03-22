@@ -41,7 +41,7 @@
       "partOf": {
         "type": "string",
         "maxLength": 100,
-        "pattern": "^[a-zA-Z0-9._-]+$",
+        "pattern": "^(?!\\.{1,2}$)[a-zA-Z0-9._-]+$",
         "description": "Initiative ID this spec belongs to"
       }
     },

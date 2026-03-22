@@ -66,7 +66,7 @@ The generator produces: Claude (`SKILL.md` dispatcher + 14 mode files in `modes/
 
 1. Contain no unsubstituted abstract operations (e.g., `READ_FILE(` must not appear)
 2. Include all safety markers from `core/safety.md`
-3. Include all template markers, workflow markers, DECOMPOSITION_MARKERS, and INITIATIVE_MARKERS
+3. Include all template markers, workflow markers, and DECOMPOSITION_MARKERS
 4. Meet platform-specific format requirements
 
 The pre-commit hook (`hooks/pre-commit`) runs 7 checks: JSON syntax, ShellCheck, stale generated files, stale checksums, PII/absolute-path detection, spec checkbox staleness, and markdown lint.

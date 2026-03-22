@@ -65,7 +65,7 @@ An external audit by [Agent Trust Hub](https://skills.sh/sanmak/specops/specops/
 
 The spec decomposition feature introduces new path construction patterns that should be reviewed in the next audit:
 
-- **Initiative ID in path construction**: Initiative IDs are used to construct directory paths (`<specsDir>/initiatives/<id>/`). The ID pattern is constrained by `initiative-schema.json` to `^[a-zA-Z0-9._-]+$`, which prevents path traversal. Runtime validation should also apply containment checks (no `..`, no absolute paths).
+- **Initiative ID in path construction**: Initiative IDs are used to construct file paths (`<specsDir>/initiatives/<id>.json`). The ID pattern is constrained by `initiative-schema.json` to `^(?!\\.{1,2}$)[a-zA-Z0-9._-]+$`, which prevents path traversal by rejecting `.` and `..` as IDs. Runtime validation should also apply containment checks (no `..`, no absolute paths).
 - **Spec dependency references**: `specDependencies[].specId` values reference other spec directories. These are validated against the same pattern constraint.
 - **Cycle detection**: The DFS-based cycle detection algorithm processes user-influenced data (spec IDs and dependency graphs). Malformed dependency graphs are bounded by `maxItems: 50` on the `specDependencies` array.
 

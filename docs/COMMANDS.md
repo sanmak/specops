@@ -412,7 +412,7 @@ Initiatives track large features that span multiple specs. When a feature reques
 
 1. **Scope assessment (Phase 1.5)** — After Phase 1 context analysis, SpecOps evaluates complexity signals (multiple bounded contexts, cross-cutting concerns, estimated task count). If thresholds are exceeded, it proposes splitting the feature into multiple specs.
 2. **Approval** — On interactive platforms, you approve or reject the decomposition. On non-interactive platforms, decomposition proceeds automatically with a summary.
-3. **Initiative creation** — An `initiative.json` file is created in `<specsDir>/initiatives/<id>/` tracking all member specs, their execution order (waves derived via topological sort), and the walking skeleton.
+3. **Initiative creation** — An `<id>.json` file is created in `<specsDir>/initiatives/` tracking all member specs, their execution order (waves derived via topological sort), and the walking skeleton. A companion `<id>-log.md` records the execution trace.
 4. **Cross-spec dependencies** — Each spec's `spec.json` includes `specDependencies` (required and advisory) and `partOf` (initiative membership). A dependency gate in Phase 3 blocks implementation when required dependencies are incomplete.
 
 ### View an Initiative

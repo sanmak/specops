@@ -102,9 +102,8 @@ list
 .specops/
   index.json             # Auto-generated spec dashboard
   initiatives/           # Multi-spec feature tracking
-    <initiative-id>/
-      initiative.json    # Member specs, execution waves, status
-      initiative-log.md  # Chronological execution trace
+    <initiative-id>.json       # Member specs, execution waves, status
+    <initiative-id>-log.md     # Chronological execution trace
   feature-name/
     spec.json            # Lifecycle metadata (always created)
     requirements.md      # What (user stories, acceptance criteria)

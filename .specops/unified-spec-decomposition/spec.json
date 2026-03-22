@@ -1,10 +1,10 @@
 {
   "id": "unified-spec-decomposition",
   "type": "feature",
-  "status": "implementing",
+  "status": "completed",
   "version": 1,
-  "created": "2026-03-22T00:00:00Z",
-  "updated": "2026-03-22T00:00:00Z",
+  "created": "2026-03-22T09:48:49Z",
+  "updated": "2026-03-22T09:48:49Z",
   "specopsCreatedWith": "1.4.1",
   "specopsUpdatedWith": "1.4.1",
   "author": {

@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Spec decomposition**: Automatic scope assessment (Phase 1.5) detects when large features should be split into multiple specs. Split detection (Phase 2 safety net) catches decomposition missed in Phase 1.5. Walking skeleton principle flags the first wave-1 spec as the integration skeleton.
-- **Initiative model**: Multi-spec features tracked as initiatives with execution waves derived via topological sort. Initiative data stored in `<specsDir>/initiatives/<id>/initiative.json` with a dedicated schema.
+- **Initiative model**: Multi-spec features tracked as initiatives with execution waves derived via topological sort. Initiative data stored in `<specsDir>/initiatives/<id>.json` with a dedicated schema, and per-initiative logs stored in `<specsDir>/initiatives/<id>-log.md`.
 - **Cross-spec dependencies**: `specDependencies` array in `spec.json` declares required and advisory dependencies between specs. Cycle detection (DFS with white/gray/black coloring) prevents circular dependency chains. `relatedSpecs` for informational cross-linking.
 - **Dependency gate (Phase 3)**: Blocks implementation when required `specDependencies` are incomplete. Protocol breach if skipped. Scope hammering provides blocker resolution options (scope_cut, interface_defined, completed, escalated, deferred).
 - **Initiative orchestration**: Autonomous multi-spec execution via `/specops initiative <id>`. Lightweight orchestrator dispatches specs through the normal dispatcher with handoff bundles containing initiative context, spec identity, dependency context, and scope constraints.

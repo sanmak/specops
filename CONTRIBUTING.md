@@ -54,7 +54,7 @@ By participating in this project, you agree to maintain a respectful and inclusi
 - Preserve all safety mechanisms (convention sanitization, template safety, path containment)
 - Use abstract operations from `core/tool-abstraction.md` (e.g., `READ_FILE`, `WRITE_FILE`)
 - After changing core modules, regenerate platform outputs: `python3 generator/generate.py --all`
-- When adding a new core module, register it in `generator/generate.py` (add to core reading logic and context dict) and update the relevant Jinja2 templates in `generator/templates/` to include the new template variable
+- When adding a new core module, register it in `generator/generate.py` (add to core reading logic and context dict) and update the relevant Jinja2 templates in `generator/templates/` to include the new template variable. Also update `docs/STRUCTURE.md` with the new module entry, add a mapping to `.claude/commands/docs-sync.md`, and update the CLAUDE.md core modules list
 - When adding a new mode, register it in `core/mode-manifest.json` with its required module list
 
 ### Validator Guidelines

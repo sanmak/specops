@@ -228,9 +228,8 @@ your-project/
       tasks.md                          (implementation task breakdown)
       implementation.md                 (optional: notes during implementation)
     initiatives/                        (created for multi-spec features)
-      oauth-payments/
-        initiative.json                 (member specs, execution waves, status)
-        initiative-log.md               (execution trace)
+      oauth-payments.json               (member specs, execution waves, status)
+      oauth-payments-log.md             (execution trace)
 ```
 
 ## Team Review

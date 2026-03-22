@@ -238,15 +238,14 @@ Generated files are checked into git so end users never need to run the build.
 The `<specsDir>` (default `.specops/`) contains spec artifacts and supporting data:
 
 ```text
+.specops.json                               # Project configuration (at project root)
 .specops/
-  .specops.json                           # Project configuration (at project root)
   index.json                              # Auto-generated spec dashboard
   steering/                               # Persistent project context (steering files)
   memory/                                 # Local memory layer (decisions, context, patterns)
   initiatives/                            # Initiative tracking for multi-spec features
-    <initiative-id>/
-      initiative.json                     # Initiative metadata, member specs, execution waves
-      initiative-log.md                   # Chronological execution trace
+    <initiative-id>.json                  # Initiative metadata, member specs, execution waves
+    <initiative-id>-log.md               # Chronological execution trace
   <spec-name>/
     spec.json                             # Spec lifecycle metadata
     requirements.md                       # Requirements (feature specs)

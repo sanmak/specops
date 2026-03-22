@@ -67,6 +67,19 @@ SpecOps uses a three-tier architecture: core modules (`core/*.md`) with abstract
 |---|-----------|--------|--------|
 | — | — | — | — |
 
+## Documentation Review
+
+All documentation updated as part of the implementation:
+- `docs/COMMANDS.md` — initiative commands and decomposition workflow
+- `docs/REFERENCE.md` — spec directory structure with initiatives
+- `docs/STRUCTURE.md` — file layout, initiative schema, flat file format
+- `QUICKSTART.md` — initiative directory tree example
+- `CHANGELOG.md` — v1.5.0 features
+- `CONTRIBUTING.md` — core module addition guidelines
+- `CLAUDE.md` — updated mode count, module list, validation pipeline
+- `SECURITY.md` — initiative ID path construction security scope
+- `docs/SECURITY-AUDIT.md` — decomposition feature audit notes
+
 ## Session Log
 
 | Session | Date | Tasks Worked | Outcome |

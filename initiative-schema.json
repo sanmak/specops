@@ -7,7 +7,7 @@
     "id": {
       "type": "string",
       "maxLength": 100,
-      "pattern": "^[a-zA-Z0-9._-]+$",
+      "pattern": "^(?!\\.{1,2}$)[a-zA-Z0-9._-]+$",
       "description": "Initiative identifier matching the file name"
     },
     "title": {
@@ -44,7 +44,7 @@
       "items": {
         "type": "string",
         "maxLength": 100,
-        "pattern": "^[a-zA-Z0-9._-]+$"
+        "pattern": "^(?!\\.{1,2}$)[a-zA-Z0-9._-]+$"
       }
     },
     "order": {
@@ -57,14 +57,14 @@
         "items": {
           "type": "string",
           "maxLength": 100,
-          "pattern": "^[a-zA-Z0-9._-]+$"
+          "pattern": "^(?!\\.{1,2}$)[a-zA-Z0-9._-]+$"
         }
       }
     },
     "skeleton": {
       "type": "string",
       "maxLength": 100,
-      "pattern": "^[a-zA-Z0-9._-]+$",
+      "pattern": "^(?!\\.{1,2}$)[a-zA-Z0-9._-]+$",
       "description": "Spec ID of the walking skeleton (first wave-1 spec establishing the end-to-end integration path)"
     },
     "status": {
