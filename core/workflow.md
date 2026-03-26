@@ -208,7 +208,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
 5.5. **Issue closure sweep**: If `config.team.taskTracking` is not `"none"` AND `canExecuteCode` is true, sweep all completed tasks for missed issue closures. This catches cases where Phase 3 auto-close was skipped due to agent context loss, delegation gaps, or platform limitations.
    - READ_FILE `tasks.md` — collect all tasks with `**Status:** Completed` and a valid `**IssueID:**` (neither `None` nor prefixed with `FAILED`).
    - For each such task, check if the external issue is still open:
-     - GitHub: RUN_COMMAND(`gh issue view <IssueID> --json state --jq '.state'`). If the result is `OPEN`, close it: RUN_COMMAND(`gh issue close <IssueID> --reason completed`).
+     - GitHub: derive an issue `<number>` from the task's `IssueID` (for example, strip a leading `#` if present), then RUN_COMMAND(`gh issue view <number> --json state --jq '.state'`). If the result is `OPEN`, close it: RUN_COMMAND(`gh issue close <number> --reason completed`).
      - Jira: RUN_COMMAND(`jira issue view <IssueID> --plain`). If status is not `Done`, move it: RUN_COMMAND(`jira issue move <IssueID> "Done"`).
      - Linear: RUN_COMMAND(`linear issue view <IssueID>`). If status is not `Done`, update it: RUN_COMMAND(`linear issue update <IssueID> --status "Done"`).
    - Report results: NOTIFY_USER("Issue closure sweep: closed N issue(s) (<list>). M issue(s) were already closed.") or NOTIFY_USER("Issue closure sweep: all issues already closed.") if none needed closing.

@@ -210,7 +210,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
 5.5. **Issue closure sweep**: If `config.team.taskTracking` is not `"none"` AND `canExecuteCode` is true, sweep all completed tasks for missed issue closures. This catches cases where Phase 3 auto-close was skipped due to agent context loss, delegation gaps, or platform limitations.
    - Read the file at `tasks.md` — collect all tasks with `**Status:** Completed` and a valid `**IssueID:**` (neither `None` nor prefixed with `FAILED`).
    - For each such task, check if the external issue is still open:
-     - GitHub: Run the terminal command(`gh issue view <IssueID> --json state --jq '.state'`). If the result is `OPEN`, close it: Run the terminal command(`gh issue close <IssueID> --reason completed`).
+     - GitHub: derive an issue `<number>` from the task's `IssueID` (for example, strip a leading `#` if present), then Run the terminal command(`gh issue view <number> --json state --jq '.state'`). If the result is `OPEN`, close it: Run the terminal command(`gh issue close <number> --reason completed`).
      - Jira: Run the terminal command(`jira issue view <IssueID> --plain`). If status is not `Done`, move it: Run the terminal command(`jira issue move <IssueID> "Done"`).
      - Linear: Run the terminal command(`linear issue view <IssueID>`). If status is not `Done`, update it: Run the terminal command(`linear issue update <IssueID> --status "Done"`).
    - Report results: Tell the user("Issue closure sweep: closed N issue(s) (<list>). M issue(s) were already closed.") or Tell the user("Issue closure sweep: all issues already closed.") if none needed closing.
@@ -5149,8 +5149,8 @@ On **every status transition** (Pending → In Progress, In Progress → Complet
 **Completion close (mandatory)**: When transitioning a task to `Completed`, close the corresponding external issue. Skipping this step when `config.team.taskTracking` is not `"none"` and the task has a valid IssueID is a protocol breach. Execute the following steps immediately after the `tasks.md` status update (Write Ordering Protocol step 1) and before the completion report (step 3):
 
 1. Verify preconditions: `config.team.taskTracking` is not `"none"` AND the task's `**IssueID:**` is neither `None` nor prefixed with `FAILED`. If preconditions are not met, skip to step 5.
-2. If `canExecuteCode` is true, execute the platform-specific close command:
-   - GitHub: Run the terminal command(`gh issue close <IssueID> --reason completed`)
+2. If `canExecuteCode` is true, first normalize the IssueID according to the Status Sync protocol. For GitHub, derive `<number>` by stripping any leading `#` from the stored IssueID; for other platforms, use the stored IssueID as required by their respective CLIs. Then execute the platform-specific close command:
+   - GitHub: Run the terminal command(`gh issue close <number> --reason completed`)
    - Jira: Run the terminal command(`jira issue move <IssueID> "Done"`)
    - Linear: Run the terminal command(`linear issue update <IssueID> --status "Done"`)
 3. If the close command fails: Tell the user("Warning: Could not close external issue <IssueID> — <error>. The issue remains open. Continue with task completion.") and continue. Do NOT block the task from being marked complete in `tasks.md`.

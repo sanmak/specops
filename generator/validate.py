@@ -719,6 +719,11 @@ def validate_platform(platform, info):
                             f"  Antigravity specops.md version ({actual})"
                             f" != platform.json ({expected})"
                         )
+            else:
+                errors.append(
+                    "  Antigravity specops.md has malformed version comment"
+                    " (expected <!-- specops-version: \"X.Y.Z\" -->)"
+                )
 
     return errors
 
