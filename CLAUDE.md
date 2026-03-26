@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What is SpecOps
 
-SpecOps is a spec-driven development workflow for AI coding assistants. It transforms ideas into structured specifications (requirements, design, tasks) before implementation, following a 4-phase workflow: Understand, Spec, Implement, Complete. It supports four platforms (Claude Code, Cursor, Codex, Copilot) from a single source of truth.
+SpecOps is a spec-driven development workflow for AI coding assistants. It transforms ideas into structured specifications (requirements, design, tasks) before implementation, following a 4-phase workflow: Understand, Spec, Implement, Complete. It supports five platforms (Claude Code, Cursor, Codex, Copilot, Google Antigravity) from a single source of truth.
 
 ## Build & Validate Commands
 
@@ -51,7 +51,7 @@ bash scripts/bump-version.sh <new-version> --checksums
 
 **Tier 3 -- Generated Outputs** (`platforms/<platform>/SKILL.md` etc.): Built by `generator/generate.py` using Jinja2 templates (`generator/templates/*.j2`) that combine core modules + platform adapters. **Never edit generated output files directly** -- edit `core/` or `generator/templates/` then regenerate.
 
-The generator produces: Claude (`SKILL.md` dispatcher + 15 mode files in `modes/`), Cursor (`specops.mdc`), Codex (`SKILL.md`), Copilot (`specops.instructions.md`).
+The generator produces: Claude (`SKILL.md` dispatcher + 15 mode files in `modes/`), Cursor (`specops.mdc`), Codex (`SKILL.md`), Copilot (`specops.instructions.md`), Antigravity (`specops.md`).
 
 ## Critical Development Rules
 

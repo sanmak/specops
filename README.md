@@ -26,7 +26,7 @@ SpecOps adds a structured thinking step to AI coding. One command triggers a 4-p
 3. **Implement** from the spec, not from assumptions
 4. **Complete** with verified acceptance criteria
 
-Specs are git-tracked, survive across sessions, and work natively with **Claude Code**, **Cursor**, **OpenAI Codex**, and **GitHub Copilot**.
+Specs are git-tracked, survive across sessions, and work natively with **Claude Code**, **Cursor**, **OpenAI Codex**, **GitHub Copilot**, and **Google Antigravity**.
 
 ## Quick Start
 
@@ -96,7 +96,7 @@ Agent:
 | Agent hallucinates vague acceptance criteria | EARS notation for precise requirements: `WHEN [event] THE SYSTEM SHALL [behavior]` |
 | Specs drift from codebase after implementation | 5 automated drift checks with audit and reconcile commands |
 | Production reveals things specs missed | Production learnings layer: capture discoveries, link to specs, surface in future work |
-| Locked into one AI coding tool | One source of truth, 4 platform outputs |
+| Locked into one AI coding tool | One source of truth, 5 platform outputs |
 
 ## Built With SpecOps
 
@@ -151,7 +151,7 @@ Design informed by ADR immutability (Netflix), fitness functions (ThoughtWorks),
 ## What Only SpecOps Does
 
 - **Production learnings**: the only spec tool that captures post-deployment discoveries, links them to originating specs, and surfaces relevant learnings in future work. No competitor closes the spec-to-production feedback loop.
-- **Multi-platform**: the only spec-driven development tool that works across Claude Code, Cursor, OpenAI Codex, and GitHub Copilot from a single source
+- **Multi-platform**: the only spec-driven development tool that works across Claude Code, Cursor, OpenAI Codex, GitHub Copilot, and Google Antigravity from a single source
 - **Spec decomposition**: automatic scope assessment splits large features into multiple coordinated specs with dependency tracking and initiative orchestration
 - **Vertical awareness**: domain-specific spec templates. Infrastructure specs include rollback steps and resource definitions. Data pipeline specs include data contracts and backfill strategy.
 - **Enforcement, not suggestions**: CI-integrated drift detection, checkbox completion gates, dependency gates, and approval workflows that block implementation until specs are approved
@@ -167,6 +167,7 @@ Design informed by ADR immutability (Netflix), fitness functions (ThoughtWorks),
 | **Cursor** | `Use specops to [description]` |
 | **OpenAI Codex** | `Use specops to [description]` |
 | **GitHub Copilot** | `Use specops to [description]` |
+| **Google Antigravity** | `Use specops to [description]` |
 
 ## Configuration
 

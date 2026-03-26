@@ -7,7 +7,7 @@ How SpecOps compares to other spec-driven and agent-context tools.
 | Capability | SpecOps | Superpowers | Kiro (Amazon) | EPIC/Reload | GitHub Spec Kit |
 | --- | --- | --- | --- | --- | --- |
 | **Spec-driven workflow** | 4-phase (Understand, Spec, Implement, Complete) | Implicit skill chain (brainstorm, plan, execute; no phases or state tracking) | 3-phase (Requirements, Design, Tasks) | Memory layer (no spec workflow) | 5 core commands (specify, plan, tasks, implement, constitution) + 3 optional commands |
-| **Platform support** | Claude Code, Cursor, Codex, Copilot | Claude Code, Cursor, Codex, OpenCode, Gemini CLI | IDE + CLI + ACP-compatible editors (JetBrains, Zed) | Cursor, Windsurf | 26+ named agents + generic |
+| **Platform support** | Claude Code, Cursor, Codex, Copilot, Google Antigravity | Claude Code, Cursor, Codex, OpenCode, Gemini CLI | IDE + CLI + ACP-compatible editors (JetBrains, Zed) | Cursor, Windsurf | 26+ named agents + generic |
 | **EARS notation** | Yes (5 patterns, HTML comment guidance) | No | Yes | No | No |
 | **Regression analysis** | Yes (severity-scaled discovery) | No | Yes (SHALL CONTINUE TO) | No | No |
 | **Steering files** | Yes (always, fileMatch, manual modes) | No (SessionStart hook only) | Yes (+ auto mode) | No | No |
@@ -44,7 +44,7 @@ How SpecOps compares to other spec-driven and agent-context tools.
 - **Visual brainstorming**: opens a browser-based companion where you see mockups and diagrams while discussing design. SpecOps produces text-based spec documents only.
 - **Parallel task execution**: independent tasks run simultaneously in separate git worktrees, each handled by a fresh agent. SpecOps' initiative orchestrator runs specs in dependency order but executes them sequentially within each wave.
 - **Systematic debugging**: when you hit a bug, the agent follows a structured 4-phase process (investigate, analyze patterns, test hypotheses, implement fix) instead of guessing. SpecOps has a bugfix spec template focused on regression analysis, not a debugging methodology.
-- **Platform breadth**: runs on 5 platforms (Claude Code, Cursor, Codex, OpenCode, Gemini CLI). SpecOps runs on 4 (Claude Code, Cursor, Codex, Copilot).
+- **Platform breadth**: runs on 5 platforms (Claude Code, Cursor, Codex, OpenCode, Gemini CLI). SpecOps runs on 5 (Claude Code, Cursor, Codex, Copilot, Google Antigravity).
 - **Adoption**: 103k+ GitHub stars (as of 2026-03-22)[^sp-stars], officially listed in the Claude Code plugin marketplace[^sp-marketplace].
 
 ### Where SpecOps leads
@@ -68,7 +68,7 @@ How SpecOps compares to other spec-driven and agent-context tools.
 
 ### Where SpecOps leads
 
-- **Platform independence**: SpecOps works natively in Claude Code, Cursor, Codex, and Copilot from a single install. Kiro extends beyond its IDE to a CLI and ACP-compatible editors (JetBrains, Zed) but remains centered on the Kiro ecosystem.
+- **Platform independence**: SpecOps works natively in Claude Code, Cursor, Codex, Copilot, and Google Antigravity from a single install. Kiro extends beyond its IDE to a CLI and ACP-compatible editors (JetBrains, Zed) but remains centered on the Kiro ecosystem.
 - **Vertical adaptations**: 7 domain-specific template sets (infra, data, library, backend, frontend, fullstack, builder). Kiro has Powers bundles for specific AWS services, but no general project-type adaptations.
 - **Drift detection**: 5 automated drift checks with audit/reconcile subcommands. Kiro has no drift detection.
 - **Spec decomposition**: large features are automatically split into coordinated specs with dependency tracking, execution waves, and initiative orchestration. Kiro has no multi-spec coordination.
@@ -130,7 +130,7 @@ How SpecOps compares to other spec-driven and agent-context tools.
 
 ### Where Spec Kit leads
 
-- **Agent breadth**: 26+ named agents and a generic option for bring-your-own-agent. SpecOps supports 4 platforms.
+- **Agent breadth**: 26+ named agents and a generic option for bring-your-own-agent. SpecOps supports 5 platforms.
 - **Extension marketplace**: 22 community extensions covering drift detection, code review, sub-agent delegation, fleet orchestration, and issue tracker integrations (Jira, Azure DevOps). SpecOps has no extension system.
 - **Hook lifecycle**: before/after hooks on all core commands. SpecOps has one hook (ExitPlanMode).
 - **Community**: 80k+ stars, 100+ contributors, active release cadence (v0.3.2, shipping every 2-3 days) (as of 2026-03-22)[^sk-stats].

@@ -2,6 +2,12 @@
 
 ## Completed Specs
 
+### auto-close-issues (feature) — 2026-03-26
+4 tasks completed, 0 deviations from design, 0 blockers. Expanded the existing advisory "Completion close" paragraph in `core/task-tracking.md` into a deterministic 5-step procedure with "protocol breach" enforcement language and platform-specific close commands (GitHub, Jira, Linear) using RUN_COMMAND abstract operations. Added Phase 4 step 5.5 "Issue closure sweep" to `core/workflow.md` that checks all completed tasks' external issues and closes any that remain open (catches misses from Phase 3 due to context loss or delegation gaps). Both additions include `canExecuteCode` capability guards and graceful failure handling. All 5 platform outputs regenerated, validator passes all checks, all 8 tests pass.
+
+### antigravity-platform (feature) — 2026-03-26
+15 tasks completed, 0 deviations from design, 0 blockers. Added Google Antigravity as 5th supported platform. New `platforms/antigravity/` directory with `platform.json` (agents_rules format, `canDelegateTask: true`), `specops.md` (generated, 5861 lines), `install.sh` (installs to `.agents/rules/specops.md`), `README.md`. New `generator/templates/antigravity.j2` template. Generator, validator, tests, infrastructure scripts (setup.sh, remote-install.sh, bump-version.sh, verify.sh, pre-commit hook), CI workflow, steering files, and documentation all updated. Antigravity is the second platform (after Claude) with `canDelegateTask: true` due to Manager View multi-agent orchestration. Uses HTML comment version marker instead of YAML frontmatter. All 8 tests pass, validator passes all checks including cross-platform consistency.
+
 ### from-plan-enforcement-checklist (feature) — 2026-03-22
 4 tasks completed, 0 deviations from design, 0 blockers. Added step 6.5 "Post-conversion enforcement pass" to `core/from-plan.md` containing all 8 checks from the dispatcher's Pre-Phase-3 Enforcement Checklist (spec.json, implementation.md with context summary, tasks.md, design.md, IssueID population, steering directory, memory directory, spec dependencies). Adapted with auto-remediation strategy (creates missing directories/files rather than stopping). Added "Post-conversion enforcement" marker to `FROM_PLAN_MARKERS` in `generator/validate.py` (Gap 31 compliant). All 4 platform outputs regenerated. Validator passes with 0 errors.
 

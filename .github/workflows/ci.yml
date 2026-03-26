@@ -23,6 +23,7 @@ jobs:
           python3 -c "import json; json.load(open('platforms/cursor/platform.json')); print('platforms/cursor/platform.json: valid')"
           python3 -c "import json; json.load(open('platforms/codex/platform.json')); print('platforms/codex/platform.json: valid')"
           python3 -c "import json; json.load(open('platforms/copilot/platform.json')); print('platforms/copilot/platform.json: valid')"
+          python3 -c "import json; json.load(open('platforms/antigravity/platform.json')); print('platforms/antigravity/platform.json: valid')"
           python3 -c "import json; json.load(open('examples/.specops.json')); print('examples/.specops.json: valid')"
           python3 -c "import json; json.load(open('examples/.specops.minimal.json')); print('examples/.specops.minimal.json: valid')"
           python3 -c "import json; json.load(open('examples/.specops.full.json')); print('examples/.specops.full.json: valid')"
@@ -78,7 +79,7 @@ jobs:
       - name: Install ShellCheck
         run: sudo apt-get install -y shellcheck
       - name: Lint shell scripts
-        run: shellcheck setup.sh verify.sh scripts/bump-version.sh scripts/run-tests.sh scripts/remote-install.sh scripts/install-hooks.sh scripts/run-review-gate.sh platforms/claude/install.sh platforms/cursor/install.sh platforms/codex/install.sh platforms/copilot/install.sh hooks/pre-commit hooks/pre-push
+        run: shellcheck setup.sh verify.sh scripts/bump-version.sh scripts/run-tests.sh scripts/remote-install.sh scripts/install-hooks.sh scripts/run-review-gate.sh platforms/claude/install.sh platforms/cursor/install.sh platforms/codex/install.sh platforms/copilot/install.sh platforms/antigravity/install.sh hooks/pre-commit hooks/pre-push
 
   markdownlint:
     name: Markdown Lint

@@ -1,0 +1,19 @@
+{
+  "id": "auto-close-issues",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "author": {
+    "name": "sanmak"
+  },
+  "created": "2026-03-26T15:55:22Z",
+  "updated": "2026-03-26T16:04:56Z",
+  "specopsCreatedWith": "1.6.0",
+  "specopsUpdatedWith": "1.6.0",
+  "specDependencies": [],
+  "relatedSpecs": [
+    "antigravity-platform",
+    "workflow-enforcement-gates",
+    "rich-issue-bodies"
+  ]
+}

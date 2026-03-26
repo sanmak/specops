@@ -1,0 +1,17 @@
+{
+  "id": "antigravity-platform",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "created": "2026-03-26T15:21:36Z",
+  "updated": "2026-03-26T21:10:00Z",
+  "specopsCreatedWith": "1.6.0",
+  "specopsUpdatedWith": "1.6.0",
+  "author": {
+    "name": "sanmak"
+  },
+  "reviewers": [],
+  "reviewRounds": [],
+  "approvals": [],
+  "requiredApprovals": 0
+}

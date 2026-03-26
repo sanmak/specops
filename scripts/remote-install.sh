@@ -27,7 +27,7 @@ usage() {
   echo "Usage: remote-install.sh [OPTIONS]"
   echo ""
   echo "Options:"
-  echo "  --platform <name>   Platform to install: claude, cursor, codex, copilot, all"
+  echo "  --platform <name>   Platform to install: claude, cursor, codex, copilot, antigravity, all"
   echo "  --scope <scope>     Claude Code only: user or project (default: user)"
   echo "  --version <ref>     Git ref to install from (default: main)"
   echo "  --config <template> Create .specops.json: minimal, standard, full"
@@ -267,6 +267,13 @@ detect_platforms() {
     detected="$detected copilot"
   fi
 
+  # Google Antigravity
+  if command -v antigravity &>/dev/null || \
+     [ -d "/Applications/Antigravity.app" ] || [ -d "$HOME/Applications/Antigravity.app" ] || \
+     [ -d ".agents" ]; then
+    detected="$detected antigravity"
+  fi
+
   echo "$detected"
 }
 
@@ -276,9 +283,9 @@ SELECTED=""
 if [[ -n "$PLATFORM" ]]; then
   # Non-interactive: use --platform flag
   case "$PLATFORM" in
-    claude|cursor|codex|copilot) SELECTED="$PLATFORM" ;;
-    all) SELECTED="claude cursor codex copilot" ;;
-    *) echo "Error: Invalid platform '$PLATFORM'. Use: claude, cursor, codex, copilot, all"; exit 1 ;;
+    claude|cursor|codex|copilot|antigravity) SELECTED="$PLATFORM" ;;
+    all) SELECTED="claude cursor codex copilot antigravity" ;;
+    *) echo "Error: Invalid platform '$PLATFORM'. Use: claude, cursor, codex, copilot, antigravity, all"; exit 1 ;;
   esac
 elif is_interactive; then
   # Interactive: detect and prompt
@@ -298,8 +305,9 @@ elif is_interactive; then
   echo "2) Cursor"
   echo "3) OpenAI Codex"
   echo "4) GitHub Copilot"
-  echo "5) All detected platforms"
-  echo "6) All platforms"
+  echo "5) Google Antigravity"
+  echo "6) All detected platforms"
+  echo "7) All platforms"
   echo ""
   read -rp "Select option(s) [comma-separated, e.g. 1,2]: " platform_choice
 
@@ -311,8 +319,9 @@ elif is_interactive; then
       2) SELECTED="$SELECTED cursor" ;;
       3) SELECTED="$SELECTED codex" ;;
       4) SELECTED="$SELECTED copilot" ;;
-      5) SELECTED="$DETECTED" ;;
-      6) SELECTED="claude cursor codex copilot" ;;
+      5) SELECTED="$SELECTED antigravity" ;;
+      6) SELECTED="$DETECTED" ;;
+      7) SELECTED="claude cursor codex copilot antigravity" ;;
       *) echo "Invalid option: $choice"; exit 1 ;;
     esac
   done
@@ -594,14 +603,51 @@ PY
   echo ""
 }
 
+install_antigravity() {
+  echo "----------------------------------------"
+  echo "Installing for: Google Antigravity"
+  echo "----------------------------------------"
+
+  local rules_dir=".agents/rules"
+  echo "Installing to: $rules_dir/specops.md"
+  download_file "${SPECOPS_BASE_URL}/platforms/antigravity/specops.md" "$rules_dir/specops.md"
+  if ! verify_file "$rules_dir/specops.md" "platforms/antigravity/specops.md"; then
+    exit 1
+  fi
+  echo "Installed successfully!"
+
+  # Update .specops.json with version metadata if it exists
+  if [ -f ".specops.json" ] && command -v python3 >/dev/null 2>&1; then
+    SPECOPS_VER="$(grep '<!-- specops-version:' "$rules_dir/specops.md" | head -1 | sed 's/.*specops-version: *"//;s/".*//')"
+    INSTALL_TS="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    if [ -n "$SPECOPS_VER" ]; then
+      SPECOPS_VER="$SPECOPS_VER" INSTALL_TS="$INSTALL_TS" python3 - <<'PY'
+import json
+import os
+
+with open(".specops.json", "r") as f:
+    d = json.load(f)
+d["_installedVersion"] = os.environ["SPECOPS_VER"]
+d["_installedAt"] = os.environ["INSTALL_TS"]
+with open(".specops.json", "w") as f:
+    json.dump(d, f, indent=2)
+    f.write("\n")
+PY
+      echo "Updated .specops.json with version metadata"
+    fi
+  fi
+  echo ""
+}
+
 # --- Install selected platforms ---
 for platform in $SELECTED; do
   platform=$(echo "$platform" | tr -d ' ')
   case "$platform" in
-    claude)  install_claude ;;
-    cursor)  install_cursor ;;
-    codex)   install_codex ;;
-    copilot) install_copilot ;;
+    claude)       install_claude ;;
+    cursor)       install_cursor ;;
+    codex)        install_codex ;;
+    copilot)      install_copilot ;;
+    antigravity)  install_antigravity ;;
   esac
 done
 

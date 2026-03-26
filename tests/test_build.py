@@ -24,6 +24,7 @@ EXPECTED_OUTPUTS = {
     "cursor": "specops.mdc",
     "codex": "SKILL.md",
     "copilot": "specops.instructions.md",
+    "antigravity": "specops.md",
 }
 
 # Claude split output: 15 mode files (from core/mode-manifest.json)

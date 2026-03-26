@@ -1,5 +1,21 @@
 [
   {
+    "id": "auto-close-issues",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-26T16:04:56Z"
+  },
+  {
+    "id": "antigravity-platform",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-26T21:10:00Z"
+  },
+  {
     "id": "ast-based-repo-map",
     "type": "feature",
     "status": "completed",

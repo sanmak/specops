@@ -48,6 +48,7 @@ FILES=(
   "platforms/cursor/platform.json"
   "platforms/codex/platform.json"
   "platforms/copilot/platform.json"
+  "platforms/antigravity/platform.json"
   ".claude-plugin/plugin.json"
   ".claude-plugin/marketplace.json"
 )
@@ -100,6 +101,8 @@ if [ "$REGEN_CHECKSUMS" = true ]; then
     platforms/codex/platform.json \
     platforms/copilot/specops.instructions.md \
     platforms/copilot/platform.json \
+    platforms/antigravity/specops.md \
+    platforms/antigravity/platform.json \
     core/workflow.md \
     core/safety.md \
     core/reconciliation.md \

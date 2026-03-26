@@ -14,5 +14,7 @@
   "implementation": {
     "autoCommit": false,
     "createPR": false
-  }
+  },
+  "_installedVersion": "1.6.0",
+  "_installedAt": "2026-03-26T15:37:07Z"
 }
