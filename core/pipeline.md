@@ -30,12 +30,12 @@ Before entering the cycle loop, validate:
 2. Apply the adversarial spec evaluator against the collected artifacts and WRITE_FILE the results to `<specsDir>/<spec-name>/evaluation.md`.
 3. READ_FILE(`<specsDir>/<spec-name>/evaluation.md`) and check the overall verdict. If the verdict is `fail`, NOTIFY_USER("Spec evaluation failed before pipeline start. Review evaluation.md for findings.") and STOP — do not enter the cycle loop. If the verdict is `pass`, proceed to the cycle loop.
 
-If `config.evaluation.enabled` is `false` or absent, skip this step entirely and proceed directly to the cycle loop.
+If `config.implementation.evaluation.enabled` is explicitly set to `false`, skip this step entirely and proceed directly to the cycle loop.
 
 The core loop:
 
 ```text
-evaluationEnabled = READ_FILE(.specops.json).config.evaluation.enabled (default: false)
+evaluationEnabled = READ_FILE(.specops.json).config.implementation.evaluation.enabled (default: true)
 previousUnmetCriteria = null
 previousEvaluationScores = null
 cycle = 0

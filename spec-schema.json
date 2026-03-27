@@ -174,7 +174,7 @@
               "type": "object",
               "description": "Final scores per dimension (dimension name to integer 1-10)",
               "patternProperties": {
-                "^[a-zA-Z]+$": {
+                "^[a-zA-Z][a-zA-Z ]*$": {
                   "type": "integer",
                   "minimum": 1,
                   "maximum": 10
@@ -207,7 +207,7 @@
               "type": "object",
               "description": "Final scores per dimension (dimension name to integer 1-10)",
               "patternProperties": {
-                "^[a-zA-Z]+$": {
+                "^[a-zA-Z][a-zA-Z ]*$": {
                   "type": "integer",
                   "minimum": 1,
                   "maximum": 10

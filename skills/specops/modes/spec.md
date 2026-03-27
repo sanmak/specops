@@ -178,7 +178,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
 
 #### Phase 4A: Adversarial Evaluation
 
-4A.1. **Load evaluation config**: Use the Read tool to read `.specops.json` and check `config.implementation.evaluation.enabled`. If evaluation is disabled (false or not configured), skip to Phase 4C step 1 (acceptance criteria verification) for backward compatibility. Initialize the evaluation iteration counter to 0.
+4A.1. **Load evaluation config**: Use the Read tool to read `.specops.json` and check `config.implementation.evaluation.enabled`. If evaluation is explicitly disabled (set to false), skip to Phase 4C step 1 (acceptance criteria verification) for backward compatibility. If the key is absent or not configured, evaluation is enabled by default. Initialize the evaluation iteration counter to 0.
 
 4A.2. **Run Implementation Evaluation Protocol**: Execute the Implementation Evaluation Protocol from the Adversarial Evaluation module (`core/evaluation.md`). Use the Read tool to read all spec artifacts (`requirements.md` or `bugfix.md`/`refactor.md`, `design.md`, `tasks.md`, `implementation.md`) and the files modified during Phase 3. If `canExecuteCode` is true and `config.implementation.evaluation.exerciseTests` is true, Use the Bash tool to run to execute the project's test suite and capture results. Score spec-type-specific dimensions following the evaluation scoring rubric. Use the Write tool to create `<specsDir>/<spec-name>/evaluation.md` with dimension scores, findings, and remediation instructions for any failing dimensions. Use the Edit tool to modify `<specsDir>/<spec-name>/spec.json` to add the `evaluation` object with dimension scores and iteration count.
 
@@ -186,7 +186,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
 
 4A.4. If any dimension fails (score < `config.implementation.evaluation.minScore`) AND iteration counter < `config.implementation.evaluation.maxIterations`: proceed to Phase 4B.
 
-4A.5. If any dimension fails AND iteration counter >= `config.implementation.evaluation.maxIterations`: Display a message to the user("Evaluation did not pass after {maxIterations} iteration(s). Failing dimensions: {list with scores}. Proceeding to completion with known gaps.") and proceed to Phase 4C with the incomplete flag set in `spec.json` evaluation object (`"evaluationPassed": false`).
+4A.5. If any dimension fails AND iteration counter >= `config.implementation.evaluation.maxIterations`: Display a message to the user("Evaluation did not pass after {maxIterations} iteration(s). Failing dimensions: {list with scores}. Proceeding to completion with known gaps.") and proceed to Phase 4C with the incomplete flag set in `spec.json` evaluation object (`evaluation.spec.passed: false` and `evaluation.implementation.passed: false`).
 
 #### Phase 4B: Remediation (conditional)
 
@@ -196,7 +196,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
 
 4B.3. Re-dispatch Phase 3 with constrained scope following the Phase Dispatch protocol in `core/initiative-orchestration.md`. The re-dispatch targets only the tasks and files identified in step 4B.2 -- not the full task list. Update `implementation.md` with a `## Remediation Iteration {N}` section documenting which dimensions failed, which tasks are being re-executed, and the evaluation feedback driving the changes.
 
-4B.4. After remediation completes, increment the evaluation iteration counter and re-enter Phase 4A step 4A.2. **Zero-progress detection**: Use the Read tool to read the previous `evaluation.md` scores and compare against the new scores. If no dimension improved by more than 0.5 points compared to the prior iteration, Display a message to the user("Remediation iteration {N} did not improve evaluation scores. Consider manual intervention.") and proceed to Phase 4C with `"evaluationPassed": false` rather than consuming additional iterations.
+4B.4. After remediation completes, increment the evaluation iteration counter and re-enter Phase 4A step 4A.2. **Zero-progress detection**: Use the Read tool to read the previous `evaluation.md` scores and compare against the new scores. If no dimension improved by more than 0.5 points compared to the prior iteration, Display a message to the user("Remediation iteration {N} did not improve evaluation scores. Consider manual intervention.") and proceed to Phase 4C with `evaluation.spec.passed: false` and `evaluation.implementation.passed: false` rather than consuming additional iterations.
 
 #### Phase 4C: Completion
 
@@ -2471,12 +2471,12 @@ Before entering the cycle loop, validate:
 2. Apply the adversarial spec evaluator against the collected artifacts and Use the Write tool to create the results to `<specsDir>/<spec-name>/evaluation.md`.
 3. Use the Read tool to read(`<specsDir>/<spec-name>/evaluation.md`) and check the overall verdict. If the verdict is `fail`, Display a message to the user("Spec evaluation failed before pipeline start. Review evaluation.md for findings.") and STOP — do not enter the cycle loop. If the verdict is `pass`, proceed to the cycle loop.
 
-If `config.evaluation.enabled` is `false` or absent, skip this step entirely and proceed directly to the cycle loop.
+If `config.implementation.evaluation.enabled` is explicitly set to `false`, skip this step entirely and proceed directly to the cycle loop.
 
 The core loop:
 
 ```text
-evaluationEnabled = Use the Read tool to read(.specops.json).config.evaluation.enabled (default: false)
+evaluationEnabled = Use the Read tool to read(.specops.json).config.implementation.evaluation.enabled (default: true)
 previousUnmetCriteria = null
 previousEvaluationScores = null
 cycle = 0
