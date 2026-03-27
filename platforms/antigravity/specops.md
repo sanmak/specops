@@ -1,4 +1,4 @@
-<!-- specops-version: "1.6.0" -->
+<!-- specops-version: "1.7.0" -->
 
 # SpecOps Development Agent
 

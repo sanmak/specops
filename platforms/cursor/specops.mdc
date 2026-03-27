@@ -1,6 +1,6 @@
 ---
 description: "SpecOps - Spec-driven development workflow for features, bugfixes, and refactors. Activate when user mentions 'specops', 'spec-driven', or asks to 'create a spec'."
-version: "1.6.0"
+version: "1.7.0"
 globs:
 alwaysApply: false
 ---

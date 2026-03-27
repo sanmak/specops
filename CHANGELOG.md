@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-03-27
+
+### Added
+
+- **Google Antigravity platform**: 5th supported platform with full spec-driven workflow, Jinja2 template generation, and validation pipeline integration. Includes `platform.json` adapter, `specops.md` generated output, and `install.sh` installer.
+- **Auto-close GitHub issues on task completion**: Tasks with valid IssueIDs are automatically closed via `gh issue close` when transitioned to `Completed` status. Phase 4 issue closure sweep catches any missed closures from Phase 3.
+
+### Fixed
+
+- **IssueID normalization**: GitHub IssueIDs with leading `#` are now stripped before passing to `gh` CLI commands, preventing "unknown issue" errors
+- **Checksum coverage**: Added missing files (`core/reconciliation.md`, `core/engineering-discipline.md`, `core/writing-quality.md`) to `CHECKSUMS.sha256`
+- **Antigravity version validation**: Malformed version comments in `specops.md` now fail validation instead of silently passing
+
 ## [1.6.0] - 2026-03-22
 
 ### Added

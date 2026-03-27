@@ -1,6 +1,6 @@
 ---
 name: specops
-version: "1.6.0"
+version: "1.7.0"
 description: "Spec-driven development workflow - transforms ideas into structured specifications (requirements, design, tasks) before implementation. Use when building features, fixing bugs, refactoring, or designing systems."
 argument-hint: "[mode] [description]"
 ---
