@@ -166,7 +166,14 @@ Based on the user's selection, Use the Write tool to create(`.specops.json`) wit
     "createPR": true,
     "validateReferences": "warn",
     "gitCheckpointing": true,
-    "pipelineMaxCycles": 3
+    "pipelineMaxCycles": 3,
+    "evaluation": {
+      "enabled": true,
+      "minScore": 7,
+      "maxIterations": 2,
+      "perTask": false,
+      "exerciseTests": true
+    }
   },
   "modules": {
     "backend": {
@@ -359,7 +366,14 @@ Load configuration from `.specops.json` at project root. If not found, use these
     "delegationThreshold": 4,
     "validateReferences": "warn",
     "gitCheckpointing": false,
-    "pipelineMaxCycles": 3
+    "pipelineMaxCycles": 3,
+    "evaluation": {
+      "enabled": true,
+      "minScore": 7,
+      "maxIterations": 2,
+      "perTask": false,
+      "exerciseTests": true
+    }
   },
   "dependencySafety": {
     "enabled": true,

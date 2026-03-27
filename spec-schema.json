@@ -153,6 +153,79 @@
       },
       "additionalProperties": false
     },
+    "evaluation": {
+      "type": "object",
+      "description": "Adversarial evaluation results from spec evaluation (Phase 2 exit gate) and implementation evaluation (Phase 4A)",
+      "properties": {
+        "spec": {
+          "type": "object",
+          "description": "Spec quality evaluation results",
+          "properties": {
+            "iterations": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of spec evaluation iterations completed"
+            },
+            "passed": {
+              "type": "boolean",
+              "description": "Whether the final spec evaluation passed all dimension thresholds"
+            },
+            "scores": {
+              "type": "object",
+              "description": "Final scores per dimension (dimension name to integer 1-10)",
+              "patternProperties": {
+                "^[a-zA-Z][a-zA-Z ]*$": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10
+                }
+              },
+              "additionalProperties": false
+            },
+            "evaluatedAt": {
+              "type": "string",
+              "maxLength": 30,
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(Z|[+-]\\d{2}:\\d{2})$"
+            }
+          },
+          "additionalProperties": false
+        },
+        "implementation": {
+          "type": "object",
+          "description": "Implementation quality evaluation results",
+          "properties": {
+            "iterations": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of implementation evaluation iterations completed"
+            },
+            "passed": {
+              "type": "boolean",
+              "description": "Whether the final implementation evaluation passed all dimension thresholds"
+            },
+            "scores": {
+              "type": "object",
+              "description": "Final scores per dimension (dimension name to integer 1-10)",
+              "patternProperties": {
+                "^[a-zA-Z][a-zA-Z ]*$": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10
+                }
+              },
+              "additionalProperties": false
+            },
+            "evaluatedAt": {
+              "type": "string",
+              "maxLength": 30,
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(Z|[+-]\\d{2}:\\d{2})$"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
     "partOf": {
       "type": "string",
       "maxLength": 100,

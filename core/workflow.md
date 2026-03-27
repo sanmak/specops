@@ -141,6 +141,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 6.5. **Dependency safety gate (mandatory)**: If `config.dependencySafety.enabled` is not `false` (default: true), execute the dependency safety verification following the Dependency Safety module. This is a Phase 2 completion gate — specs cannot proceed to review or implementation without passing. Skipping this gate when dependency safety is enabled is a protocol breach.
 6.7. **Git checkpoint (spec-created)**: If `config.implementation.gitCheckpointing` is true for this run, commit spec artifacts following the Git Checkpointing module: RUN_COMMAND(`git add <specsDir>/<spec-name>/`) then RUN_COMMAND(`git commit -m "specops(checkpoint): spec-created -- <spec-name>"`). If the commit fails, NOTIFY_USER and continue.
 6.8. **Spec review gate**: If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow. This step must run before phase dispatch so the review invitation is sent before the current context ends.
+6.85. **Spec evaluation gate**: If `config.implementation.evaluation.enabled` is true, run the Spec Evaluation Protocol from the Adversarial Evaluation module (`core/evaluation.md`). READ_FILE the spec's requirements (or `bugfix.md`/`refactor.md`), `design.md`, and `tasks.md`. Score the 4 spec evaluation dimensions (Criteria Testability, Criteria Completeness, Design Coherence, Task Coverage) following the scoring rubric. WRITE_FILE `evaluation.md` with scores and findings. If all dimensions score at or above `config.implementation.evaluation.minScore`, proceed to Phase 3 dispatch. If any dimension fails and iteration count < `config.implementation.evaluation.maxIterations`, revise the failing artifacts using the evaluation feedback and re-evaluate. If iterations exhausted, NOTIFY_USER and proceed to Phase 3 with known spec gaps. If evaluation is disabled, skip this step.
 6.9. **Phase dispatch gate (Phase 2 → Phase 3)**: Write a Phase 2 Completion Summary to `implementation.md` capturing: key requirements decided, design decisions made, task breakdown summary, and dependencies identified. Then signal for a fresh Phase 3 context following the Phase Dispatch protocol in `core/initiative-orchestration.md`:
 
 - If `canDelegateTask` is true: build a Phase 3 Handoff Bundle (spec name, artifact paths — requirements.md, design.md, tasks.md, spec.json — Phase 1 Context Summary from implementation.md, Phase 2 Completion Summary, and config) and dispatch Phase 3 as a fresh sub-agent. The current context ends here.
@@ -174,6 +175,30 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - If `canDelegateTask` is false and `canAskInteractive` is false: continue sequentially with enhanced checkpointing (no dispatch, Phase 4 executes in the current context).
 
 ### Phase 4: Complete
+
+#### Phase 4A: Adversarial Evaluation
+
+4A.1. **Load evaluation config**: READ_FILE `.specops.json` and check `config.implementation.evaluation.enabled`. If evaluation is explicitly disabled (set to false), skip to Phase 4C step 1 (acceptance criteria verification) for backward compatibility. If the key is absent or not configured, evaluation is enabled by default. Initialize the evaluation iteration counter to 0.
+
+4A.2. **Run Implementation Evaluation Protocol**: Execute the Implementation Evaluation Protocol from the Adversarial Evaluation module (`core/evaluation.md`). READ_FILE all spec artifacts (`requirements.md` or `bugfix.md`/`refactor.md`, `design.md`, `tasks.md`, `implementation.md`) and the files modified during Phase 3. If `canExecuteCode` is true and `config.implementation.evaluation.exerciseTests` is true, RUN_COMMAND to execute the project's test suite and capture results. Score spec-type-specific dimensions following the evaluation scoring rubric. EDIT_FILE `<specsDir>/<spec-name>/evaluation.md` to append dimension scores, findings, and remediation instructions for any failing dimensions (preserving prior iteration results). EDIT_FILE `<specsDir>/<spec-name>/spec.json` to add the `evaluation` object with dimension scores and iteration count.
+
+4A.3. If all dimensions score at or above `config.implementation.evaluation.minScore`: proceed to Phase 4C.
+
+4A.4. If any dimension fails (score < `config.implementation.evaluation.minScore`) AND iteration counter < `config.implementation.evaluation.maxIterations`: proceed to Phase 4B.
+
+4A.5. If any dimension fails AND iteration counter >= `config.implementation.evaluation.maxIterations`: NOTIFY_USER("Evaluation did not pass after {maxIterations} iteration(s). Failing dimensions: {list with scores}. Proceeding to completion with known gaps.") and proceed to Phase 4C with the incomplete flag set in `spec.json` evaluation object (`evaluation.implementation.passed: false`; preserve `evaluation.spec.passed` from Phase 2 unless re-evaluated).
+
+#### Phase 4B: Remediation (conditional)
+
+4B.1. READ_FILE `<specsDir>/<spec-name>/evaluation.md` to identify failing dimensions and their remediation instructions.
+
+4B.2. Cross-reference failing dimensions against tasks in `tasks.md` to identify which tasks are related to the failures. If a failing dimension maps to a specific task or set of tasks, scope the remediation to those tasks. If the failure is systemic (e.g., design coherence), identify the minimal set of files and tasks that need revision.
+
+4B.3. Re-dispatch Phase 3 with constrained scope following the Phase Dispatch protocol in `core/initiative-orchestration.md`. The re-dispatch targets only the tasks and files identified in step 4B.2 -- not the full task list. Update `implementation.md` with a `## Remediation Iteration {N}` section documenting which dimensions failed, which tasks are being re-executed, and the evaluation feedback driving the changes.
+
+4B.4. After remediation completes, increment the evaluation iteration counter and re-enter Phase 4A step 4A.2. **Zero-progress detection**: READ_FILE the previous `evaluation.md` scores and compare against the new scores. If no dimension improved by more than 0.5 points compared to the prior iteration, NOTIFY_USER("Remediation iteration {N} did not improve evaluation scores. Consider manual intervention.") and proceed to Phase 4C with `evaluation.implementation.passed: false` (preserve `evaluation.spec.passed` from Phase 2) rather than consuming additional iterations.
+
+#### Phase 4C: Completion
 
 1. Verify all acceptance criteria are met:
    - READ_FILE `requirements.md` (or `bugfix.md`/`refactor.md`)

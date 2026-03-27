@@ -116,7 +116,7 @@
       "specType": "feature",
       "number": 1,
       "decision": "Audit artifact template defined inline in core/dependency-safety.md, not in core/templates/",
-      "rationale": "generator/generate.py auto-loads ALL core/templates/*.md into _templates dict — adding a file there would cause it to be loaded as a spec-type template",
+      "rationale": "generator/generate.py auto-loads ALL core/templates/*.md into _templates dict \u2014 adding a file there would cause it to be loaded as a spec-type template",
       "task": "Task 1",
       "date": "2026-03-21",
       "completedAt": "2026-03-21T09:07:08Z"
@@ -126,7 +126,7 @@
       "specType": "feature",
       "number": 2,
       "decision": "DEPENDENCY_SAFETY_MARKERS added to both validate_platform() and cross-platform consistency loop in same commit",
-      "rationale": "Gap 31 pattern — markers must be in both locations to avoid validator/consistency check mismatch",
+      "rationale": "Gap 31 pattern \u2014 markers must be in both locations to avoid validator/consistency check mismatch",
       "task": "Task 9",
       "date": "2026-03-21",
       "completedAt": "2026-03-21T09:07:08Z"
@@ -150,6 +150,26 @@
       "task": "Task 1",
       "date": "2026-03-22",
       "completedAt": "2026-03-22T17:18:51Z"
+    },
+    {
+      "specId": "adversarial-evaluation",
+      "specType": "feature",
+      "number": 1,
+      "decision": "Module size 15KB above 5KB target",
+      "rationale": "Comparable to learnings.md (15KB), memory.md (16KB), decomposition.md (17KB). Content necessary for evaluator to function correctly.",
+      "task": "Task 1",
+      "date": "2026-03-27",
+      "completedAt": "2026-03-27"
+    },
+    {
+      "specId": "adversarial-evaluation",
+      "specType": "feature",
+      "number": 2,
+      "decision": "Evaluation template added to mode-manifest templates array",
+      "rationale": "Templates need to be in both modules and templates arrays for proper rendering in mode-based architecture.",
+      "task": "Task 4",
+      "date": "2026-03-27",
+      "completedAt": "2026-03-27"
     }
   ]
 }

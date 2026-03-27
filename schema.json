@@ -168,6 +168,42 @@
           "default": 3,
           "description": "Maximum Phase 3 to Phase 4 iteration cycles in pipeline mode. Pipeline stops after this many cycles even if criteria are unmet."
         },
+        "evaluation": {
+          "type": "object",
+          "description": "Adversarial evaluation configuration. When enabled, Phase 2 exit gate scores spec quality and Phase 4A scores implementation quality using scored dimensions with hard thresholds and feedback loops.",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable adversarial evaluation. When false, skip both evaluation touchpoints and use legacy Phase 4 checkbox verification."
+            },
+            "minScore": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10,
+              "default": 7,
+              "description": "Minimum quality dimension score (1-10) required to pass evaluation."
+            },
+            "maxIterations": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5,
+              "default": 2,
+              "description": "Maximum evaluation-remediation iterations before proceeding to next phase."
+            },
+            "perTask": {
+              "type": "boolean",
+              "default": false,
+              "description": "Run implementation evaluation after each task instead of after all tasks."
+            },
+            "exerciseTests": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether the implementation evaluator should run the project test suite."
+            }
+          },
+          "additionalProperties": false
+        },
         "learnings": {
           "type": "object",
           "description": "Production learnings configuration. Controls capture and surfacing of post-deployment discoveries.",

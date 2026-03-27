@@ -1,11 +1,11 @@
 [
   {
-    "id": "auto-close-issues",
+    "id": "adversarial-evaluation",
     "type": "feature",
     "status": "completed",
     "version": 1,
     "author": "sanmak",
-    "updated": "2026-03-26T16:04:56Z"
+    "updated": "2026-03-27T18:00:40Z"
   },
   {
     "id": "antigravity-platform",
@@ -22,6 +22,14 @@
     "version": 1,
     "author": "sanmak",
     "updated": "2026-03-14T18:37:08Z"
+  },
+  {
+    "id": "auto-close-issues",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-26T16:04:56Z"
   },
   {
     "id": "bugfix-regression-analysis",

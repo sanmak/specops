@@ -1,0 +1,28 @@
+{
+  "id": "adversarial-evaluation",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "created": "2026-03-27T17:30:00Z",
+  "updated": "2026-03-27T18:00:40Z",
+  "specopsCreatedWith": "1.7.0",
+  "specopsUpdatedWith": "1.7.0",
+  "author": {
+    "name": "sanketmakhija"
+  },
+  "reviewers": [],
+  "reviewRounds": 0,
+  "approvals": 0,
+  "requiredApprovals": 0,
+  "metrics": {
+    "specArtifactTokensEstimate": 10356,
+    "filesChanged": 52,
+    "linesAdded": 4132,
+    "linesRemoved": 363,
+    "tasksCompleted": 12,
+    "acceptanceCriteriaVerified": 26,
+    "specDurationMinutes": 30
+  },
+  "specDependencies": [],
+  "relatedSpecs": ["workflow-enforcement-gates", "context-aware-dispatch"]
+}

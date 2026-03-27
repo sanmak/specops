@@ -382,6 +382,21 @@ LEARNINGS_MARKERS = [
 ]
 
 
+# Adversarial evaluation markers that MUST appear in every output
+EVALUATION_MARKERS = [
+    "## Adversarial Evaluation",
+    "### Evaluation Configuration",
+    "### Scoring Rubric",
+    "### Spec Evaluation Protocol",
+    "### Implementation Evaluation Protocol",
+    "### Feedback Loop",
+    "### Platform Adaptation",
+    "### Evaluation Safety",
+    "evaluation.md",
+    "minScore",
+]
+
+
 # Simplicity principle markers that MUST appear in every output
 SIMPLICITY_MARKERS = [
     "Simplicity Principle",
@@ -667,6 +682,9 @@ def validate_platform(platform, info):
 
     # Check production learnings present
     errors.extend(check_markers_present(platform, content, LEARNINGS_MARKERS, "learnings"))
+
+    # Check adversarial evaluation present
+    errors.extend(check_markers_present(platform, content, EVALUATION_MARKERS, "evaluation"))
 
     # Check decomposition and initiative markers present
     errors.extend(check_markers_present(platform, content, DECOMPOSITION_MARKERS, "decomposition"))

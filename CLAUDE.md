@@ -45,7 +45,7 @@ bash scripts/bump-version.sh <new-version> --checksums
 
 ## Three-Tier Architecture
 
-**Tier 1 -- Core Modules** (`core/*.md`): Platform-agnostic workflow logic using abstract operations (`READ_FILE`, `WRITE_FILE`, `RUN_COMMAND`, etc. defined in `core/tool-abstraction.md`). Never use platform-specific tool names here. Key modules include `core/workflow.md` (4-phase workflow), `core/decomposition.md` (scope assessment, split detection, initiative model, cross-spec dependencies), `core/initiative-orchestration.md` (autonomous multi-spec execution), `core/dispatcher.md` (context-aware mode routing and enforcement gates), and `core/learnings.md` (production learnings capture and retrieval).
+**Tier 1 -- Core Modules** (`core/*.md`): Platform-agnostic workflow logic using abstract operations (`READ_FILE`, `WRITE_FILE`, `RUN_COMMAND`, etc. defined in `core/tool-abstraction.md`). Never use platform-specific tool names here. Key modules include `core/workflow.md` (4-phase workflow), `core/decomposition.md` (scope assessment, split detection, initiative model, cross-spec dependencies), `core/initiative-orchestration.md` (autonomous multi-spec execution), `core/dispatcher.md` (context-aware mode routing and enforcement gates), `core/evaluation.md` (adversarial evaluation with scored quality gates), and `core/learnings.md` (production learnings capture and retrieval).
 
 **Tier 2 -- Platform Adapters** (`platforms/<platform>/platform.json`): Maps abstract operations to platform-specific tool invocations (e.g., `READ_FILE` maps to `Use the Read tool to read(...)` for Claude).
 

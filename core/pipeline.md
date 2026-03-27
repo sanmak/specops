@@ -24,10 +24,20 @@ Before entering the cycle loop, validate:
 
 ### Pipeline Cycle
 
+**Pre-cycle spec evaluation (one-time):** Before entering the cycle loop, if READ_FILE(`.specops.json`) shows `config.implementation.evaluation.enabled` is `true` (default: true), run spec evaluation once since the spec already exists and does not change during pipeline execution:
+
+1. READ_FILE(`<specsDir>/<spec-name>/requirements.md`) (or `bugfix.md`/`refactor.md`), READ_FILE(`<specsDir>/<spec-name>/design.md`), and READ_FILE(`<specsDir>/<spec-name>/tasks.md`).
+2. Apply the adversarial spec evaluator against the collected artifacts and WRITE_FILE the results to `<specsDir>/<spec-name>/evaluation.md`.
+3. READ_FILE(`<specsDir>/<spec-name>/evaluation.md`) and check the overall verdict. If the verdict is `fail`, NOTIFY_USER("Spec evaluation failed before pipeline start. Review evaluation.md for findings.") and STOP — do not enter the cycle loop. If the verdict is `pass`, proceed to the cycle loop.
+
+If `config.implementation.evaluation.enabled` is explicitly set to `false`, skip this step entirely and proceed directly to the cycle loop.
+
 The core loop:
 
 ```text
+evaluationEnabled = READ_FILE(.specops.json).config.implementation.evaluation.enabled (default: true)
 previousUnmetCriteria = null
+previousEvaluationScores = null
 cycle = 0
 
 while cycle < maxCycles:
@@ -48,40 +58,75 @@ while cycle < maxCycles:
     // Git checkpoint: implemented (if gitCheckpointing enabled)
     // RUN_COMMAND(git add -A && git commit -m "specops(checkpoint): implemented -- <spec-name>")
 
-    // Phase 4 acceptance check (existing step 1 logic)
-    // READ_FILE requirements/bugfix/refactor file
-    // Count checked (- [x]) and unchecked (- [ ]) acceptance criteria
-    // Check off criteria that the implementation now satisfies
+    // Phase 4 acceptance check — evaluation-aware
+    if evaluationEnabled:
+        // Run Phase 4A implementation evaluation
+        // Apply adversarial evaluation against the implementation
+        // WRITE_FILE results to <specsDir>/<spec-name>/evaluation.md
+        // READ_FILE evaluation.md and extract per-category scores and overall verdict
+        evaluationScores = map of category -> score from evaluation.md
+        overallVerdict = verdict from evaluation.md
 
-    unmetCriteria = set of unchecked criteria text
+        if overallVerdict == "pass":
+            // All evaluation criteria pass — finalize
+            // Execute Phase 4 steps 2-8 (finalize implementation.md, metrics, memory, docs, completion gate, status)
+            // Git checkpoint: completed (if enabled)
+            NOTIFY_USER("Pipeline completed in {cycle} cycle(s). All evaluation criteria passed.")
+            break
 
-    if unmetCriteria is empty:
-        // All criteria pass — finalize
-        // Execute Phase 4 steps 2-8 (finalize implementation.md, metrics, memory, docs, completion gate, status)
-        // Git checkpoint: completed (if enabled)
-        NOTIFY_USER("Pipeline completed in {cycle} cycle(s). All acceptance criteria met.")
-        break
+        // Zero-progress detection (evaluation-based)
+        if evaluationScores == previousEvaluationScores:
+            NOTIFY_USER("No progress in cycle {cycle} — evaluation scores unchanged from previous cycle. Stopping to avoid infinite loop.")
+            // Do NOT mark spec as completed
+            // Leave status as "implementing"
+            break
 
-    // Zero-progress detection
-    if unmetCriteria == previousUnmetCriteria:
-        NOTIFY_USER("No progress in cycle {cycle} — same {count} criteria unmet as previous cycle. Stopping to avoid infinite loop.")
-        // Do NOT mark spec as completed
-        // Leave status as "implementing"
-        break
+        previousEvaluationScores = evaluationScores
+        failingCategories = categories where score < passing threshold
 
-    previousUnmetCriteria = unmetCriteria
+    else:
+        // Evaluation disabled — use existing checkbox verification
+        // READ_FILE requirements/bugfix/refactor file
+        // Count checked (- [x]) and unchecked (- [ ]) acceptance criteria
+        // Check off criteria that the implementation now satisfies
+
+        unmetCriteria = set of unchecked criteria text
+
+        if unmetCriteria is empty:
+            // All criteria pass — finalize
+            // Execute Phase 4 steps 2-8 (finalize implementation.md, metrics, memory, docs, completion gate, status)
+            // Git checkpoint: completed (if enabled)
+            NOTIFY_USER("Pipeline completed in {cycle} cycle(s). All acceptance criteria met.")
+            break
+
+        // Zero-progress detection (checkbox-based)
+        if unmetCriteria == previousUnmetCriteria:
+            NOTIFY_USER("No progress in cycle {cycle} — same {count} criteria unmet as previous cycle. Stopping to avoid infinite loop.")
+            // Do NOT mark spec as completed
+            // Leave status as "implementing"
+            break
+
+        previousUnmetCriteria = unmetCriteria
 
     if cycle == maxCycles:
-        NOTIFY_USER("Pipeline reached max cycles ({maxCycles}). {count} criteria still unmet. Manual intervention required.")
+        if evaluationEnabled:
+            NOTIFY_USER("Pipeline reached max cycles ({maxCycles}). Evaluation still failing on: {failingCategories}. Manual intervention required.")
+        else:
+            NOTIFY_USER("Pipeline reached max cycles ({maxCycles}). {count} criteria still unmet. Manual intervention required.")
         // Do NOT mark spec as completed
         // Leave status as "implementing"
         // Log incomplete state in run log
         break
 
     // Prepare for next cycle
-    // Reset tasks whose acceptance criteria contributed to unmet items back to Pending
-    // EDIT_FILE tasks.md — set relevant tasks to **Status:** Pending
-    NOTIFY_USER("Cycle {cycle}/{maxCycles}: {unmetCount} criteria unmet. Starting next cycle...")
+    if evaluationEnabled:
+        // Reset tasks that map to failing evaluation categories back to Pending
+        // EDIT_FILE tasks.md — set relevant tasks to **Status:** Pending
+        NOTIFY_USER("Cycle {cycle}/{maxCycles}: evaluation failing on {failingCategories}. Starting next cycle...")
+    else:
+        // Reset tasks whose acceptance criteria contributed to unmet items back to Pending
+        // EDIT_FILE tasks.md — set relevant tasks to **Status:** Pending
+        NOTIFY_USER("Cycle {cycle}/{maxCycles}: {unmetCount} criteria unmet. Starting next cycle...")
 
 // Pipeline ends
 ```

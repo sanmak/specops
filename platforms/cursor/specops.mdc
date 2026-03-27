@@ -148,6 +148,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 6.5. **Dependency safety gate (mandatory)**: If `config.dependencySafety.enabled` is not `false` (default: true), execute the dependency safety verification following the Dependency Safety module. This is a Phase 2 completion gate — specs cannot proceed to review or implementation without passing. Skipping this gate when dependency safety is enabled is a protocol breach.
 6.7. **Git checkpoint (spec-created)**: If `config.implementation.gitCheckpointing` is true for this run, commit spec artifacts following the Git Checkpointing module: Run the terminal command(`git add <specsDir>/<spec-name>/`) then Run the terminal command(`git commit -m "specops(checkpoint): spec-created -- <spec-name>"`). If the commit fails, Tell the user and continue.
 6.8. **Spec review gate**: If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow. This step must run before phase dispatch so the review invitation is sent before the current context ends.
+6.85. **Spec evaluation gate**: If `config.implementation.evaluation.enabled` is true, run the Spec Evaluation Protocol from the Adversarial Evaluation module (`core/evaluation.md`). Read the file at the spec's requirements (or `bugfix.md`/`refactor.md`), `design.md`, and `tasks.md`. Score the 4 spec evaluation dimensions (Criteria Testability, Criteria Completeness, Design Coherence, Task Coverage) following the scoring rubric. Create the file at `evaluation.md` with scores and findings. If all dimensions score at or above `config.implementation.evaluation.minScore`, proceed to Phase 3 dispatch. If any dimension fails and iteration count < `config.implementation.evaluation.maxIterations`, revise the failing artifacts using the evaluation feedback and re-evaluate. If iterations exhausted, Tell the user and proceed to Phase 3 with known spec gaps. If evaluation is disabled, skip this step.
 6.9. **Phase dispatch gate (Phase 2 → Phase 3)**: Write a Phase 2 Completion Summary to `implementation.md` capturing: key requirements decided, design decisions made, task breakdown summary, and dependencies identified. Then signal for a fresh Phase 3 context following the Phase Dispatch protocol in `core/initiative-orchestration.md`:
 
 - If `canDelegateTask` is true: build a Phase 3 Handoff Bundle (spec name, artifact paths — requirements.md, design.md, tasks.md, spec.json — Phase 1 Context Summary from implementation.md, Phase 2 Completion Summary, and config) and dispatch Phase 3 as a fresh sub-agent. The current context ends here.
@@ -181,6 +182,30 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - If `canDelegateTask` is false and `canAskInteractive` is false: continue sequentially with enhanced checkpointing (no dispatch, Phase 4 executes in the current context).
 
 ### Phase 4: Complete
+
+#### Phase 4A: Adversarial Evaluation
+
+4A.1. **Load evaluation config**: Read the file at `.specops.json` and check `config.implementation.evaluation.enabled`. If evaluation is explicitly disabled (set to false), skip to Phase 4C step 1 (acceptance criteria verification) for backward compatibility. If the key is absent or not configured, evaluation is enabled by default. Initialize the evaluation iteration counter to 0.
+
+4A.2. **Run Implementation Evaluation Protocol**: Execute the Implementation Evaluation Protocol from the Adversarial Evaluation module (`core/evaluation.md`). Read the file at all spec artifacts (`requirements.md` or `bugfix.md`/`refactor.md`, `design.md`, `tasks.md`, `implementation.md`) and the files modified during Phase 3. If `canExecuteCode` is true and `config.implementation.evaluation.exerciseTests` is true, Run the terminal command to execute the project's test suite and capture results. Score spec-type-specific dimensions following the evaluation scoring rubric. Edit the file at `<specsDir>/<spec-name>/evaluation.md` to append dimension scores, findings, and remediation instructions for any failing dimensions (preserving prior iteration results). Edit the file at `<specsDir>/<spec-name>/spec.json` to add the `evaluation` object with dimension scores and iteration count.
+
+4A.3. If all dimensions score at or above `config.implementation.evaluation.minScore`: proceed to Phase 4C.
+
+4A.4. If any dimension fails (score < `config.implementation.evaluation.minScore`) AND iteration counter < `config.implementation.evaluation.maxIterations`: proceed to Phase 4B.
+
+4A.5. If any dimension fails AND iteration counter >= `config.implementation.evaluation.maxIterations`: Tell the user("Evaluation did not pass after {maxIterations} iteration(s). Failing dimensions: {list with scores}. Proceeding to completion with known gaps.") and proceed to Phase 4C with the incomplete flag set in `spec.json` evaluation object (`evaluation.implementation.passed: false`; preserve `evaluation.spec.passed` from Phase 2 unless re-evaluated).
+
+#### Phase 4B: Remediation (conditional)
+
+4B.1. Read the file at `<specsDir>/<spec-name>/evaluation.md` to identify failing dimensions and their remediation instructions.
+
+4B.2. Cross-reference failing dimensions against tasks in `tasks.md` to identify which tasks are related to the failures. If a failing dimension maps to a specific task or set of tasks, scope the remediation to those tasks. If the failure is systemic (e.g., design coherence), identify the minimal set of files and tasks that need revision.
+
+4B.3. Re-dispatch Phase 3 with constrained scope following the Phase Dispatch protocol in `core/initiative-orchestration.md`. The re-dispatch targets only the tasks and files identified in step 4B.2 -- not the full task list. Update `implementation.md` with a `## Remediation Iteration {N}` section documenting which dimensions failed, which tasks are being re-executed, and the evaluation feedback driving the changes.
+
+4B.4. After remediation completes, increment the evaluation iteration counter and re-enter Phase 4A step 4A.2. **Zero-progress detection**: Read the file at the previous `evaluation.md` scores and compare against the new scores. If no dimension improved by more than 0.5 points compared to the prior iteration, Tell the user("Remediation iteration {N} did not improve evaluation scores. Consider manual intervention.") and proceed to Phase 4C with `evaluation.implementation.passed: false` (preserve `evaluation.spec.passed` from Phase 2) rather than consuming additional iterations.
+
+#### Phase 4C: Completion
 
 1. Verify all acceptance criteria are met:
    - Read the file at `requirements.md` (or `bugfix.md`/`refactor.md`)
@@ -375,7 +400,14 @@ Load configuration from `.specops.json` at project root. If not found, use these
     "delegationThreshold": 4,
     "validateReferences": "warn",
     "gitCheckpointing": false,
-    "pipelineMaxCycles": 3
+    "pipelineMaxCycles": 3,
+    "evaluation": {
+      "enabled": true,
+      "minScore": 7,
+      "maxIterations": 2,
+      "perTask": false,
+      "exerciseTests": true
+    }
   },
   "dependencySafety": {
     "enabled": true,
@@ -3810,6 +3842,203 @@ The `relatedSpecs` array in spec.json provides informational cross-references be
 | `canDelegateTask: false` | Initiative specs executed sequentially or via checkpoint+prompt |
 
 
+## Adversarial Evaluation
+
+The adversarial evaluation system adds structurally separated quality scoring to the SpecOps workflow at two touchpoints: spec evaluation (Phase 2 exit gate) and implementation evaluation (Phase 4A). Both use scored quality dimensions with hard thresholds and feedback loops. Evaluation is enabled by default.
+
+The core principle: agents reliably praise their own work. Separating the evaluator from the generator — using a fresh context with explicit skepticism prompting — creates a feedback loop that drives output quality up.
+
+### Evaluation Configuration
+
+Read evaluation settings from `config.implementation.evaluation`. If absent, use defaults:
+
+```json
+{
+  "enabled": true,
+  "minScore": 7,
+  "maxIterations": 2,
+  "perTask": false,
+  "exerciseTests": true
+}
+```
+
+- `enabled`: Master switch. When false, skip both evaluation touchpoints and use legacy Phase 4 checkbox verification.
+- `minScore`: Minimum dimension score (1-10) to pass. Any dimension below this triggers remediation.
+- `maxIterations`: Maximum evaluation-remediation cycles before proceeding (1-5).
+- `perTask`: When true, run implementation evaluation after each task instead of after all tasks.
+- `exerciseTests`: When true, the implementation evaluator runs the project test suite.
+
+### Scoring Rubric
+
+All quality dimensions use this 1-10 integer scale:
+
+| Score | Meaning |
+| ------- | --------- |
+| 9-10 | Exceeds expectations. Thorough, well-considered, production-ready. |
+| 7-8 | Meets expectations. Solid implementation with minor gaps. |
+| 5-6 | Below expectations. Notable gaps that should be addressed. |
+| 3-4 | Significant problems. Core requirements partially unmet. |
+| 1-2 | Fundamentally broken. Does not address the spec. |
+
+### Spec Evaluation Protocol
+
+Spec evaluation runs at the Phase 2 exit boundary — after Phase 2 produces spec artifacts but before Phase 3 dispatch. It verifies that the specification is clear, complete, and implementable.
+
+**Spec evaluation dimensions (all spec types):**
+
+| Dimension | What it measures | Scoring guidance |
+| ----------- | ----------------- | ------------------ |
+| Criteria Testability | Are acceptance criteria specific, verifiable, and unambiguous? | 7+: each criterion has a binary observable outcome. Below 7: criteria use subjective terms ("works well", "fast enough") without measurable thresholds. |
+| Criteria Completeness | Do criteria cover happy path, edge cases, and error states? | 7+: happy path and at least 2 edge cases per requirement. Below 7: only happy path covered, or obvious failure modes missing. |
+| Design Coherence | Does the design address all requirements? Are decisions justified? | 7+: every requirement maps to a design element with rationale. Below 7: requirements without corresponding design, or decisions without rationale. |
+| Task Coverage | Do tasks cover all design components? Are dependencies ordered correctly? | 7+: every design component has at least one task, dependencies form a valid DAG. Below 7: design elements without tasks, or circular/missing dependencies. |
+
+**Spec evaluator prompt** (hardcoded — not configurable via `.specops.json`):
+
+```text
+You are a spec quality evaluator. Your job is to find gaps in the specification BEFORE
+implementation begins. Errors in the spec cascade into implementation.
+Check: Are criteria actually testable? Are edge cases covered? Does the design address
+every requirement? Are tasks properly scoped?
+Score honestly — a vague spec that passes review will produce a vague implementation.
+Do not rewrite the spec artifacts. Provide specific, actionable feedback only.
+```
+
+**Procedure:**
+
+1. Read the file at the requirements file (requirements.md, bugfix.md, or refactor.md), design.md, and tasks.md.
+2. For each spec evaluation dimension:
+   - Assess against the scoring guidance in the table above.
+   - Assign a score (1-10 integer).
+   - Record specific evidence (quote or reference the artifact line).
+   - If below `config.implementation.evaluation.minScore`: write a concrete remediation instruction (e.g., "Acceptance criterion 3 uses 'works well' — specify a measurable threshold such as response time < 200ms").
+3. Create the file at `<specsDir>/<spec-name>/evaluation.md` using the Evaluation Report Template. If the file already exists, append the new iteration (do not overwrite prior iterations).
+4. Edit the file at `<specsDir>/<spec-name>/spec.json` to update the `evaluation.spec` object with `iterations`, `passed`, `scores`, and `evaluatedAt`.
+5. If ALL dimensions score at or above `minScore`: evaluation passes — signal for Phase 3 dispatch.
+6. If ANY dimension scores below `minScore` AND current iteration < `maxIterations`: evaluation fails — signal for Phase 2 revision with evaluation.md feedback as input context.
+7. If ANY dimension scores below `minScore` AND current iteration >= `maxIterations`: Tell the user("Spec evaluation did not pass after {iterations} iterations. Proceeding to implementation with known spec gaps: {list of failing dimensions}.") and signal for Phase 3 dispatch with an incomplete evaluation flag.
+
+**Spec evaluator safety rules:**
+
+- The evaluator MUST NOT rewrite requirements, design, or tasks directly. It provides feedback only.
+- The evaluator MUST NOT modify any file other than `evaluation.md` and the `spec.json` `evaluation` field.
+
+### Implementation Evaluation Protocol
+
+Implementation evaluation runs as Phase 4A — after Phase 3 completes but before completion steps. It verifies that the implementation matches the spec with quality.
+
+**Implementation evaluation dimensions by spec type:**
+
+**Feature specs:**
+
+| Dimension | What it measures | Scoring guidance |
+| ----------- | ----------------- | ------------------ |
+| Functionality Depth | Full spec coverage, not just happy path | 7+: all acceptance criteria addressed with implementation evidence. Below 7: criteria checked without corresponding code, or happy-path-only implementation. |
+| Design Fidelity | Implementation matches design.md decisions | 7+: each design decision reflected in code. Below 7: design decisions ignored or contradicted without documented deviation. |
+| Code Quality | Clean architecture, appropriate abstractions | 7+: no obvious code smells, functions focused, naming clear. Below 7: duplicated logic, unclear naming, overly complex control flow. |
+| Test Verification | Tests run and pass, adequate coverage | 7+: tests exist and pass for core functionality. Below 7: no tests, failing tests, or tests that do not exercise the implementation. |
+
+**Bugfix specs:**
+
+| Dimension | What it measures | Scoring guidance |
+| ----------- | ----------------- | ------------------ |
+| Root Cause Accuracy | Actual root cause addressed, not symptoms | 7+: fix targets the identified root cause. Below 7: fix addresses symptoms only, or root cause analysis is absent. |
+| Fix Completeness | All bug manifestations handled | 7+: all reported manifestations verified fixed. Below 7: some manifestations still reproducible, or related paths untested. |
+| Regression Safety | Must-Test behaviors from risk analysis preserved | 7+: Regression Risk Analysis Must-Test items verified. Below 7: Must-Test behaviors not checked, or existing tests broken. |
+| Test Verification | Reproduction, fix, and regression tests pass | 7+: reproduction test confirms fix, regression tests pass. Below 7: no reproduction test, or regression tests skipped. |
+
+**Refactor specs:**
+
+| Dimension | What it measures | Scoring guidance |
+| ----------- | ----------------- | ------------------ |
+| Behavior Preservation | Existing functionality unchanged | 7+: all existing tests pass, no behavioral change. Below 7: existing tests fail, or observable behavior changed. |
+| Structural Improvement | Code measurably better organized | 7+: clear reduction in complexity, duplication, or coupling. Below 7: no measurable improvement, or new complexity introduced. |
+| API Stability | Public interfaces preserved or properly migrated | 7+: public APIs unchanged, or migration path provided. Below 7: breaking changes without migration, or undocumented API changes. |
+| Test Verification | All existing tests pass, new structural tests added | 7+: existing tests pass, new tests cover structural changes. Below 7: existing tests fail, or structural changes untested. |
+
+**Implementation evaluator prompt** (hardcoded — not configurable via `.specops.json`):
+
+```text
+You are an adversarial evaluator. Your job is to FIND PROBLEMS, not confirm success.
+Assume the implementation has flaws until proven otherwise.
+Do not take the implementer's word for anything — verify by reading code and running tests.
+Score honestly. 7 means "acceptable." 5 means "significant gaps." 3 means "broken."
+If you cannot verify a dimension (e.g., no tests exist to run), score lower, not higher.
+```
+
+**Procedure:**
+
+1. Read the file at the requirements file, design.md, tasks.md, and implementation.md.
+2. Read the file at each file listed in the implementation.md Session Log "Files to Modify" entries to inspect the actual implementation.
+3. If `canExecuteCode` is true AND `config.implementation.evaluation.exerciseTests` is true: Run the terminal command to execute the project's test suite. Record test output (pass count, fail count, specific failures).
+4. If `canExecuteCode` is false: note "Tests not exercised — code review only" and cap the Test Verification dimension score at 7 (cannot verify higher without running tests).
+5. For each dimension (selected by spec type from the tables above):
+   - Assess against the scoring guidance.
+   - Assign a score (1-10 integer).
+   - Record specific evidence (file paths, line references, test output).
+   - If below `minScore`: write a concrete remediation instruction scoped to specific tasks and files.
+6. Create the file at (or append to) `<specsDir>/<spec-name>/evaluation.md` with the implementation evaluation iteration. Append under the `## Implementation Evaluation` section.
+7. Edit the file at `<specsDir>/<spec-name>/spec.json` to update the `evaluation.implementation` object.
+8. If ALL dimensions score at or above `minScore`: evaluation passes — proceed to Phase 4C (completion steps).
+9. If ANY dimension scores below `minScore` AND current iteration < `maxIterations`: evaluation fails — signal Phase 4B (remediation).
+10. If ANY dimension scores below `minScore` AND current iteration >= `maxIterations`: Tell the user("Implementation evaluation did not pass after {iterations} iterations. Proceeding to completion with known quality gaps: {list of failing dimensions and scores}.") and proceed to Phase 4C.
+
+**Implementation evaluator safety rules:**
+
+- The evaluator MUST NOT modify implementation code. Evaluation is read-only except for `evaluation.md` and `spec.json`.
+- The evaluator MUST NOT mark the spec as completed. Only Phase 4C can set status to `completed`.
+- The evaluator MUST NOT change acceptance criteria checkboxes. Checkbox verification is a Phase 4C responsibility.
+
+### Feedback Loop
+
+**Spec evaluation feedback (Phase 2 revision):**
+
+When spec evaluation fails, the evaluator has written specific feedback to `evaluation.md`. The revision step:
+
+1. Read the file at `<specsDir>/<spec-name>/evaluation.md` to get the failing dimensions and remediation instructions.
+2. For each failing dimension: revise the corresponding artifact (requirements, design, or tasks) following the remediation instructions.
+3. After revisions: re-run spec evaluation (increment iteration counter).
+
+**Implementation evaluation feedback (Phase 4B remediation):**
+
+When implementation evaluation fails, the evaluator has written remediation instructions scoped to specific tasks and files. The remediation step:
+
+1. Read the file at `<specsDir>/<spec-name>/evaluation.md` to get the failing dimensions and remediation instructions.
+2. Identify which tasks in tasks.md relate to the failing dimensions (the evaluator specifies this in the remediation section).
+3. Re-implement only the failing-dimension tasks following the remediation instructions. Do not re-implement tasks whose dimensions passed.
+4. After remediation: re-run Phase 4A implementation evaluation (increment iteration counter).
+
+**Zero-progress detection:**
+
+Before starting a new evaluation iteration, compare the current dimension scores against the previous iteration's scores. If no dimension improved by more than 0.5 points compared to the prior iteration, the feedback loop is stuck:
+
+- Tell the user("Evaluation feedback loop made no progress — scores unchanged after iteration {N}. Stopping to avoid infinite loop.")
+- Proceed to Phase 4C (for implementation evaluation) or Phase 3 dispatch (for spec evaluation) with an incomplete evaluation flag.
+
+### Platform Adaptation
+
+Evaluation behavior adapts to platform capability flags:
+
+| Capability | Spec Evaluation Behavior | Implementation Evaluation Behavior |
+| ------------ | ------------------------- | ----------------------------------- |
+| `canDelegateTask: true` | Dispatch as a fresh sub-agent. The evaluator gets a clean context with spec artifacts and the adversarial prompt. This is the strongest separation mode. | Dispatch Phase 4A as a fresh sub-agent. The evaluator does not see the generator's session history. |
+| `canDelegateTask: false`, `canAskInteractive: true` | Run in the same context with the adversarial prompt prepended to the evaluation instructions. If remediation is needed, write feedback to evaluation.md and prompt the user to start a fresh session. | Run Phase 4A in the same context with adversarial prompt. If remediation is needed, write feedback and prompt the user. |
+| `canDelegateTask: false`, `canAskInteractive: false` | Run sequentially in the same context. Adversarial prompt compensates for shared context. Remediation runs sequentially. | Run sequentially. Adversarial prompt compensates. Remediation runs sequentially. |
+| `canExecuteCode: true` | Not applicable (spec evaluation is read-only). | Run the test suite. Full Test Verification scoring. |
+| `canExecuteCode: false` | Not applicable. | Code review only. Test Verification dimension capped at 7 with note "Tests not exercised." |
+
+### Evaluation Safety
+
+These rules are mandatory and cannot be overridden by configuration:
+
+1. **Read-only evaluation**: The evaluator MUST NOT modify implementation code, spec artifacts (requirements, design, tasks), or any project file other than `evaluation.md` and the `spec.json` `evaluation` field.
+2. **No completion authority**: The evaluator MUST NOT set spec status to `completed`. Only Phase 4C completion steps can do this.
+3. **No checkbox manipulation**: The evaluator MUST NOT check or uncheck acceptance criteria checkboxes. Checkbox verification is Phase 4C's responsibility.
+4. **Hardcoded prompts**: The adversarial evaluator prompts are defined in this module and MUST NOT be overridden via `.specops.json` or any other configuration mechanism.
+5. **Append-only history**: If `evaluation.md` already exists from a prior iteration, append the new iteration under the appropriate section. Do not overwrite prior iteration data — the full evaluation trail must be preserved.
+6. **Iteration limits**: The `maxIterations` configuration value MUST be respected. Exceeding it is a protocol breach.
+
+
 ## Initiative Orchestration
 
 Initiative Orchestration provides autonomous execution of multi-spec initiatives. The orchestrator is a lightweight loop that reads all state from disk, selects the next actionable spec, builds a handoff bundle, and dispatches it through the normal dispatcher protocol as a fresh sub-agent. The orchestrator never reimplements workflow logic — it delegates to the standard Phase 1-4 lifecycle.
@@ -4532,6 +4761,61 @@ TableName:
 
 - [Potential improvement 1]
 - [Potential improvement 2]
+```
+
+### evaluation.md (Evaluation Report)
+
+```markdown
+# Evaluation Report: [Title]
+
+## Spec Evaluation
+
+### Iteration [N]
+
+**Evaluated at:** [ISO 8601 timestamp]
+**Threshold:** [minScore]/10
+
+| Dimension | Score | Threshold | Pass/Fail | Key Finding |
+| ----------- | ------- | ----------- | ----------- | ------------- |
+| Criteria Testability | | | | |
+| Criteria Completeness | | | | |
+| Design Coherence | | | | |
+| Task Coverage | | | | |
+
+**Verdict:** [PASS / FAIL — N of M dimensions passed]
+
+**Remediation** (if FAIL):
+<!-- List specific, actionable instructions for each failing dimension. Reference artifact sections by name. -->
+
+---
+
+## Implementation Evaluation
+
+### Iteration [N]
+
+**Evaluated at:** [ISO 8601 timestamp]
+**Spec type:** [feature / bugfix / refactor]
+**Threshold:** [minScore]/10
+
+| Dimension | Score | Threshold | Pass/Fail | Key Finding |
+| ----------- | ------- | ----------- | ----------- | ------------- |
+| [Dimension 1] | | | | |
+| [Dimension 2] | | | | |
+| [Dimension 3] | | | | |
+| [Dimension 4] | | | | |
+
+**Test Exercise Results:**
+
+- Tests run: [yes / no / not applicable]
+- Test command: [command executed, if any]
+- Pass count: [N]
+- Fail count: [N]
+- Failures: [specific test failures, if any]
+
+**Verdict:** [PASS / FAIL — N of M dimensions passed]
+
+**Remediation** (if FAIL):
+<!-- List specific, actionable instructions scoped to tasks and files. -->
 ```
 
 ### tasks.md
@@ -5661,10 +5945,20 @@ Before entering the cycle loop, validate:
 
 ### Pipeline Cycle
 
+**Pre-cycle spec evaluation (one-time):** Before entering the cycle loop, if Read the file at(`.specops.json`) shows `config.implementation.evaluation.enabled` is `true` (default: true), run spec evaluation once since the spec already exists and does not change during pipeline execution:
+
+1. Read the file at(`<specsDir>/<spec-name>/requirements.md`) (or `bugfix.md`/`refactor.md`), Read the file at(`<specsDir>/<spec-name>/design.md`), and Read the file at(`<specsDir>/<spec-name>/tasks.md`).
+2. Apply the adversarial spec evaluator against the collected artifacts and Create the file at the results to `<specsDir>/<spec-name>/evaluation.md`.
+3. Read the file at(`<specsDir>/<spec-name>/evaluation.md`) and check the overall verdict. If the verdict is `fail`, Tell the user("Spec evaluation failed before pipeline start. Review evaluation.md for findings.") and STOP — do not enter the cycle loop. If the verdict is `pass`, proceed to the cycle loop.
+
+If `config.implementation.evaluation.enabled` is explicitly set to `false`, skip this step entirely and proceed directly to the cycle loop.
+
 The core loop:
 
 ```text
+evaluationEnabled = Read the file at(.specops.json).config.implementation.evaluation.enabled (default: true)
 previousUnmetCriteria = null
+previousEvaluationScores = null
 cycle = 0
 
 while cycle < maxCycles:
@@ -5685,40 +5979,75 @@ while cycle < maxCycles:
     // Git checkpoint: implemented (if gitCheckpointing enabled)
     // Run the terminal command(git add -A && git commit -m "specops(checkpoint): implemented -- <spec-name>")
 
-    // Phase 4 acceptance check (existing step 1 logic)
-    // Read the file at requirements/bugfix/refactor file
-    // Count checked (- [x]) and unchecked (- [ ]) acceptance criteria
-    // Check off criteria that the implementation now satisfies
+    // Phase 4 acceptance check — evaluation-aware
+    if evaluationEnabled:
+        // Run Phase 4A implementation evaluation
+        // Apply adversarial evaluation against the implementation
+        // Create the file at results to <specsDir>/<spec-name>/evaluation.md
+        // Read the file at evaluation.md and extract per-category scores and overall verdict
+        evaluationScores = map of category -> score from evaluation.md
+        overallVerdict = verdict from evaluation.md
 
-    unmetCriteria = set of unchecked criteria text
+        if overallVerdict == "pass":
+            // All evaluation criteria pass — finalize
+            // Execute Phase 4 steps 2-8 (finalize implementation.md, metrics, memory, docs, completion gate, status)
+            // Git checkpoint: completed (if enabled)
+            Tell the user("Pipeline completed in {cycle} cycle(s). All evaluation criteria passed.")
+            break
 
-    if unmetCriteria is empty:
-        // All criteria pass — finalize
-        // Execute Phase 4 steps 2-8 (finalize implementation.md, metrics, memory, docs, completion gate, status)
-        // Git checkpoint: completed (if enabled)
-        Tell the user("Pipeline completed in {cycle} cycle(s). All acceptance criteria met.")
-        break
+        // Zero-progress detection (evaluation-based)
+        if evaluationScores == previousEvaluationScores:
+            Tell the user("No progress in cycle {cycle} — evaluation scores unchanged from previous cycle. Stopping to avoid infinite loop.")
+            // Do NOT mark spec as completed
+            // Leave status as "implementing"
+            break
 
-    // Zero-progress detection
-    if unmetCriteria == previousUnmetCriteria:
-        Tell the user("No progress in cycle {cycle} — same {count} criteria unmet as previous cycle. Stopping to avoid infinite loop.")
-        // Do NOT mark spec as completed
-        // Leave status as "implementing"
-        break
+        previousEvaluationScores = evaluationScores
+        failingCategories = categories where score < passing threshold
 
-    previousUnmetCriteria = unmetCriteria
+    else:
+        // Evaluation disabled — use existing checkbox verification
+        // Read the file at requirements/bugfix/refactor file
+        // Count checked (- [x]) and unchecked (- [ ]) acceptance criteria
+        // Check off criteria that the implementation now satisfies
+
+        unmetCriteria = set of unchecked criteria text
+
+        if unmetCriteria is empty:
+            // All criteria pass — finalize
+            // Execute Phase 4 steps 2-8 (finalize implementation.md, metrics, memory, docs, completion gate, status)
+            // Git checkpoint: completed (if enabled)
+            Tell the user("Pipeline completed in {cycle} cycle(s). All acceptance criteria met.")
+            break
+
+        // Zero-progress detection (checkbox-based)
+        if unmetCriteria == previousUnmetCriteria:
+            Tell the user("No progress in cycle {cycle} — same {count} criteria unmet as previous cycle. Stopping to avoid infinite loop.")
+            // Do NOT mark spec as completed
+            // Leave status as "implementing"
+            break
+
+        previousUnmetCriteria = unmetCriteria
 
     if cycle == maxCycles:
-        Tell the user("Pipeline reached max cycles ({maxCycles}). {count} criteria still unmet. Manual intervention required.")
+        if evaluationEnabled:
+            Tell the user("Pipeline reached max cycles ({maxCycles}). Evaluation still failing on: {failingCategories}. Manual intervention required.")
+        else:
+            Tell the user("Pipeline reached max cycles ({maxCycles}). {count} criteria still unmet. Manual intervention required.")
         // Do NOT mark spec as completed
         // Leave status as "implementing"
         // Log incomplete state in run log
         break
 
     // Prepare for next cycle
-    // Reset tasks whose acceptance criteria contributed to unmet items back to Pending
-    // Edit the file at tasks.md — set relevant tasks to **Status:** Pending
-    Tell the user("Cycle {cycle}/{maxCycles}: {unmetCount} criteria unmet. Starting next cycle...")
+    if evaluationEnabled:
+        // Reset tasks that map to failing evaluation categories back to Pending
+        // Edit the file at tasks.md — set relevant tasks to **Status:** Pending
+        Tell the user("Cycle {cycle}/{maxCycles}: evaluation failing on {failingCategories}. Starting next cycle...")
+    else:
+        // Reset tasks whose acceptance criteria contributed to unmet items back to Pending
+        // Edit the file at tasks.md — set relevant tasks to **Status:** Pending
+        Tell the user("Cycle {cycle}/{maxCycles}: {unmetCount} criteria unmet. Starting next cycle...")
 
 // Pipeline ends
 ```

@@ -89,9 +89,10 @@
         "run-logging",
         "plan-validation",
         "git-checkpointing",
-        "error-handling"
+        "error-handling",
+        "evaluation"
       ],
-      "templates": ["implementation"]
+      "templates": ["implementation", "evaluation"]
     },
     "interview": {
       "description": "Structured Q&A session to refine vague requests before spec generation",
@@ -136,7 +137,8 @@
         "feedback",
         "dependency-safety",
         "learnings",
-        "decomposition"
+        "decomposition",
+        "evaluation"
       ],
       "templates": [
         "feature-requirements",
@@ -145,7 +147,8 @@
         "design",
         "tasks",
         "implementation",
-        "reviews"
+        "reviews",
+        "evaluation"
       ]
     }
   }
