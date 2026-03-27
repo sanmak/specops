@@ -588,7 +588,14 @@ Load configuration from `.specops.json` at project root. If not found, use these
     "delegationThreshold": 4,
     "validateReferences": "warn",
     "gitCheckpointing": false,
-    "pipelineMaxCycles": 3
+    "pipelineMaxCycles": 3,
+    "evaluation": {
+      "enabled": true,
+      "minScore": 7,
+      "maxIterations": 2,
+      "perTask": false,
+      "exerciseTests": true
+    }
   },
   "dependencySafety": {
     "enabled": true,

@@ -100,6 +100,21 @@ After mode detection (and enforcement checks if applicable), dispatch the mode:
      - `canDelegateTask: false` and `canAskInteractive: true`: the completion summary is already written to `implementation.md` — prompt the user to start a fresh session.
      - `canDelegateTask: false` and `canAskInteractive: false`: no action needed — the workflow continues sequentially in the current context.
 
+6. **Spec evaluation dispatch at Phase 2 exit**: When the dispatcher detects `## Phase 2 Completion Summary` in `implementation.md` AND READ_FILE(`.specops.json`) shows `config.evaluation.enabled` is `true`, dispatch a spec evaluation step before Phase 3 begins:
+   - READ_FILE(`<specsDir>/<spec-name>/requirements.md`) (or `bugfix.md`/`refactor.md`), READ_FILE(`<specsDir>/<spec-name>/design.md`), and READ_FILE(`<specsDir>/<spec-name>/tasks.md`) to collect the full spec artifact set.
+   - `canDelegateTask: true`: Dispatch a fresh sub-agent with the adversarial spec evaluator prompt and the collected spec artifacts as context. The sub-agent writes its evaluation output to `<specsDir>/<spec-name>/evaluation.md`. After the sub-agent returns, READ_FILE(`<specsDir>/<spec-name>/evaluation.md`) and check the overall verdict. If the verdict is `pass`, proceed to Phase 3 dispatch. If the verdict is `fail`, NOTIFY_USER("Spec evaluation failed. Review evaluation.md for findings and remediation guidance.") and STOP — do not dispatch Phase 3 until the spec is revised and re-evaluated.
+   - `canDelegateTask: false`: Run the evaluation inline using the skepticism prompt. READ_FILE the spec artifacts, apply the adversarial evaluation criteria, and WRITE_FILE the results to `<specsDir>/<spec-name>/evaluation.md`. Apply the same pass/fail gate as above.
+
+7. **Implementation evaluation-to-remediation dispatch**: After Phase 4A writes evaluation results to `<specsDir>/<spec-name>/evaluation.md`, the dispatcher checks for implementation failures:
+   - READ_FILE(`<specsDir>/<spec-name>/evaluation.md`) and check for any evaluation category with a score below the passing threshold or an overall verdict of `fail`.
+   - If failures are detected:
+     - Extract the failing evaluation categories and their specific findings from `evaluation.md`.
+     - Build a remediation context containing: the evaluation report (failing categories + findings), the original tasks.md, and a constrained task scope limited to only the tasks that address the failing evaluation criteria.
+     - `canDelegateTask: true`: Dispatch a fresh sub-agent with the **spec** mode, instructing it to resume at Phase 3 with the remediation context. The sub-agent receives only the failing criteria and constrained task list — not the full spec — to keep the remediation focused.
+     - `canDelegateTask: false` and `canAskInteractive: true`: WRITE_FILE the remediation context to `<specsDir>/<spec-name>/implementation.md` (appended as `## Remediation Context`) and NOTIFY_USER("Implementation evaluation found failures. Remediation context written to implementation.md. Start a fresh session to address the failing criteria.").
+     - `canDelegateTask: false` and `canAskInteractive: false`: WRITE_FILE the remediation context to implementation.md (appended as `## Remediation Context`) and continue execution sequentially with the constrained task scope.
+   - If no failures are detected: proceed to Phase 4 completion steps normally.
+
 ## Shared Context Block
 
 The following context is prepended to every sub-agent prompt. It provides the minimum information needed for any mode to operate correctly.

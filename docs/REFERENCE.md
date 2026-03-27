@@ -169,6 +169,12 @@ Metrics are captured automatically at Phase 4 completion. See [TOKEN-USAGE.md](T
 | `implementation.validateReferences` | `off`/`warn`/`strict` | `warn` | enum | Validate file paths and code references in spec against codebase before implementation. `off`: skip. `warn`: notify and continue. `strict`: block on unresolved. |
 | `implementation.gitCheckpointing` | boolean | `false` | | Commit at phase boundaries (spec-created, implemented, completed). Three commits max per run. Complements `autoCommit` (per-task). |
 | `implementation.pipelineMaxCycles` | integer | `3` | min 1, max 10 | Maximum Phase 3→4 iteration cycles in pipeline mode. |
+| `implementation.evaluation` | object | | | Adversarial evaluation configuration. When enabled, Phase 2 exit gate scores spec quality and Phase 4A scores implementation quality using scored dimensions with hard thresholds and feedback loops. |
+| `implementation.evaluation.enabled` | boolean | `true` | | Enable adversarial evaluation. When false, skip both evaluation touchpoints and use legacy Phase 4 checkbox verification. |
+| `implementation.evaluation.minScore` | integer | `7` | min 1, max 10 | Minimum quality dimension score (1-10) required to pass evaluation. |
+| `implementation.evaluation.maxIterations` | integer | `2` | min 1, max 5 | Maximum evaluation-remediation iterations before proceeding to next phase. |
+| `implementation.evaluation.perTask` | boolean | `false` | | Run implementation evaluation after each task instead of after all tasks. |
+| `implementation.evaluation.exerciseTests` | boolean | `true` | | Whether the implementation evaluator should run the project test suite. |
 | `implementation.learnings` | object | | | Production learnings configuration. Controls capture and surfacing of post-deployment discoveries. |
 | `implementation.learnings.maxSurfaced` | integer | `3` | min 1, max 10 | Maximum number of learnings surfaced during Phase 1 loading. |
 | `implementation.learnings.severityThreshold` | string | `"medium"` | `all`, `medium`, `high`, `critical` | Minimum severity level to surface learnings. Critical/high always surface regardless. |

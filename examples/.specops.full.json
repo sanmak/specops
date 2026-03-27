@@ -41,7 +41,14 @@
     "createPR": true,
     "validateReferences": "warn",
     "gitCheckpointing": true,
-    "pipelineMaxCycles": 3
+    "pipelineMaxCycles": 3,
+    "evaluation": {
+      "enabled": true,
+      "minScore": 7,
+      "maxIterations": 2,
+      "perTask": false,
+      "exerciseTests": true
+    }
   },
   "modules": {
     "backend": {

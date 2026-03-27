@@ -87,6 +87,7 @@ specops/
 │   ├── from-plan.md                      # Convert plan mode output to spec
 │   ├── feedback.md                       # User feedback submission to SpecOps repo
 │   ├── memory.md                         # Local memory layer
+│   ├── evaluation.md                     # Adversarial evaluation (scored quality gates at Phase 2 exit and Phase 4A)
 │   ├── learnings.md                      # Production learnings (post-deployment discovery capture and retrieval)
 │   ├── metrics.md                        # Proxy metrics collection at completion
 │   ├── repo-map.md                       # Agent-driven codebase structural map
@@ -108,6 +109,7 @@ specops/
 │       ├── refactor.md                   # Refactor template
 │       ├── design.md                     # Design document template
 │       ├── tasks.md                      # Task breakdown template
+│       ├── evaluation.md                 # Evaluation scorecard template
 │       ├── implementation.md             # Implementation notes template
 │       └── reviews.md                    # Review feedback template
 │
