@@ -131,7 +131,16 @@ On **every status transition** (Pending → In Progress, In Progress → Complet
 
 **Sync failures are non-blocking**: If the command to update the external tracker fails, NOTIFY_USER with the error and continue. The `tasks.md` state machine is always the source of truth.
 
-**Completion close**: When transitioning to `Completed`, close the external issue. If the close command fails, warn but do not prevent the task from being marked complete in `tasks.md`.
+**Completion close (mandatory)**: When transitioning a task to `Completed`, close the corresponding external issue. Skipping this step when `config.team.taskTracking` is not `"none"` and the task has a valid IssueID is a protocol breach. Execute the following steps immediately after the `tasks.md` status update (Write Ordering Protocol step 1) and before the completion report (step 3):
+
+1. Verify preconditions: `config.team.taskTracking` is not `"none"` AND the task's `**IssueID:**` is neither `None` nor prefixed with `FAILED`. If preconditions are not met, skip to step 5.
+2. If `canExecuteCode` is true, first normalize the IssueID according to the Status Sync protocol. For GitHub, derive `<number>` by stripping any leading `#` from the stored IssueID; for other platforms, use the stored IssueID as required by their respective CLIs. Then execute the platform-specific close command:
+   - GitHub: RUN_COMMAND(`gh issue close <number> --reason completed`)
+   - Jira: RUN_COMMAND(`jira issue move <IssueID> "Done"`)
+   - Linear: RUN_COMMAND(`linear issue update <IssueID> --status "Done"`)
+3. If the close command fails: NOTIFY_USER("Warning: Could not close external issue <IssueID> — <error>. The issue remains open. Continue with task completion.") and continue. Do NOT block the task from being marked complete in `tasks.md`.
+4. If `canExecuteCode` is false: NOTIFY_USER("Task completed. Please close external issue <IssueID> manually: `<platform-specific close command>`") and continue.
+5. Proceed with Acceptance Criteria Verification and completion report.
 
 Issue creation uses the Issue Body Composition template from the Configuration Handling module — freeform issue bodies are a protocol breach.
 

@@ -37,6 +37,13 @@ detect_platforms() {
     DETECTED="$DETECTED copilot"
   fi
 
+  # Google Antigravity
+  if command -v antigravity &>/dev/null || \
+     [ -d "/Applications/Antigravity.app" ] || [ -d "$HOME/Applications/Antigravity.app" ] || \
+     [ -d ".agents" ]; then
+    DETECTED="$DETECTED antigravity"
+  fi
+
   echo "$DETECTED"
 }
 
@@ -55,8 +62,9 @@ echo "1) Claude Code"
 echo "2) Cursor"
 echo "3) OpenAI Codex"
 echo "4) GitHub Copilot"
-echo "5) All detected platforms"
-echo "6) All platforms"
+echo "5) Google Antigravity"
+echo "6) All detected platforms"
+echo "7) All platforms"
 echo ""
 
 # Show detected platforms
@@ -76,8 +84,9 @@ for choice in "${CHOICES[@]}"; do
     2) SELECTED="$SELECTED cursor" ;;
     3) SELECTED="$SELECTED codex" ;;
     4) SELECTED="$SELECTED copilot" ;;
-    5) SELECTED="$DETECTED" ;;
-    6) SELECTED=" claude cursor codex copilot" ;;
+    5) SELECTED="$SELECTED antigravity" ;;
+    6) SELECTED="$DETECTED" ;;
+    7) SELECTED=" claude cursor codex copilot antigravity" ;;
     *)
       echo "Invalid option: $choice"
       exit 1

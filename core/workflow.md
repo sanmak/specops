@@ -205,6 +205,15 @@ See "Collaborative Spec Review" module for the full review workflow including re
      - [ ] `FILE_EXISTS` guard used before reading any optional config (e.g., `.specops.json`) in the subcommand's first step
 4.5. **Repo map refresh**: If FILE_EXISTS(`<specsDir>/steering/repo-map.md`), refresh the repo map by running the Generation algorithm from the Repo Map module. This ensures the structural map reflects any files added, removed, or reorganized during implementation. If the repo map file does not exist, skip this step (the map will be auto-generated in Phase 1 of the next spec if steering is configured).
 5. **Completion gate**: Before marking the spec as completed, verify that memory was updated. READ_FILE(`<specsDir>/memory/context.md`) and confirm it contains a section heading `### <spec-name>`. If missing, go back to step 3 and execute it — do not mark the spec as completed without memory being updated.
+5.5. **Issue closure sweep**: If `config.team.taskTracking` is not `"none"` AND `canExecuteCode` is true, sweep all completed tasks for missed issue closures. This catches cases where Phase 3 auto-close was skipped due to agent context loss, delegation gaps, or platform limitations.
+   - READ_FILE `tasks.md` — collect all tasks with `**Status:** Completed` and a valid `**IssueID:**` (neither `None` nor prefixed with `FAILED`).
+   - For each such task, check if the external issue is still open:
+     - GitHub: derive an issue `<number>` from the task's `IssueID` (for example, strip a leading `#` if present), then RUN_COMMAND(`gh issue view <number> --json state --jq '.state'`). If the result is `OPEN`, close it: RUN_COMMAND(`gh issue close <number> --reason completed`).
+     - Jira: RUN_COMMAND(`jira issue view <IssueID> --plain`). If status is not `Done`, move it: RUN_COMMAND(`jira issue move <IssueID> "Done"`).
+     - Linear: RUN_COMMAND(`linear issue view <IssueID>`). If status is not `Done`, update it: RUN_COMMAND(`linear issue update <IssueID> --status "Done"`).
+   - Report results: NOTIFY_USER("Issue closure sweep: closed N issue(s) (<list>). M issue(s) were already closed.") or NOTIFY_USER("Issue closure sweep: all issues already closed.") if none needed closing.
+   - If any close command fails, NOTIFY_USER with the error for that issue and continue with the remaining issues. Sweep failures are non-blocking — they do not prevent spec completion.
+   - If `canExecuteCode` is false, skip this step silently (the Phase 3 completion close already suggested manual commands).
 6. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (RUN_COMMAND(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`
 6.3. **Initiative status update**: If this spec has a `partOf` field in spec.json (belongs to an initiative):
    - READ_FILE(`<specsDir>/initiatives/<partOf>.json`) to load the initiative.

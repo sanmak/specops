@@ -60,6 +60,7 @@ PLATFORM_FILES = {
     "cursor": "specops.mdc",
     "codex": "SKILL.md",
     "copilot": "specops.instructions.md",
+    "antigravity": "specops.md",
 }
 
 # All marker sets to check, keyed by category name.

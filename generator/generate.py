@@ -27,7 +27,7 @@ EXAMPLES_DIR = os.path.join(ROOT_DIR, "examples")
 SKILLS_DIR = os.path.join(ROOT_DIR, "skills")
 PLUGIN_DIR = os.path.join(ROOT_DIR, ".claude-plugin")
 
-SUPPORTED_PLATFORMS = ["claude", "cursor", "codex", "copilot"]
+SUPPORTED_PLATFORMS = ["claude", "cursor", "codex", "copilot", "antigravity"]
 
 
 def read_file(path):
@@ -623,11 +623,27 @@ def generate_copilot(core, platform_config):
     write_file(output_path, frontmatter + output)
 
 
+def generate_antigravity(core, platform_config):
+    """Generate Google Antigravity platform files."""
+    template = load_template("antigravity")
+    context = build_common_context(core, platform_config)
+    version = context["version"]
+
+    output = render_template(template, context)
+    output = substitute_tools(output, platform_config["toolMapping"])
+
+    # Generate specops.md (Antigravity agents rules: HTML comment version, no YAML frontmatter)
+    version_comment = f'<!-- specops-version: "{version}" -->\n\n'
+    output_path = os.path.join(PLATFORMS_DIR, "antigravity", "specops.md")
+    write_file(output_path, version_comment + output)
+
+
 GENERATORS = {
     "claude": generate_claude,
     "cursor": generate_cursor,
     "codex": generate_codex,
     "copilot": generate_copilot,
+    "antigravity": generate_antigravity,
 }
 
 

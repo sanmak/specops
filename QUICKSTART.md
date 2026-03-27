@@ -71,6 +71,13 @@ mkdir -p /path/to/your/project/.github/instructions
 cp platforms/copilot/specops.instructions.md /path/to/your/project/.github/instructions/
 ```
 
+**Google Antigravity:**
+
+```bash
+mkdir -p /path/to/your/project/.agents/rules
+cp platforms/antigravity/specops.md /path/to/your/project/.agents/rules/
+```
+
 ## First Use (2 minutes)
 
 ### 1. Create a project config

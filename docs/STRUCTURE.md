@@ -129,11 +129,16 @@ specops/
 │   │   ├── SKILL.md                      # Generated Codex skill file
 │   │   ├── install.sh                    # Codex-specific installer
 │   │   └── README.md                     # Codex quickstart
-│   └── copilot/                          # GitHub Copilot adapter
+│   ├── copilot/                          # GitHub Copilot adapter
+│   │   ├── platform.json                 # Capabilities, tool mapping
+│   │   ├── specops.instructions.md       # Generated Copilot scoped instructions
+│   │   ├── install.sh                    # Copilot-specific installer
+│   │   └── README.md                     # Copilot quickstart
+│   └── antigravity/                      # Google Antigravity adapter
 │       ├── platform.json                 # Capabilities, tool mapping
-│       ├── specops.instructions.md       # Generated Copilot scoped instructions
-│       ├── install.sh                    # Copilot-specific installer
-│       └── README.md                     # Copilot quickstart
+│       ├── specops.md                    # Generated Antigravity rules file
+│       ├── install.sh                    # Antigravity-specific installer
+│       └── README.md                     # Antigravity quickstart
 │
 ├── generator/                            # Build system
 │   ├── generate.py                       # Assembles platform outputs from core/
@@ -143,7 +148,8 @@ specops/
 │       ├── claude-dispatcher.j2          # Claude Code dispatcher output template
 │       ├── cursor.j2                     # Cursor output template
 │       ├── codex.j2                      # Codex output template
-│       └── copilot.j2                    # Copilot output template
+│       ├── copilot.j2                    # Copilot output template
+│       └── antigravity.j2               # Antigravity output template
 │
 ├── .claude-plugin/                       # Claude Code plugin manifests (generated)
 │   ├── plugin.json                       # Plugin metadata and version
@@ -204,13 +210,13 @@ specops/
 │  Single source of truth for all platforms       │
 └─────────────────────┬───────────────────────────┘
                       │
-         ┌────────────┼────────────┬────────────┐
-         ▼            ▼            ▼            ▼
-┌──────────────┐ ┌──────────┐ ┌─────────┐ ┌──────────┐
-│  Claude Code │ │  Cursor  │ │  Codex  │ │  Copilot │
-│  platforms/  │ │platforms/│ │platforms/│ │platforms/ │
-│  claude/     │ │cursor/   │ │codex/   │ │copilot/  │
-└──────────────┘ └──────────┘ └─────────┘ └──────────┘
+         ┌────────────┼────────────┬────────────┬──────────────┐
+         ▼            ▼            ▼            ▼              ▼
+┌──────────────┐ ┌──────────┐ ┌─────────┐ ┌──────────┐ ┌──────────────┐
+│  Claude Code │ │  Cursor  │ │  Codex  │ │  Copilot │ │ Antigravity  │
+│  platforms/  │ │platforms/│ │platforms/│ │platforms/ │ │  platforms/  │
+│  claude/     │ │cursor/   │ │codex/   │ │copilot/  │ │ antigravity/ │
+└──────────────┘ └──────────┘ └─────────┘ └──────────┘ └──────────────┘
 ```
 
 ### Build System

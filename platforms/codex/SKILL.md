@@ -211,6 +211,15 @@ See "Collaborative Spec Review" module for the full review workflow including re
      - [ ] `Check if the file exists at` guard used before reading any optional config (e.g., `.specops.json`) in the subcommand's first step
 4.5. **Repo map refresh**: If Check if the file exists at(`<specsDir>/steering/repo-map.md`), refresh the repo map by running the Generation algorithm from the Repo Map module. This ensures the structural map reflects any files added, removed, or reorganized during implementation. If the repo map file does not exist, skip this step (the map will be auto-generated in Phase 1 of the next spec if steering is configured).
 5. **Completion gate**: Before marking the spec as completed, verify that memory was updated. Read the file at(`<specsDir>/memory/context.md`) and confirm it contains a section heading `### <spec-name>`. If missing, go back to step 3 and execute it — do not mark the spec as completed without memory being updated.
+5.5. **Issue closure sweep**: If `config.team.taskTracking` is not `"none"` AND `canExecuteCode` is true, sweep all completed tasks for missed issue closures. This catches cases where Phase 3 auto-close was skipped due to agent context loss, delegation gaps, or platform limitations.
+   - Read the file at `tasks.md` — collect all tasks with `**Status:** Completed` and a valid `**IssueID:**` (neither `None` nor prefixed with `FAILED`).
+   - For each such task, check if the external issue is still open:
+     - GitHub: derive an issue `<number>` from the task's `IssueID` (for example, strip a leading `#` if present), then Execute the command(`gh issue view <number> --json state --jq '.state'`). If the result is `OPEN`, close it: Execute the command(`gh issue close <number> --reason completed`).
+     - Jira: Execute the command(`jira issue view <IssueID> --plain`). If status is not `Done`, move it: Execute the command(`jira issue move <IssueID> "Done"`).
+     - Linear: Execute the command(`linear issue view <IssueID>`). If status is not `Done`, update it: Execute the command(`linear issue update <IssueID> --status "Done"`).
+   - Report results: Print to stdout("Issue closure sweep: closed N issue(s) (<list>). M issue(s) were already closed.") or Print to stdout("Issue closure sweep: all issues already closed.") if none needed closing.
+   - If any close command fails, Print to stdout with the error for that issue and continue with the remaining issues. Sweep failures are non-blocking — they do not prevent spec completion.
+   - If `canExecuteCode` is false, skip this step silently (the Phase 3 completion close already suggested manual commands).
 6. Set `spec.json` status to `completed`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (Execute the command(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`
 6.3. **Initiative status update**: If this spec has a `partOf` field in spec.json (belongs to an initiative):
    - Read the file at(`<specsDir>/initiatives/<partOf>.json`) to load the initiative.
@@ -5141,7 +5150,16 @@ On **every status transition** (Pending → In Progress, In Progress → Complet
 
 **Sync failures are non-blocking**: If the command to update the external tracker fails, Print to stdout with the error and continue. The `tasks.md` state machine is always the source of truth.
 
-**Completion close**: When transitioning to `Completed`, close the external issue. If the close command fails, warn but do not prevent the task from being marked complete in `tasks.md`.
+**Completion close (mandatory)**: When transitioning a task to `Completed`, close the corresponding external issue. Skipping this step when `config.team.taskTracking` is not `"none"` and the task has a valid IssueID is a protocol breach. Execute the following steps immediately after the `tasks.md` status update (Write Ordering Protocol step 1) and before the completion report (step 3):
+
+1. Verify preconditions: `config.team.taskTracking` is not `"none"` AND the task's `**IssueID:**` is neither `None` nor prefixed with `FAILED`. If preconditions are not met, skip to step 5.
+2. If `canExecuteCode` is true, first normalize the IssueID according to the Status Sync protocol. For GitHub, derive `<number>` by stripping any leading `#` from the stored IssueID; for other platforms, use the stored IssueID as required by their respective CLIs. Then execute the platform-specific close command:
+   - GitHub: Execute the command(`gh issue close <number> --reason completed`)
+   - Jira: Execute the command(`jira issue move <IssueID> "Done"`)
+   - Linear: Execute the command(`linear issue update <IssueID> --status "Done"`)
+3. If the close command fails: Print to stdout("Warning: Could not close external issue <IssueID> — <error>. The issue remains open. Continue with task completion.") and continue. Do NOT block the task from being marked complete in `tasks.md`.
+4. If `canExecuteCode` is false: Print to stdout("Task completed. Please close external issue <IssueID> manually: `<platform-specific close command>`") and continue.
+5. Proceed with Acceptance Criteria Verification and completion report.
 
 Issue creation uses the Issue Body Composition template from the Configuration Handling module — freeform issue bodies are a protocol breach.
 

@@ -431,6 +431,7 @@ def get_generated_files():
         "cursor": "specops.mdc",
         "codex": "SKILL.md",
         "copilot": "specops.instructions.md",
+        "antigravity": "specops.md",
     }
 
     for platform, filename in platform_outputs.items():
@@ -693,6 +694,36 @@ def validate_platform(platform, info):
             content, "Copilot specops.instructions.md", ["applyTo", "version"]
         )
         errors.extend(fmt_errors)
+    elif platform == "antigravity":
+        # Antigravity uses HTML comment version marker instead of YAML frontmatter
+        if '<!-- specops-version:' not in content:
+            errors.append(
+                "  Antigravity specops.md missing HTML comment version marker"
+                " (expected <!-- specops-version: \"X.Y.Z\" -->)"
+            )
+        else:
+            # Verify version matches platform.json
+            import re
+            match = re.search(r'<!-- specops-version: "([^"]+)" -->', content)
+            if match:
+                config_path = os.path.join(
+                    PLATFORMS_DIR, "antigravity", "platform.json"
+                )
+                if os.path.exists(config_path):
+                    with open(config_path, "r", encoding="utf-8") as f:
+                        config = json.load(f)
+                    expected = config.get("version", "")
+                    actual = match.group(1)
+                    if actual != expected:
+                        errors.append(
+                            f"  Antigravity specops.md version ({actual})"
+                            f" != platform.json ({expected})"
+                        )
+            else:
+                errors.append(
+                    "  Antigravity specops.md has malformed version comment"
+                    " (expected <!-- specops-version: \"X.Y.Z\" -->)"
+                )
 
     return errors
 

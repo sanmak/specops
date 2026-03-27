@@ -1,0 +1,62 @@
+{
+  "name": "antigravity",
+  "displayName": "Google Antigravity",
+  "version": "1.6.0",
+  "instructionFormat": "agents_rules",
+  "outputFiles": {
+    "instructions": "specops.md"
+  },
+  "installLocation": {
+    "project": ".agents/rules/specops.md"
+  },
+  "capabilities": {
+    "canExecuteCode": true,
+    "canEditFiles": true,
+    "canCreateFiles": true,
+    "canAskInteractive": true,
+    "canTrackProgress": false,
+    "canAccessGit": true,
+    "canDelegateTask": true
+  },
+  "toolMapping": {
+    "READ_FILE": "Read the file at",
+    "WRITE_FILE": "Create the file at",
+    "EDIT_FILE": "Edit the file at",
+    "LIST_DIR": "List the contents of",
+    "FILE_EXISTS": "Check if the file exists at",
+    "RUN_COMMAND": "Run the terminal command",
+    "ASK_USER": "Ask the user",
+    "NOTIFY_USER": "Tell the user",
+    "UPDATE_PROGRESS": "Note the completed task in your response",
+    "GET_SPECOPS_VERSION": "Run the terminal command `grep '<!-- specops-version:' .agents/rules/specops.md 2>/dev/null | head -1 | sed 's/.*specops-version: *\"//;s/\".*//g'`"
+  },
+  "entryPoint": {
+    "type": "keyword",
+    "trigger": "When the user asks you to run 'specops', mentions 'spec-driven development', or asks you to 'create a spec' for a feature, bugfix, or refactor",
+    "examples": [
+      "Use specops to add user authentication",
+      "Use specops version to check the installed version",
+      "Use specops init to set up the project config",
+      "Use specops interview to explore an idea for a dashboard",
+      "Create a spec for adding user authentication",
+      "Create a specops refactor spec for simplifying auth middleware",
+      "Create a spec for fixing the 500 errors on checkout",
+      "Implement the auth-feature spec",
+      "Review the oauth-auth spec",
+      "Revise the oauth-auth spec",
+      "Show specops status",
+      "Show specops status for draft specs",
+      "Show specops status for in-review specs",
+      "View the auth-feature spec",
+      "View the auth-feature design section",
+      "View the full auth-feature spec",
+      "View the auth-feature spec status",
+      "Walk me through the auth-feature spec",
+      "View auth-feature requirements and design sections",
+      "List all specops specs",
+      "Use specops update to check for updates",
+      "Use specops feedback to report an issue",
+      "Use specops pipeline for auth-feature"
+    ]
+  }
+}

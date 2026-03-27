@@ -88,11 +88,12 @@ check_file "generator/templates/claude.j2"
 check_file "generator/templates/cursor.j2"
 check_file "generator/templates/codex.j2"
 check_file "generator/templates/copilot.j2"
+check_file "generator/templates/antigravity.j2"
 echo ""
 
 # Check platform adapters
 echo "Platform Adapters:"
-for platform in claude cursor codex copilot; do
+for platform in claude cursor codex copilot antigravity; do
   check_dir "platforms/$platform"
   check_file "platforms/$platform/platform.json"
   check_file "platforms/$platform/install.sh"
@@ -102,6 +103,7 @@ check_file "platforms/claude/SKILL.md"
 check_file "platforms/cursor/specops.mdc"
 check_file "platforms/codex/SKILL.md"
 check_file "platforms/copilot/specops.instructions.md"
+check_file "platforms/antigravity/specops.md"
 echo ""
 
 # Check plugin manifests
@@ -161,6 +163,7 @@ json_files=(
   platforms/cursor/platform.json
   platforms/codex/platform.json
   platforms/copilot/platform.json
+  platforms/antigravity/platform.json
   ".claude-plugin/plugin.json"
   ".claude-plugin/marketplace.json"
 )
@@ -178,7 +181,7 @@ echo ""
 
 # Check file permissions
 echo "File Permissions:"
-for script in setup.sh verify.sh scripts/bump-version.sh scripts/remote-install.sh platforms/claude/install.sh platforms/cursor/install.sh platforms/codex/install.sh platforms/copilot/install.sh; do
+for script in setup.sh verify.sh scripts/bump-version.sh scripts/remote-install.sh platforms/claude/install.sh platforms/cursor/install.sh platforms/codex/install.sh platforms/copilot/install.sh platforms/antigravity/install.sh; do
   if [ -f "$script" ]; then
     if [ -x "$script" ]; then
       echo "  OK: $script is executable"
@@ -192,7 +195,7 @@ echo ""
 
 # Run build validation if generated files exist
 echo "Build Validation:"
-if [ -f "platforms/claude/SKILL.md" ] && [ -f "platforms/cursor/specops.mdc" ] && [ -f "platforms/codex/SKILL.md" ] && [ -f "platforms/copilot/specops.instructions.md" ]; then
+if [ -f "platforms/claude/SKILL.md" ] && [ -f "platforms/cursor/specops.mdc" ] && [ -f "platforms/codex/SKILL.md" ] && [ -f "platforms/copilot/specops.instructions.md" ] && [ -f "platforms/antigravity/specops.md" ]; then
   if python3 generator/validate.py 2>/dev/null; then
     echo "  OK: All platform outputs validated"
   else

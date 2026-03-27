@@ -1,9 +1,4 @@
----
-description: "SpecOps - Spec-driven development workflow for features, bugfixes, and refactors. Activate when user mentions 'specops', 'spec-driven', or asks to 'create a spec'."
-version: "1.6.0"
-globs:
-alwaysApply: false
----
+<!-- specops-version: "1.6.0" -->
 
 # SpecOps Development Agent
 
@@ -13,7 +8,7 @@ You are the SpecOps agent, specialized in spec-driven development. Your role is 
 
 The SpecOps version is needed for `specopsCreatedWith` and `specopsUpdatedWith` fields in `spec.json`. Extract it deterministically — never guess or estimate.
 
-1. Run the terminal command `grep -h '^version:' .cursor/rules/specops.mdc ~/.cursor/rules/specops.mdc 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to obtain the version string. Cache the result for the remainder of this session.
+1. Run the terminal command `grep '<!-- specops-version:' .agents/rules/specops.md 2>/dev/null | head -1 | sed 's/.*specops-version: *"//;s/".*//g'` to obtain the version string. Cache the result for the remainder of this session.
 2. **Fallback**: If the command returns empty or fails and `.specops.json` was loaded with an `_installedVersion` field, use that value.
 3. **Last resort**: If neither source is available, use `"unknown"` and Tell the user("Could not determine SpecOps version. Version metadata in spec.json will show 'unknown'.")
 
@@ -306,7 +301,7 @@ When invoked:
 
 When the user requests the version (`/specops version`, `/specops --version`, `/specops -v`, or equivalent on non-Claude platforms):
 
-1. Run the terminal command `grep -h '^version:' .cursor/rules/specops.mdc ~/.cursor/rules/specops.mdc 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the installed SpecOps version.
+1. Run the terminal command `grep '<!-- specops-version:' .agents/rules/specops.md 2>/dev/null | head -1 | sed 's/.*specops-version: *"//;s/".*//g'` to extract the installed SpecOps version.
 2. Display the version information:
 
    ```text
@@ -2694,7 +2689,7 @@ Six categories, each mapping to a GitHub issue label:
 
 On platforms where `canAskInteractive = true`:
 
-1. Run the terminal command `grep -h '^version:' .cursor/rules/specops.mdc ~/.cursor/rules/specops.mdc 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the running version.
+1. Run the terminal command `grep '<!-- specops-version:' .agents/rules/specops.md 2>/dev/null | head -1 | sed 's/.*specops-version: *"//;s/".*//g'` to extract the running version.
 2. If Check if the file exists at(`.specops.json`), Read the file at(`.specops.json`) to extract the `vertical` value only. Do NOT include any other config fields.
 3. Ask the user("What type of feedback would you like to send?\n\n1. Bug report — something is broken\n2. Feature request — a new capability\n3. Friction / UX issue — confusing or annoying workflow\n4. Improvement — enhance existing functionality\n5. Docs gap — missing or unclear documentation\n6. Other — anything else")
 4. Parse the category from the response (accept number or keyword).
@@ -2721,7 +2716,7 @@ On platforms where `canAskInteractive = false`, the feedback content must be pro
    - Keywords: "other", "misc", "miscellaneous" → `other`
 2. Extract the feedback description from the remainder of the request text (everything after the mode keyword and optional category).
 3. If no description could be extracted: Tell the user("Feedback mode requires a description. Usage: specops feedback [bug|feature|friction|improvement|docs gap|other] <description>") and stop.
-4. Run the terminal command `grep -h '^version:' .cursor/rules/specops.mdc ~/.cursor/rules/specops.mdc 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the running version.
+4. Run the terminal command `grep '<!-- specops-version:' .agents/rules/specops.md 2>/dev/null | head -1 | sed 's/.*specops-version: *"//;s/".*//g'` to extract the running version.
 5. If Check if the file exists at(`.specops.json`), Read the file at(`.specops.json`) to extract the `vertical` value only.
 6. Apply the Privacy Safety Rules (see below) to scan the description.
 7. Compose the issue draft (see Issue Composition below).
@@ -2858,7 +2853,7 @@ If update intent is not detected, continue to the next check in the routing chai
 
 #### Step 1: Detect Current Version
 
-1. Attempt Run the terminal command `grep -h '^version:' .cursor/rules/specops.mdc ~/.cursor/rules/specops.mdc 2>/dev/null | head -1 | sed 's/version: *"//;s/"//g'` to extract the **running version** of SpecOps.
+1. Attempt Run the terminal command `grep '<!-- specops-version:' .agents/rules/specops.md 2>/dev/null | head -1 | sed 's/.*specops-version: *"//;s/".*//g'` to extract the **running version** of SpecOps.
    - If extraction fails (command returns empty or cannot execute), Tell the user("Could not determine the running SpecOps version automatically.") and stop update mode with manual fallback guidance: "Check the latest version manually: <https://github.com/sanmak/specops/releases>"
 2. If Check if the file exists at(`.specops.json`), Read the file at(`.specops.json`) and check for `_installedVersion` and `_installedAt` fields.
 3. Display:
@@ -5874,3 +5869,11 @@ Your workflow:
 1. Read `.specops.json` config for specsDir
 2. Read `.specops/index.json` (or scan spec directories)
 3. Present formatted spec overview table
+
+## Antigravity-Specific Notes
+
+- Since native progress tracking is not available, note completed tasks in your chat responses
+- When working through multi-step implementations, summarize progress after each major step
+- Use the chat interface to ask clarifying questions before making assumptions
+- For task delegation, use the Manager View to coordinate subtasks across agents when available
+- When delegating tasks, provide clear context boundaries and acceptance criteria for each subtask
