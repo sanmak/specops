@@ -187,13 +187,13 @@ See "Collaborative Spec Review" module for the full review workflow including re
 
 4A.1. **Load evaluation config**: Read the file at `.specops.json` and check `config.implementation.evaluation.enabled`. If evaluation is explicitly disabled (set to false), skip to Phase 4C step 1 (acceptance criteria verification) for backward compatibility. If the key is absent or not configured, evaluation is enabled by default. Initialize the evaluation iteration counter to 0.
 
-4A.2. **Run Implementation Evaluation Protocol**: Execute the Implementation Evaluation Protocol from the Adversarial Evaluation module (`core/evaluation.md`). Read the file at all spec artifacts (`requirements.md` or `bugfix.md`/`refactor.md`, `design.md`, `tasks.md`, `implementation.md`) and the files modified during Phase 3. If `canExecuteCode` is true and `config.implementation.evaluation.exerciseTests` is true, Run the terminal command to execute the project's test suite and capture results. Score spec-type-specific dimensions following the evaluation scoring rubric. Create the file at `<specsDir>/<spec-name>/evaluation.md` with dimension scores, findings, and remediation instructions for any failing dimensions. Edit the file at `<specsDir>/<spec-name>/spec.json` to add the `evaluation` object with dimension scores and iteration count.
+4A.2. **Run Implementation Evaluation Protocol**: Execute the Implementation Evaluation Protocol from the Adversarial Evaluation module (`core/evaluation.md`). Read the file at all spec artifacts (`requirements.md` or `bugfix.md`/`refactor.md`, `design.md`, `tasks.md`, `implementation.md`) and the files modified during Phase 3. If `canExecuteCode` is true and `config.implementation.evaluation.exerciseTests` is true, Run the terminal command to execute the project's test suite and capture results. Score spec-type-specific dimensions following the evaluation scoring rubric. Edit the file at `<specsDir>/<spec-name>/evaluation.md` to append dimension scores, findings, and remediation instructions for any failing dimensions (preserving prior iteration results). Edit the file at `<specsDir>/<spec-name>/spec.json` to add the `evaluation` object with dimension scores and iteration count.
 
 4A.3. If all dimensions score at or above `config.implementation.evaluation.minScore`: proceed to Phase 4C.
 
 4A.4. If any dimension fails (score < `config.implementation.evaluation.minScore`) AND iteration counter < `config.implementation.evaluation.maxIterations`: proceed to Phase 4B.
 
-4A.5. If any dimension fails AND iteration counter >= `config.implementation.evaluation.maxIterations`: Tell the user("Evaluation did not pass after {maxIterations} iteration(s). Failing dimensions: {list with scores}. Proceeding to completion with known gaps.") and proceed to Phase 4C with the incomplete flag set in `spec.json` evaluation object (`evaluation.spec.passed: false` and `evaluation.implementation.passed: false`).
+4A.5. If any dimension fails AND iteration counter >= `config.implementation.evaluation.maxIterations`: Tell the user("Evaluation did not pass after {maxIterations} iteration(s). Failing dimensions: {list with scores}. Proceeding to completion with known gaps.") and proceed to Phase 4C with the incomplete flag set in `spec.json` evaluation object (`evaluation.implementation.passed: false`; preserve `evaluation.spec.passed` from Phase 2 unless re-evaluated).
 
 #### Phase 4B: Remediation (conditional)
 
@@ -203,7 +203,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
 
 4B.3. Re-dispatch Phase 3 with constrained scope following the Phase Dispatch protocol in `core/initiative-orchestration.md`. The re-dispatch targets only the tasks and files identified in step 4B.2 -- not the full task list. Update `implementation.md` with a `## Remediation Iteration {N}` section documenting which dimensions failed, which tasks are being re-executed, and the evaluation feedback driving the changes.
 
-4B.4. After remediation completes, increment the evaluation iteration counter and re-enter Phase 4A step 4A.2. **Zero-progress detection**: Read the file at the previous `evaluation.md` scores and compare against the new scores. If no dimension improved by more than 0.5 points compared to the prior iteration, Tell the user("Remediation iteration {N} did not improve evaluation scores. Consider manual intervention.") and proceed to Phase 4C with `evaluation.spec.passed: false` and `evaluation.implementation.passed: false` rather than consuming additional iterations.
+4B.4. After remediation completes, increment the evaluation iteration counter and re-enter Phase 4A step 4A.2. **Zero-progress detection**: Read the file at the previous `evaluation.md` scores and compare against the new scores. If no dimension improved by more than 0.5 points compared to the prior iteration, Tell the user("Remediation iteration {N} did not improve evaluation scores. Consider manual intervention.") and proceed to Phase 4C with `evaluation.implementation.passed: false` (preserve `evaluation.spec.passed` from Phase 2) rather than consuming additional iterations.
 
 #### Phase 4C: Completion
 
@@ -4010,7 +4010,7 @@ When implementation evaluation fails, the evaluator has written remediation inst
 
 **Zero-progress detection:**
 
-Before starting a new evaluation iteration, compare the current dimension scores against the previous iteration's scores. If no dimension improved (all scores are the same or lower), the feedback loop is stuck:
+Before starting a new evaluation iteration, compare the current dimension scores against the previous iteration's scores. If no dimension improved by more than 0.5 points compared to the prior iteration, the feedback loop is stuck:
 
 - Tell the user("Evaluation feedback loop made no progress — scores unchanged after iteration {N}. Stopping to avoid infinite loop.")
 - Proceed to Phase 4C (for implementation evaluation) or Phase 3 dispatch (for spec evaluation) with an incomplete evaluation flag.
@@ -5945,7 +5945,7 @@ Before entering the cycle loop, validate:
 
 ### Pipeline Cycle
 
-**Pre-cycle spec evaluation (one-time):** Before entering the cycle loop, if Read the file at(`.specops.json`) shows `config.evaluation.enabled` is `true`, run spec evaluation once since the spec already exists and does not change during pipeline execution:
+**Pre-cycle spec evaluation (one-time):** Before entering the cycle loop, if Read the file at(`.specops.json`) shows `config.implementation.evaluation.enabled` is `true` (default: true), run spec evaluation once since the spec already exists and does not change during pipeline execution:
 
 1. Read the file at(`<specsDir>/<spec-name>/requirements.md`) (or `bugfix.md`/`refactor.md`), Read the file at(`<specsDir>/<spec-name>/design.md`), and Read the file at(`<specsDir>/<spec-name>/tasks.md`).
 2. Apply the adversarial spec evaluator against the collected artifacts and Create the file at the results to `<specsDir>/<spec-name>/evaluation.md`.

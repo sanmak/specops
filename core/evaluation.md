@@ -166,7 +166,7 @@ When implementation evaluation fails, the evaluator has written remediation inst
 
 **Zero-progress detection:**
 
-Before starting a new evaluation iteration, compare the current dimension scores against the previous iteration's scores. If no dimension improved (all scores are the same or lower), the feedback loop is stuck:
+Before starting a new evaluation iteration, compare the current dimension scores against the previous iteration's scores. If no dimension improved by more than 0.5 points compared to the prior iteration, the feedback loop is stuck:
 
 - NOTIFY_USER("Evaluation feedback loop made no progress — scores unchanged after iteration {N}. Stopping to avoid infinite loop.")
 - Proceed to Phase 4C (for implementation evaluation) or Phase 3 dispatch (for spec evaluation) with an incomplete evaluation flag.

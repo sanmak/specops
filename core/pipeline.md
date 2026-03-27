@@ -24,7 +24,7 @@ Before entering the cycle loop, validate:
 
 ### Pipeline Cycle
 
-**Pre-cycle spec evaluation (one-time):** Before entering the cycle loop, if READ_FILE(`.specops.json`) shows `config.evaluation.enabled` is `true`, run spec evaluation once since the spec already exists and does not change during pipeline execution:
+**Pre-cycle spec evaluation (one-time):** Before entering the cycle loop, if READ_FILE(`.specops.json`) shows `config.implementation.evaluation.enabled` is `true` (default: true), run spec evaluation once since the spec already exists and does not change during pipeline execution:
 
 1. READ_FILE(`<specsDir>/<spec-name>/requirements.md`) (or `bugfix.md`/`refactor.md`), READ_FILE(`<specsDir>/<spec-name>/design.md`), and READ_FILE(`<specsDir>/<spec-name>/tasks.md`).
 2. Apply the adversarial spec evaluator against the collected artifacts and WRITE_FILE the results to `<specsDir>/<spec-name>/evaluation.md`.

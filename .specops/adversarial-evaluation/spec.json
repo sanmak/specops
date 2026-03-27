@@ -7,10 +7,12 @@
   "updated": "2026-03-27T18:00:40Z",
   "specopsCreatedWith": "1.7.0",
   "specopsUpdatedWith": "1.7.0",
-  "author": "sanketmakhija",
+  "author": {
+    "name": "sanketmakhija"
+  },
   "reviewers": [],
   "reviewRounds": 0,
-  "approvals": [],
+  "approvals": 0,
   "requiredApprovals": 0,
   "metrics": {
     "specArtifactTokensEstimate": 10356,
