@@ -95,6 +95,7 @@ Agent:
 | No way to review specs before coding starts | Built-in team review workflow with configurable approval gates |
 | Agent hallucinates vague acceptance criteria | EARS notation for precise requirements: `WHEN [event] THE SYSTEM SHALL [behavior]` |
 | Specs drift from codebase after implementation | 5 automated drift checks with audit and reconcile commands |
+| AI adds packages without checking maintenance or license | Dependency introduction gate: 5-criteria evaluation (scope, maintenance, size, security, license) before any install |
 | Agent marks its own work as "done" without scrutiny | Adversarial evaluation: separate evaluator scores specs and implementations against hard thresholds |
 | Production reveals things specs missed | Production learnings layer: capture discoveries, link to specs, surface in future work |
 | Locked into one AI coding tool | One source of truth, 5 platform outputs |
@@ -143,6 +144,7 @@ Specs end at "completed." But production reveals things specs missed. SpecOps cl
 - **Spec decomposition**: automatic scope assessment splits large features into multiple coordinated specs with dependency tracking and initiative orchestration
 - **Vertical awareness**: domain-specific spec templates. Infrastructure specs include rollback steps and resource definitions. Data pipeline specs include data contracts and backfill strategy.
 - **Adversarial evaluation**: a structurally separated evaluator scores spec quality (Phase 2) and implementation quality (Phase 4) against hard thresholds. Agents praise their own work; a second pass with skepticism prompting catches what they missed.
+- **Dependency governance**: every new package must pass a 5-criteria gate (scope match, maintenance health, size proportionality, security surface, license compatibility) before installation. Always active, no bypass.
 - **Enforcement, not suggestions**: CI-integrated drift detection, checkbox completion gates, dependency gates, and approval workflows that block implementation until specs are approved
 - **Open source, local, no lock-in**: everything is git-tracked markdown. No cloud service, no account required. MIT license.
 

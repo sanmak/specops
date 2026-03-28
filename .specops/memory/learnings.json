@@ -120,6 +120,21 @@
       "supersededBy": null,
       "discoveredAt": "2026-03-22T18:00:00Z",
       "resolvedAt": "2026-03-22T18:00:00Z"
+    },
+    {
+      "id": "L-dependency-introduction-gate-1",
+      "specId": "dependency-introduction-gate",
+      "category": "quality",
+      "severity": "medium",
+      "description": "Adversarial evaluation sub-agents score uniformly high (8/10) across all dimensions because they are the same LLM confirming its own work. Both plan-mode-blocking-enforcement and dependency-introduction-gate scored exactly 8/10 on all 4 dimensions despite acknowledged gaps (no unit tests for gate logic, no black-box testing of hook behavior, no registry API exercise). The evaluator notes gaps but rationalizes them instead of scoring lower. Fresh-context dispatch is insufficient to overcome structural self-confirmation bias.",
+      "resolution": null,
+      "preventionRule": "Do not rely on same-LLM adversarial evaluation as a quality gate. Uniform high scores (e.g., 8/10 across all dimensions) are a signal of self-confirmation bias, not actual quality. Evaluation scores from same-model sub-agents should be treated as advisory, not authoritative. Consider external validation, concrete test coverage metrics, or human review for actual quality assurance.",
+      "affectedFiles": ["core/evaluation.md"],
+      "reconsiderWhen": ["core/evaluation.md is rearchitected to use a different model or external evaluator for adversarial scoring"],
+      "supersedes": null,
+      "supersededBy": null,
+      "discoveredAt": "2026-03-28T00:00:00Z",
+      "resolvedAt": null
     }
   ]
 }

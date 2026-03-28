@@ -8,7 +8,7 @@
   "specopsCreatedWith": "1.7.0",
   "specopsUpdatedWith": "1.7.0",
   "author": {
-    "name": "sanketmakhija"
+    "name": "sanmak"
   },
   "reviewers": [],
   "reviewRounds": 0,
@@ -24,5 +24,8 @@
     "specDurationMinutes": 30
   },
   "specDependencies": [],
-  "relatedSpecs": ["workflow-enforcement-gates", "context-aware-dispatch"]
+  "relatedSpecs": [
+    "workflow-enforcement-gates",
+    "context-aware-dispatch"
+  ]
 }

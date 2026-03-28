@@ -46,7 +46,7 @@ Spec evaluation runs at the Phase 2 exit boundary — after Phase 2 produces spe
 | ----------- | ----------------- | ------------------ |
 | Criteria Testability | Are acceptance criteria specific, verifiable, and unambiguous? | 7+: each criterion has a binary observable outcome. Below 7: criteria use subjective terms ("works well", "fast enough") without measurable thresholds. |
 | Criteria Completeness | Do criteria cover happy path, edge cases, and error states? | 7+: happy path and at least 2 edge cases per requirement. Below 7: only happy path covered, or obvious failure modes missing. |
-| Design Coherence | Does the design address all requirements? Are decisions justified? | 7+: every requirement maps to a design element with rationale. Below 7: requirements without corresponding design, or decisions without rationale. |
+| Design Coherence | Does the design address all requirements? Are decisions justified? | 7+: every requirement maps to a design element with rationale; if design.md references new dependencies, a ### Dependency Decisions section is present with evaluated rationale. Below 7: requirements without corresponding design, decisions without rationale, or dependencies introduced without evaluation. |
 | Task Coverage | Do tasks cover all design components? Are dependencies ordered correctly? | 7+: every design component has at least one task, dependencies form a valid DAG. Below 7: design elements without tasks, or circular/missing dependencies. |
 
 **Spec evaluator prompt** (hardcoded — not configurable via `.specops.json`):
@@ -58,21 +58,32 @@ Check: Are criteria actually testable? Are edge cases covered? Does the design a
 every requirement? Are tasks properly scoped?
 Score honestly — a vague spec that passes review will produce a vague implementation.
 Do not rewrite the spec artifacts. Provide specific, actionable feedback only.
+
+STRUCTURAL RULES (mandatory, not guidelines):
+1. Evidence-first: For each dimension, list specific evidence (file paths, line references,
+   code quotes, section references) BEFORE assigning a score. The score must follow from
+   the evidence.
+2. Mandatory finding: Each dimension MUST identify at least one concrete finding (gap, risk,
+   or improvement opportunity). "No issues found" is not acceptable. If you cannot identify
+   a finding, your score for that dimension is capped at 7.
+3. Score variance: If all your dimension scores are identical, your evaluation auto-fails
+   and you must re-evaluate with distinct per-dimension justification.
 ```
 
 **Procedure:**
 
 1. READ_FILE the requirements file (requirements.md, bugfix.md, or refactor.md), design.md, and tasks.md.
 2. For each spec evaluation dimension:
-   - Assess against the scoring guidance in the table above.
-   - Assign a score (1-10 integer).
-   - Record specific evidence (quote or reference the artifact line).
-   - If below `config.implementation.evaluation.minScore`: write a concrete remediation instruction (e.g., "Acceptance criterion 3 uses 'works well' — specify a measurable threshold such as response time < 200ms").
-3. WRITE_FILE `<specsDir>/<spec-name>/evaluation.md` using the Evaluation Report Template. If the file already exists, append the new iteration (do not overwrite prior iterations).
-4. EDIT_FILE `<specsDir>/<spec-name>/spec.json` to update the `evaluation.spec` object with `iterations`, `passed`, `scores`, and `evaluatedAt`.
-5. If ALL dimensions score at or above `minScore`: evaluation passes — signal for Phase 3 dispatch.
-6. If ANY dimension scores below `minScore` AND current iteration < `maxIterations`: evaluation fails — signal for Phase 2 revision with evaluation.md feedback as input context.
-7. If ANY dimension scores below `minScore` AND current iteration >= `maxIterations`: NOTIFY_USER("Spec evaluation did not pass after {iterations} iterations. Proceeding to implementation with known spec gaps: {list of failing dimensions}.") and signal for Phase 3 dispatch with an incomplete evaluation flag.
+   a. List specific evidence: quote or reference the artifact section, line, or passage that is relevant to this dimension.
+   b. List findings: identify at least one concrete finding (gap, risk, or improvement opportunity) for this dimension. "No issues found" is not acceptable evidence.
+   c. Assign a score (1-10 integer) that follows from the evidence and findings above. If the findings list is empty or contains only "No issues found" or equivalent language, cap the score at 7 and append: "Score capped at 7 -- no concrete finding identified for this dimension."
+   d. If below `config.implementation.evaluation.minScore`: write a concrete remediation instruction (e.g., "Acceptance criterion 3 uses 'works well' -- specify a measurable threshold such as response time < 200ms").
+3. **Score variance check**: After all dimensions are scored, check whether all dimension scores are identical. If all scores are the same value, the evaluation auto-fails: record "Uniform scores detected -- re-evaluate with distinct per-dimension justification" and re-run the evaluation from step 2. This re-run does NOT consume a `maxIterations` cycle.
+4. WRITE_FILE `<specsDir>/<spec-name>/evaluation.md` using the Evaluation Report Template. If the file already exists, append the new iteration (do not overwrite prior iterations).
+5. EDIT_FILE `<specsDir>/<spec-name>/spec.json` to update the `evaluation.spec` object with `iterations`, `passed`, `scores`, and `evaluatedAt`.
+6. If ALL dimensions score at or above `minScore`: evaluation passes -- signal for Phase 3 dispatch.
+7. If ANY dimension scores below `minScore` AND current iteration < `maxIterations`: evaluation fails -- signal for Phase 2 revision with evaluation.md feedback as input context.
+8. If ANY dimension scores below `minScore` AND current iteration >= `maxIterations`: NOTIFY_USER("Spec evaluation did not pass after {iterations} iterations. Proceeding to implementation with known spec gaps: {list of failing dimensions}.") and signal for Phase 3 dispatch with an incomplete evaluation flag.
 
 **Spec evaluator safety rules:**
 
@@ -90,7 +101,7 @@ Implementation evaluation runs as Phase 4A — after Phase 3 completes but befor
 | Dimension | What it measures | Scoring guidance |
 | ----------- | ----------------- | ------------------ |
 | Functionality Depth | Full spec coverage, not just happy path | 7+: all acceptance criteria addressed with implementation evidence. Below 7: criteria checked without corresponding code, or happy-path-only implementation. |
-| Design Fidelity | Implementation matches design.md decisions | 7+: each design decision reflected in code. Below 7: design decisions ignored or contradicted without documented deviation. |
+| Design Fidelity | Implementation matches design.md decisions | 7+: each design decision reflected in code; all installed packages match the approved list in design.md ### Dependency Decisions. Below 7: design decisions ignored or contradicted without documented deviation, or packages installed that are not in the approved dependency list. |
 | Code Quality | Clean architecture, appropriate abstractions | 7+: no obvious code smells, functions focused, naming clear. Below 7: duplicated logic, unclear naming, overly complex control flow. |
 | Test Verification | Tests run and pass, adequate coverage | 7+: tests exist and pass for core functionality. Below 7: no tests, failing tests, or tests that do not exercise the implementation. |
 
@@ -120,6 +131,15 @@ Assume the implementation has flaws until proven otherwise.
 Do not take the implementer's word for anything — verify by reading code and running tests.
 Score honestly. 7 means "acceptable." 5 means "significant gaps." 3 means "broken."
 If you cannot verify a dimension (e.g., no tests exist to run), score lower, not higher.
+
+STRUCTURAL RULES (mandatory, not guidelines):
+1. Evidence-first: For each dimension, list specific evidence (file paths, line references,
+   code quotes, test output) BEFORE assigning a score. The score must follow from the evidence.
+2. Mandatory finding: Each dimension MUST identify at least one concrete finding (gap, risk,
+   or improvement opportunity). "No issues found" is not acceptable. If you cannot identify
+   a finding, your score for that dimension is capped at 7.
+3. Score variance: If all your dimension scores are identical, your evaluation auto-fails
+   and you must re-evaluate with distinct per-dimension justification.
 ```
 
 **Procedure:**
@@ -127,17 +147,18 @@ If you cannot verify a dimension (e.g., no tests exist to run), score lower, not
 1. READ_FILE the requirements file, design.md, tasks.md, and implementation.md.
 2. READ_FILE each file listed in the implementation.md Session Log "Files to Modify" entries to inspect the actual implementation.
 3. If `canExecuteCode` is true AND `config.implementation.evaluation.exerciseTests` is true: RUN_COMMAND to execute the project's test suite. Record test output (pass count, fail count, specific failures).
-4. If `canExecuteCode` is false: note "Tests not exercised — code review only" and cap the Test Verification dimension score at 7 (cannot verify higher without running tests).
+4. If `canExecuteCode` is false: note "Tests not exercised -- code review only" and cap the Test Verification dimension score at 7 (cannot verify higher without running tests).
 5. For each dimension (selected by spec type from the tables above):
-   - Assess against the scoring guidance.
-   - Assign a score (1-10 integer).
-   - Record specific evidence (file paths, line references, test output).
-   - If below `minScore`: write a concrete remediation instruction scoped to specific tasks and files.
-6. WRITE_FILE (or append to) `<specsDir>/<spec-name>/evaluation.md` with the implementation evaluation iteration. Append under the `## Implementation Evaluation` section.
-7. EDIT_FILE `<specsDir>/<spec-name>/spec.json` to update the `evaluation.implementation` object.
-8. If ALL dimensions score at or above `minScore`: evaluation passes — proceed to Phase 4C (completion steps).
-9. If ANY dimension scores below `minScore` AND current iteration < `maxIterations`: evaluation fails — signal Phase 4B (remediation).
-10. If ANY dimension scores below `minScore` AND current iteration >= `maxIterations`: NOTIFY_USER("Implementation evaluation did not pass after {iterations} iterations. Proceeding to completion with known quality gaps: {list of failing dimensions and scores}.") and proceed to Phase 4C.
+   a. List specific evidence: cite file paths, line references, code quotes, or test output that are relevant to this dimension.
+   b. List findings: identify at least one concrete finding (gap, risk, or improvement opportunity) for this dimension. "No issues found" is not acceptable evidence.
+   c. Assign a score (1-10 integer) that follows from the evidence and findings above. If the findings list is empty or contains only "No issues found" or equivalent language, cap the score at 7 and append: "Score capped at 7 -- no concrete finding identified for this dimension."
+   d. If below `minScore`: write a concrete remediation instruction scoped to specific tasks and files.
+6. **Score variance check**: After all dimensions are scored, check whether all dimension scores are identical. If all scores are the same value, the evaluation auto-fails: record "Uniform scores detected -- re-evaluate with distinct per-dimension justification" and re-run the evaluation from step 5. This re-run does NOT consume a `maxIterations` cycle.
+7. WRITE_FILE (or append to) `<specsDir>/<spec-name>/evaluation.md` with the implementation evaluation iteration. Append under the `## Implementation Evaluation` section.
+8. EDIT_FILE `<specsDir>/<spec-name>/spec.json` to update the `evaluation.implementation` object.
+9. If ALL dimensions score at or above `minScore`: evaluation passes -- proceed to Phase 4C (completion steps).
+10. If ANY dimension scores below `minScore` AND current iteration < `maxIterations`: evaluation fails -- signal Phase 4B (remediation).
+11. If ANY dimension scores below `minScore` AND current iteration >= `maxIterations`: NOTIFY_USER("Implementation evaluation did not pass after {iterations} iterations. Proceeding to completion with known quality gaps: {list of failing dimensions and scores}.") and proceed to Phase 4C.
 
 **Implementation evaluator safety rules:**
 

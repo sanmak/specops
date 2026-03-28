@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Plan mode blocking enforcement**: Upgraded ExitPlanMode hook from advisory to blocking using a marker file state machine. PostToolUse hook creates `.plan-pending-conversion` marker, PreToolUse Write|Edit guard blocks non-spec writes until `/specops from-plan` converts the plan and removes the marker. Both local (`install.sh`) and remote (`remote-install.sh`) installers updated. Marker file lifecycle documented in `core/from-plan.md` and `core/dispatcher.md`.
+
 ## [1.7.0] - 2026-03-27
 
 ### Added

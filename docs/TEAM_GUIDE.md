@@ -245,15 +245,15 @@ Total: 4 specs | 1 approved | 1 in-review | 1 draft | 1 implementing
 
 Review works across all platforms, with behavior adapted to each platform's capabilities.
 
-| Capability | Claude Code | Cursor | Codex | Copilot |
-| --- | --- | --- | --- | --- |
-| Spec creation + spec.json | Full | Full | Full | Full |
-| Interactive review (ask questions) | Yes | Yes | No | Yes |
-| Review feedback collection | Section-by-section | Section-by-section | All-in-prompt | Section-by-section |
-| Verdict selection | Interactive choice | Interactive choice | Parsed from prompt | Interactive choice |
-| Revision mode | Interactive guidance | Interactive guidance | Prompt-directed | Interactive guidance |
-| Implementation gate override | Ask user | Ask user | Hard stop | Ask user |
-| Progress tracking | TodoWrite tool | Chat responses | stdout | Chat responses |
+| Capability | Claude Code | Cursor | Codex | Copilot | Antigravity |
+| --- | --- | --- | --- | --- | --- |
+| Spec creation + spec.json | Full | Full | Full | Full | Full |
+| Interactive review (ask questions) | Yes | Yes | No | Yes | No |
+| Review feedback collection | Section-by-section | Section-by-section | All-in-prompt | Section-by-section | All-in-prompt |
+| Verdict selection | Interactive choice | Interactive choice | Parsed from prompt | Interactive choice | Parsed from prompt |
+| Revision mode | Interactive guidance | Interactive guidance | Prompt-directed | Interactive guidance | Prompt-directed |
+| Implementation gate override | Ask user | Ask user | Hard stop | Ask user | Hard stop |
+| Progress tracking | TodoWrite tool | Chat responses | stdout | Chat responses | stdout |
 
 ### Claude Code Examples
 

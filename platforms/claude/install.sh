@@ -116,8 +116,8 @@ else
   echo "WARNING: Installation may be incomplete - missing files in $INSTALL_DIR"
 fi
 
-# Install PostToolUse ExitPlanMode hook
-install_hook() {
+# Install PostToolUse ExitPlanMode hook and PreToolUse Write/Edit guard
+install_hooks() {
   local settings_file
 
   # Determine settings file based on installation scope
@@ -135,9 +135,8 @@ install_hook() {
 
   if ! command -v python3 >/dev/null 2>&1; then
     echo ""
-    echo "WARNING: python3 not found — cannot install ExitPlanMode hook automatically."
-    echo "To install manually, add this to $settings_file under hooks.PostToolUse:"
-    echo '  {"matcher": "ExitPlanMode", "hooks": [{"type": "command", "command": "test -f .specops.json && echo \"SPECOPS HOOK: ...\" # specops-hook"}]}'
+    echo "WARNING: python3 not found — cannot install hooks automatically."
+    echo "To install manually, add PostToolUse and PreToolUse hooks to $settings_file."
     return 0
   fi
 
@@ -162,30 +161,86 @@ if os.path.isfile(settings_file):
 else:
     settings = {}
 
-# Ensure hooks.PostToolUse array exists with correct types
+# Ensure hooks structure exists
 if not isinstance(settings.get("hooks"), dict):
     settings["hooks"] = {}
 if not isinstance(settings["hooks"].get("PostToolUse"), list):
     settings["hooks"]["PostToolUse"] = []
+if not isinstance(settings["hooks"].get("PreToolUse"), list):
+    settings["hooks"]["PreToolUse"] = []
 
-# Check for existing specops-hook marker (idempotent)
+# --- PostToolUse: marker-creating ExitPlanMode hook ---
+NEW_POST_CMD = (
+    'if [ -f .specops.json ]; then '
+    'SPECS_DIR=$(python3 -c "import json; print(json.load(open(\'.specops.json\')).get(\'specsDir\',\'.specops\'))" 2>/dev/null || echo ".specops"); '
+    'mkdir -p "$SPECS_DIR"; '
+    'touch "$SPECS_DIR/.plan-pending-conversion"; '
+    'echo "SPECOPS ENFORCEMENT: Plan approved. Marker set at $SPECS_DIR/.plan-pending-conversion. '
+    'Write/Edit on non-spec files is blocked until /specops from-plan converts the plan into a structured spec."; '
+    'fi # specops-hook'
+)
+
+# Find and replace existing specops-hook, or append
+found_post = False
 for entry in settings["hooks"]["PostToolUse"]:
     for hook in entry.get("hooks", []):
         if "specops-hook" in hook.get("command", ""):
-            print("ExitPlanMode hook already installed (skipped)")
-            exit(0)
+            hook["command"] = NEW_POST_CMD
+            found_post = True
+            print("Updated ExitPlanMode hook (replaced advisory with marker-creating version)")
+            break
+    if found_post:
+        break
 
-# Append the hook entry (Claude Code hooks schema: matcher + hooks array)
-hook_entry = {
-    "matcher": "ExitPlanMode",
-    "hooks": [
-        {
-            "type": "command",
-            "command": 'test -f .specops.json && echo "SPECOPS HOOK: A plan was just approved. This project uses SpecOps (.specops.json detected). Do NOT implement directly. Instead, run /specops from-plan to convert the plan into a structured spec before implementation. Implementing without a spec in a SpecOps-configured project is a protocol breach." # specops-hook'
-        }
-    ]
-}
-settings["hooks"]["PostToolUse"].append(hook_entry)
+if not found_post:
+    settings["hooks"]["PostToolUse"].append({
+        "matcher": "ExitPlanMode",
+        "hooks": [{"type": "command", "command": NEW_POST_CMD}]
+    })
+    print("Installed ExitPlanMode hook (marker-creating version)")
+
+# --- PreToolUse: Write/Edit guard ---
+NEW_PRE_CMD = (
+    "python3 -c \"\n"
+    "import json, sys, os\n"
+    "if not os.path.isfile('.specops.json'):\n"
+    "    sys.exit(0)\n"
+    "specs = json.load(open('.specops.json')).get('specsDir', '.specops')\n"
+    "marker = os.path.join(specs, '.plan-pending-conversion')\n"
+    "if not os.path.isfile(marker):\n"
+    "    sys.exit(0)\n"
+    "try:\n"
+    "    data = json.load(sys.stdin)\n"
+    "    fp = data.get('file_path', '')\n"
+    "except Exception:\n"
+    "    sys.exit(0)\n"
+    "allowed = [specs + '/', '.claude/plans/', '.claude/memory/']\n"
+    "if any(fp.startswith(a) for a in allowed):\n"
+    "    sys.exit(0)\n"
+    "print('SPECOPS ENFORCEMENT: A plan was approved but not yet converted to a spec.', file=sys.stderr)\n"
+    "print('Run /specops from-plan to convert the plan before implementing.', file=sys.stderr)\n"
+    "print(f'Blocked write to: {fp}', file=sys.stderr)\n"
+    "sys.exit(2)\n"
+    "\" # specops-plan-guard"
+)
+
+# Check for existing specops-plan-guard marker (idempotent)
+found_pre = False
+for entry in settings["hooks"]["PreToolUse"]:
+    for hook in entry.get("hooks", []):
+        if "specops-plan-guard" in hook.get("command", ""):
+            found_pre = True
+            print("PreToolUse Write/Edit guard already installed (skipped)")
+            break
+    if found_pre:
+        break
+
+if not found_pre:
+    settings["hooks"]["PreToolUse"].append({
+        "matcher": "Write|Edit",
+        "hooks": [{"type": "command", "command": NEW_PRE_CMD}]
+    })
+    print("Installed PreToolUse Write/Edit guard")
 
 # Write back with indent=2
 os.makedirs(os.path.dirname(settings_file) or ".", exist_ok=True)
@@ -193,11 +248,11 @@ with open(settings_file, "w") as f:
     json.dump(settings, f, indent=2)
     f.write("\n")
 
-print(f"Installed ExitPlanMode hook in {settings_file}")
+print(f"Hooks installed in {settings_file}")
 HOOK_PY
 }
 
-install_hook
+install_hooks
 
 # Update .specops.json with version metadata if it exists
 if [ -f ".specops.json" ] && command -v python3 >/dev/null 2>&1; then

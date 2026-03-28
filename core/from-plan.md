@@ -35,6 +35,8 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
 
    If none of the branches produced plan content (non-interactive platform, no inline content, no file path, no `planFileDirectory`): NOTIFY_USER: "From Plan mode requires the plan to be pasted inline or provided as a file path. Re-invoke with your plan content or path included in the request." and stop.
 
+   **Step 1.5 — Marker detection**: If FILE_EXISTS(`<specsDir>/.plan-pending-conversion`), NOTIFY_USER: "Plan-pending-conversion marker detected. Write/Edit on non-spec files is currently blocked by the PreToolUse guard. This marker will be removed after the post-conversion enforcement pass (step 6.5) succeeds, unblocking all writes."
+
 2. **Parse the plan**: Read through the plan content and identify sections using these keyword heuristics:
 
    | Plan signal | Keywords to look for |
@@ -83,7 +85,7 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
 
 6. **Gap-fill rule**: If a section could not be extracted (e.g., no acceptance criteria in the plan), add `[To be defined]` placeholder text rather than inventing content. Note the gap in the mapping summary.
 
-6.5. **Post-conversion enforcement pass (mandatory)**: After generating all spec artifacts, run the same structural checks the dispatcher's Pre-Phase-3 Enforcement Checklist defines. From-plan mode skips Phase 1 setup, so these checks verify and auto-remediate the structural prerequisites that Phase 1 would normally create. Skipping this enforcement pass is a protocol breach — from-plan specs must pass the same structural checks as dispatcher-routed specs before being declared ready for implementation.
+7. **Post-conversion enforcement pass (mandatory, formerly step 6.5)**: After generating all spec artifacts, run the same structural checks the dispatcher's Pre-Phase-3 Enforcement Checklist defines. From-plan mode skips Phase 1 setup, so these checks verify and auto-remediate the structural prerequisites that Phase 1 would normally create. Skipping this enforcement pass is a protocol breach — from-plan specs must pass the same structural checks as dispatcher-routed specs before being declared ready for implementation.
 
    Run all 8 checks in order. Auto-remediate where possible; STOP only when remediation fails or is not applicable.
 
@@ -117,9 +119,13 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
 
    8. **Spec dependency gate**: READ_FILE(`<specsDir>/<specName>/spec.json`) and check the `specDependencies` array. For each entry with `required: true`, READ_FILE(`<specsDir>/<entry.specId>/spec.json`) and verify `status == "completed"`. If any required dependency is not completed, NOTIFY_USER("Spec '<specName>' has unmet required dependency: '<entry.specId>' (status: <status>). Complete the dependency spec first.") and STOP. If `specDependencies` is absent or empty, this check passes trivially.
 
-   After all 8 checks pass, proceed to step 7.
+   After all 8 checks pass:
 
-1. **Complete**: Proceed to Phase 2 spec review gate (if `config.team.specReview.enabled` or `config.team.reviewRequired`) or NOTIFY_USER that the spec is ready and they can begin implementation.
+   **Remove plan-pending-conversion marker**: If FILE_EXISTS(`<specsDir>/.plan-pending-conversion`), RUN_COMMAND(`rm -f <specsDir>/.plan-pending-conversion`). NOTIFY_USER: "Plan-pending-conversion marker removed. Write/Edit on all files is now unblocked." If from-plan fails before this point, the marker persists and Write/Edit remains blocked until conversion succeeds.
+
+   Proceed to step 7.
+
+8. **Complete**: Proceed to Phase 2 spec review gate (if `config.team.specReview.enabled` or `config.team.reviewRequired`) or NOTIFY_USER that the spec is ready and they can begin implementation.
 
 ## Faithful Conversion Principle
 

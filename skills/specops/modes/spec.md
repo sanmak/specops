@@ -137,6 +137,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 5.5. **Coherence Verification**: After generating all spec files, cross-check for contradictions between spec sections. Use the Read tool to read the requirements/bugfix/refactor file and design.md. Extract numeric constraints from NFRs (performance targets, SLAs, limits) and verify they do not contradict functional requirements or design decisions. Record the result in implementation.md under `## Phase 1 Context Summary` as a `- Coherence check: [pass / N contradiction(s) found — details]` entry. If contradictions are found, Display a message to the user with the specifics before proceeding.
 5.6. **Vocabulary Verification**: If the detected vertical is not `backend`, `fullstack`, or `frontend`, and no custom template is used, scan generated spec files for prohibited default terms (see the Vocabulary Verification subsection in the Vertical Adaptation Rules module). Replace any found terms with vertical-specific vocabulary. Record the result in implementation.md Phase 1 Context Summary.
 5.7. **Code-grounded plan validation**: If `config.implementation.validateReferences` is not `"off"`, validate file paths and code references in design.md and tasks.md against the codebase following the Code-Grounded Plan Validation module. Use the repo map (loaded in Phase 1 step 3.5) as the primary reference. Record the result in implementation.md Phase 1 Context Summary.
+5.8. **Dependency introduction gate**: Execute the Phase 2 Gate Procedure from the Dependency Introduction Gate module (`core/dependency-introduction.md`). Scan design.md for install commands and new package references, compare against the Detected Dependencies in `dependencies.md`, evaluate net-new dependencies using the Build-vs-Install framework and Maintenance Profile Intelligence, surface each to the user via Use the AskUserQuestion tool, and record all decisions in design.md under `### Dependency Decisions`. Update the Dependency Introduction Policy in `dependencies.md`. If no new dependencies are found, the gate passes trivially. This gate is always active -- there is no config switch to disable it.
 6. **External issue creation (mandatory when taskTracking configured)**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. Use the Read tool to read `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`. For each eligible task, compose the issue body using the Issue Body Composition template (reading spec artifacts for context), create issues via the Issue Creation Protocol (with labels for GitHub), and write IssueIDs back to `tasks.md`. If issue creation is skipped or all IssueIDs remain `None`, the Phase 3 task tracking gate will catch the omission — the spec artifact linter validates IssueIDs on completed specs and fails CI when they are missing.
 6.5. **Dependency safety gate (mandatory)**: If `config.dependencySafety.enabled` is not `false` (default: true), execute the dependency safety verification following the Dependency Safety module. This is a Phase 2 completion gate — specs cannot proceed to review or implementation without passing. Skipping this gate when dependency safety is enabled is a protocol breach.
 6.7. **Git checkpoint (spec-created)**: If `config.implementation.gitCheckpointing` is true for this run, commit spec artifacts following the Git Checkpointing module: Use the Bash tool to run(`git add <specsDir>/<spec-name>/`) then Use the Bash tool to run(`git commit -m "specops(checkpoint): spec-created -- <spec-name>"`). If the commit fails, Display a message to the user and continue.
@@ -157,6 +158,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - **Dependency gate (always runs)**: Run the Phase 3 Dependency Gate from the Spec Decomposition module (`core/decomposition.md` section 7). Use the Read tool to read the spec's `spec.json` and check its `specDependencies` array. For each `required: true` dependency, verify the dependency spec has `status == "completed"`. If any required dependency is not completed, STOP — present the Scope Hammering options from `core/decomposition.md` section 8. For `required: false` (advisory) dependencies, Display a message to the user with a warning and continue. Run cycle detection as a safety net. **Skipping the dependency gate is a protocol breach** — it runs unconditionally for every spec, even specs with no dependencies (gate passes trivially when `specDependencies` is empty or absent).
    - **Review gate**: If spec review is enabled, verify `spec.json` status is `approved` or `self-approved` before proceeding (see the Implementation Gate section in the Collaborative Spec Review module for interactive override behavior when the spec is not yet approved).
    - **Task tracking gate**: If `config.team.taskTracking` is not `"none"`, verify external issue creation following the Task Tracking Gate in the Configuration Handling module. This gate is mandatory when task tracking is configured — skipping it is a protocol breach.
+   - **Dependency introduction enforcement (always runs)**: Throughout Phase 3, enforce the Phase 3 Spec Adherence rules from the Dependency Introduction Gate module (`core/dependency-introduction.md`). Before executing any install command (npm install, pip install, cargo add, etc.), verify the target package appears in design.md `### Dependency Decisions` with `Decision: Approved`. Unapproved installs are a protocol breach. After all tasks complete, run the post-Phase-3 verification to confirm all approved dependencies were installed.
    - After all gates pass, update status to `implementing`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (Use the Bash tool to run(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`.
 2. **Determine execution strategy**: Check if task delegation is active (see the Task Delegation module — computes a complexity score against `config.implementation.delegationThreshold` and checks platform capability `canDelegateTask`). If delegation is active, execute tasks using the delegation protocol (orchestrator dispatches each task to a fresh context). If delegation is not active, execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions).
 3. For each task: set `In Progress` in tasks.md FIRST (following Write Ordering Protocol), then if `config.team.taskTracking` is not `"none"` and the task has a valid IssueID, sync the status to the external tracker (see Status Sync in the Configuration Handling module). Skipping Status Sync when taskTracking is configured and the task has a valid IssueID is a protocol breach — the external tracker must reflect the current task state. Sync failures are non-blocking (warn and continue), but sync omissions are not. When task delegation is active, the orchestrator handles Status Sync (see Task Delegation module step 5a.6). Then implement, then report progress.
@@ -924,6 +926,19 @@ _generatedAt: "YYYY-MM-DDTHH:MM:SSZ"
 ## Known Accepted Risks
 
 [Team-maintained: acknowledged vulnerabilities with justification]
+
+## Dependency Introduction Policy
+
+**Default stance:** [conservative|moderate] ([vertical] vertical)
+**Primary ecosystem:** [detected from indicator files]
+
+### Approved Patterns
+
+[Auto-populated by the dependency introduction gate -- accumulated from approved dependency decisions across specs]
+
+### Rejected Patterns
+
+[Auto-populated by the dependency introduction gate -- accumulated from rejected dependencies with reasons]
 ```
 
 ### Steering Command
@@ -4035,7 +4050,7 @@ The specs directory (<specsDir>) does not exist. Create your first spec to get s
 
 ## Audit Mode
 
-SpecOps `audit` detects drift between spec artifacts and the live codebase. It runs 6 checks and produces a health report. `reconcile` guides interactive repair of findings.
+SpecOps `audit` detects drift between spec artifacts and the live codebase. It runs 7 checks and produces a health report. `reconcile` guides interactive repair of findings.
 
 ### Mode Detection
 
@@ -4055,11 +4070,11 @@ If neither pattern matches, continue to interview check and the standard phases.
 3. For each target spec:
    a. If Use the Bash tool to check if the file exists at(`<specsDir>/<name>/spec.json`), Use the Read tool to read(`<specsDir>/<name>/spec.json`) to load metadata. If not found, Display a message to the user(`"Spec '<name>' not found in <specsDir>. Run '/specops list' to see available specs."`) and stop.
    b. If Use the Bash tool to check if the file exists at(`<specsDir>/<name>/tasks.md`), Use the Read tool to read(`<specsDir>/<name>/tasks.md`) to load tasks.
-   c. Run the 6 drift checks below. Record each result as `Healthy`, `Warning`, or `Drift`.
+   c. Run the 7 drift checks below. Record each result as `Healthy`, `Warning`, or `Drift`.
    d. Overall health = worst result across all checks.
 4. Present the Audit Report (format below).
 
-### Six Drift Checks
+### Seven Drift Checks
 
 ### File Drift
 
@@ -4126,9 +4141,30 @@ Validate cross-spec dependency integrity.
 
 - If no issues found across all three sub-checks → **Healthy**
 
+### Dependency Drift
+
+Detect packages installed in the project that were not approved in any spec's dependency decisions.
+
+1. **Detect ecosystems**: Use the Dependency Detection Protocol from `core/dependency-safety.md` to identify which ecosystems are present (scan for indicator files: `package-lock.json`, `requirements.txt`, `Cargo.lock`, etc.).
+
+2. **Collect installed packages**: For each detected ecosystem, Use the Read tool to read the lock file and extract the list of installed package names:
+   - Node.js: Use the Read tool to read(`package-lock.json`) or Use the Read tool to read(`yarn.lock`) -- extract package names from the `dependencies` or `packages` sections
+   - Python: Use the Read tool to read(`requirements.txt`) -- extract package names (one per line, strip version specifiers)
+   - Rust: Use the Read tool to read(`Cargo.lock`) -- extract `name` fields from `[[package]]` sections
+   - Ruby: Use the Read tool to read(`Gemfile.lock`) -- extract package names from the `GEM > specs` section
+   - Go: Use the Read tool to read(`go.sum`) -- extract module paths
+   - PHP: Use the Read tool to read(`composer.lock`) -- extract `name` fields from `packages` array
+   - Java/Kotlin: Use the Read tool to read(`pom.xml`) or Use the Read tool to read(`build.gradle`) -- extract dependency names
+
+3. **Collect approved dependencies**: Use the Read tool to read(`<specsDir>/index.json`) to enumerate all specs. For each spec with `status == "completed"`, Use the Read tool to read(`<specsDir>/<spec-name>/design.md`) and extract packages from the `### Dependency Decisions` table where `Decision` is `Approved`. Build a union set of all approved packages across all completed specs.
+
+4. **Compare**: For each installed package, check if it appears in the approved union set. If a package is installed but not in any spec's approved list → **Warning** (not Drift, since it may be a pre-existing dependency that predates SpecOps adoption or was added to the project before dependency introduction tracking began).
+
+5. If no unapproved packages found → **Healthy**
+
 ### Health Summary
 
-Overall health = worst result across all 6 checks (Drift > Warning > Healthy).
+Overall health = worst result across all 7 checks (Drift > Warning > Healthy).
 
 Report each check as:
 
@@ -4140,6 +4176,7 @@ Report each check as:
 | Staleness | Healthy / Warning / Drift | N days since last activity |
 | Cross-Spec Conflicts | Healthy / Warning | N shared files |
 | Dependency Health | Healthy / Warning / Drift | N dependency issues |
+| Dependency Drift | Healthy / Warning | N unapproved packages |
 
 **Overall Health**: Healthy / Warning / Drift
 
@@ -4163,6 +4200,8 @@ Only show the **Findings** section for non-Healthy checks.
 | Task Consistency | Warning | Task 3 marked Completed, 1 file missing |
 | Staleness | Healthy | 2 days since last activity |
 | Cross-Spec Conflicts | Healthy | No shared files |
+| Dependency Health | Healthy | 0 dependency issues |
+| Dependency Drift | Healthy | 0 unapproved packages |
 
 **Overall Health**: Warning
 
@@ -4200,7 +4239,7 @@ Guided interactive repair for drifted specs. Available only on platforms with `c
 1. If Use the Bash tool to check if the file exists at(`.specops.json`), Use the Read tool to read(`.specops.json`) to get `specsDir`; otherwise use default `.specops`
 2. Parse target spec name from the request. Reconcile requires a target — if no name given, Display a message to the user(`"Reconcile requires a specific spec name. Example: 'reconcile <spec-name>'. Run 'audit' to see all specs."`) and stop.
 3. **Platform check**: If `canAskInteractive` is false, Display a message to the user(`"Reconcile mode requires interactive input. Run audit to see findings. Manual fixes can be applied to tasks.md and spec.json directly."`) and stop.
-4. Run full audit on the target spec (all 6 checks).
+4. Run full audit on the target spec (all 7 checks).
 5. If all checks Healthy → Display a message to the user(`"No drift detected in <spec-name>. No reconciliation needed."`) and stop.
 6. Present numbered findings list to the user.
 7. Prompt the user: "Which findings to fix? Enter 'all', comma-separated numbers (e.g. '1,3'), or 'skip' to exit."
@@ -4281,6 +4320,8 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
 
    If none of the branches produced plan content (non-interactive platform, no inline content, no file path, no `planFileDirectory`): Display a message to the user: "From Plan mode requires the plan to be pasted inline or provided as a file path. Re-invoke with your plan content or path included in the request." and stop.
 
+   **Step 1.5 — Marker detection**: If Use the Bash tool to check if the file exists at(`<specsDir>/.plan-pending-conversion`), Display a message to the user: "Plan-pending-conversion marker detected. Write/Edit on non-spec files is currently blocked by the PreToolUse guard. This marker will be removed after the post-conversion enforcement pass (step 6.5) succeeds, unblocking all writes."
+
 2. **Parse the plan**: Read through the plan content and identify sections using these keyword heuristics:
 
    | Plan signal | Keywords to look for |
@@ -4329,7 +4370,7 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
 
 6. **Gap-fill rule**: If a section could not be extracted (e.g., no acceptance criteria in the plan), add `[To be defined]` placeholder text rather than inventing content. Note the gap in the mapping summary.
 
-6.5. **Post-conversion enforcement pass (mandatory)**: After generating all spec artifacts, run the same structural checks the dispatcher's Pre-Phase-3 Enforcement Checklist defines. From-plan mode skips Phase 1 setup, so these checks verify and auto-remediate the structural prerequisites that Phase 1 would normally create. Skipping this enforcement pass is a protocol breach — from-plan specs must pass the same structural checks as dispatcher-routed specs before being declared ready for implementation.
+7. **Post-conversion enforcement pass (mandatory, formerly step 6.5)**: After generating all spec artifacts, run the same structural checks the dispatcher's Pre-Phase-3 Enforcement Checklist defines. From-plan mode skips Phase 1 setup, so these checks verify and auto-remediate the structural prerequisites that Phase 1 would normally create. Skipping this enforcement pass is a protocol breach — from-plan specs must pass the same structural checks as dispatcher-routed specs before being declared ready for implementation.
 
    Run all 8 checks in order. Auto-remediate where possible; STOP only when remediation fails or is not applicable.
 
@@ -4363,9 +4404,13 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
 
    8. **Spec dependency gate**: Use the Read tool to read(`<specsDir>/<specName>/spec.json`) and check the `specDependencies` array. For each entry with `required: true`, Use the Read tool to read(`<specsDir>/<entry.specId>/spec.json`) and verify `status == "completed"`. If any required dependency is not completed, Display a message to the user("Spec '<specName>' has unmet required dependency: '<entry.specId>' (status: <status>). Complete the dependency spec first.") and STOP. If `specDependencies` is absent or empty, this check passes trivially.
 
-   After all 8 checks pass, proceed to step 7.
+   After all 8 checks pass:
 
-1. **Complete**: Proceed to Phase 2 spec review gate (if `config.team.specReview.enabled` or `config.team.reviewRequired`) or Display a message to the user that the spec is ready and they can begin implementation.
+   **Remove plan-pending-conversion marker**: If Use the Bash tool to check if the file exists at(`<specsDir>/.plan-pending-conversion`), Use the Bash tool to run(`rm -f <specsDir>/.plan-pending-conversion`). Display a message to the user: "Plan-pending-conversion marker removed. Write/Edit on all files is now unblocked." If from-plan fails before this point, the marker persists and Write/Edit remains blocked until conversion succeeds.
+
+   Proceed to step 7.
+
+8. **Complete**: Proceed to Phase 2 spec review gate (if `config.team.specReview.enabled` or `config.team.reviewRequired`) or Display a message to the user that the spec is ready and they can begin implementation.
 
 ## Faithful Conversion Principle
 
@@ -4831,6 +4876,192 @@ Read `config.dependencySafety` and apply defaults for any missing fields:
 - **`autoFix`** (boolean, default `false`): Attempt automatic remediation (e.g., `npm audit fix`) before re-evaluating.
 - **`allowedAdvisories`** (string array, default `[]`): CVE IDs that are acknowledged and excluded from blocking. Maximum 50 entries.
 - **`scanScope`** (string, default `"spec"`): Scope of the dependency scan. `"spec"` scans only ecosystems relevant to the current spec's affected files. `"project"` scans all detected ecosystems.
+
+
+## Dependency Introduction Gate
+
+LLMs casually install packages during implementation without evaluating alternatives or checking project conventions. The dependency introduction gate ensures all new dependency decisions happen during spec creation (Phase 2) and that Phase 3 only installs what the spec approved. This complements the existing Dependency Safety module (CVE/EOL audit) by controlling *which* dependencies enter the project, not just whether existing ones are safe.
+
+The gate is always active. There are no config knobs, no bypass, and no `enabled: false` switch. If a spec has no new dependencies, the gate passes trivially.
+
+### Install Command Patterns
+
+Detect install commands across supported ecosystems. These patterns are used in Phase 2 (scanning design.md) and Phase 3 (enforcement before execution).
+
+| Ecosystem | Install Command Patterns | Lock File |
+| --- | --- | --- |
+| Node.js | `npm install`, `npm i`, `yarn add`, `pnpm add`, `npx` | `package-lock.json` / `yarn.lock` / `pnpm-lock.yaml` |
+| Python | `pip install`, `pip3 install`, `poetry add`, `pipenv install`, `uv add` | `requirements.txt` / `Pipfile.lock` / `poetry.lock` |
+| Rust | `cargo add`, `cargo install` | `Cargo.lock` |
+| Ruby | `gem install`, `bundle add` | `Gemfile.lock` |
+| Go | `go get`, `go install` | `go.sum` |
+| PHP | `composer require` | `composer.lock` |
+| Java/Kotlin | Maven/Gradle dependency additions (manual `pom.xml` or `build.gradle` edits) | `pom.xml` / `build.gradle` |
+
+### Build-vs-Install Evaluation Framework
+
+For each new dependency identified, evaluate against these 5 criteria before recommending approval or rejection:
+
+| # | Criterion | Question | Approve Signal | Reject Signal |
+| --- | --- | --- | --- | --- |
+| 1 | Scope Match | Does the package solve the exact problem needed? | Package's primary purpose aligns with the requirement | Package is a large toolkit and only a small utility is needed |
+| 2 | Maintenance Health | Is the package actively maintained? | Regular releases, responsive issues, active contributors | No releases in 12+ months, unresolved critical issues, single maintainer with no activity |
+| 3 | Size Proportionality | Is the package size proportionate to the value it provides? | Small footprint relative to the functionality gained | Large dependency tree for a simple utility (e.g., full lodash for one function) |
+| 4 | Security Surface | Does the package expand the project's attack surface? | Minimal transitive dependencies, no native bindings, no network access | Extensive transitive tree, native code compilation, ambient network access |
+| 5 | License Compatibility | Is the package license compatible with the project? | MIT, Apache-2.0, BSD, or project-compatible license | GPL (if project is not GPL), SSPL, or unknown license |
+
+**Evaluation output format** (presented to user via Use the AskUserQuestion tool):
+
+```text
+Dependency Evaluation: <package-name>@<version> (<ecosystem>)
+
+1. Scope Match:        [Good/Acceptable/Poor] - <brief reason>
+2. Maintenance Health: [Good/Acceptable/Poor] - <metrics summary>
+3. Size Proportionality: [Good/Acceptable/Poor] - <size/dep count>
+4. Security Surface:   [Good/Acceptable/Poor] - <transitive dep count, native bindings>
+5. License:            [Good/Acceptable/Poor] - <license name>
+
+Recommendation: [Approve / Reject / Needs Discussion]
+Rationale: <1-2 sentence summary>
+```
+
+### Maintenance Profile Intelligence
+
+Assess dependency maintenance health using a 3-layer approach. Each layer compensates for the previous layer's failures.
+
+**Layer 1 -- Registry APIs:**
+
+Query the package registry for download statistics and publish activity:
+
+- Node.js: Use the Bash tool to run(`curl -s --max-time 10 "https://registry.npmjs.org/<package>"`) -- extract `time.modified`, version count, latest version date
+- Python: Use the Bash tool to run(`curl -s --max-time 10 "https://pypi.org/pypi/<package>/json"`) -- extract `info.version`, `releases` dates
+- Other ecosystems: skip Layer 1, fall through to Layer 2
+
+If the request times out or returns an error, Display a message to the user("Registry query failed for <package> -- falling through to source repo check.") and proceed to Layer 2.
+
+**Layer 2 -- Source Repository APIs:**
+
+Query the source repository for activity metrics:
+
+- If the package metadata includes a repository URL pointing to GitHub: Use the Bash tool to run(`curl -s --max-time 10 "https://api.github.com/repos/<owner>/<repo>"`) -- extract `stargazers_count`, `pushed_at`, `open_issues_count`
+- If no repository URL or not on GitHub: skip to Layer 3
+
+If the request times out or returns an error, Display a message to the user("Source repo query failed for <package> -- falling through to LLM assessment.") and proceed to Layer 3.
+
+**Layer 3 -- LLM Knowledge Fallback:**
+
+Use training data knowledge to assess the dependency:
+
+- Assess known maintenance status, popularity, and common alternatives
+- Every assessment from this layer MUST be annotated: "(based on training data -- may not reflect current status)"
+- The gate still runs -- it never silently passes
+
+### Phase 2 Gate Procedure (Step 5.8)
+
+**Dependency Introduction Gate -- runs after code-grounded plan validation (step 5.7), before external issue creation (step 6).**
+
+Procedure:
+
+1. Use the Read tool to read(`<specsDir>/<spec-name>/design.md`) and scan for:
+   - Explicit install commands matching the Install Command Patterns table
+   - Package names referenced in code examples, import statements, or dependency listings
+   - References to external libraries, frameworks, or tools not already in the project
+
+2. Use the Read tool to read(`<specsDir>/steering/dependencies.md`) to get the Detected Dependencies list (auto-populated by the dependency safety gate).
+
+3. Compare the packages found in design.md against the Detected Dependencies. Identify **net-new dependencies** -- packages that appear in design.md but are not in the Detected Dependencies list. If no net-new dependencies are found, the gate passes -- record "No new dependencies introduced" in design.md and proceed.
+
+4. For each net-new dependency (maximum 10):
+   a. Run Maintenance Profile Intelligence (3-layer assessment)
+   b. Run Build-vs-Install Evaluation Framework (5 criteria)
+   c. Use the AskUserQuestion tool with the evaluation output, asking for approval or rejection:
+      - "Approve: add <package> as an approved dependency for this spec"
+      - "Reject: build the functionality in-house instead"
+
+5. Record all decisions in design.md by adding or updating a `### Dependency Decisions` section:
+
+   ```markdown
+   ### Dependency Decisions
+
+   | Package | Version | Ecosystem | Decision | Rationale |
+   | ------- | ------- | --------- | -------- | --------- |
+   | <name>  | <ver>   | <eco>     | Approved/Rejected | <evaluation summary> |
+   ```
+
+6. Use the Edit tool to modify(`<specsDir>/<spec-name>/design.md`) to write the Dependency Decisions table.
+
+7. Update the Dependency Introduction Policy in dependencies.md (see Auto-Intelligence Policy Generation).
+
+### Phase 3 Spec Adherence Enforcement
+
+**MANDATORY enforcement rule for Phase 3 implementation.** This runs as part of the implementation gates (Phase 3 step 1).
+
+**Pre-install verification:**
+
+WHEN the agent is about to execute any command matching the Install Command Patterns table (npm install, pip install, cargo add, etc.), the agent MUST:
+
+1. Use the Read tool to read(`<specsDir>/<spec-name>/design.md`) and locate the `### Dependency Decisions` section
+2. Verify the target package appears in the Dependency Decisions table with `Decision: Approved`
+3. If approved: proceed with the install command
+4. If NOT approved (missing from table, or Decision is Rejected): this is a **protocol breach**. Display a message to the user("Protocol breach: attempting to install unapproved dependency '<package>'. This package is not listed in design.md ### Dependency Decisions. Options: (1) Add it to the spec by re-running the dependency introduction gate, (2) Remove the install and build the functionality in-house.") and HALT until the user resolves the situation.
+
+**No Dependency Decisions section:** If design.md has no `### Dependency Decisions` section, any install command is a protocol breach -- the dependency introduction gate was skipped or the spec predates this feature. For backward compatibility with pre-existing specs (specs with `specopsCreatedWith` earlier than the version that introduced this gate): Display a message to the user with a warning but allow the install to proceed. For specs created with the current version or later: enforce as a protocol breach.
+
+**Post-Phase-3 verification:**
+
+After all tasks are completed but before Phase 3 exit:
+
+1. Use the Read tool to read(`<specsDir>/<spec-name>/design.md`) and extract all packages with `Decision: Approved` from the Dependency Decisions table
+2. For each approved package, verify it was actually installed by checking the project's manifest or lock files
+3. If an approved package was NOT installed: Display a message to the user("Warning: dependency '<package>' was approved in design.md but was not installed during implementation. This may indicate a phantom approval or a change in approach. Please confirm this is intentional.") -- this is a warning, not a blocking error
+
+### Auto-Intelligence Policy Generation
+
+The Dependency Introduction Policy accumulates governance intelligence in the `dependencies.md` steering file across spec runs.
+
+**First-run creation:**
+
+WHEN the dependency introduction gate runs and `dependencies.md` does not contain a `## Dependency Introduction Policy` section:
+
+1. Detect the project's primary ecosystem from indicator files (same detection as Dependency Safety module)
+2. Determine the default policy stance based on the project vertical:
+   - `builder` or `library` vertical: **conservative** (prefer building over installing)
+   - All other verticals: **moderate** (evaluate case-by-case)
+3. Use the Edit tool to modify(`<specsDir>/steering/dependencies.md`) to add:
+
+```markdown
+## Dependency Introduction Policy
+
+**Default stance:** <conservative|moderate> (<vertical> vertical)
+**Primary ecosystem:** <ecosystem> (detected from <indicator file>)
+
+### Approved Patterns
+
+[Accumulated from approved dependency decisions across specs]
+
+### Rejected Patterns
+
+[Accumulated from rejected dependencies with reasons]
+```
+
+**Decision pattern accumulation:**
+
+WHEN a dependency decision is made (approved or rejected):
+
+- For approved dependencies: Use the Edit tool to modify to add an entry under `### Approved Patterns` with the package category and rationale (e.g., "HTTP server frameworks: approved when scope requires request handling")
+- For rejected dependencies: Use the Edit tool to modify to add an entry under `### Rejected Patterns` with the rejection reason (e.g., "Utility libraries for single functions: prefer native/built-in alternatives")
+
+**Team-section preservation:**
+
+The agent MUST preserve all existing sections in dependencies.md when updating. The Dependency Introduction Policy section is appended after the existing team-maintained sections. Existing content (Detected Dependencies, Runtime & Framework Status, Approved Versions, Banned Libraries, Migration Timelines, Known Accepted Risks) must not be modified by this gate.
+
+### Platform Adaptation
+
+All supported platforms have `canExecuteCode: true`, so the full registry API + curl workflow is available everywhere.
+
+- **`canAskInteractive = true`** (Claude Code, Cursor, Copilot): Present Build-vs-Install evaluation and ask user for approval/rejection of each new dependency.
+- **`canAskInteractive = false`** (Codex): Present the evaluation and default to the recommendation. Record the recommendation as the decision. Display a message to the user with the full evaluation output so the user can review.
+- **`canTrackProgress = false`** (Cursor, Codex, Copilot): Report gate progress in text output rather than a progress tracker.
 
 
 ## Production Learnings
@@ -5384,7 +5615,7 @@ Spec evaluation runs at the Phase 2 exit boundary — after Phase 2 produces spe
 | ----------- | ----------------- | ------------------ |
 | Criteria Testability | Are acceptance criteria specific, verifiable, and unambiguous? | 7+: each criterion has a binary observable outcome. Below 7: criteria use subjective terms ("works well", "fast enough") without measurable thresholds. |
 | Criteria Completeness | Do criteria cover happy path, edge cases, and error states? | 7+: happy path and at least 2 edge cases per requirement. Below 7: only happy path covered, or obvious failure modes missing. |
-| Design Coherence | Does the design address all requirements? Are decisions justified? | 7+: every requirement maps to a design element with rationale. Below 7: requirements without corresponding design, or decisions without rationale. |
+| Design Coherence | Does the design address all requirements? Are decisions justified? | 7+: every requirement maps to a design element with rationale; if design.md references new dependencies, a ### Dependency Decisions section is present with evaluated rationale. Below 7: requirements without corresponding design, decisions without rationale, or dependencies introduced without evaluation. |
 | Task Coverage | Do tasks cover all design components? Are dependencies ordered correctly? | 7+: every design component has at least one task, dependencies form a valid DAG. Below 7: design elements without tasks, or circular/missing dependencies. |
 
 **Spec evaluator prompt** (hardcoded — not configurable via `.specops.json`):
@@ -5396,21 +5627,32 @@ Check: Are criteria actually testable? Are edge cases covered? Does the design a
 every requirement? Are tasks properly scoped?
 Score honestly — a vague spec that passes review will produce a vague implementation.
 Do not rewrite the spec artifacts. Provide specific, actionable feedback only.
+
+STRUCTURAL RULES (mandatory, not guidelines):
+1. Evidence-first: For each dimension, list specific evidence (file paths, line references,
+   code quotes, section references) BEFORE assigning a score. The score must follow from
+   the evidence.
+2. Mandatory finding: Each dimension MUST identify at least one concrete finding (gap, risk,
+   or improvement opportunity). "No issues found" is not acceptable. If you cannot identify
+   a finding, your score for that dimension is capped at 7.
+3. Score variance: If all your dimension scores are identical, your evaluation auto-fails
+   and you must re-evaluate with distinct per-dimension justification.
 ```
 
 **Procedure:**
 
 1. Use the Read tool to read the requirements file (requirements.md, bugfix.md, or refactor.md), design.md, and tasks.md.
 2. For each spec evaluation dimension:
-   - Assess against the scoring guidance in the table above.
-   - Assign a score (1-10 integer).
-   - Record specific evidence (quote or reference the artifact line).
-   - If below `config.implementation.evaluation.minScore`: write a concrete remediation instruction (e.g., "Acceptance criterion 3 uses 'works well' — specify a measurable threshold such as response time < 200ms").
-3. Use the Write tool to create `<specsDir>/<spec-name>/evaluation.md` using the Evaluation Report Template. If the file already exists, append the new iteration (do not overwrite prior iterations).
-4. Use the Edit tool to modify `<specsDir>/<spec-name>/spec.json` to update the `evaluation.spec` object with `iterations`, `passed`, `scores`, and `evaluatedAt`.
-5. If ALL dimensions score at or above `minScore`: evaluation passes — signal for Phase 3 dispatch.
-6. If ANY dimension scores below `minScore` AND current iteration < `maxIterations`: evaluation fails — signal for Phase 2 revision with evaluation.md feedback as input context.
-7. If ANY dimension scores below `minScore` AND current iteration >= `maxIterations`: Display a message to the user("Spec evaluation did not pass after {iterations} iterations. Proceeding to implementation with known spec gaps: {list of failing dimensions}.") and signal for Phase 3 dispatch with an incomplete evaluation flag.
+   a. List specific evidence: quote or reference the artifact section, line, or passage that is relevant to this dimension.
+   b. List findings: identify at least one concrete finding (gap, risk, or improvement opportunity) for this dimension. "No issues found" is not acceptable evidence.
+   c. Assign a score (1-10 integer) that follows from the evidence and findings above. If the findings list is empty or contains only "No issues found" or equivalent language, cap the score at 7 and append: "Score capped at 7 -- no concrete finding identified for this dimension."
+   d. If below `config.implementation.evaluation.minScore`: write a concrete remediation instruction (e.g., "Acceptance criterion 3 uses 'works well' -- specify a measurable threshold such as response time < 200ms").
+3. **Score variance check**: After all dimensions are scored, check whether all dimension scores are identical. If all scores are the same value, the evaluation auto-fails: record "Uniform scores detected -- re-evaluate with distinct per-dimension justification" and re-run the evaluation from step 2. This re-run does NOT consume a `maxIterations` cycle.
+4. Use the Write tool to create `<specsDir>/<spec-name>/evaluation.md` using the Evaluation Report Template. If the file already exists, append the new iteration (do not overwrite prior iterations).
+5. Use the Edit tool to modify `<specsDir>/<spec-name>/spec.json` to update the `evaluation.spec` object with `iterations`, `passed`, `scores`, and `evaluatedAt`.
+6. If ALL dimensions score at or above `minScore`: evaluation passes -- signal for Phase 3 dispatch.
+7. If ANY dimension scores below `minScore` AND current iteration < `maxIterations`: evaluation fails -- signal for Phase 2 revision with evaluation.md feedback as input context.
+8. If ANY dimension scores below `minScore` AND current iteration >= `maxIterations`: Display a message to the user("Spec evaluation did not pass after {iterations} iterations. Proceeding to implementation with known spec gaps: {list of failing dimensions}.") and signal for Phase 3 dispatch with an incomplete evaluation flag.
 
 **Spec evaluator safety rules:**
 
@@ -5428,7 +5670,7 @@ Implementation evaluation runs as Phase 4A — after Phase 3 completes but befor
 | Dimension | What it measures | Scoring guidance |
 | ----------- | ----------------- | ------------------ |
 | Functionality Depth | Full spec coverage, not just happy path | 7+: all acceptance criteria addressed with implementation evidence. Below 7: criteria checked without corresponding code, or happy-path-only implementation. |
-| Design Fidelity | Implementation matches design.md decisions | 7+: each design decision reflected in code. Below 7: design decisions ignored or contradicted without documented deviation. |
+| Design Fidelity | Implementation matches design.md decisions | 7+: each design decision reflected in code; all installed packages match the approved list in design.md ### Dependency Decisions. Below 7: design decisions ignored or contradicted without documented deviation, or packages installed that are not in the approved dependency list. |
 | Code Quality | Clean architecture, appropriate abstractions | 7+: no obvious code smells, functions focused, naming clear. Below 7: duplicated logic, unclear naming, overly complex control flow. |
 | Test Verification | Tests run and pass, adequate coverage | 7+: tests exist and pass for core functionality. Below 7: no tests, failing tests, or tests that do not exercise the implementation. |
 
@@ -5458,6 +5700,15 @@ Assume the implementation has flaws until proven otherwise.
 Do not take the implementer's word for anything — verify by reading code and running tests.
 Score honestly. 7 means "acceptable." 5 means "significant gaps." 3 means "broken."
 If you cannot verify a dimension (e.g., no tests exist to run), score lower, not higher.
+
+STRUCTURAL RULES (mandatory, not guidelines):
+1. Evidence-first: For each dimension, list specific evidence (file paths, line references,
+   code quotes, test output) BEFORE assigning a score. The score must follow from the evidence.
+2. Mandatory finding: Each dimension MUST identify at least one concrete finding (gap, risk,
+   or improvement opportunity). "No issues found" is not acceptable. If you cannot identify
+   a finding, your score for that dimension is capped at 7.
+3. Score variance: If all your dimension scores are identical, your evaluation auto-fails
+   and you must re-evaluate with distinct per-dimension justification.
 ```
 
 **Procedure:**
@@ -5465,17 +5716,18 @@ If you cannot verify a dimension (e.g., no tests exist to run), score lower, not
 1. Use the Read tool to read the requirements file, design.md, tasks.md, and implementation.md.
 2. Use the Read tool to read each file listed in the implementation.md Session Log "Files to Modify" entries to inspect the actual implementation.
 3. If `canExecuteCode` is true AND `config.implementation.evaluation.exerciseTests` is true: Use the Bash tool to run to execute the project's test suite. Record test output (pass count, fail count, specific failures).
-4. If `canExecuteCode` is false: note "Tests not exercised — code review only" and cap the Test Verification dimension score at 7 (cannot verify higher without running tests).
+4. If `canExecuteCode` is false: note "Tests not exercised -- code review only" and cap the Test Verification dimension score at 7 (cannot verify higher without running tests).
 5. For each dimension (selected by spec type from the tables above):
-   - Assess against the scoring guidance.
-   - Assign a score (1-10 integer).
-   - Record specific evidence (file paths, line references, test output).
-   - If below `minScore`: write a concrete remediation instruction scoped to specific tasks and files.
-6. Use the Write tool to create (or append to) `<specsDir>/<spec-name>/evaluation.md` with the implementation evaluation iteration. Append under the `## Implementation Evaluation` section.
-7. Use the Edit tool to modify `<specsDir>/<spec-name>/spec.json` to update the `evaluation.implementation` object.
-8. If ALL dimensions score at or above `minScore`: evaluation passes — proceed to Phase 4C (completion steps).
-9. If ANY dimension scores below `minScore` AND current iteration < `maxIterations`: evaluation fails — signal Phase 4B (remediation).
-10. If ANY dimension scores below `minScore` AND current iteration >= `maxIterations`: Display a message to the user("Implementation evaluation did not pass after {iterations} iterations. Proceeding to completion with known quality gaps: {list of failing dimensions and scores}.") and proceed to Phase 4C.
+   a. List specific evidence: cite file paths, line references, code quotes, or test output that are relevant to this dimension.
+   b. List findings: identify at least one concrete finding (gap, risk, or improvement opportunity) for this dimension. "No issues found" is not acceptable evidence.
+   c. Assign a score (1-10 integer) that follows from the evidence and findings above. If the findings list is empty or contains only "No issues found" or equivalent language, cap the score at 7 and append: "Score capped at 7 -- no concrete finding identified for this dimension."
+   d. If below `minScore`: write a concrete remediation instruction scoped to specific tasks and files.
+6. **Score variance check**: After all dimensions are scored, check whether all dimension scores are identical. If all scores are the same value, the evaluation auto-fails: record "Uniform scores detected -- re-evaluate with distinct per-dimension justification" and re-run the evaluation from step 5. This re-run does NOT consume a `maxIterations` cycle.
+7. Use the Write tool to create (or append to) `<specsDir>/<spec-name>/evaluation.md` with the implementation evaluation iteration. Append under the `## Implementation Evaluation` section.
+8. Use the Edit tool to modify `<specsDir>/<spec-name>/spec.json` to update the `evaluation.implementation` object.
+9. If ALL dimensions score at or above `minScore`: evaluation passes -- proceed to Phase 4C (completion steps).
+10. If ANY dimension scores below `minScore` AND current iteration < `maxIterations`: evaluation fails -- signal Phase 4B (remediation).
+11. If ANY dimension scores below `minScore` AND current iteration >= `maxIterations`: Display a message to the user("Implementation evaluation did not pass after {iterations} iterations. Proceeding to completion with known quality gaps: {list of failing dimensions and scores}.") and proceed to Phase 4C.
 
 **Implementation evaluator safety rules:**
 
@@ -6116,14 +6368,14 @@ Detailed description of what needs to be done.
 **Evaluated at:** [ISO 8601 timestamp]
 **Threshold:** [minScore]/10
 
-| Dimension | Score | Threshold | Pass/Fail | Key Finding |
-| ----------- | ------- | ----------- | ----------- | ------------- |
-| Criteria Testability | | | | |
-| Criteria Completeness | | | | |
-| Design Coherence | | | | |
-| Task Coverage | | | | |
+| Dimension | Evidence | Findings | Score | Threshold | Pass/Fail |
+| ----------- | -------- | -------- | ------- | ----------- | ----------- |
+| Criteria Testability | | | | | |
+| Criteria Completeness | | | | | |
+| Design Coherence | | | | | |
+| Task Coverage | | | | | |
 
-**Verdict:** [PASS / FAIL — N of M dimensions passed]
+**Verdict:** [PASS / FAIL -- N of M dimensions passed]
 
 **Remediation** (if FAIL):
 <!-- List specific, actionable instructions for each failing dimension. Reference artifact sections by name. -->
@@ -6138,12 +6390,12 @@ Detailed description of what needs to be done.
 **Spec type:** [feature / bugfix / refactor]
 **Threshold:** [minScore]/10
 
-| Dimension | Score | Threshold | Pass/Fail | Key Finding |
-| ----------- | ------- | ----------- | ----------- | ------------- |
-| [Dimension 1] | | | | |
-| [Dimension 2] | | | | |
-| [Dimension 3] | | | | |
-| [Dimension 4] | | | | |
+| Dimension | Evidence | Findings | Score | Threshold | Pass/Fail |
+| ----------- | -------- | -------- | ------- | ----------- | ----------- |
+| [Dimension 1] | | | | | |
+| [Dimension 2] | | | | | |
+| [Dimension 3] | | | | | |
+| [Dimension 4] | | | | | |
 
 **Test Exercise Results:**
 
@@ -6153,7 +6405,7 @@ Detailed description of what needs to be done.
 - Fail count: [N]
 - Failures: [specific test failures, if any]
 
-**Verdict:** [PASS / FAIL — N of M dimensions passed]
+**Verdict:** [PASS / FAIL -- N of M dimensions passed]
 
 **Remediation** (if FAIL):
 <!-- List specific, actionable instructions scoped to tasks and files. -->

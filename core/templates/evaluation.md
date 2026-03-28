@@ -7,14 +7,14 @@
 **Evaluated at:** [ISO 8601 timestamp]
 **Threshold:** [minScore]/10
 
-| Dimension | Score | Threshold | Pass/Fail | Key Finding |
-| ----------- | ------- | ----------- | ----------- | ------------- |
-| Criteria Testability | | | | |
-| Criteria Completeness | | | | |
-| Design Coherence | | | | |
-| Task Coverage | | | | |
+| Dimension | Evidence | Findings | Score | Threshold | Pass/Fail |
+| ----------- | -------- | -------- | ------- | ----------- | ----------- |
+| Criteria Testability | | | | | |
+| Criteria Completeness | | | | | |
+| Design Coherence | | | | | |
+| Task Coverage | | | | | |
 
-**Verdict:** [PASS / FAIL — N of M dimensions passed]
+**Verdict:** [PASS / FAIL -- N of M dimensions passed]
 
 **Remediation** (if FAIL):
 <!-- List specific, actionable instructions for each failing dimension. Reference artifact sections by name. -->
@@ -29,12 +29,12 @@
 **Spec type:** [feature / bugfix / refactor]
 **Threshold:** [minScore]/10
 
-| Dimension | Score | Threshold | Pass/Fail | Key Finding |
-| ----------- | ------- | ----------- | ----------- | ------------- |
-| [Dimension 1] | | | | |
-| [Dimension 2] | | | | |
-| [Dimension 3] | | | | |
-| [Dimension 4] | | | | |
+| Dimension | Evidence | Findings | Score | Threshold | Pass/Fail |
+| ----------- | -------- | -------- | ------- | ----------- | ----------- |
+| [Dimension 1] | | | | | |
+| [Dimension 2] | | | | | |
+| [Dimension 3] | | | | | |
+| [Dimension 4] | | | | | |
 
 **Test Exercise Results:**
 
@@ -44,7 +44,7 @@
 - Fail count: [N]
 - Failures: [specific test failures, if any]
 
-**Verdict:** [PASS / FAIL — N of M dimensions passed]
+**Verdict:** [PASS / FAIL -- N of M dimensions passed]
 
 **Remediation** (if FAIL):
 <!-- List specific, actionable instructions scoped to tasks and files. -->

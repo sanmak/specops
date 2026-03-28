@@ -25,6 +25,7 @@ How SpecOps compares to other spec-driven and agent-context tools.
 | **Visual brainstorming** | No | Yes (browser-based mockup companion) | No | No | No |
 | **MCP integration** | No | No | Yes | No | No |
 | **Design-first workflow** | No | No | Yes | No | No |
+| **Dependency governance** | Yes (5-criteria introduction gate + CVE/EOL safety scanning) | No | No | No | No |
 | **Security hardening** | Yes (injection defense, path containment, PII prevention) | No | Enterprise governance (tool trust, MCP registry); no spec-level hardening | No | No |
 | **Storage model** | Local files, git-tracked | Local files, flat skill directories | Local files | Cloud service | Local files |
 | **Open source** | Yes (MIT) | Yes (MIT) | No (proprietary) | No (funded startup) | Yes |
@@ -116,7 +117,7 @@ How SpecOps compares to other spec-driven and agent-context tools.
 
 | Capability | SpecOps | GitHub Spec Kit |
 | --- | --- | --- |
-| Supported platforms | 4 (Claude Code, Cursor, Codex, Copilot) | 26+ named agents + generic |
+| Supported platforms | 5 (Claude Code, Cursor, Codex, Copilot, Antigravity) | 26+ named agents + generic |
 | Installation | Plugin marketplace or `curl \| bash` | Python 3.11+ and uv |
 | Team review workflow | Built-in | Community extension ("review") |
 | Vertical-aware templates | 7 project types | Generic (preset system exists, no official vertical presets) |

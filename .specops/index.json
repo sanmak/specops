@@ -48,6 +48,14 @@
     "updated": "2026-03-21T07:23:41Z"
   },
   {
+    "id": "dependency-introduction-gate",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-28T11:21:31Z"
+  },
+  {
     "id": "dependency-safety-gate",
     "type": "feature",
     "status": "completed",
@@ -70,6 +78,14 @@
     "version": 1,
     "author": "sanmak",
     "updated": "2026-03-07T12:30:00Z"
+  },
+  {
+    "id": "evaluation-bias-hardening",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-28T12:00:00Z"
   },
   {
     "id": "enforcement-roadmap",
@@ -118,6 +134,14 @@
     "version": 1,
     "author": "sanmak",
     "updated": "2026-03-14T09:28:58Z"
+  },
+  {
+    "id": "plan-mode-blocking-enforcement",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-28T05:18:32Z"
   },
   {
     "id": "plan-to-specops-automation",

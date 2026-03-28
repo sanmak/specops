@@ -10,7 +10,7 @@ A one-page reference for daily use of SpecOps.
 /specops [description]
 ```
 
-**Cursor / Codex:**
+**Cursor / Codex / Copilot / Antigravity:**
 
 ```text
 Use specops to [description]
@@ -168,6 +168,8 @@ Metrics are captured automatically at Phase 4 completion. See [TOKEN-USAGE.md](T
 | `implementation.delegationThreshold` | integer | `4` | min 1, max 20 | Complexity score threshold for auto task delegation. Lower values delegate more aggressively. |
 | `implementation.validateReferences` | `off`/`warn`/`strict` | `warn` | enum | Validate file paths and code references in spec against codebase before implementation. `off`: skip. `warn`: notify and continue. `strict`: block on unresolved. |
 | `implementation.gitCheckpointing` | boolean | `false` | | Commit at phase boundaries (spec-created, implemented, completed). Three commits max per run. Complements `autoCommit` (per-task). |
+| `implementation.taskDelegation` | `auto`/`always`/`never` | `auto` | enum | Phase 3 task execution strategy. `auto`: delegate when complexity score >= threshold. `always`: always delegate. `never`: sequential in current context. |
+| `implementation.runLogging` | boolean | `false` | | Log per-step execution traces to `<specsDir>/runs/`. Complements proxy metrics with process data. |
 | `implementation.pipelineMaxCycles` | integer | `3` | min 1, max 10 | Maximum Phase 3→4 iteration cycles in pipeline mode. |
 | `implementation.evaluation` | object | | | Adversarial evaluation configuration. When enabled, Phase 2 exit gate scores spec quality and Phase 4A scores implementation quality using scored dimensions with hard thresholds and feedback loops. |
 | `implementation.evaluation.enabled` | boolean | `true` | | Enable adversarial evaluation. When false, skip both evaluation touchpoints and use legacy Phase 4 checkbox verification. |
@@ -359,6 +361,25 @@ git push
 | Can't create specs | Check directory permissions |
 | Tests failing | Review test output, check dependencies |
 
+## Plan Enforcement (Claude Code)
+
+When a plan is approved in Claude Code, SpecOps enforces the spec-driven workflow using a marker file state machine:
+
+1. **ExitPlanMode fires**: The PostToolUse hook creates `.plan-pending-conversion` in the specsDir
+2. **Write/Edit blocked**: The PreToolUse guard blocks writes to non-spec files while the marker exists
+3. **Allowed paths**: Writes to specsDir, `.claude/plans/`, and `.claude/memory/` are always allowed
+4. **`/specops from-plan` runs**: Converts the plan to a spec, then removes the marker
+5. **Writes unblocked**: All Write/Edit operations resume normally
+
+The marker file is:
+
+- Created by the PostToolUse ExitPlanMode hook
+- Checked by the PreToolUse Write|Edit guard
+- Removed by from-plan mode after the enforcement pass (step 6.5) succeeds
+- Gitignored (ephemeral, not committed)
+
+If from-plan fails before the enforcement pass, the marker persists and writes remain blocked until conversion succeeds.
+
 ## Best Practices
 
 ✅ **DO:**
@@ -395,6 +416,9 @@ git push
 
 # Copilot
 <project>/.github/instructions/     # Scoped instructions
+
+# Antigravity
+<project>/.agents/rules/specops.md  # Agent rules
 
 # All platforms
 <project>/.specops.json             # Project configuration
@@ -505,5 +529,5 @@ Agent:
 
 ---
 
-**Version**: 1.5.0
+**Version**: 1.7.0
 **Keep this reference handy for daily development!**
