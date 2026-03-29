@@ -2320,7 +2320,7 @@ Detect packages installed in the project that were not approved in any spec's de
    - PHP: Read the file at(`composer.lock`) -- extract `name` fields from `packages` array
    - Java/Kotlin: Read the file at(`pom.xml`) or Read the file at(`build.gradle`) -- extract dependency names
 
-3. **Collect approved dependencies**: Read the file at(`<specsDir>/index.json`) to enumerate all specs. For each spec with `status` in (`"completed"`, `"in-progress"`, `"in-review"`), Read the file at(`<specsDir>/<spec-name>/design.md`) and extract packages from the `### Dependency Decisions` table where `Decision` is `Approved`. Build a union set of all approved packages across all matching specs. Including in-progress and in-review specs prevents false warnings for dependencies that were approved in a spec's design but whose spec is not yet completed.
+3. **Collect approved dependencies**: Read the file at(`<specsDir>/index.json`) to enumerate all specs. For each spec with `status` in (`"completed"`, `"implementing"`, `"in-review"`), Read the file at(`<specsDir>/<spec-name>/design.md`) and extract packages from the `### Dependency Decisions` table where `Decision` is `Approved`. Build a union set of all approved packages across all matching specs. Including implementing and in-review specs prevents false warnings for dependencies that were approved in a spec's design but whose spec is not yet completed.
 
 4. **Compare**: For each installed package, check if it appears in the approved union set. If a package is installed but not in any spec's approved list → **Warning** (not Drift, since it may be a pre-existing dependency that predates SpecOps adoption or was added to the project before dependency introduction tracking began).
 
