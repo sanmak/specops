@@ -1,7 +1,7 @@
 {
   "name": "copilot",
   "displayName": "GitHub Copilot",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "instructionFormat": "instructions_scoped",
   "outputFiles": {
     "instructions": "specops.instructions.md"

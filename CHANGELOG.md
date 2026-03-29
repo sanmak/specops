@@ -7,9 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-03-29
+
 ### Added
 
-- **Plan mode blocking enforcement**: Upgraded ExitPlanMode hook from advisory to blocking using a marker file state machine. PostToolUse hook creates `.plan-pending-conversion` marker, PreToolUse Write|Edit guard blocks non-spec writes until `/specops from-plan` converts the plan and removes the marker. Both local (`install.sh`) and remote (`remote-install.sh`) installers updated. Marker file lifecycle documented in `core/from-plan.md` and `core/dispatcher.md`.
+- **Adversarial evaluation system**: Scored quality gates for both spec and implementation phases. Spec evaluation runs 4 dimensions (Completeness, Testability, Clarity, Feasibility) before Phase 3; implementation evaluation runs 4 dimensions (Functionality Depth, Design Fidelity, Code Quality, Test Verification) as Phase 4A. Configurable `minScore` threshold with `maxIterations` retry loop and structured evaluation reports in `evaluation.md`.
+- **Dependency introduction gate**: Always-active gate evaluating every new package against 5 criteria (scope fit, maintenance health, bundle size, security posture, license compatibility) using registry API lookups. Build-vs-Install recommendation with interactive approval on supported platforms. Tracked in `dependencies.md` per spec.
+- **Plan-mode blocking enforcement**: Upgraded ExitPlanMode hook from advisory to blocking using a marker file state machine. PreToolUse Write/Edit guard blocks non-spec writes until `/specops from-plan` converts the plan and removes the marker.
+- **Evaluation bias hardening**: Mandatory-finding score capped at `minScore - 1` (not hardcoded 7) to prevent threshold bypass. Score variance re-evaluation capped at one re-run to prevent infinite loops.
+
+### Fixed
+
+- **PreToolUse guard path handling**: Both `install.sh` and `remote-install.sh` now read `tool_input.file_path`, add empty-path guard, and use `os.path.commonpath` for absolute path containment
+- **Reconciliation status enum**: Replaced invalid `"in-progress"` status with `"implementing"` per `spec-schema.json` enum
+- **Dependency drift scope**: Design Fidelity evaluation scoped to spec-introduced packages only; approved dependency set widened to include in-progress and in-review specs to prevent false warnings
+- **From-plan step references**: Corrected step numbering (6.5 to 7, 7 to 8) in `core/from-plan.md` and documentation
+- **Antigravity platform docs**: Reconciled `canAskInteractive` documentation with `platform.json` (true)
 
 ## [1.7.0] - 2026-03-27
 

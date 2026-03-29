@@ -1,7 +1,7 @@
 {
   "name": "antigravity",
   "displayName": "Google Antigravity",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "instructionFormat": "agents_rules",
   "outputFiles": {
     "instructions": "specops.md"
