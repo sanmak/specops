@@ -362,6 +362,7 @@ def build_common_context(core, platform_config):
         "git_checkpointing": core["git-checkpointing"],
         "pipeline": core["pipeline"],
         "dependency_safety": core["dependency-safety"],
+        "dependency_introduction": core["dependency-introduction"],
         "learnings": core["learnings"],
         "decomposition": core["decomposition"],
         "evaluation": core["evaluation"],

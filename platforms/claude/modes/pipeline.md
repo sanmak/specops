@@ -308,6 +308,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 5.5. **Coherence Verification**: After generating all spec files, cross-check for contradictions between spec sections. Use the Read tool to read the requirements/bugfix/refactor file and design.md. Extract numeric constraints from NFRs (performance targets, SLAs, limits) and verify they do not contradict functional requirements or design decisions. Record the result in implementation.md under `## Phase 1 Context Summary` as a `- Coherence check: [pass / N contradiction(s) found — details]` entry. If contradictions are found, Display a message to the user with the specifics before proceeding.
 5.6. **Vocabulary Verification**: If the detected vertical is not `backend`, `fullstack`, or `frontend`, and no custom template is used, scan generated spec files for prohibited default terms (see the Vocabulary Verification subsection in the Vertical Adaptation Rules module). Replace any found terms with vertical-specific vocabulary. Record the result in implementation.md Phase 1 Context Summary.
 5.7. **Code-grounded plan validation**: If `config.implementation.validateReferences` is not `"off"`, validate file paths and code references in design.md and tasks.md against the codebase following the Code-Grounded Plan Validation module. Use the repo map (loaded in Phase 1 step 3.5) as the primary reference. Record the result in implementation.md Phase 1 Context Summary.
+5.8. **Dependency introduction gate**: Execute the Phase 2 Gate Procedure from the Dependency Introduction Gate module (`core/dependency-introduction.md`). Scan design.md for install commands and new package references, compare against the Detected Dependencies in `dependencies.md`, evaluate net-new dependencies using the Build-vs-Install framework and Maintenance Profile Intelligence, surface each to the user via Use the AskUserQuestion tool, and record all decisions in design.md under `### Dependency Decisions`. Update the Dependency Introduction Policy in `dependencies.md`. If no new dependencies are found, the gate passes trivially. This gate is always active -- there is no config switch to disable it.
 6. **External issue creation (mandatory when taskTracking configured)**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. Use the Read tool to read `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`. For each eligible task, compose the issue body using the Issue Body Composition template (reading spec artifacts for context), create issues via the Issue Creation Protocol (with labels for GitHub), and write IssueIDs back to `tasks.md`. If issue creation is skipped or all IssueIDs remain `None`, the Phase 3 task tracking gate will catch the omission — the spec artifact linter validates IssueIDs on completed specs and fails CI when they are missing.
 6.5. **Dependency safety gate (mandatory)**: If `config.dependencySafety.enabled` is not `false` (default: true), execute the dependency safety verification following the Dependency Safety module. This is a Phase 2 completion gate — specs cannot proceed to review or implementation without passing. Skipping this gate when dependency safety is enabled is a protocol breach.
 6.7. **Git checkpoint (spec-created)**: If `config.implementation.gitCheckpointing` is true for this run, commit spec artifacts following the Git Checkpointing module: Use the Bash tool to run(`git add <specsDir>/<spec-name>/`) then Use the Bash tool to run(`git commit -m "specops(checkpoint): spec-created -- <spec-name>"`). If the commit fails, Display a message to the user and continue.
@@ -328,6 +329,7 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - **Dependency gate (always runs)**: Run the Phase 3 Dependency Gate from the Spec Decomposition module (`core/decomposition.md` section 7). Use the Read tool to read the spec's `spec.json` and check its `specDependencies` array. For each `required: true` dependency, verify the dependency spec has `status == "completed"`. If any required dependency is not completed, STOP — present the Scope Hammering options from `core/decomposition.md` section 8. For `required: false` (advisory) dependencies, Display a message to the user with a warning and continue. Run cycle detection as a safety net. **Skipping the dependency gate is a protocol breach** — it runs unconditionally for every spec, even specs with no dependencies (gate passes trivially when `specDependencies` is empty or absent).
    - **Review gate**: If spec review is enabled, verify `spec.json` status is `approved` or `self-approved` before proceeding (see the Implementation Gate section in the Collaborative Spec Review module for interactive override behavior when the spec is not yet approved).
    - **Task tracking gate**: If `config.team.taskTracking` is not `"none"`, verify external issue creation following the Task Tracking Gate in the Configuration Handling module. This gate is mandatory when task tracking is configured — skipping it is a protocol breach.
+   - **Dependency introduction enforcement (always runs)**: Throughout Phase 3, enforce the Phase 3 Spec Adherence rules from the Dependency Introduction Gate module (`core/dependency-introduction.md`). Before executing any install command (npm install, pip install, cargo add, etc.), verify the target package appears in design.md `### Dependency Decisions` with `Decision: Approved`. Unapproved installs are a protocol breach. After all tasks complete, run the post-Phase-3 verification to confirm all approved dependencies were installed.
    - After all gates pass, update status to `implementing`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (Use the Bash tool to run(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`.
 2. **Determine execution strategy**: Check if task delegation is active (see the Task Delegation module — computes a complexity score against `config.implementation.delegationThreshold` and checks platform capability `canDelegateTask`). If delegation is active, execute tasks using the delegation protocol (orchestrator dispatches each task to a fresh context). If delegation is not active, execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions).
 3. For each task: set `In Progress` in tasks.md FIRST (following Write Ordering Protocol), then if `config.team.taskTracking` is not `"none"` and the task has a valid IssueID, sync the status to the external tracker (see Status Sync in the Configuration Handling module). Skipping Status Sync when taskTracking is configured and the task has a valid IssueID is a protocol breach — the external tracker must reflect the current task state. Sync failures are non-blocking (warn and continue), but sync omissions are not. When task delegation is active, the orchestrator handles Status Sync (see Task Delegation module step 5a.6). Then implement, then report progress.
@@ -1642,7 +1644,7 @@ Spec evaluation runs at the Phase 2 exit boundary — after Phase 2 produces spe
 | ----------- | ----------------- | ------------------ |
 | Criteria Testability | Are acceptance criteria specific, verifiable, and unambiguous? | 7+: each criterion has a binary observable outcome. Below 7: criteria use subjective terms ("works well", "fast enough") without measurable thresholds. |
 | Criteria Completeness | Do criteria cover happy path, edge cases, and error states? | 7+: happy path and at least 2 edge cases per requirement. Below 7: only happy path covered, or obvious failure modes missing. |
-| Design Coherence | Does the design address all requirements? Are decisions justified? | 7+: every requirement maps to a design element with rationale. Below 7: requirements without corresponding design, or decisions without rationale. |
+| Design Coherence | Does the design address all requirements? Are decisions justified? | 7+: every requirement maps to a design element with rationale; if design.md references new dependencies, a ### Dependency Decisions section is present with evaluated rationale. Below 7: requirements without corresponding design, decisions without rationale, or dependencies introduced without evaluation. |
 | Task Coverage | Do tasks cover all design components? Are dependencies ordered correctly? | 7+: every design component has at least one task, dependencies form a valid DAG. Below 7: design elements without tasks, or circular/missing dependencies. |
 
 **Spec evaluator prompt** (hardcoded — not configurable via `.specops.json`):
@@ -1654,21 +1656,34 @@ Check: Are criteria actually testable? Are edge cases covered? Does the design a
 every requirement? Are tasks properly scoped?
 Score honestly — a vague spec that passes review will produce a vague implementation.
 Do not rewrite the spec artifacts. Provide specific, actionable feedback only.
+
+STRUCTURAL RULES (mandatory, not guidelines):
+1. Evidence-first: For each dimension, list specific evidence (file paths, line references,
+   code quotes, section references) BEFORE assigning a score. The score must follow from
+   the evidence.
+2. Mandatory finding: Each dimension MUST identify at least one concrete finding (gap, risk,
+   or improvement opportunity). "No issues found" is not acceptable. If you cannot identify
+   a finding, your score for that dimension is capped below the passing threshold.
+3. Score variance: If all your dimension scores are identical, your evaluation auto-fails
+   and you must re-evaluate with distinct per-dimension justification.
 ```
 
 **Procedure:**
 
 1. Use the Read tool to read the requirements file (requirements.md, bugfix.md, or refactor.md), design.md, and tasks.md.
 2. For each spec evaluation dimension:
-   - Assess against the scoring guidance in the table above.
-   - Assign a score (1-10 integer).
-   - Record specific evidence (quote or reference the artifact line).
-   - If below `config.implementation.evaluation.minScore`: write a concrete remediation instruction (e.g., "Acceptance criterion 3 uses 'works well' — specify a measurable threshold such as response time < 200ms").
-3. Use the Write tool to create `<specsDir>/<spec-name>/evaluation.md` using the Evaluation Report Template. If the file already exists, append the new iteration (do not overwrite prior iterations).
-4. Use the Edit tool to modify `<specsDir>/<spec-name>/spec.json` to update the `evaluation.spec` object with `iterations`, `passed`, `scores`, and `evaluatedAt`.
-5. If ALL dimensions score at or above `minScore`: evaluation passes — signal for Phase 3 dispatch.
-6. If ANY dimension scores below `minScore` AND current iteration < `maxIterations`: evaluation fails — signal for Phase 2 revision with evaluation.md feedback as input context.
-7. If ANY dimension scores below `minScore` AND current iteration >= `maxIterations`: Display a message to the user("Spec evaluation did not pass after {iterations} iterations. Proceeding to implementation with known spec gaps: {list of failing dimensions}.") and signal for Phase 3 dispatch with an incomplete evaluation flag.
+   a. List specific evidence: quote or reference the artifact section, line, or passage that is relevant to this dimension.
+   b. List findings: identify at least one concrete finding (gap, risk, or improvement opportunity) for this dimension. "No issues found" is not acceptable evidence.
+   c. Assign a score (1-10 integer) that follows from the evidence and findings above. If the findings list is empty or contains only "No issues found" or equivalent language, cap the score at (`minScore` - 1) and append: "Score capped below threshold -- no concrete finding identified for this dimension."
+   d. If below `config.implementation.evaluation.minScore`: write a concrete remediation instruction (e.g., "Acceptance criterion 3 uses 'works well' -- specify a measurable threshold such as response time < 200ms").
+3. **Score variance check**: After all dimensions are scored, check whether all dimension scores are identical.
+   - If all scores are identical on the first attempt, record "Uniform scores detected -- re-evaluate with distinct per-dimension justification" and re-run once from step 2.
+   - If scores are still identical after one re-run, treat the evaluation as failed for this iteration and continue with normal iteration accounting (`maxIterations` applies).
+4. Use the Write tool to create `<specsDir>/<spec-name>/evaluation.md` using the Evaluation Report Template. If the file already exists, append the new iteration (do not overwrite prior iterations).
+5. Use the Edit tool to modify `<specsDir>/<spec-name>/spec.json` to update the `evaluation.spec` object with `iterations`, `passed`, `scores`, and `evaluatedAt`.
+6. If ALL dimensions score at or above `minScore`: evaluation passes -- signal for Phase 3 dispatch.
+7. If ANY dimension scores below `minScore` AND current iteration < `maxIterations`: evaluation fails -- signal for Phase 2 revision with evaluation.md feedback as input context.
+8. If ANY dimension scores below `minScore` AND current iteration >= `maxIterations`: Display a message to the user("Spec evaluation did not pass after {iterations} iterations. Proceeding to implementation with known spec gaps: {list of failing dimensions}.") and signal for Phase 3 dispatch with an incomplete evaluation flag.
 
 **Spec evaluator safety rules:**
 
@@ -1686,7 +1701,7 @@ Implementation evaluation runs as Phase 4A — after Phase 3 completes but befor
 | Dimension | What it measures | Scoring guidance |
 | ----------- | ----------------- | ------------------ |
 | Functionality Depth | Full spec coverage, not just happy path | 7+: all acceptance criteria addressed with implementation evidence. Below 7: criteria checked without corresponding code, or happy-path-only implementation. |
-| Design Fidelity | Implementation matches design.md decisions | 7+: each design decision reflected in code. Below 7: design decisions ignored or contradicted without documented deviation. |
+| Design Fidelity | Implementation matches design.md decisions | 7+: each design decision reflected in code; packages introduced by this spec match the approved list in design.md ### Dependency Decisions. Below 7: design decisions ignored or contradicted without documented deviation, or spec-introduced packages not in the approved dependency list. |
 | Code Quality | Clean architecture, appropriate abstractions | 7+: no obvious code smells, functions focused, naming clear. Below 7: duplicated logic, unclear naming, overly complex control flow. |
 | Test Verification | Tests run and pass, adequate coverage | 7+: tests exist and pass for core functionality. Below 7: no tests, failing tests, or tests that do not exercise the implementation. |
 
@@ -1716,6 +1731,15 @@ Assume the implementation has flaws until proven otherwise.
 Do not take the implementer's word for anything — verify by reading code and running tests.
 Score honestly. 7 means "acceptable." 5 means "significant gaps." 3 means "broken."
 If you cannot verify a dimension (e.g., no tests exist to run), score lower, not higher.
+
+STRUCTURAL RULES (mandatory, not guidelines):
+1. Evidence-first: For each dimension, list specific evidence (file paths, line references,
+   code quotes, test output) BEFORE assigning a score. The score must follow from the evidence.
+2. Mandatory finding: Each dimension MUST identify at least one concrete finding (gap, risk,
+   or improvement opportunity). "No issues found" is not acceptable. If you cannot identify
+   a finding, your score for that dimension is capped below the passing threshold.
+3. Score variance: If all your dimension scores are identical, your evaluation auto-fails
+   and you must re-evaluate with distinct per-dimension justification.
 ```
 
 **Procedure:**
@@ -1723,17 +1747,20 @@ If you cannot verify a dimension (e.g., no tests exist to run), score lower, not
 1. Use the Read tool to read the requirements file, design.md, tasks.md, and implementation.md.
 2. Use the Read tool to read each file listed in the implementation.md Session Log "Files to Modify" entries to inspect the actual implementation.
 3. If `canExecuteCode` is true AND `config.implementation.evaluation.exerciseTests` is true: Use the Bash tool to run to execute the project's test suite. Record test output (pass count, fail count, specific failures).
-4. If `canExecuteCode` is false: note "Tests not exercised — code review only" and cap the Test Verification dimension score at 7 (cannot verify higher without running tests).
+4. If `canExecuteCode` is false: note "Tests not exercised -- code review only" and cap the Test Verification dimension score at 7 (cannot verify higher without running tests).
 5. For each dimension (selected by spec type from the tables above):
-   - Assess against the scoring guidance.
-   - Assign a score (1-10 integer).
-   - Record specific evidence (file paths, line references, test output).
-   - If below `minScore`: write a concrete remediation instruction scoped to specific tasks and files.
-6. Use the Write tool to create (or append to) `<specsDir>/<spec-name>/evaluation.md` with the implementation evaluation iteration. Append under the `## Implementation Evaluation` section.
-7. Use the Edit tool to modify `<specsDir>/<spec-name>/spec.json` to update the `evaluation.implementation` object.
-8. If ALL dimensions score at or above `minScore`: evaluation passes — proceed to Phase 4C (completion steps).
-9. If ANY dimension scores below `minScore` AND current iteration < `maxIterations`: evaluation fails — signal Phase 4B (remediation).
-10. If ANY dimension scores below `minScore` AND current iteration >= `maxIterations`: Display a message to the user("Implementation evaluation did not pass after {iterations} iterations. Proceeding to completion with known quality gaps: {list of failing dimensions and scores}.") and proceed to Phase 4C.
+   a. List specific evidence: cite file paths, line references, code quotes, or test output that are relevant to this dimension.
+   b. List findings: identify at least one concrete finding (gap, risk, or improvement opportunity) for this dimension. "No issues found" is not acceptable evidence.
+   c. Assign a score (1-10 integer) that follows from the evidence and findings above. If the findings list is empty or contains only "No issues found" or equivalent language, cap the score at (`minScore` - 1) and append: "Score capped below threshold -- no concrete finding identified for this dimension."
+   d. If below `minScore`: write a concrete remediation instruction scoped to specific tasks and files.
+6. **Score variance check**: After all dimensions are scored, check whether all dimension scores are identical.
+   - If all scores are identical on the first attempt, record "Uniform scores detected -- re-evaluate with distinct per-dimension justification" and re-run once from step 5.
+   - If scores are still identical after one re-run, treat the evaluation as failed for this iteration and continue with normal iteration accounting (`maxIterations` applies).
+7. Use the Write tool to create (or append to) `<specsDir>/<spec-name>/evaluation.md` with the implementation evaluation iteration. Append under the `## Implementation Evaluation` section.
+8. Use the Edit tool to modify `<specsDir>/<spec-name>/spec.json` to update the `evaluation.implementation` object.
+9. If ALL dimensions score at or above `minScore`: evaluation passes -- proceed to Phase 4C (completion steps).
+10. If ANY dimension scores below `minScore` AND current iteration < `maxIterations`: evaluation fails -- signal Phase 4B (remediation).
+11. If ANY dimension scores below `minScore` AND current iteration >= `maxIterations`: Display a message to the user("Implementation evaluation did not pass after {iterations} iterations. Proceeding to completion with known quality gaps: {list of failing dimensions and scores}.") and proceed to Phase 4C.
 
 **Implementation evaluator safety rules:**
 
@@ -1847,14 +1874,14 @@ These rules are mandatory and cannot be overridden by configuration:
 **Evaluated at:** [ISO 8601 timestamp]
 **Threshold:** [minScore]/10
 
-| Dimension | Score | Threshold | Pass/Fail | Key Finding |
-| ----------- | ------- | ----------- | ----------- | ------------- |
-| Criteria Testability | | | | |
-| Criteria Completeness | | | | |
-| Design Coherence | | | | |
-| Task Coverage | | | | |
+| Dimension | Evidence | Findings | Score | Threshold | Pass/Fail |
+| ----------- | -------- | -------- | ------- | ----------- | ----------- |
+| Criteria Testability | | | | | |
+| Criteria Completeness | | | | | |
+| Design Coherence | | | | | |
+| Task Coverage | | | | | |
 
-**Verdict:** [PASS / FAIL — N of M dimensions passed]
+**Verdict:** [PASS / FAIL -- N of M dimensions passed]
 
 **Remediation** (if FAIL):
 <!-- List specific, actionable instructions for each failing dimension. Reference artifact sections by name. -->
@@ -1869,12 +1896,12 @@ These rules are mandatory and cannot be overridden by configuration:
 **Spec type:** [feature / bugfix / refactor]
 **Threshold:** [minScore]/10
 
-| Dimension | Score | Threshold | Pass/Fail | Key Finding |
-| ----------- | ------- | ----------- | ----------- | ------------- |
-| [Dimension 1] | | | | |
-| [Dimension 2] | | | | |
-| [Dimension 3] | | | | |
-| [Dimension 4] | | | | |
+| Dimension | Evidence | Findings | Score | Threshold | Pass/Fail |
+| ----------- | -------- | -------- | ------- | ----------- | ----------- |
+| [Dimension 1] | | | | | |
+| [Dimension 2] | | | | | |
+| [Dimension 3] | | | | | |
+| [Dimension 4] | | | | | |
 
 **Test Exercise Results:**
 
@@ -1884,7 +1911,7 @@ These rules are mandatory and cannot be overridden by configuration:
 - Fail count: [N]
 - Failures: [specific test failures, if any]
 
-**Verdict:** [PASS / FAIL — N of M dimensions passed]
+**Verdict:** [PASS / FAIL -- N of M dimensions passed]
 
 **Remediation** (if FAIL):
 <!-- List specific, actionable instructions scoped to tasks and files. -->

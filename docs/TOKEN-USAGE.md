@@ -66,6 +66,24 @@ Track metrics across completed specs to identify:
 - **Initiative management**: Negligible overhead. Reading and writing `initiative.json` and `initiative-log.md` involves small structured data files (typically under 1KB).
 - **Cross-spec dependency checks**: The Phase 3 dependency gate reads `spec.json` files for referenced specs. With typical initiative sizes (2-5 specs), this adds fewer than 50 tokens per gate check.
 
+## Evaluation Overhead
+
+When adversarial evaluation is enabled (default: `true`), two evaluation touchpoints add token overhead:
+
+- **Spec evaluation (Phase 2 exit)**: Reads requirements.md, design.md, and tasks.md, then scores 4 dimensions (Criteria Testability, Criteria Completeness, Design Coherence, Task Coverage). Adds approximately 200-500 tokens of output per evaluation pass. With `maxIterations: 2` (default), worst case is 2 passes before proceeding.
+- **Implementation evaluation (Phase 4A)**: Scores spec-type-specific dimensions (e.g., Functionality Depth, Design Fidelity, Code Quality, Test Verification for features). Adds approximately 300-800 tokens per pass depending on implementation size.
+- **Total overhead**: Evaluation typically adds 10-20% to Phase 2 and Phase 4 token usage. The overhead is higher for specs that fail the initial evaluation and require remediation iterations.
+
+Configure with `implementation.evaluation.minScore` (default: 7) and `implementation.evaluation.maxIterations` (default: 2). Set `implementation.evaluation.enabled: false` to disable entirely and use legacy checkbox verification.
+
+## Production Learnings Overhead
+
+When production learnings are configured (default: `auto` capture):
+
+- **Phase 1 surfacing**: Loads `learnings.json` and filters relevant learnings. With `maxSurfaced: 3` (default), adds approximately 150-300 tokens of surfaced learning context per spec.
+- **Phase 4 capture**: When triggered (auto mode: after all specs and bugfixes), the capture prompt adds approximately 100-200 tokens.
+- **Net impact**: Negligible compared to overall workflow token usage. Learnings are small structured records (typically 50-100 tokens each).
+
 ## Limitations
 
 - **Token estimates are approximate**: Characters/4 is a rough proxy. Actual tokenization varies by model and encoding.

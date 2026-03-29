@@ -171,6 +171,19 @@ _generatedAt: "YYYY-MM-DDTHH:MM:SSZ"
 ## Known Accepted Risks
 
 [Team-maintained: acknowledged vulnerabilities with justification]
+
+## Dependency Introduction Policy
+
+**Default stance:** [conservative|moderate] ([vertical] vertical)
+**Primary ecosystem:** [detected from indicator files]
+
+### Approved Patterns
+
+[Auto-populated by the dependency introduction gate -- accumulated from approved dependency decisions across specs]
+
+### Rejected Patterns
+
+[Auto-populated by the dependency introduction gate -- accumulated from rejected dependencies with reasons]
 ```
 
 ### Steering Command

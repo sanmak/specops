@@ -152,6 +152,26 @@
       "completedAt": "2026-03-22T17:18:51Z"
     },
     {
+      "specId": "plan-mode-blocking-enforcement",
+      "specType": "feature",
+      "number": 1,
+      "decision": "Used fp.startswith(a) instead of a in fp for allowed path prefix matching in PreToolUse guard",
+      "rationale": "Design used any(a in fp for a in allowed) which could match substrings anywhere in the path. startswith is more precise for path prefix checking and prevents false positives.",
+      "task": "Task 2",
+      "date": "2026-03-28",
+      "completedAt": "2026-03-28T05:18:32Z"
+    },
+    {
+      "specId": "plan-mode-blocking-enforcement",
+      "specType": "feature",
+      "number": 2,
+      "decision": "PostToolUse hook replacement (not skip) when specops-hook marker already exists",
+      "rationale": "Old installer skipped if existing hook found; new installer replaces advisory hook with marker-creating version, ensuring upgrades apply correctly.",
+      "task": "Task 5",
+      "date": "2026-03-28",
+      "completedAt": "2026-03-28T05:18:32Z"
+    },
+    {
       "specId": "adversarial-evaluation",
       "specType": "feature",
       "number": 1,
@@ -170,6 +190,36 @@
       "task": "Task 4",
       "date": "2026-03-27",
       "completedAt": "2026-03-27"
+    },
+    {
+      "specId": "dependency-introduction-gate",
+      "specType": "feature",
+      "number": 1,
+      "decision": "Always-active gate with no config knobs -- no enabled/disabled switch",
+      "rationale": "Config flags without deterministic workflow instructions are dead features (feedback pattern). The gate passes trivially when no new dependencies exist. No legitimate reason to bypass dependency governance.",
+      "task": "Task 1",
+      "date": "2026-03-28",
+      "completedAt": "2026-03-28T11:21:31Z"
+    },
+    {
+      "specId": "dependency-introduction-gate",
+      "specType": "feature",
+      "number": 2,
+      "decision": "Separate core/dependency-introduction.md module rather than extending dependency-safety.md",
+      "rationale": "Different trigger points (safety at 6.5, introduction at 5.8 and throughout Phase 3), different data flows, different purposes (audit existing vs govern new). Combining would create an oversized module.",
+      "task": "Task 1",
+      "date": "2026-03-28",
+      "completedAt": "2026-03-28T11:21:31Z"
+    },
+    {
+      "specId": "dependency-introduction-gate",
+      "specType": "feature",
+      "number": 3,
+      "decision": "Agent instruction enforcement pattern for Phase 3 (not code interception)",
+      "rationale": "SpecOps operates at the instruction/prompt level. Agent is told to verify before executing install commands. Same enforcement pattern as all other SpecOps gates. Adversarial evaluation catches violations.",
+      "task": "Task 1",
+      "date": "2026-03-28",
+      "completedAt": "2026-03-28T11:21:31Z"
     }
   ]
 }

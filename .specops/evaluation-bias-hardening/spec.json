@@ -1,0 +1,39 @@
+{
+  "id": "evaluation-bias-hardening",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "created": "2026-03-28T12:00:00Z",
+  "updated": "2026-03-28T12:35:00Z",
+  "specopsCreatedWith": "1.7.0",
+  "specopsUpdatedWith": "1.7.0",
+  "author": {
+    "name": "sanmak"
+  },
+  "reviewers": [],
+  "reviewRounds": 0,
+  "approvals": 0,
+  "requiredApprovals": 0,
+  "metrics": {
+    "filesChanged": 4,
+    "tasksCompleted": 7,
+    "acceptanceCriteriaVerified": 12
+  },
+  "specDependencies": [],
+  "relatedSpecs": [
+    "adversarial-evaluation"
+  ],
+  "evaluation": {
+    "implementation": {
+      "iterations": 1,
+      "passed": true,
+      "scores": {
+        "Functionality Depth": 8,
+        "Design Fidelity": 9,
+        "Code Quality": 8,
+        "Test Verification": 7
+      },
+      "evaluatedAt": "2026-03-28T12:30:00Z"
+    }
+  }
+}

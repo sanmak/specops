@@ -1,6 +1,6 @@
 # SpecOps Command Reference
 
-All supported commands across Claude Code, Cursor, OpenAI Codex, and GitHub Copilot in one place.
+All supported commands across Claude Code, Cursor, OpenAI Codex, GitHub Copilot, and Google Antigravity in one place.
 
 ---
 
@@ -810,6 +810,13 @@ These are the valid states a spec can be in, usable as filters with the status c
 - **Capabilities:** Interactive questions (via chat), but cannot directly create/edit files (generates as suggestions)
 - **Special features:** Auto-detect like Cursor
 - **Limitation:** Spec content generated as suggestions; user manually applies recommendations
+
+### Google Antigravity
+
+- **Best for:** Multi-agent orchestration via Manager View
+- **Capabilities:** Full feature set including sub-agent delegation (`canDelegateTask: true`)
+- **Special features:** Same invocation pattern as Codex. Supports task delegation via Manager View agents.
+- **Limitation:** No progress tracking (`canTrackProgress: false`)
 
 ---
 

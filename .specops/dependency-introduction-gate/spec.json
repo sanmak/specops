@@ -1,0 +1,35 @@
+{
+  "id": "dependency-introduction-gate",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "created": "2026-03-28T05:37:36Z",
+  "updated": "2026-03-28T11:21:31Z",
+  "specopsCreatedWith": "1.7.0",
+  "specopsUpdatedWith": "1.7.0",
+  "author": {
+    "name": "sanmak"
+  },
+  "reviewers": [],
+  "reviewRounds": 0,
+  "approvals": 0,
+  "requiredApprovals": 0,
+  "specDependencies": [],
+  "relatedSpecs": [
+    "dependency-safety-gate",
+    "adversarial-evaluation"
+  ],
+  "evaluation": {
+    "implementation": {
+      "iterations": 1,
+      "passed": true,
+      "scores": {
+        "functionalityDepth": 8,
+        "designFidelity": 9,
+        "codeQuality": 8,
+        "testVerification": 8
+      },
+      "evaluatedAt": "2026-03-28T11:21:31Z"
+    }
+  }
+}

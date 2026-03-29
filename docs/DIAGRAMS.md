@@ -613,3 +613,108 @@ sequenceDiagram
 ```
 
 **Source:** [`core/decomposition.md`](../core/decomposition.md), [`core/initiative-orchestration.md`](../core/initiative-orchestration.md)
+
+---
+
+## Adversarial Evaluation
+
+Two-touchpoint quality scoring: spec evaluation at Phase 2 exit and implementation evaluation at Phase 4A.
+
+```mermaid
+sequenceDiagram
+    participant A as Agent
+    participant E as Evaluator
+    participant S as .specops/<spec-name>/
+
+    Note over A,E: Phase 2 Exit — Spec Evaluation
+
+    A->>S: Write requirements.md, design.md, tasks.md
+    A->>E: Dispatch evaluator with spec artifacts
+
+    E->>S: Read requirements.md
+    E->>S: Read design.md
+    E->>S: Read tasks.md
+    E->>E: Score 4 dimensions (1-10 each)
+    Note over E: Criteria Testability, Criteria Completeness,<br/>Design Coherence, Task Coverage
+
+    alt All scores >= minScore (default 7)
+        E->>S: Write evaluation.md (verdict: pass)
+        Note over A: Proceed to Phase 3
+    else Any score < minScore
+        E->>S: Write evaluation.md (verdict: fail, findings)
+        E-->>A: Remediation guidance per failing dimension
+        A->>S: Revise spec artifacts
+        Note over A,E: Re-evaluate (up to maxIterations)
+    end
+
+    Note over A,E: Phase 4A — Implementation Evaluation
+
+    A->>S: Phase 3 implementation complete
+    A->>E: Dispatch evaluator with code + spec artifacts
+
+    E->>E: Score spec-type-specific dimensions (1-10 each)
+    Note over E: Feature: Functionality Depth, Design Fidelity,<br/>Code Quality, Test Verification
+
+    alt All scores >= minScore
+        E->>S: Append to evaluation.md (verdict: pass)
+        Note over A: Proceed to Phase 4B/4C (complete)
+    else Any score < minScore
+        E->>S: Append to evaluation.md (verdict: fail, findings)
+        Note over A: Phase 4B remediation → re-implement failing tasks
+    end
+```
+
+**Source:** [`core/evaluation.md`](../core/evaluation.md)
+
+---
+
+## Production Learnings Lifecycle
+
+Capture, store, and surface post-deployment discoveries across spec sessions.
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant A as Agent
+    participant M as .specops/memory/
+    participant S as .specops/<spec-name>/
+
+    Note over U,A: Capture — Three Mechanisms
+
+    alt Explicit capture
+        U->>A: /specops learn <spec-name>
+        A-->>U: "What was discovered?"
+        U->>A: Discovery details
+        A-->>U: "Severity? Category? Root cause?"
+        U->>A: Metadata
+    else Agent-proposed (during bugfix)
+        A->>A: Detect production issue pattern
+        A-->>U: "Should I capture this as a learning?"
+        U->>A: Approve
+    else Reconciliation-based
+        A->>A: Detect hotfix commits post-completion
+        A->>A: Extract learning from fix context
+    end
+
+    A->>M: Append to learnings.json (immutable record)
+    Note over M: {specId, category, severity,<br/>discovery, prevention, reconsiderWhen}
+
+    Note over U,A: Retrieval — During Phase 1
+
+    U->>A: /specops Add feature touching same files
+    A->>M: Read learnings.json
+    A->>A: Filter by 5 layers
+    Note over A: 1. Proximity (file overlap)<br/>2. Recurrence (pattern count)<br/>3. Severity (critical/high always)<br/>4. Decay/validity (reconsiderWhen)<br/>5. Category match
+
+    A->>A: Surface top N learnings (maxSurfaced: 3)
+    A-->>U: "Relevant learnings from prior specs: ..."
+
+    Note over U,A: Supersession — Newer replaces older
+
+    U->>A: /specops learn <spec-name>
+    A->>M: Read existing learnings for same topic
+    A->>M: Write new learning (supersedes: <old-id>)
+    Note over M: Old learning preserved, marked superseded
+```
+
+**Source:** [`core/learnings.md`](../core/learnings.md)

@@ -1,6 +1,6 @@
 ## Audit Mode
 
-SpecOps `audit` detects drift between spec artifacts and the live codebase. It runs 6 checks and produces a health report. `reconcile` guides interactive repair of findings.
+SpecOps `audit` detects drift between spec artifacts and the live codebase. It runs 7 checks and produces a health report. `reconcile` guides interactive repair of findings.
 
 ### Mode Detection
 
@@ -20,11 +20,11 @@ If neither pattern matches, continue to interview check and the standard phases.
 3. For each target spec:
    a. If Use the Bash tool to check if the file exists at(`<specsDir>/<name>/spec.json`), Use the Read tool to read(`<specsDir>/<name>/spec.json`) to load metadata. If not found, Display a message to the user(`"Spec '<name>' not found in <specsDir>. Run '/specops list' to see available specs."`) and stop.
    b. If Use the Bash tool to check if the file exists at(`<specsDir>/<name>/tasks.md`), Use the Read tool to read(`<specsDir>/<name>/tasks.md`) to load tasks.
-   c. Run the 6 drift checks below. Record each result as `Healthy`, `Warning`, or `Drift`.
+   c. Run the 7 drift checks below. Record each result as `Healthy`, `Warning`, or `Drift`.
    d. Overall health = worst result across all checks.
 4. Present the Audit Report (format below).
 
-### Six Drift Checks
+### Seven Drift Checks
 
 ### File Drift
 
@@ -91,9 +91,30 @@ Validate cross-spec dependency integrity.
 
 - If no issues found across all three sub-checks → **Healthy**
 
+### Dependency Drift
+
+Detect packages installed in the project that were not approved in any spec's dependency decisions.
+
+1. **Detect ecosystems**: Use the Dependency Detection Protocol from `core/dependency-safety.md` to identify which ecosystems are present (scan for indicator files: `package-lock.json`, `requirements.txt`, `Cargo.lock`, etc.).
+
+2. **Collect installed packages**: For each detected ecosystem, Use the Read tool to read the lock file and extract the list of installed package names:
+   - Node.js: Use the Read tool to read(`package-lock.json`) or Use the Read tool to read(`yarn.lock`) -- extract package names from the `dependencies` or `packages` sections
+   - Python: Use the Read tool to read(`requirements.txt`) -- extract package names (one per line, strip version specifiers)
+   - Rust: Use the Read tool to read(`Cargo.lock`) -- extract `name` fields from `[[package]]` sections
+   - Ruby: Use the Read tool to read(`Gemfile.lock`) -- extract package names from the `GEM > specs` section
+   - Go: Use the Read tool to read(`go.sum`) -- extract module paths
+   - PHP: Use the Read tool to read(`composer.lock`) -- extract `name` fields from `packages` array
+   - Java/Kotlin: Use the Read tool to read(`pom.xml`) or Use the Read tool to read(`build.gradle`) -- extract dependency names
+
+3. **Collect approved dependencies**: Use the Read tool to read(`<specsDir>/index.json`) to enumerate all specs. For each spec with `status` in (`"completed"`, `"implementing"`, `"in-review"`), Use the Read tool to read(`<specsDir>/<spec-name>/design.md`) and extract packages from the `### Dependency Decisions` table where `Decision` is `Approved`. Build a union set of all approved packages across all matching specs. Including implementing and in-review specs prevents false warnings for dependencies that were approved in a spec's design but whose spec is not yet completed.
+
+4. **Compare**: For each installed package, check if it appears in the approved union set. If a package is installed but not in any spec's approved list → **Warning** (not Drift, since it may be a pre-existing dependency that predates SpecOps adoption or was added to the project before dependency introduction tracking began).
+
+5. If no unapproved packages found → **Healthy**
+
 ### Health Summary
 
-Overall health = worst result across all 6 checks (Drift > Warning > Healthy).
+Overall health = worst result across all 7 checks (Drift > Warning > Healthy).
 
 Report each check as:
 
@@ -105,6 +126,7 @@ Report each check as:
 | Staleness | Healthy / Warning / Drift | N days since last activity |
 | Cross-Spec Conflicts | Healthy / Warning | N shared files |
 | Dependency Health | Healthy / Warning / Drift | N dependency issues |
+| Dependency Drift | Healthy / Warning | N unapproved packages |
 
 **Overall Health**: Healthy / Warning / Drift
 
@@ -128,6 +150,8 @@ Only show the **Findings** section for non-Healthy checks.
 | Task Consistency | Warning | Task 3 marked Completed, 1 file missing |
 | Staleness | Healthy | 2 days since last activity |
 | Cross-Spec Conflicts | Healthy | No shared files |
+| Dependency Health | Healthy | 0 dependency issues |
+| Dependency Drift | Healthy | 0 unapproved packages |
 
 **Overall Health**: Warning
 
@@ -165,7 +189,7 @@ Guided interactive repair for drifted specs. Available only on platforms with `c
 1. If Use the Bash tool to check if the file exists at(`.specops.json`), Use the Read tool to read(`.specops.json`) to get `specsDir`; otherwise use default `.specops`
 2. Parse target spec name from the request. Reconcile requires a target — if no name given, Display a message to the user(`"Reconcile requires a specific spec name. Example: 'reconcile <spec-name>'. Run 'audit' to see all specs."`) and stop.
 3. **Platform check**: If `canAskInteractive` is false, Display a message to the user(`"Reconcile mode requires interactive input. Run audit to see findings. Manual fixes can be applied to tasks.md and spec.json directly."`) and stop.
-4. Run full audit on the target spec (all 6 checks).
+4. Run full audit on the target spec (all 7 checks).
 5. If all checks Healthy → Display a message to the user(`"No drift detected in <spec-name>. No reconciliation needed."`) and stop.
 6. Present numbered findings list to the user.
 7. Prompt the user: "Which findings to fix? Enter 'all', comma-separated numbers (e.g. '1,3'), or 'skip' to exit."

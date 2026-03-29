@@ -71,6 +71,19 @@ The spec decomposition feature introduces new path construction patterns that sh
 
 **Status**: Re-audit recommended before v1.5.0 release.
 
+## Post-Audit Feature Review (v1.5.0 -- v1.7.0)
+
+The following security-relevant features were added after the 2026-03-02 audit and should be reviewed in the next audit cycle:
+
+| Feature | Version | Security Relevance |
+| --- | --- | --- |
+| **Dependency introduction gate** | Unreleased | Always-active gate evaluating new packages against 5 criteria (scope, maintenance, size, security, license). Uses `RUN_COMMAND` for install command detection. Review: path construction from package names, registry API calls. |
+| **Plan-mode blocking enforcement** | Unreleased | Marker file state machine (`.plan-pending-conversion`) blocking Write/Edit via PreToolUse hook. Review: marker creation/deletion race conditions, allowed path prefix matching logic. |
+| **Adversarial evaluation** | v1.7.0 | Hardcoded evaluator prompts (not configurable by users) reduce prompt injection risk. Evaluation scores are written to `evaluation.md` in specsDir. Review: evaluation output sanitization, score parsing. |
+| **Production learnings** | v1.6.0 | Stored in local `learnings.json` files only, no external transmission. Supersession chains use spec IDs in path construction. Review: learning record path construction, category field validation. |
+| **Evaluation bias hardening** | Unreleased | Score variance enforcement and mandatory findings in evaluation. No new attack surface -- tightens existing evaluation constraints. |
+| **Auto-close issues** | v1.7.0 | Uses `RUN_COMMAND` to close GitHub/Jira/Linear issues. Review: command injection via issue IDs or spec names in close commands. |
+
 ## Next Audit
 
-Recommended before the next minor or major release, or after significant changes to [security-sensitive files](../CLAUDE.md).
+Recommended before the next minor or major release, or after significant changes to [security-sensitive files](../CLAUDE.md). Priority items from the post-audit review above: dependency introduction gate (install command patterns), plan-mode blocking (marker file race conditions), and auto-close issues (command construction from spec/issue IDs).

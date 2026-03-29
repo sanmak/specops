@@ -182,5 +182,19 @@
       ],
       "count": 2
     }
+  ],
+  "learningPatterns": [
+    {
+      "category": "design",
+      "specs": ["drift-detection", "dependency-safety-gate", "exit-plan-mode-hook"],
+      "count": 3,
+      "summary": "Design-category learnings recur across specs: heading-level collisions in validator markers, generator auto-loading of template files, and Claude Code hooks schema structure. Pattern: implementation constraints of downstream systems (validator, generator, hooks) are discovered only at integration time."
+    },
+    {
+      "category": "reliability",
+      "specs": ["workflow-enforcement-gates", "context-aware-dispatch", "production-learnings"],
+      "count": 3,
+      "summary": "Reliability-category learnings recur across specs: config flags without workflow annotations become dead features, marker constants drift between validate.py and tests, and three-way sync requirements emerge. Pattern: multi-file consistency obligations are discovered only when one location is missed."
+    }
   ]
 }

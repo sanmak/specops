@@ -25,7 +25,11 @@ specops/
 │   ├── PLAN-VS-SPEC.md                   # Plan Mode vs Spec Mode comparison
 │   ├── SECURITY-AUDIT.md                 # Security audit results
 │   ├── COMPARISON.md                     # Competitive comparison (vs Superpowers, Kiro, EPIC/Reload, Spec Kit)
-│   └── MARKETPLACE_SUBMISSIONS.md        # Marketplace submission content
+│   ├── MARKETPLACE_SUBMISSIONS.md        # Marketplace submission content
+│   ├── LEARNINGS.md                      # Production learnings guide
+│   ├── TOKEN-USAGE.md                    # Proxy metrics benchmarks and ROI analysis
+│   ├── WRITING_PHILOSOPHY.md             # Writing quality rules and references
+│   └── ENGINEERING_PHILOSOPHY.md         # Engineering discipline principles
 │
 ├── assets/                               # Visual assets (SVG diagrams)
 │   ├── workflow.svg                      # 4-phase workflow diagram
@@ -46,7 +50,8 @@ specops/
 │   ├── run-tests.sh                      # Test runner
 │   ├── remote-install.sh                 # Remote installer (curl-based, no clone needed)
 │   ├── install-hooks.sh                  # Git hooks installer
-│   └── run-review-gate.sh               # Review gate runner script
+│   ├── run-review-gate.sh               # Review gate runner script
+│   └── lint-spec-artifacts.py            # Spec artifact linter (checkbox staleness, doc review, version)
 │
 ├── hooks/                                # Git hooks
 │   ├── pre-commit                        # JSON validation, ShellCheck, stale file checks
@@ -73,6 +78,7 @@ specops/
 │   ├── config-handling.md                # Configuration defaults and handling
 │   ├── data-handling.md                  # Secrets, PII, data classification rules
 │   ├── dependency-safety.md              # Dependency CVE scanning, EOL detection, safety gate
+│   ├── dependency-introduction.md        # Dependency introduction gate (governs which new dependencies enter the project)
 │   ├── engineering-discipline.md         # Engineering discipline rules for design and implementation
 │   ├── error-handling.md                 # Error handling, success criteria
 │   ├── verticals.md                      # Vertical adaptation rules
@@ -118,7 +124,7 @@ specops/
 │   │   ├── platform.json                 # Capabilities, tool mapping, entry point
 │   │   ├── SKILL.md                      # Generated dispatcher skill file (lightweight routing)
 │   │   ├── SKILL.monolithic.md           # Monolithic backup for backward compatibility
-│   │   ├── modes/                        # Generated per-mode instruction files (13 files)
+│   │   ├── modes/                        # Generated per-mode instruction files (15 files)
 │   │   ├── install.sh                    # Claude-specific installer
 │   │   └── README.md                     # Claude Code quickstart
 │   ├── cursor/                           # Cursor adapter
@@ -169,7 +175,8 @@ specops/
 │   ├── check_schema_sync.py             # Validates schema.json is well-formed
 │   ├── test_platform_consistency.py      # Checks all platform outputs are consistent
 │   ├── test_build.py                     # Tests build system generates valid outputs
-│   └── test_spec_schema.py              # Validates spec.json against spec-schema.json
+│   ├── test_spec_schema.py              # Validates spec.json against spec-schema.json
+│   └── test_initiative_schema.py         # Validates initiative.json against initiative-schema.json
 │
 ├── .github/
 │   └── workflows/
@@ -266,5 +273,5 @@ The `<specsDir>` (default `.specops/`) contains spec artifacts and supporting da
 
 ## Version
 
-**Version**: 1.5.0
-**Last Updated**: 2026-03-22
+**Version**: 1.7.0
+**Last Updated**: 2026-03-28

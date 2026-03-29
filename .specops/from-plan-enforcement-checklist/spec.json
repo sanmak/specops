@@ -15,8 +15,17 @@
   "approvals": 0,
   "requiredApprovals": 0,
   "specDependencies": [
-    { "specId": "workflow-enforcement-gates", "required": true },
-    { "specId": "plan-to-specops-automation", "required": true },
-    { "specId": "context-aware-dispatch", "required": true }
+    {
+      "specId": "workflow-enforcement-gates",
+      "required": true
+    },
+    {
+      "specId": "plan-to-specops-automation",
+      "required": true
+    },
+    {
+      "specId": "context-aware-dispatch",
+      "required": true
+    }
   ]
 }

@@ -64,6 +64,7 @@
         "review-workflow",
         "task-tracking",
         "dependency-safety",
+        "dependency-introduction",
         "learnings",
         "decomposition"
       ],
@@ -136,6 +137,7 @@
         "from-plan",
         "feedback",
         "dependency-safety",
+        "dependency-introduction",
         "learnings",
         "decomposition",
         "evaluation"

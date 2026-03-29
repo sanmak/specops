@@ -44,3 +44,6 @@ dist/
 !.claude/skills/
 
 /internal*
+
+# SpecOps ephemeral marker (plan-pending-conversion state machine)
+.plan-pending-conversion

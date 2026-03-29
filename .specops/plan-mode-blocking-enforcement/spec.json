@@ -1,0 +1,42 @@
+{
+  "id": "plan-mode-blocking-enforcement",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "created": "2026-03-28T04:56:27Z",
+  "updated": "2026-03-28T05:18:32Z",
+  "specopsCreatedWith": "1.7.0",
+  "specopsUpdatedWith": "1.7.0",
+  "author": {
+    "name": "sanmak"
+  },
+  "reviewers": [],
+  "reviewRounds": 0,
+  "approvals": 0,
+  "requiredApprovals": 0,
+  "specDependencies": [
+    {
+      "specId": "exit-plan-mode-hook",
+      "required": true,
+      "relationship": "extends"
+    }
+  ],
+  "relatedSpecs": [
+    "exit-plan-mode-hook",
+    "from-plan-enforcement-checklist",
+    "plan-to-specops-automation"
+  ],
+  "evaluation": {
+    "implementation": {
+      "iterations": 1,
+      "passed": true,
+      "scores": {
+        "functionalityDepth": 8,
+        "designFidelity": 8,
+        "codeQuality": 8,
+        "testVerification": 8
+      },
+      "evaluatedAt": "2026-03-28T05:18:32Z"
+    }
+  }
+}
