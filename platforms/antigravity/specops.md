@@ -2316,7 +2316,7 @@ Detect packages installed in the project that were not approved in any spec's de
    - PHP: Read the file at(`composer.lock`) -- extract `name` fields from `packages` array
    - Java/Kotlin: Read the file at(`pom.xml`) or Read the file at(`build.gradle`) -- extract dependency names
 
-3. **Collect approved dependencies**: Read the file at(`<specsDir>/index.json`) to enumerate all specs. For each spec with `status == "completed"`, Read the file at(`<specsDir>/<spec-name>/design.md`) and extract packages from the `### Dependency Decisions` table where `Decision` is `Approved`. Build a union set of all approved packages across all completed specs.
+3. **Collect approved dependencies**: Read the file at(`<specsDir>/index.json`) to enumerate all specs. For each spec with `status` in (`"completed"`, `"in-progress"`, `"in-review"`), Read the file at(`<specsDir>/<spec-name>/design.md`) and extract packages from the `### Dependency Decisions` table where `Decision` is `Approved`. Build a union set of all approved packages across all matching specs. Including in-progress and in-review specs prevents false warnings for dependencies that were approved in a spec's design but whose spec is not yet completed.
 
 4. **Compare**: For each installed package, check if it appears in the approved union set. If a package is installed but not in any spec's approved list → **Warning** (not Drift, since it may be a pre-existing dependency that predates SpecOps adoption or was added to the project before dependency introduction tracking began).
 
@@ -2618,7 +2618,7 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
 
    If none of the branches produced plan content (non-interactive platform, no inline content, no file path, no `planFileDirectory`): Tell the user: "From Plan mode requires the plan to be pasted inline or provided as a file path. Re-invoke with your plan content or path included in the request." and stop.
 
-   **Step 1.5 — Marker detection**: If Check if the file exists at(`<specsDir>/.plan-pending-conversion`), Tell the user: "Plan-pending-conversion marker detected. Write/Edit on non-spec files is currently blocked by the PreToolUse guard. This marker will be removed after the post-conversion enforcement pass (step 6.5) succeeds, unblocking all writes."
+   **Step 1.5 — Marker detection**: If Check if the file exists at(`<specsDir>/.plan-pending-conversion`), Tell the user: "Plan-pending-conversion marker detected. Write/Edit on non-spec files is currently blocked by the PreToolUse guard. This marker will be removed after the post-conversion enforcement pass (step 7) succeeds, unblocking all writes."
 
 2. **Parse the plan**: Read through the plan content and identify sections using these keyword heuristics:
 
@@ -2706,7 +2706,7 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
 
    **Remove plan-pending-conversion marker**: If Check if the file exists at(`<specsDir>/.plan-pending-conversion`), Run the terminal command(`rm -f <specsDir>/.plan-pending-conversion`). Tell the user: "Plan-pending-conversion marker removed. Write/Edit on all files is now unblocked." If from-plan fails before this point, the marker persists and Write/Edit remains blocked until conversion succeeds.
 
-   Proceed to step 7.
+   Proceed to step 8.
 
 8. **Complete**: Proceed to Phase 2 spec review gate (if `config.team.specReview.enabled` or `config.team.reviewRequired`) or Tell the user that the spec is ready and they can begin implementation.
 
@@ -3560,9 +3560,9 @@ The agent MUST preserve all existing sections in dependencies.md when updating. 
 
 All supported platforms have `canExecuteCode: true`, so the full registry API + curl workflow is available everywhere.
 
-- **`canAskInteractive = true`** (Claude Code, Cursor, Copilot): Present Build-vs-Install evaluation and ask user for approval/rejection of each new dependency.
-- **`canAskInteractive = false`** (Codex): Present the evaluation and default to the recommendation. Record the recommendation as the decision. Tell the user with the full evaluation output so the user can review.
-- **`canTrackProgress = false`** (Cursor, Codex, Copilot): Report gate progress in text output rather than a progress tracker.
+- **`canAskInteractive = true`**: Present Build-vs-Install evaluation and ask user for approval/rejection of each new dependency.
+- **`canAskInteractive = false`**: Present the evaluation and default to the recommendation. Record the recommendation as the decision. Tell the user with the full evaluation output so the user can review.
+- **`canTrackProgress = false`**: Report gate progress in text output rather than a progress tracker.
 
 
 ## Production Learnings
@@ -4135,7 +4135,7 @@ STRUCTURAL RULES (mandatory, not guidelines):
    the evidence.
 2. Mandatory finding: Each dimension MUST identify at least one concrete finding (gap, risk,
    or improvement opportunity). "No issues found" is not acceptable. If you cannot identify
-   a finding, your score for that dimension is capped at 7.
+   a finding, your score for that dimension is capped below the passing threshold.
 3. Score variance: If all your dimension scores are identical, your evaluation auto-fails
    and you must re-evaluate with distinct per-dimension justification.
 ```
@@ -4146,9 +4146,11 @@ STRUCTURAL RULES (mandatory, not guidelines):
 2. For each spec evaluation dimension:
    a. List specific evidence: quote or reference the artifact section, line, or passage that is relevant to this dimension.
    b. List findings: identify at least one concrete finding (gap, risk, or improvement opportunity) for this dimension. "No issues found" is not acceptable evidence.
-   c. Assign a score (1-10 integer) that follows from the evidence and findings above. If the findings list is empty or contains only "No issues found" or equivalent language, cap the score at 7 and append: "Score capped at 7 -- no concrete finding identified for this dimension."
+   c. Assign a score (1-10 integer) that follows from the evidence and findings above. If the findings list is empty or contains only "No issues found" or equivalent language, cap the score at (`minScore` - 1) and append: "Score capped below threshold -- no concrete finding identified for this dimension."
    d. If below `config.implementation.evaluation.minScore`: write a concrete remediation instruction (e.g., "Acceptance criterion 3 uses 'works well' -- specify a measurable threshold such as response time < 200ms").
-3. **Score variance check**: After all dimensions are scored, check whether all dimension scores are identical. If all scores are the same value, the evaluation auto-fails: record "Uniform scores detected -- re-evaluate with distinct per-dimension justification" and re-run the evaluation from step 2. This re-run does NOT consume a `maxIterations` cycle.
+3. **Score variance check**: After all dimensions are scored, check whether all dimension scores are identical.
+   - If all scores are identical on the first attempt, record "Uniform scores detected -- re-evaluate with distinct per-dimension justification" and re-run once from step 2.
+   - If scores are still identical after one re-run, treat the evaluation as failed for this iteration and continue with normal iteration accounting (`maxIterations` applies).
 4. Create the file at `<specsDir>/<spec-name>/evaluation.md` using the Evaluation Report Template. If the file already exists, append the new iteration (do not overwrite prior iterations).
 5. Edit the file at `<specsDir>/<spec-name>/spec.json` to update the `evaluation.spec` object with `iterations`, `passed`, `scores`, and `evaluatedAt`.
 6. If ALL dimensions score at or above `minScore`: evaluation passes -- signal for Phase 3 dispatch.
@@ -4171,7 +4173,7 @@ Implementation evaluation runs as Phase 4A — after Phase 3 completes but befor
 | Dimension | What it measures | Scoring guidance |
 | ----------- | ----------------- | ------------------ |
 | Functionality Depth | Full spec coverage, not just happy path | 7+: all acceptance criteria addressed with implementation evidence. Below 7: criteria checked without corresponding code, or happy-path-only implementation. |
-| Design Fidelity | Implementation matches design.md decisions | 7+: each design decision reflected in code; all installed packages match the approved list in design.md ### Dependency Decisions. Below 7: design decisions ignored or contradicted without documented deviation, or packages installed that are not in the approved dependency list. |
+| Design Fidelity | Implementation matches design.md decisions | 7+: each design decision reflected in code; packages introduced by this spec match the approved list in design.md ### Dependency Decisions. Below 7: design decisions ignored or contradicted without documented deviation, or spec-introduced packages not in the approved dependency list. |
 | Code Quality | Clean architecture, appropriate abstractions | 7+: no obvious code smells, functions focused, naming clear. Below 7: duplicated logic, unclear naming, overly complex control flow. |
 | Test Verification | Tests run and pass, adequate coverage | 7+: tests exist and pass for core functionality. Below 7: no tests, failing tests, or tests that do not exercise the implementation. |
 
@@ -4207,7 +4209,7 @@ STRUCTURAL RULES (mandatory, not guidelines):
    code quotes, test output) BEFORE assigning a score. The score must follow from the evidence.
 2. Mandatory finding: Each dimension MUST identify at least one concrete finding (gap, risk,
    or improvement opportunity). "No issues found" is not acceptable. If you cannot identify
-   a finding, your score for that dimension is capped at 7.
+   a finding, your score for that dimension is capped below the passing threshold.
 3. Score variance: If all your dimension scores are identical, your evaluation auto-fails
    and you must re-evaluate with distinct per-dimension justification.
 ```
@@ -4221,9 +4223,11 @@ STRUCTURAL RULES (mandatory, not guidelines):
 5. For each dimension (selected by spec type from the tables above):
    a. List specific evidence: cite file paths, line references, code quotes, or test output that are relevant to this dimension.
    b. List findings: identify at least one concrete finding (gap, risk, or improvement opportunity) for this dimension. "No issues found" is not acceptable evidence.
-   c. Assign a score (1-10 integer) that follows from the evidence and findings above. If the findings list is empty or contains only "No issues found" or equivalent language, cap the score at 7 and append: "Score capped at 7 -- no concrete finding identified for this dimension."
+   c. Assign a score (1-10 integer) that follows from the evidence and findings above. If the findings list is empty or contains only "No issues found" or equivalent language, cap the score at (`minScore` - 1) and append: "Score capped below threshold -- no concrete finding identified for this dimension."
    d. If below `minScore`: write a concrete remediation instruction scoped to specific tasks and files.
-6. **Score variance check**: After all dimensions are scored, check whether all dimension scores are identical. If all scores are the same value, the evaluation auto-fails: record "Uniform scores detected -- re-evaluate with distinct per-dimension justification" and re-run the evaluation from step 5. This re-run does NOT consume a `maxIterations` cycle.
+6. **Score variance check**: After all dimensions are scored, check whether all dimension scores are identical.
+   - If all scores are identical on the first attempt, record "Uniform scores detected -- re-evaluate with distinct per-dimension justification" and re-run once from step 5.
+   - If scores are still identical after one re-run, treat the evaluation as failed for this iteration and continue with normal iteration accounting (`maxIterations` applies).
 7. Create the file at (or append to) `<specsDir>/<spec-name>/evaluation.md` with the implementation evaluation iteration. Append under the `## Implementation Evaluation` section.
 8. Edit the file at `<specsDir>/<spec-name>/spec.json` to update the `evaluation.implementation` object.
 9. If ALL dimensions score at or above `minScore`: evaluation passes -- proceed to Phase 4C (completion steps).

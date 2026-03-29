@@ -248,11 +248,11 @@ Review works across all platforms, with behavior adapted to each platform's capa
 | Capability | Claude Code | Cursor | Codex | Copilot | Antigravity |
 | --- | --- | --- | --- | --- | --- |
 | Spec creation + spec.json | Full | Full | Full | Full | Full |
-| Interactive review (ask questions) | Yes | Yes | No | Yes | No |
-| Review feedback collection | Section-by-section | Section-by-section | All-in-prompt | Section-by-section | All-in-prompt |
-| Verdict selection | Interactive choice | Interactive choice | Parsed from prompt | Interactive choice | Parsed from prompt |
-| Revision mode | Interactive guidance | Interactive guidance | Prompt-directed | Interactive guidance | Prompt-directed |
-| Implementation gate override | Ask user | Ask user | Hard stop | Ask user | Hard stop |
+| Interactive review (ask questions) | Yes | Yes | No | Yes | Yes |
+| Review feedback collection | Section-by-section | Section-by-section | All-in-prompt | Section-by-section | Section-by-section |
+| Verdict selection | Interactive choice | Interactive choice | Parsed from prompt | Interactive choice | Interactive choice |
+| Revision mode | Interactive guidance | Interactive guidance | Prompt-directed | Interactive guidance | Interactive guidance |
+| Implementation gate override | Ask user | Ask user | Hard stop | Ask user | Ask user |
 | Progress tracking | TodoWrite tool | Chat responses | stdout | Chat responses | stdout |
 
 ### Claude Code Examples

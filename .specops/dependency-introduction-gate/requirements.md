@@ -132,7 +132,7 @@ Add a core enforcement mechanism that prevents AI agents from casually installin
 
 ## Non-Functional Requirements
 
-- Performance: The dependency introduction gate must not add more than 5 seconds to Phase 2 execution (registry API calls use 10-second timeouts)
+- Performance: In typical conditions, the dependency introduction gate should complete within 5 seconds. Individual registry API calls use 10-second timeouts; when a network call times out the gate still proceeds (logs a warning and skips the registry check for that package)
 - No configuration: The gate is always active with no config knobs, no bypass, deterministic behavior
 - Backward compatibility: Specs created before this feature work unchanged (gate passes trivially when no ### Dependency Decisions section exists)
 

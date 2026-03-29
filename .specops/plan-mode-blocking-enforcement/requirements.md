@@ -73,7 +73,6 @@ Upgrade the ExitPlanMode hook enforcement from advisory to blocking. When a plan
 - `.gitignore` update for marker file
 - Dogfood in `.claude/settings.local.json`
 - Documentation updates (CLAUDE.md, docs/REFERENCE.md, CHANGELOG.md)
-- Delete `core/dependency-introduction.md` (created outside SpecOps workflow)
 
 **Deferred:**
 - [To be defined]
@@ -94,7 +93,6 @@ Upgrade the ExitPlanMode hook enforcement from advisory to blocking. When a plan
 - `.claude/settings.json` is gitignored by `.claude/*` pattern, so dogfood uses `.claude/settings.local.json`
 - Must regenerate platform outputs after changing `core/` files
 - Must regenerate checksums after changing checksummed files
-- Prerequisite: delete `core/dependency-introduction.md` before starting implementation
 
 ## Team Conventions
 - Conventional commits: feat:, fix:, chore:, docs:, test:, refactor:

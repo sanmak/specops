@@ -816,7 +816,7 @@ These are the valid states a spec can be in, usable as filters with the status c
 - **Best for:** Multi-agent orchestration via Manager View
 - **Capabilities:** Full feature set including sub-agent delegation (`canDelegateTask: true`)
 - **Special features:** Same invocation pattern as Codex. Supports task delegation via Manager View agents.
-- **Limitation:** Non-interactive (`canAskInteractive: false`) -- interview mode skipped, reconcile blocked
+- **Limitation:** No progress tracking (`canTrackProgress: false`)
 
 ---
 

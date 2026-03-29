@@ -375,7 +375,7 @@ The marker file is:
 
 - Created by the PostToolUse ExitPlanMode hook
 - Checked by the PreToolUse Write|Edit guard
-- Removed by from-plan mode after the enforcement pass (step 6.5) succeeds
+- Removed by from-plan mode after the enforcement pass (step 7) succeeds
 - Gitignored (ephemeral, not committed)
 
 If from-plan fails before the enforcement pass, the marker persists and writes remain blocked until conversion succeeds.

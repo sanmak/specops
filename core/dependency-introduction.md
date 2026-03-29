@@ -179,6 +179,6 @@ The agent MUST preserve all existing sections in dependencies.md when updating. 
 
 All supported platforms have `canExecuteCode: true`, so the full registry API + curl workflow is available everywhere.
 
-- **`canAskInteractive = true`** (Claude Code, Cursor, Copilot): Present Build-vs-Install evaluation and ask user for approval/rejection of each new dependency.
-- **`canAskInteractive = false`** (Codex): Present the evaluation and default to the recommendation. Record the recommendation as the decision. NOTIFY_USER with the full evaluation output so the user can review.
-- **`canTrackProgress = false`** (Cursor, Codex, Copilot): Report gate progress in text output rather than a progress tracker.
+- **`canAskInteractive = true`**: Present Build-vs-Install evaluation and ask user for approval/rejection of each new dependency.
+- **`canAskInteractive = false`**: Present the evaluation and default to the recommendation. Record the recommendation as the decision. NOTIFY_USER with the full evaluation output so the user can review.
+- **`canTrackProgress = false`**: Report gate progress in text output rather than a progress tracker.

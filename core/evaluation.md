@@ -65,7 +65,7 @@ STRUCTURAL RULES (mandatory, not guidelines):
    the evidence.
 2. Mandatory finding: Each dimension MUST identify at least one concrete finding (gap, risk,
    or improvement opportunity). "No issues found" is not acceptable. If you cannot identify
-   a finding, your score for that dimension is capped at 7.
+   a finding, your score for that dimension is capped below the passing threshold.
 3. Score variance: If all your dimension scores are identical, your evaluation auto-fails
    and you must re-evaluate with distinct per-dimension justification.
 ```
@@ -76,9 +76,11 @@ STRUCTURAL RULES (mandatory, not guidelines):
 2. For each spec evaluation dimension:
    a. List specific evidence: quote or reference the artifact section, line, or passage that is relevant to this dimension.
    b. List findings: identify at least one concrete finding (gap, risk, or improvement opportunity) for this dimension. "No issues found" is not acceptable evidence.
-   c. Assign a score (1-10 integer) that follows from the evidence and findings above. If the findings list is empty or contains only "No issues found" or equivalent language, cap the score at 7 and append: "Score capped at 7 -- no concrete finding identified for this dimension."
+   c. Assign a score (1-10 integer) that follows from the evidence and findings above. If the findings list is empty or contains only "No issues found" or equivalent language, cap the score at (`minScore` - 1) and append: "Score capped below threshold -- no concrete finding identified for this dimension."
    d. If below `config.implementation.evaluation.minScore`: write a concrete remediation instruction (e.g., "Acceptance criterion 3 uses 'works well' -- specify a measurable threshold such as response time < 200ms").
-3. **Score variance check**: After all dimensions are scored, check whether all dimension scores are identical. If all scores are the same value, the evaluation auto-fails: record "Uniform scores detected -- re-evaluate with distinct per-dimension justification" and re-run the evaluation from step 2. This re-run does NOT consume a `maxIterations` cycle.
+3. **Score variance check**: After all dimensions are scored, check whether all dimension scores are identical.
+   - If all scores are identical on the first attempt, record "Uniform scores detected -- re-evaluate with distinct per-dimension justification" and re-run once from step 2.
+   - If scores are still identical after one re-run, treat the evaluation as failed for this iteration and continue with normal iteration accounting (`maxIterations` applies).
 4. WRITE_FILE `<specsDir>/<spec-name>/evaluation.md` using the Evaluation Report Template. If the file already exists, append the new iteration (do not overwrite prior iterations).
 5. EDIT_FILE `<specsDir>/<spec-name>/spec.json` to update the `evaluation.spec` object with `iterations`, `passed`, `scores`, and `evaluatedAt`.
 6. If ALL dimensions score at or above `minScore`: evaluation passes -- signal for Phase 3 dispatch.
@@ -101,7 +103,7 @@ Implementation evaluation runs as Phase 4A — after Phase 3 completes but befor
 | Dimension | What it measures | Scoring guidance |
 | ----------- | ----------------- | ------------------ |
 | Functionality Depth | Full spec coverage, not just happy path | 7+: all acceptance criteria addressed with implementation evidence. Below 7: criteria checked without corresponding code, or happy-path-only implementation. |
-| Design Fidelity | Implementation matches design.md decisions | 7+: each design decision reflected in code; all installed packages match the approved list in design.md ### Dependency Decisions. Below 7: design decisions ignored or contradicted without documented deviation, or packages installed that are not in the approved dependency list. |
+| Design Fidelity | Implementation matches design.md decisions | 7+: each design decision reflected in code; packages introduced by this spec match the approved list in design.md ### Dependency Decisions. Below 7: design decisions ignored or contradicted without documented deviation, or spec-introduced packages not in the approved dependency list. |
 | Code Quality | Clean architecture, appropriate abstractions | 7+: no obvious code smells, functions focused, naming clear. Below 7: duplicated logic, unclear naming, overly complex control flow. |
 | Test Verification | Tests run and pass, adequate coverage | 7+: tests exist and pass for core functionality. Below 7: no tests, failing tests, or tests that do not exercise the implementation. |
 
@@ -137,7 +139,7 @@ STRUCTURAL RULES (mandatory, not guidelines):
    code quotes, test output) BEFORE assigning a score. The score must follow from the evidence.
 2. Mandatory finding: Each dimension MUST identify at least one concrete finding (gap, risk,
    or improvement opportunity). "No issues found" is not acceptable. If you cannot identify
-   a finding, your score for that dimension is capped at 7.
+   a finding, your score for that dimension is capped below the passing threshold.
 3. Score variance: If all your dimension scores are identical, your evaluation auto-fails
    and you must re-evaluate with distinct per-dimension justification.
 ```
@@ -151,9 +153,11 @@ STRUCTURAL RULES (mandatory, not guidelines):
 5. For each dimension (selected by spec type from the tables above):
    a. List specific evidence: cite file paths, line references, code quotes, or test output that are relevant to this dimension.
    b. List findings: identify at least one concrete finding (gap, risk, or improvement opportunity) for this dimension. "No issues found" is not acceptable evidence.
-   c. Assign a score (1-10 integer) that follows from the evidence and findings above. If the findings list is empty or contains only "No issues found" or equivalent language, cap the score at 7 and append: "Score capped at 7 -- no concrete finding identified for this dimension."
+   c. Assign a score (1-10 integer) that follows from the evidence and findings above. If the findings list is empty or contains only "No issues found" or equivalent language, cap the score at (`minScore` - 1) and append: "Score capped below threshold -- no concrete finding identified for this dimension."
    d. If below `minScore`: write a concrete remediation instruction scoped to specific tasks and files.
-6. **Score variance check**: After all dimensions are scored, check whether all dimension scores are identical. If all scores are the same value, the evaluation auto-fails: record "Uniform scores detected -- re-evaluate with distinct per-dimension justification" and re-run the evaluation from step 5. This re-run does NOT consume a `maxIterations` cycle.
+6. **Score variance check**: After all dimensions are scored, check whether all dimension scores are identical.
+   - If all scores are identical on the first attempt, record "Uniform scores detected -- re-evaluate with distinct per-dimension justification" and re-run once from step 5.
+   - If scores are still identical after one re-run, treat the evaluation as failed for this iteration and continue with normal iteration accounting (`maxIterations` applies).
 7. WRITE_FILE (or append to) `<specsDir>/<spec-name>/evaluation.md` with the implementation evaluation iteration. Append under the `## Implementation Evaluation` section.
 8. EDIT_FILE `<specsDir>/<spec-name>/spec.json` to update the `evaluation.implementation` object.
 9. If ALL dimensions score at or above `minScore`: evaluation passes -- proceed to Phase 4C (completion steps).

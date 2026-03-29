@@ -35,7 +35,7 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
 
    If none of the branches produced plan content (non-interactive platform, no inline content, no file path, no `planFileDirectory`): Display a message to the user: "From Plan mode requires the plan to be pasted inline or provided as a file path. Re-invoke with your plan content or path included in the request." and stop.
 
-   **Step 1.5 — Marker detection**: If Use the Bash tool to check if the file exists at(`<specsDir>/.plan-pending-conversion`), Display a message to the user: "Plan-pending-conversion marker detected. Write/Edit on non-spec files is currently blocked by the PreToolUse guard. This marker will be removed after the post-conversion enforcement pass (step 6.5) succeeds, unblocking all writes."
+   **Step 1.5 — Marker detection**: If Use the Bash tool to check if the file exists at(`<specsDir>/.plan-pending-conversion`), Display a message to the user: "Plan-pending-conversion marker detected. Write/Edit on non-spec files is currently blocked by the PreToolUse guard. This marker will be removed after the post-conversion enforcement pass (step 7) succeeds, unblocking all writes."
 
 2. **Parse the plan**: Read through the plan content and identify sections using these keyword heuristics:
 
@@ -123,7 +123,7 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
 
    **Remove plan-pending-conversion marker**: If Use the Bash tool to check if the file exists at(`<specsDir>/.plan-pending-conversion`), Use the Bash tool to run(`rm -f <specsDir>/.plan-pending-conversion`). Display a message to the user: "Plan-pending-conversion marker removed. Write/Edit on all files is now unblocked." If from-plan fails before this point, the marker persists and Write/Edit remains blocked until conversion succeeds.
 
-   Proceed to step 7.
+   Proceed to step 8.
 
 8. **Complete**: Proceed to Phase 2 spec review gate (if `config.team.specReview.enabled` or `config.team.reviewRequired`) or Display a message to the user that the spec is ready and they can begin implementation.
 
@@ -1621,9 +1621,9 @@ The agent MUST preserve all existing sections in dependencies.md when updating. 
 
 All supported platforms have `canExecuteCode: true`, so the full registry API + curl workflow is available everywhere.
 
-- **`canAskInteractive = true`** (Claude Code, Cursor, Copilot): Present Build-vs-Install evaluation and ask user for approval/rejection of each new dependency.
-- **`canAskInteractive = false`** (Codex): Present the evaluation and default to the recommendation. Record the recommendation as the decision. Display a message to the user with the full evaluation output so the user can review.
-- **`canTrackProgress = false`** (Cursor, Codex, Copilot): Report gate progress in text output rather than a progress tracker.
+- **`canAskInteractive = true`**: Present Build-vs-Install evaluation and ask user for approval/rejection of each new dependency.
+- **`canAskInteractive = false`**: Present the evaluation and default to the recommendation. Record the recommendation as the decision. Display a message to the user with the full evaluation output so the user can review.
+- **`canTrackProgress = false`**: Report gate progress in text output rather than a progress tracker.
 
 
 ## Production Learnings

@@ -35,7 +35,7 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
 
    If none of the branches produced plan content (non-interactive platform, no inline content, no file path, no `planFileDirectory`): NOTIFY_USER: "From Plan mode requires the plan to be pasted inline or provided as a file path. Re-invoke with your plan content or path included in the request." and stop.
 
-   **Step 1.5 — Marker detection**: If FILE_EXISTS(`<specsDir>/.plan-pending-conversion`), NOTIFY_USER: "Plan-pending-conversion marker detected. Write/Edit on non-spec files is currently blocked by the PreToolUse guard. This marker will be removed after the post-conversion enforcement pass (step 6.5) succeeds, unblocking all writes."
+   **Step 1.5 — Marker detection**: If FILE_EXISTS(`<specsDir>/.plan-pending-conversion`), NOTIFY_USER: "Plan-pending-conversion marker detected. Write/Edit on non-spec files is currently blocked by the PreToolUse guard. This marker will be removed after the post-conversion enforcement pass (step 7) succeeds, unblocking all writes."
 
 2. **Parse the plan**: Read through the plan content and identify sections using these keyword heuristics:
 
@@ -123,7 +123,7 @@ On non-interactive platforms (`canAskInteractive = false`), the plan content mus
 
    **Remove plan-pending-conversion marker**: If FILE_EXISTS(`<specsDir>/.plan-pending-conversion`), RUN_COMMAND(`rm -f <specsDir>/.plan-pending-conversion`). NOTIFY_USER: "Plan-pending-conversion marker removed. Write/Edit on all files is now unblocked." If from-plan fails before this point, the marker persists and Write/Edit remains blocked until conversion succeeds.
 
-   Proceed to step 7.
+   Proceed to step 8.
 
 8. **Complete**: Proceed to Phase 2 spec review gate (if `config.team.specReview.enabled` or `config.team.reviewRequired`) or NOTIFY_USER that the spec is ready and they can begin implementation.
 

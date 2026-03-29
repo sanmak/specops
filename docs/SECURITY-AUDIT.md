@@ -77,7 +77,7 @@ The following security-relevant features were added after the 2026-03-02 audit a
 
 | Feature | Version | Security Relevance |
 | --- | --- | --- |
-| **Dependency introduction gate** | v1.5.0 | Always-active gate evaluating new packages against 5 criteria (scope, maintenance, size, security, license). Uses `RUN_COMMAND` for install command detection. Review: path construction from package names, registry API calls. |
+| **Dependency introduction gate** | Unreleased | Always-active gate evaluating new packages against 5 criteria (scope, maintenance, size, security, license). Uses `RUN_COMMAND` for install command detection. Review: path construction from package names, registry API calls. |
 | **Plan-mode blocking enforcement** | Unreleased | Marker file state machine (`.plan-pending-conversion`) blocking Write/Edit via PreToolUse hook. Review: marker creation/deletion race conditions, allowed path prefix matching logic. |
 | **Adversarial evaluation** | v1.7.0 | Hardcoded evaluator prompts (not configurable by users) reduce prompt injection risk. Evaluation scores are written to `evaluation.md` in specsDir. Review: evaluation output sanitization, score parsing. |
 | **Production learnings** | v1.6.0 | Stored in local `learnings.json` files only, no external transmission. Supersession chains use spec IDs in path construction. Review: learning record path construction, category field validation. |
