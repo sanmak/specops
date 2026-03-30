@@ -220,6 +220,26 @@
       "task": "Task 1",
       "date": "2026-03-28",
       "completedAt": "2026-03-28T11:21:31Z"
+    },
+    {
+      "specId": "multi-persona-review",
+      "specType": "feature",
+      "number": 1,
+      "decision": "Used 'Deduplication' (capitalized) as validator marker instead of 'deduplication' (lowercase)",
+      "rationale": "The marker must match exact case in the generated output. The section heading uses 'Deduplication Notes' (capitalized).",
+      "task": "Task 8",
+      "date": "2026-03-29",
+      "completedAt": "2026-03-29T17:58:21Z"
+    },
+    {
+      "specId": "multi-persona-review",
+      "specType": "feature",
+      "number": 2,
+      "decision": "core/review-agents.md auto-loaded by load_core_modules() glob pattern",
+      "rationale": "The existing load_core_modules() function globs all .md files in core/ directory, so no explicit load line was needed -- only the build_common_context() mapping.",
+      "task": "Task 7",
+      "date": "2026-03-29",
+      "completedAt": "2026-03-29T17:58:21Z"
     }
   ]
 }

@@ -79,10 +79,13 @@ Initiative Handoff Bundle
 
 For completed dependency specs, include key outputs by reading the Summary section from their `implementation.md`.
 
+**Planned wave context enrichment:** If the initiative has a `plannedWaves` array, find the entry matching the current wave number. If found, include the wave-level description in the Initiative Context section and the per-spec description and context (if present) in the Spec Identity section. This provides execution guidance for specs that have not yet been created, enabling cross-session initiative resumption without external plan references.
+
 #### Step 6: Dispatch spec
 
 1. If the spec has `status == "not-created"`:
-   - Dispatch through the normal dispatcher protocol with the request: "Create spec '{spec-id}' — {spec description from initiative context}"
+   - Check if `initiative.plannedWaves` contains an entry for the current wave with a spec entry matching the spec ID. If found, use the spec's `description` and `context` fields to enrich the dispatch request.
+   - Dispatch through the normal dispatcher protocol with the request: "Create spec '{spec-id}' — {spec description from plannedWaves entry if available, otherwise from initiative description}"
    - The dispatcher routes to the `spec` mode, which runs the full Phase 1-4 lifecycle.
 
 2. If the spec has an existing status (`draft`, `in-review`, `approved`, `self-approved`, `implementing`):
@@ -158,6 +161,7 @@ The orchestrator is entirely file-based. All state can be reconstructed from dis
 | Dependency outputs | `<specsDir>/<spec-id>/implementation.md` (completed specs) | Step 5 |
 | Initiative log | `<specsDir>/initiatives/<id>-log.md` | Step 8 (append) |
 | Execution waves | `initiative.order` field | Step 3 |
+| Planned wave context | `initiative.plannedWaves` field (optional) | Step 5, Step 6 |
 
 No in-memory state accumulates across iterations. The orchestrator can be interrupted and resumed at any point — it re-reads everything from disk on each iteration.
 

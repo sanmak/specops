@@ -225,6 +225,16 @@ Create specs in this structure:
 
 Example: `.specops/user-auth-oauth/requirements.md`
 
+## Depth Calibration
+
+The `depth` field in `spec.json` records the complexity depth flag computed during Phase 1 step 9.7. It calibrates workflow ceremony depth throughout the spec lifecycle.
+
+**Valid values:** `lightweight`, `standard`, `deep`
+
+**Per-spec field** (not a project-level config) — each spec may have a different depth based on its scope. Depth is computed from task count, file domain breadth, and new dependency presence. Users can override with keywords in their request (e.g., "quick" forces lightweight, "thorough" forces deep).
+
+**Workflow impact:** See the Depth Calibration sections in `core/workflow.md` steps 3.5, 5.8, 6.85, 9.5, 9.7, and Phase 4A.1 for step-specific behavior adjustments by depth level.
+
 ## Spec Review Configuration
 
 If `config.team.specReview` is configured:
@@ -1940,7 +1950,21 @@ An initiative groups related specs created through decomposition (or manually) i
 | `specs` | string[] | Yes | Array of spec IDs belonging to this initiative (maxItems 50) |
 | `order` | string[][] | Yes | Execution waves — array of arrays where each inner array is a wave of spec IDs that can execute in parallel (maxItems 20 waves, inner maxItems 50) |
 | `skeleton` | string | No | Spec ID of the walking skeleton (first wave-1 spec) |
+| `plannedWaves` | object[] | No | Planned wave context for specs not yet created (see below) |
 | `status` | string | Yes | `active` or `completed` — derived from member spec statuses |
+
+**Planned Waves:** When an initiative spans multiple waves and later waves have specs not yet created, `plannedWaves` carries execution context so that a new session can resume the initiative without external plan references. Each entry contains:
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `wave` | integer | Yes | Wave number (1-indexed, corresponds to position in `order`) |
+| `description` | string | Yes | What this wave accomplishes and why (maxLength 2000) |
+| `specs` | object[] | Yes | Per-spec execution context (minItems 1, maxItems 50) |
+| `specs[].id` | string | Yes | Spec ID matching an entry in the initiative's `specs` array |
+| `specs[].description` | string | Yes | What this spec should accomplish (maxLength 2000) |
+| `specs[].context` | string | No | Extended context: implementation details, file targets, constraints (maxLength 5000) |
+
+**Population:** When decomposition creates an initiative with multiple waves (Phase 1.5), populate `plannedWaves` for all waves beyond wave 1. Include enough context per spec that a fresh session can execute the spec without referencing external plan files. When a wave completes, its `plannedWaves` entry may be retained for historical context or removed — the orchestrator does not require it for completed waves.
 
 **Schema:** Validated against `initiative-schema.json` (draft-07, `additionalProperties: false` at all object levels).
 
@@ -2654,6 +2678,7 @@ Detailed description of what needs to be done.
 - Vertical: [detected or configured vertical]
 - Affected files: [list of affected file paths]
 - Project state: [greenfield / brownfield / migration]
+- Depth: [lightweight / standard / deep] [computed / user override]
 
 ## Decision Log
 

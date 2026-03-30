@@ -402,6 +402,7 @@ EVALUATION_MARKERS = [
     "## Adversarial Evaluation",
     "### Evaluation Configuration",
     "### Scoring Rubric",
+    "### Confidence Tiers for Findings",
     "### Spec Evaluation Protocol",
     "### Implementation Evaluation Protocol",
     "### Feedback Loop",
@@ -409,6 +410,73 @@ EVALUATION_MARKERS = [
     "### Evaluation Safety",
     "evaluation.md",
     "minScore",
+    "Confidence classification",
+    "[Advisory]",
+]
+
+
+# Multi-persona review markers that MUST appear in every output
+REVIEW_AGENTS_MARKERS = [
+    "## Multi-Persona Review",
+    "### Persona Registry",
+    "Correctness Reviewer",
+    "Testing Reviewer",
+    "Standards Reviewer",
+    "Security Reviewer",
+    "security-sensitive",
+    "### Review Execution Protocol",
+    "### Persona Prompts",
+    "P0",
+    "P1",
+    "Deduplication",
+    "Multi-Persona Review",
+]
+
+
+# Action routing markers that MUST appear in every output
+ACTION_ROUTING_MARKERS = [
+    "Action Routing for Findings",
+    "auto_fix",
+    "gated_fix",
+    "Fix Determinism",
+    "Fix Scope",
+    "Fix Risk",
+    "Action Routing Summary",
+    "Routing Decision Matrix",
+    "Auto-Fix Results",
+    "reclassify",
+]
+
+
+# Environment pre-flight markers that MUST appear in every output
+PREFLIGHT_MARKERS = [
+    "Environment pre-flight",
+    "Test command detection",
+    "Dependency installation check",
+    "Git branch state check",
+    "Pre-flight summary",
+]
+
+
+# Depth calibration markers that MUST appear in every output
+DEPTH_MARKERS = [
+    "Depth calibration",
+    "lightweight",
+    "Depth assessment",
+    "depth flag",
+]
+
+
+# Explore mode markers that MUST appear in every output
+EXPLORE_MARKERS = [
+    "Explore Mode",
+    "Explore Mode Detection",
+    "Explore Workflow",
+    "Approach Format",
+    "Approach Quality Rules",
+    "Codebase grounding requirement",
+    "Approach diversity",
+    "Explore Mode Safety",
 ]
 
 
@@ -440,6 +508,30 @@ DECOMPOSITION_MARKERS = [
     "Walking Skeleton",
     "decomposition",
     "relatedSpecs",
+]
+
+
+# Headless mode protocol markers that MUST appear in every output
+HEADLESS_MARKERS = [
+    "Headless Mode Protocol",
+    "Headless Response Schema",
+    "Headless Dispatch",
+    "headless: true",
+    "Participating Modes",
+    "headless mode",
+]
+
+
+# Conditional reviewer triggering markers that MUST appear in every output
+TRIGGERING_MARKERS = [
+    "Triggering Conditions",
+    "activationMode",
+    "filePatterns",
+    "contentPatterns",
+    "Persona Trigger Patterns",
+    "manual override",
+    "always-on",
+    "activation reason",
 ]
 
 
@@ -588,9 +680,9 @@ def validate_claude_dispatcher():
         errors.append("  Missing platforms/claude/modes/ directory")
     else:
         mode_files = [f for f in os.listdir(modes_dir) if f.endswith(".md")]
-        if len(mode_files) != 15:
+        if len(mode_files) != 16:
             errors.append(
-                f"  Expected 15 mode files in platforms/claude/modes/,"
+                f"  Expected 16 mode files in platforms/claude/modes/,"
                 f" found {len(mode_files)}: {sorted(mode_files)}"
             )
 
@@ -704,8 +796,29 @@ def validate_platform(platform, info):
     # Check adversarial evaluation present
     errors.extend(check_markers_present(platform, content, EVALUATION_MARKERS, "evaluation"))
 
+    # Check multi-persona review present
+    errors.extend(check_markers_present(platform, content, REVIEW_AGENTS_MARKERS, "review-agents"))
+
+    # Check action routing present
+    errors.extend(check_markers_present(platform, content, ACTION_ROUTING_MARKERS, "action-routing"))
+
+    # Check environment pre-flight markers present
+    errors.extend(check_markers_present(platform, content, PREFLIGHT_MARKERS, "environment pre-flight"))
+
+    # Check depth calibration markers present
+    errors.extend(check_markers_present(platform, content, DEPTH_MARKERS, "depth calibration"))
+
+    # Check explore mode markers present
+    errors.extend(check_markers_present(platform, content, EXPLORE_MARKERS, "explore"))
+
     # Check decomposition and initiative markers present
     errors.extend(check_markers_present(platform, content, DECOMPOSITION_MARKERS, "decomposition"))
+
+    # Check headless mode protocol markers present
+    errors.extend(check_markers_present(platform, content, HEADLESS_MARKERS, "headless"))
+
+    # Check conditional reviewer triggering markers present
+    errors.extend(check_markers_present(platform, content, TRIGGERING_MARKERS, "triggering"))
 
     # Platform-specific format validation
     if platform == "cursor":
@@ -1245,7 +1358,7 @@ def main():
     if len(generated) >= 2:
         platforms = list(generated.keys())
         consistency_errors = []
-        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + TEMPLATE_MARKERS + VERTICAL_MARKERS + SIMPLICITY_MARKERS + DATA_HANDLING_MARKERS + INTERVIEW_MARKERS + STEERING_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + EXTERNAL_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS + REPO_MAP_MARKERS + DELEGATION_MARKERS + WRITING_QUALITY_MARKERS + ENGINEERING_DISCIPLINE_MARKERS + FEEDBACK_MARKERS + COHERENCE_MARKERS + METRICS_MARKERS + RUN_LOGGING_MARKERS + PLAN_VALIDATION_MARKERS + GIT_CHECKPOINT_MARKERS + PIPELINE_MARKERS + ISSUE_BODY_MARKERS + DEPENDENCY_SAFETY_MARKERS + DEPENDENCY_INTRODUCTION_MARKERS + LEARNINGS_MARKERS + DECOMPOSITION_MARKERS + EVALUATION_MARKERS:
+        for marker in WORKFLOW_MARKERS + SAFETY_MARKERS + TEMPLATE_MARKERS + VERTICAL_MARKERS + SIMPLICITY_MARKERS + DATA_HANDLING_MARKERS + INTERVIEW_MARKERS + STEERING_MARKERS + REVIEW_MARKERS + VIEW_MARKERS + UPDATE_MARKERS + TASK_TRACKING_MARKERS + EXTERNAL_TRACKING_MARKERS + REGRESSION_MARKERS + RECONCILIATION_MARKERS + FROM_PLAN_MARKERS + MEMORY_MARKERS + REPO_MAP_MARKERS + DELEGATION_MARKERS + WRITING_QUALITY_MARKERS + ENGINEERING_DISCIPLINE_MARKERS + FEEDBACK_MARKERS + COHERENCE_MARKERS + METRICS_MARKERS + RUN_LOGGING_MARKERS + PLAN_VALIDATION_MARKERS + GIT_CHECKPOINT_MARKERS + PIPELINE_MARKERS + ISSUE_BODY_MARKERS + DEPENDENCY_SAFETY_MARKERS + DEPENDENCY_INTRODUCTION_MARKERS + LEARNINGS_MARKERS + DECOMPOSITION_MARKERS + EVALUATION_MARKERS + REVIEW_AGENTS_MARKERS + DEPTH_MARKERS + PREFLIGHT_MARKERS + TRIGGERING_MARKERS:
             present_in = [p for p in platforms if marker in generated[p]["content"]]
             if len(present_in) != len(platforms):
                 missing = set(platforms) - set(present_in)

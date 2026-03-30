@@ -1,0 +1,57 @@
+{
+  "id": "action-routing",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "author": {
+    "name": "sanmak"
+  },
+  "created": "2026-03-29T18:03:12Z",
+  "updated": "2026-03-29T18:25:00Z",
+  "specopsCreatedWith": "1.8.0",
+  "specopsUpdatedWith": "1.8.0",
+  "partOf": "ce-wave1-foundation",
+  "depth": "standard",
+  "specDependencies": [
+    {
+      "specId": "multi-persona-review",
+      "reason": "Action routing classifies persona findings (CORR-1, TEST-1, etc.) from multi-persona review into fix classes",
+      "required": true
+    },
+    {
+      "specId": "adversarial-evaluation",
+      "reason": "Action routing extends the evaluation dimension findings with fix classification",
+      "required": true
+    }
+  ],
+  "relatedSpecs": [
+    "confidence-gating",
+    "depth-calibration",
+    "environment-preflight",
+    "solution-exploration"
+  ],
+  "evaluation": {
+    "spec": {
+      "iterations": 1,
+      "passed": true,
+      "scores": {
+        "criteriaTestability": 8,
+        "criteriaCompleteness": 7,
+        "designCoherence": 8,
+        "taskCoverage": 8
+      },
+      "evaluatedAt": "2026-03-29T18:15:00Z"
+    },
+    "implementation": {
+      "iterations": 1,
+      "passed": true,
+      "scores": {
+        "functionalityDepth": 9,
+        "designFidelity": 9,
+        "codeQuality": 8,
+        "testVerification": 8
+      },
+      "evaluatedAt": "2026-03-29T18:20:00Z"
+    }
+  }
+}

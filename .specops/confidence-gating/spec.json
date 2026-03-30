@@ -1,0 +1,38 @@
+{
+  "id": "confidence-gating",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "author": {
+    "name": "sanmak"
+  },
+  "created": "2026-03-29T14:35:20Z",
+  "updated": "2026-03-29T15:15:12Z",
+  "specopsUpdatedWith": "1.8.0",
+  "specopsCreatedWith": "1.8.0",
+  "partOf": "ce-wave1-foundation",
+  "evaluation": {
+    "spec": {
+      "iterations": 1,
+      "passed": true,
+      "scores": {
+        "criteriaTestability": 8,
+        "criteriaCompleteness": 7,
+        "designCoherence": 8,
+        "taskCoverage": 8
+      },
+      "evaluatedAt": "2026-03-29T14:44:25Z"
+    }
+  },
+  "specDependencies": [],
+  "relatedSpecs": [
+    {
+      "specId": "depth-calibration",
+      "relationship": "same-initiative"
+    },
+    {
+      "specId": "environment-preflight",
+      "relationship": "same-initiative"
+    }
+  ]
+}

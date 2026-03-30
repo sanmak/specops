@@ -85,6 +85,7 @@ specops/
 │   ├── custom-templates.md               # Custom template resolution logic
 │   ├── view.md                           # Spec viewing and listing
 │   ├── interview.md                      # Interview mode for vague requests
+│   ├── explore.md                        # Explore mode (codebase-grounded solution approaches)
 │   ├── init.md                           # Init mode (config creation)
 │   ├── update.md                         # Update mode (version checking)
 │   ├── review-workflow.md                # Collaborative spec review workflow
@@ -94,6 +95,7 @@ specops/
 │   ├── feedback.md                       # User feedback submission to SpecOps repo
 │   ├── memory.md                         # Local memory layer
 │   ├── evaluation.md                     # Adversarial evaluation (scored quality gates at Phase 2 exit and Phase 4A)
+│   ├── review-agents.md                  # Multi-persona review (4 specialized reviewer personas for Phase 4A)
 │   ├── learnings.md                      # Production learnings (post-deployment discovery capture and retrieval)
 │   ├── metrics.md                        # Proxy metrics collection at completion
 │   ├── repo-map.md                       # Agent-driven codebase structural map
@@ -108,7 +110,7 @@ specops/
 │   ├── pipeline.md                       # Automated pipeline mode (implement-verify cycling)
 │   ├── dispatcher.md                     # Dispatcher routing, enforcement gates, dispatch protocol (Claude only)
 │   ├── tool-abstraction.md               # Abstract tool operations and capability flags
-│   ├── mode-manifest.json                # Maps 15 modes to their required core module lists
+│   ├── mode-manifest.json                # Maps 16 modes to their required core module lists
 │   └── templates/                        # Default spec templates
 │       ├── feature-requirements.md       # Feature requirements template
 │       ├── bugfix.md                     # Bug fix template
@@ -124,7 +126,7 @@ specops/
 │   │   ├── platform.json                 # Capabilities, tool mapping, entry point
 │   │   ├── SKILL.md                      # Generated dispatcher skill file (lightweight routing)
 │   │   ├── SKILL.monolithic.md           # Monolithic backup for backward compatibility
-│   │   ├── modes/                        # Generated per-mode instruction files (15 files)
+│   │   ├── modes/                        # Generated per-mode instruction files (16 files)
 │   │   ├── install.sh                    # Claude-specific installer
 │   │   └── README.md                     # Claude Code quickstart
 │   ├── cursor/                           # Cursor adapter
@@ -273,5 +275,5 @@ The `<specsDir>` (default `.specops/`) contains spec artifacts and supporting da
 
 ## Version
 
-**Version**: 1.7.0
-**Last Updated**: 2026-03-28
+**Version**: 1.8.0
+**Last Updated**: 2026-03-30

@@ -35,6 +35,7 @@ For each changed file, check which documentation may be affected using this mapp
 | `core/safety.md` | `CLAUDE.md` (Security-Sensitive Files), `SECURITY.md` |
 | `core/verticals.md` | `README.md` (Vertical Adaptation), `docs/REFERENCE.md` |
 | `core/interview.md` | `docs/COMMANDS.md` (Interview Mode) |
+| `core/explore.md` | `docs/COMMANDS.md` (Explore Mode), `docs/STRUCTURE.md` |
 | `core/init.md` | `QUICKSTART.md`, `docs/COMMANDS.md` |
 | `platforms/*/platform.json` | `README.md` (Platforms table), `docs/STRUCTURE.md`, `CLAUDE.md` (Platform Capabilities) |
 | New platform directory under `platforms/` | `README.md`, `CLAUDE.md` (Adding a New Platform), `docs/STRUCTURE.md`, `CONTRIBUTING.md` |
@@ -50,6 +51,7 @@ For each changed file, check which documentation may be affected using this mapp
 | `core/dependency-safety.md` | `CLAUDE.md` (Security-Sensitive Files, core modules list), `docs/REFERENCE.md` (Configuration Options), `docs/STRUCTURE.md` |
 | `core/dependency-introduction.md` | `CLAUDE.md` (core modules list), `docs/STRUCTURE.md` |
 | `core/evaluation.md` | `CLAUDE.md` (core modules list), `docs/REFERENCE.md` (Configuration Options), `docs/STRUCTURE.md` |
+| `core/review-agents.md` | `CLAUDE.md` (core modules list), `docs/STRUCTURE.md` |
 | `core/learnings.md` | `CLAUDE.md` (core modules list), `docs/REFERENCE.md` (Configuration Options), `docs/STRUCTURE.md`, `docs/COMMANDS.md` (Learn) |
 | `core/error-handling.md` | `docs/REFERENCE.md` |
 | `core/feedback.md` | `docs/COMMANDS.md` (Send Feedback) |

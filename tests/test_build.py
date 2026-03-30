@@ -30,6 +30,7 @@ EXPECTED_OUTPUTS = {
 # Claude split output: 15 mode files (from core/mode-manifest.json)
 EXPECTED_CLAUDE_MODES = [
     "audit.md",
+    "explore.md",
     "feedback.md",
     "from-plan.md",
     "init.md",

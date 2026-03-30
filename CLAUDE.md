@@ -45,13 +45,13 @@ bash scripts/bump-version.sh <new-version> --checksums
 
 ## Three-Tier Architecture
 
-**Tier 1 -- Core Modules** (`core/*.md`): Platform-agnostic workflow logic using abstract operations (`READ_FILE`, `WRITE_FILE`, `RUN_COMMAND`, etc. defined in `core/tool-abstraction.md`). Never use platform-specific tool names here. Key modules include `core/workflow.md` (4-phase workflow), `core/decomposition.md` (scope assessment, split detection, initiative model, cross-spec dependencies), `core/initiative-orchestration.md` (autonomous multi-spec execution), `core/dispatcher.md` (context-aware mode routing and enforcement gates), `core/evaluation.md` (adversarial evaluation with scored quality gates), `core/dependency-introduction.md` (dependency introduction gate), and `core/learnings.md` (production learnings capture and retrieval).
+**Tier 1 -- Core Modules** (`core/*.md`): Platform-agnostic workflow logic using abstract operations (`READ_FILE`, `WRITE_FILE`, `RUN_COMMAND`, etc. defined in `core/tool-abstraction.md`). Never use platform-specific tool names here. Key modules include `core/workflow.md` (4-phase workflow), `core/decomposition.md` (scope assessment, split detection, initiative model, cross-spec dependencies), `core/initiative-orchestration.md` (autonomous multi-spec execution), `core/dispatcher.md` (context-aware mode routing and enforcement gates), `core/evaluation.md` (adversarial evaluation with scored quality gates), `core/review-agents.md` (multi-persona review with 4 specialized reviewer personas), `core/explore.md` (codebase-grounded solution exploration), `core/dependency-introduction.md` (dependency introduction gate), and `core/learnings.md` (production learnings capture and retrieval).
 
 **Tier 2 -- Platform Adapters** (`platforms/<platform>/platform.json`): Maps abstract operations to platform-specific tool invocations (e.g., `READ_FILE` maps to `Use the Read tool to read(...)` for Claude).
 
 **Tier 3 -- Generated Outputs** (`platforms/<platform>/SKILL.md` etc.): Built by `generator/generate.py` using Jinja2 templates (`generator/templates/*.j2`) that combine core modules + platform adapters. **Never edit generated output files directly** -- edit `core/` or `generator/templates/` then regenerate.
 
-The generator produces: Claude (`SKILL.md` dispatcher + 15 mode files in `modes/`), Cursor (`specops.mdc`), Codex (`SKILL.md`), Copilot (`specops.instructions.md`), Antigravity (`specops.md`). Supported platforms are defined in `SUPPORTED_PLATFORMS` in `generator/generate.py`.
+The generator produces: Claude (`SKILL.md` dispatcher + 16 mode files in `modes/`), Cursor (`specops.mdc`), Codex (`SKILL.md`), Copilot (`specops.instructions.md`), Antigravity (`specops.md`). Supported platforms are defined in `SUPPORTED_PLATFORMS` in `generator/generate.py`.
 
 ## Critical Development Rules
 
@@ -76,7 +76,7 @@ The pre-commit hook (`hooks/pre-commit`) runs 7 checks: JSON syntax, ShellCheck,
 
 ## Mode Architecture (Claude Platform)
 
-The Claude platform uses a dispatcher (`platforms/claude/SKILL.md`) that loads one of 15 modes on demand from `platforms/claude/modes/`. The primary mode is `spec` (full 4-phase workflow in `core/workflow.md`). Other modes: init, view, interview, steering, memory, learn, map, audit, pipeline, from-plan, feedback, update, version, initiative.
+The Claude platform uses a dispatcher (`platforms/claude/SKILL.md`) that loads one of 16 modes on demand from `platforms/claude/modes/`. The primary mode is `spec` (full 4-phase workflow in `core/workflow.md`). Other modes: init, view, interview, explore, steering, memory, learn, map, audit, pipeline, from-plan, feedback, update, version, initiative.
 
 ## Testing
 
