@@ -91,9 +91,15 @@
         "plan-validation",
         "git-checkpointing",
         "error-handling",
-        "evaluation"
+        "evaluation",
+        "review-agents"
       ],
       "templates": ["implementation", "evaluation"]
+    },
+    "explore": {
+      "description": "Generate codebase-grounded solution approaches for a known problem",
+      "modules": ["explore", "config-handling", "repo-map", "steering", "memory"],
+      "templates": []
     },
     "interview": {
       "description": "Structured Q&A session to refine vague requests before spec generation",
@@ -130,6 +136,7 @@
         "pipeline",
         "review-workflow",
         "interview",
+        "explore",
         "init",
         "update",
         "view",
@@ -140,7 +147,8 @@
         "dependency-introduction",
         "learnings",
         "decomposition",
-        "evaluation"
+        "evaluation",
+        "review-agents"
       ],
       "templates": [
         "feature-requirements",

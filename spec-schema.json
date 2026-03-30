@@ -226,6 +226,11 @@
       },
       "additionalProperties": false
     },
+    "depth": {
+      "type": "string",
+      "enum": ["lightweight", "standard", "deep"],
+      "description": "Complexity depth flag computed during Phase 1 step 9.7. Calibrates workflow ceremony depth."
+    },
     "partOf": {
       "type": "string",
       "maxLength": 100,

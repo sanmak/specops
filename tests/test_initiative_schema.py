@@ -305,6 +305,144 @@ def main():
         "status": "active"
     }, "Rejects initiative with path traversal in ID"))
 
+    # --- Planned Waves tests ---
+    print("\n--- Planned Waves Validation ---")
+
+    # Valid: initiative with plannedWaves
+    check(expect_valid(initiative_schema, {
+        "id": "multi-wave",
+        "title": "Multi-Wave Initiative",
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": "Alice",
+        "specs": ["spec-a", "spec-b", "spec-c"],
+        "order": [["spec-a"], ["spec-b", "spec-c"]],
+        "status": "active",
+        "plannedWaves": [
+            {
+                "wave": 2,
+                "description": "Wave 2 builds on spec-a foundation",
+                "specs": [
+                    {"id": "spec-b", "description": "Implement feature B"},
+                    {"id": "spec-c", "description": "Implement feature C", "context": "Extended context for spec-c with file targets and constraints"}
+                ]
+            }
+        ]
+    }, "Valid initiative with plannedWaves"))
+
+    # Valid: initiative with plannedWaves without optional context field
+    check(expect_valid(initiative_schema, {
+        "id": "planned-no-ctx",
+        "title": "Planned Without Context",
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": "Alice",
+        "specs": ["spec-a", "spec-b"],
+        "order": [["spec-a"], ["spec-b"]],
+        "status": "active",
+        "plannedWaves": [
+            {
+                "wave": 2,
+                "description": "Wave 2 description",
+                "specs": [{"id": "spec-b", "description": "Build on spec-a"}]
+            }
+        ]
+    }, "Valid plannedWaves without optional context field"))
+
+    # Valid: initiative without plannedWaves (backward compatible)
+    check(expect_valid(initiative_schema, {
+        "id": "no-planned",
+        "title": "No Planned Waves",
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": "Alice",
+        "specs": ["spec-1"],
+        "order": [["spec-1"]],
+        "status": "active"
+    }, "Valid initiative without plannedWaves (backward compatible)"))
+
+    # Invalid: plannedWaves spec with additional properties
+    check(expect_invalid(initiative_schema, {
+        "id": "bad-planned",
+        "title": "Bad Planned Wave",
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": "Alice",
+        "specs": ["spec-a"],
+        "order": [["spec-a"]],
+        "status": "active",
+        "plannedWaves": [
+            {
+                "wave": 1,
+                "description": "Wave 1",
+                "specs": [{"id": "spec-a", "description": "Do thing", "extraField": "bad"}]
+            }
+        ]
+    }, "Rejects plannedWaves spec with additional properties"))
+
+    # Invalid: plannedWaves entry missing required fields
+    check(expect_invalid(initiative_schema, {
+        "id": "missing-wave-desc",
+        "title": "Missing Wave Desc",
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": "Alice",
+        "specs": ["spec-a"],
+        "order": [["spec-a"]],
+        "status": "active",
+        "plannedWaves": [
+            {"wave": 1, "specs": [{"id": "spec-a", "description": "Do thing"}]}
+        ]
+    }, "Rejects plannedWaves entry missing description"))
+
+    # Invalid: plannedWaves spec missing required id
+    check(expect_invalid(initiative_schema, {
+        "id": "missing-spec-id",
+        "title": "Missing Spec ID",
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": "Alice",
+        "specs": ["spec-a"],
+        "order": [["spec-a"]],
+        "status": "active",
+        "plannedWaves": [
+            {"wave": 1, "description": "Wave 1", "specs": [{"description": "No ID"}]}
+        ]
+    }, "Rejects plannedWaves spec missing id"))
+
+    # Invalid: plannedWaves wave number out of range
+    check(expect_invalid(initiative_schema, {
+        "id": "bad-wave-num",
+        "title": "Bad Wave Number",
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": "Alice",
+        "specs": ["spec-a"],
+        "order": [["spec-a"]],
+        "status": "active",
+        "plannedWaves": [
+            {"wave": 0, "description": "Invalid wave 0", "specs": [{"id": "spec-a", "description": "Do thing"}]}
+        ]
+    }, "Rejects plannedWaves with wave number 0 (minimum is 1)"))
+
+    # Invalid: plannedWaves with bad spec ID pattern
+    check(expect_invalid(initiative_schema, {
+        "id": "bad-planned-id",
+        "title": "Bad Planned Spec ID",
+        "created": "2026-03-20T10:00:00Z",
+        "updated": "2026-03-20T10:00:00Z",
+        "author": "Alice",
+        "specs": ["spec-a"],
+        "order": [["spec-a"]],
+        "status": "active",
+        "plannedWaves": [
+            {"wave": 1, "description": "Wave 1", "specs": [{"id": "../hack", "description": "Bad ID"}]}
+        ]
+    }, "Rejects plannedWaves spec with bad ID pattern"))
+
+    # --- Invalid initiative tests (continued) ---
+    print("\n--- Invalid Initiative Validation ---")
+
     # Invalid: bad ID pattern (spaces)
     check(expect_invalid(initiative_schema, {
         "id": "bad initiative id",

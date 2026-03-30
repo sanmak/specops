@@ -1,0 +1,57 @@
+{
+  "id": "inter-mode-communication",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "author": {
+    "name": "sanmak"
+  },
+  "created": "2026-03-29T20:00:00Z",
+  "updated": "2026-03-30T00:05:00Z",
+  "specopsCreatedWith": "1.8.0",
+  "specopsUpdatedWith": "1.8.0",
+  "partOf": "ce-wave1-foundation",
+  "depth": "standard",
+  "specDependencies": [
+    {
+      "specId": "multi-persona-review",
+      "reason": "Headless response schema captures persona finding format (CORR-1, TEST-1 with P0-P3 severity, HIGH/MODERATE/LOW confidence)",
+      "required": true
+    },
+    {
+      "specId": "action-routing",
+      "reason": "Headless response schema includes fix class assignments (auto_fix/gated_fix/manual/advisory) from action routing",
+      "required": true
+    }
+  ],
+  "relatedSpecs": [
+    "confidence-gating",
+    "depth-calibration",
+    "environment-preflight",
+    "solution-exploration"
+  ],
+  "evaluation": {
+    "spec": {
+      "iterations": 1,
+      "passed": true,
+      "scores": {
+        "criteriaTestability": 8,
+        "criteriaCompleteness": 7,
+        "designCoherence": 8,
+        "taskCoverage": 8
+      },
+      "evaluatedAt": "2026-03-29T20:10:00Z"
+    },
+    "implementation": {
+      "iterations": 1,
+      "passed": true,
+      "scores": {
+        "functionalityDepth": 8,
+        "designFidelity": 9,
+        "codeQuality": 8,
+        "testVerification": 8
+      },
+      "evaluatedAt": "2026-03-30T00:00:00Z"
+    }
+  }
+}

@@ -73,6 +73,58 @@
       "pattern": "^(?!\\.{1,2}$)[a-zA-Z0-9._-]+$",
       "description": "Spec ID of the walking skeleton (first wave-1 spec establishing the end-to-end integration path)"
     },
+    "plannedWaves": {
+      "type": "array",
+      "maxItems": 20,
+      "description": "Planned waves with execution context for specs not yet created. Enables cross-session initiative resumption without external plan references.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "wave": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20,
+            "description": "Wave number (1-indexed, must correspond to a position in the order array)"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Wave-level description explaining what this wave accomplishes and why"
+          },
+          "specs": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "description": "Per-spec execution context for specs in this wave",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 100,
+                  "pattern": "^(?!\\.{1,2}$)[a-zA-Z0-9._-]+$",
+                  "description": "Spec ID matching an entry in the initiative's specs array"
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 2000,
+                  "description": "What this spec should accomplish"
+                },
+                "context": {
+                  "type": "string",
+                  "maxLength": 5000,
+                  "description": "Extended execution context: implementation details, file targets, constraints, developer benefit"
+                }
+              },
+              "required": ["id", "description"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["wave", "description", "specs"],
+        "additionalProperties": false
+      }
+    },
     "status": {
       "type": "string",
       "enum": ["active", "completed"],

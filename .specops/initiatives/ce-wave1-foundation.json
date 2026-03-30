@@ -1,0 +1,63 @@
+{
+  "id": "ce-wave1-foundation",
+  "title": "CE-Inspired Foundation Improvements",
+  "description": "Eight improvements inspired by Compound Engineering Plugin analysis, executed in three dependency-ordered waves. Wave 1 (foundation) is complete. Waves 2 and 3 build on the foundation with smart review, exploration, composability, and conditional intelligence.",
+  "created": "2026-03-29T14:35:20Z",
+  "updated": "2026-03-30T01:30:00Z",
+  "author": "sanketmakhija",
+  "specs": [
+    "depth-calibration",
+    "confidence-gating",
+    "environment-preflight",
+    "multi-persona-review",
+    "action-routing",
+    "solution-exploration",
+    "inter-mode-communication",
+    "conditional-reviewer-triggering"
+  ],
+  "order": [
+    ["depth-calibration", "confidence-gating", "environment-preflight"],
+    ["multi-persona-review", "action-routing", "solution-exploration"],
+    ["inter-mode-communication", "conditional-reviewer-triggering"]
+  ],
+  "plannedWaves": [
+    {
+      "wave": 2,
+      "description": "Smart Review & Exploration -- adds multi-persona review at Phase 4A, action routing for remediation classification, and a solution exploration mode. Depends on Wave 1: D2 uses D4 confidence format, D3 uses D4 finding format, D5 benefits from D1 depth context.",
+      "specs": [
+        {
+          "id": "multi-persona-review",
+          "description": "Add 3-4 focused reviewer perspectives to Phase 4A alongside the adversarial evaluator. Reviewers: Correctness (code vs spec), Testing (coverage adequacy), Standards (conventions from steering), Security (conditional: sensitive files only). Each produces findings with severity (P0-P3) and confidence (from D4). Findings aggregated and deduplicated; more conservative classification wins on disagreement.",
+          "context": "Developer problem: 'The evaluation scored 8/10 but production broke because of a race condition nobody caught.' Monolithic self-review has blind spots. Use existing sub-agent delegation (canDelegateTask). New core module core/review-agents.md. Modify core/evaluation.md and core/dispatcher.md. Large complexity."
+        },
+        {
+          "id": "action-routing",
+          "description": "Classify evaluation findings as auto_fix (agent fixes without asking), gated_fix (agent proposes, developer approves in batch), manual (flagged for developer, no agent fix), or advisory (informational only). Severity (P0-P3) orthogonal to fix class.",
+          "context": "Developer problem: 'SpecOps found 6 issues, 3 are trivial formatting fixes it could have just done, but it asks about all 6 one by one.' Auto-fixable items resolved instantly, gated items batched for single approval, advisory items reported without blocking. Modify core/evaluation.md, core/pipeline.md, evaluation templates. Medium complexity."
+        },
+        {
+          "id": "solution-exploration",
+          "description": "New explore mode for 'I know the problem, not the approach'. Generate 3-5 codebase-grounded solution approaches with tradeoff analysis. Reference actual project structure (repo map, steering files). User picks approach, flows into Phase 2.",
+          "context": "Developer problem: 'I know what problem to solve but not whether to use a webhook, polling job, or event stream. SpecOps jumps straight to spec writing.' Fills gap between interview (convergent) and spec (committed). New core/explore.md module, update core/dispatcher.md and core/mode-manifest.json. Medium complexity."
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "description": "Composability & Intelligence -- adds structured inter-mode communication for headless skill composition, and conditional reviewer triggering based on changed file patterns. Depends on Wave 2: D7 builds on D2/D3 structured response patterns, D9 requires D2 review personas to exist.",
+      "specs": [
+        {
+          "id": "inter-mode-communication",
+          "description": "Define a JSON response schema for headless mode-to-mode invocation. Modes that support headless output produce structured responses (status, findings array, scores, action items) instead of human-readable markdown. Enables compound workflows (audit feeding evaluation, pipeline running review headlessly).",
+          "context": "Developer problem: 'I want to run audit then evaluation then pipeline but have to manually chain three commands.' One command, multiple stages. Pipeline mode gets deterministic pass/fail JSON from evaluation. Modify core/dispatcher.md and participating mode modules. Medium complexity."
+        },
+        {
+          "id": "conditional-reviewer-triggering",
+          "description": "Each reviewer persona has triggering conditions (file globs, content patterns). The review orchestrator matches changed files against triggers and selects only relevant reviewers. Always-on reviewers (correctness, testing, standards) fire on every review; conditional reviewers (security, performance, data migration) fire only when their file patterns match.",
+          "context": "Developer problem: 'Every review runs all reviewers including security even when I am just updating a README. When I do touch auth code I have to remember to ask for security review.' Automatic expertise matching. Depends on D2 multi-persona review being implemented. Modify core/review-agents.md. Medium complexity."
+        }
+      ]
+    }
+  ],
+  "status": "completed"
+}

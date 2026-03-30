@@ -20,7 +20,10 @@ How SpecOps compares to other spec-driven and agent-context tools.
 | **Vertical adaptations** | 7 project types | None | None | None | Generic templates |
 | **Team review workflow** | Built-in (draft, review, approve, gate) | No | No | No | Community extension ("review") |
 | **Agent hooks** | Yes (ExitPlanMode) | Yes (SessionStart hook injection) | Yes (10 trigger types) | No | Yes (before/after hooks on all core commands) |
-| **Subagent architecture** | Phase dispatch + initiative orchestrator | Dispatcher + spec reviewer + code reviewer per task | Up to 4 parallel subagents, isolated contexts | No | Community extension ("conduct") |
+| **Subagent architecture** | Phase dispatch + initiative orchestrator + multi-persona review (4 reviewer sub-agents) | Dispatcher + spec reviewer + code reviewer per task | Up to 4 parallel subagents, isolated contexts | No | Community extension ("conduct") |
+| **Solution exploration** | Yes (3-5 codebase-grounded approaches with tradeoff analysis) | No | No | No | No |
+| **Action routing** | Yes (auto_fix, gated_fix, manual, advisory classification for findings) | No | No | No | No |
+| **Headless mode composition** | Yes (structured JSON responses for mode-to-mode invocation) | No | No | No | No |
 | **TDD enforcement** | Acceptance criteria as completion gates | Anti-rationalization tables, strict test-first mandate | No | No | Yes (TDD in core implement command) |
 | **Visual brainstorming** | No | Yes (browser-based mockup companion) | No | No | No |
 | **MCP integration** | No | No | Yes | No | No |
