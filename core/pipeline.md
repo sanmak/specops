@@ -58,14 +58,26 @@ while cycle < maxCycles:
     // Git checkpoint: implemented (if gitCheckpointing enabled)
     // RUN_COMMAND(git add -A && git commit -m "specops(checkpoint): implemented -- <spec-name>")
 
-    // Phase 4 acceptance check — evaluation-aware
+    // Phase 4 acceptance check — evaluation-aware (headless mode)
     if evaluationEnabled:
-        // Run Phase 4A implementation evaluation
-        // Apply adversarial evaluation against the implementation
-        // WRITE_FILE results to <specsDir>/<spec-name>/evaluation.md
-        // READ_FILE evaluation.md and extract per-category scores and overall verdict
-        evaluationScores = map of category -> score from evaluation.md
-        overallVerdict = verdict from evaluation.md
+        // Dispatch evaluation with headless: true for structured JSON response
+        // The evaluation sub-agent returns a Headless Response Schema JSON object
+        evaluationResponse = dispatch evaluation with headless: true
+
+        // Parse structured response (with fallback)
+        if evaluationResponse is valid JSON with status, scores, verdict, findings:
+            evaluationScores = evaluationResponse.scores
+            overallVerdict = evaluationResponse.verdict
+            findings = evaluationResponse.findings
+            // Persist evaluation results to evaluation.md for audit trail
+            // WRITE_FILE <specsDir>/<spec-name>/evaluation.md with formatted results
+        else:
+            // Fallback: evaluation did not return valid headless JSON
+            // Read evaluation.md and parse markdown (backward compatibility)
+            // READ_FILE <specsDir>/<spec-name>/evaluation.md
+            evaluationScores = map of category -> score from evaluation.md
+            overallVerdict = verdict from evaluation.md
+            findings = extracted findings from evaluation.md
 
         if overallVerdict == "pass":
             // All evaluation criteria pass — finalize
@@ -83,6 +95,25 @@ while cycle < maxCycles:
 
         previousEvaluationScores = evaluationScores
         failingCategories = categories where score < passing threshold
+
+        // Action routing: classify findings and apply auto-fixes within cycle
+        // When headless JSON is available, read fix classes directly from findings[].fixClass
+        // When using markdown fallback, apply the Action Routing procedure from core/evaluation.md
+        // to classify into: auto_fix, gated_fix, manual, advisory
+
+        // Execute auto_fix items immediately (no developer interaction)
+        // For each auto_fix finding: EDIT_FILE to apply fix, verify no test regression
+        // If auto_fix fails: revert, reclassify as gated_fix
+
+        // Handle gated_fix items based on platform capability
+        if canAskInteractive:
+            // Batch all gated_fix items and ASK_USER for approval
+            // Apply approved fixes, reclassify rejected as manual
+        else:
+            // Non-interactive: treat gated_fix as auto_fix (apply without asking)
+
+        // Report manual findings to developer via NOTIFY_USER (no fix attempted)
+        // Include advisory findings in evaluation report (no action)
 
     else:
         // Evaluation disabled — use existing checkbox verification
@@ -148,6 +179,8 @@ Pipeline mode connects to other SpecOps features:
 | **Task delegation** | Within each cycle, task execution uses auto-delegation (complexity score vs `config.implementation.delegationThreshold`). If delegation is active, the pipeline orchestrator delegates tasks the same way Phase 3 does. |
 | **Plan validation** | Runs once in Phase 2 (before pipeline starts). Not repeated per cycle — the spec references don't change between cycles. |
 | **Metrics** | Captured once at final completion (Phase 4 step 2.5), not per cycle. `specDurationMinutes` includes all cycle time. |
+| **Action routing** | Within each cycle, evaluation findings are classified by fix class. Auto-fix items are applied within the cycle without stopping. Gated items are batched for approval (interactive) or auto-applied (non-interactive). Manual and advisory items are reported at cycle end. |
+| **Headless evaluation** | Pipeline dispatches evaluation with headless: true to receive structured JSON (scores, verdict, findings with fix classes). Falls back to markdown parsing if headless response is unavailable. Structured consumption eliminates brittle text parsing for score extraction and verdict determination. |
 | **autoCommit** | Fires per-task within each cycle (Phase 3 step 7). Composes with checkpointing as usual. |
 
 ### Pipeline Safety
@@ -157,6 +190,7 @@ Pipeline mode connects to other SpecOps features:
 - **Blocked task handling**: If a task is set to `Blocked` during a cycle and cannot be resolved, the pipeline stops and NOTIFY_USER with the blocker details.
 - **Safety inheritance**: Pipeline mode inherits all safety rules from the Safety module (convention sanitization, path containment, no secrets in specs).
 - **No spec artifact modification**: Pipeline mode does not modify requirements.md or design.md — it only re-executes tasks and re-checks acceptance criteria. Spec content is frozen during pipeline execution.
+- **Auto-fix safety**: Auto-fix items applied during action routing follow the same safety rules as manual implementation — path containment, no secrets, convention sanitization. If an auto-fix introduces a test regression, it is reverted and reclassified as gated_fix.
 
 ### Platform Adaptation
 
@@ -167,3 +201,34 @@ Pipeline mode connects to other SpecOps features:
 | `canDelegateTask: true` | Task delegation available within each cycle |
 | `canTrackProgress: true` | Cycle progress tracked via UPDATE_PROGRESS |
 | `canTrackProgress: false` | Cycle progress reported in response text |
+
+### Headless Mode Protocol for Pipeline
+
+Pipeline mode is the primary consumer of the Headless Mode Protocol defined in the dispatcher. When pipeline dispatches evaluation within a cycle, it sets `headless: true` to receive structured JSON instead of markdown.
+
+#### Headless Response Schema
+
+The headless mode response is a JSON object with these fields:
+
+- `status`: `"success"`, `"failure"`, or `"partial"`
+- `findings`: Array of finding objects (id, severity, confidence, confidenceValue, fixClass, description, remediation, file, line)
+- `scores`: Object mapping dimension names to integer scores (1-10)
+- `verdict`: `"pass"`, `"fail"`, or `null`
+- `actionItems`: Array of action strings for the caller
+- `metadata`: Object with mode name, specId, timestamp, and `headless: true`
+
+#### Headless Dispatch in Pipeline
+
+1. Pipeline sets `headless: true` when dispatching evaluation
+2. Evaluation sub-agent returns JSON conforming to the Headless Response Schema
+3. Pipeline parses the JSON and extracts scores, verdict, findings directly
+4. If JSON parsing fails, pipeline falls back to reading evaluation.md and parsing markdown (backward compatibility)
+
+#### Participating Modes
+
+Pipeline interacts with these headless mode producers:
+
+- **evaluation**: Returns structured scores, findings (with fix classes from action routing), and verdict
+- **audit**: Returns structured health check findings when invoked headlessly
+
+All other modes remain interactive-only and do not produce headless output.

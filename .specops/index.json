@@ -1,5 +1,14 @@
 [
   {
+    "id": "action-routing",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-29T18:25:00Z",
+    "partOf": "ce-wave1-foundation"
+  },
+  {
     "id": "adversarial-evaluation",
     "type": "feature",
     "status": "completed",
@@ -40,6 +49,15 @@
     "updated": "2026-03-08T03:12:30Z"
   },
   {
+    "id": "confidence-gating",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-29T15:15:12Z",
+    "partOf": "ce-wave1-foundation"
+  },
+  {
     "id": "context-aware-dispatch",
     "type": "feature",
     "status": "completed",
@@ -64,6 +82,15 @@
     "updated": "2026-03-21T09:22:38Z"
   },
   {
+    "id": "depth-calibration",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-29T15:15:12Z",
+    "partOf": "ce-wave1-foundation"
+  },
+  {
     "id": "drift-detection",
     "type": "feature",
     "status": "completed",
@@ -80,14 +107,6 @@
     "updated": "2026-03-07T12:30:00Z"
   },
   {
-    "id": "evaluation-bias-hardening",
-    "type": "feature",
-    "status": "completed",
-    "version": 1,
-    "author": "sanmak",
-    "updated": "2026-03-28T12:00:00Z"
-  },
-  {
     "id": "enforcement-roadmap",
     "type": "feature",
     "status": "completed",
@@ -102,6 +121,23 @@
     "version": 1,
     "author": "sanmak",
     "updated": "2026-03-21T16:30:00Z"
+  },
+  {
+    "id": "environment-preflight",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-29T15:15:12Z",
+    "partOf": "ce-wave1-foundation"
+  },
+  {
+    "id": "evaluation-bias-hardening",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-28T12:35:00Z"
   },
   {
     "id": "exit-plan-mode-hook",
@@ -134,6 +170,15 @@
     "version": 1,
     "author": "sanmak",
     "updated": "2026-03-14T09:28:58Z"
+  },
+  {
+    "id": "multi-persona-review",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-29T17:59:54Z",
+    "partOf": "ce-wave1-foundation"
   },
   {
     "id": "plan-mode-blocking-enforcement",
@@ -192,6 +237,15 @@
     "updated": "2026-03-21T04:52:53Z"
   },
   {
+    "id": "solution-exploration",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-29T19:45:00Z",
+    "partOf": "ce-wave1-foundation"
+  },
+  {
     "id": "steering-files",
     "type": "feature",
     "status": "completed",
@@ -238,5 +292,23 @@
     "version": 1,
     "author": "sanmak",
     "updated": "2026-03-20T17:09:13Z"
+  },
+  {
+    "id": "inter-mode-communication",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-30T00:05:00Z",
+    "partOf": "ce-wave1-foundation"
+  },
+  {
+    "id": "conditional-reviewer-triggering",
+    "type": "feature",
+    "status": "completed",
+    "version": 1,
+    "author": "sanmak",
+    "updated": "2026-03-30T01:30:00Z",
+    "partOf": "ce-wave1-foundation"
   }
 ]

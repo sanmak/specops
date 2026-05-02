@@ -1,0 +1,52 @@
+{
+  "id": "conditional-reviewer-triggering",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "author": {
+    "name": "sanmak"
+  },
+  "created": "2026-03-30T01:00:00Z",
+  "updated": "2026-03-30T01:30:00Z",
+  "specopsCreatedWith": "1.8.0",
+  "specopsUpdatedWith": "1.8.0",
+  "partOf": "ce-wave1-foundation",
+  "depth": "standard",
+  "specDependencies": [
+    {
+      "specId": "multi-persona-review",
+      "reason": "Extends the persona activation system defined in core/review-agents.md. This spec generalizes the hardcoded activation logic to a per-persona triggering conditions system.",
+      "required": true
+    }
+  ],
+  "relatedSpecs": [
+    "confidence-gating",
+    "action-routing",
+    "inter-mode-communication"
+  ],
+  "requiredApprovals": 0,
+  "evaluation": {
+    "spec": {
+      "iterations": 1,
+      "passed": true,
+      "scores": {
+        "criteriaTestability": 8,
+        "criteriaCompleteness": 7,
+        "designCoherence": 8,
+        "taskCoverage": 8
+      },
+      "evaluatedAt": "2026-03-30T01:05:00Z"
+    },
+    "implementation": {
+      "iterations": 1,
+      "passed": true,
+      "scores": {
+        "functionalityDepth": 8,
+        "designFidelity": 9,
+        "codeQuality": 8,
+        "testVerification": 8
+      },
+      "evaluatedAt": "2026-03-30T01:30:00Z"
+    }
+  }
+}

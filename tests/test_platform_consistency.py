@@ -18,14 +18,20 @@ import sys
 # Import marker constants from validate.py (single source of truth)
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "generator"))
 from validate import (  # noqa: E402
+    ACTION_ROUTING_MARKERS,
     COHERENCE_MARKERS,
     DATA_HANDLING_MARKERS,
     DECOMPOSITION_MARKERS,
     DELEGATION_MARKERS,
     DEPENDENCY_INTRODUCTION_MARKERS,
     DEPENDENCY_SAFETY_MARKERS,
+    DEPTH_MARKERS,
     ENGINEERING_DISCIPLINE_MARKERS,
+    EXPLORE_MARKERS,
+    HEADLESS_MARKERS,
+    PREFLIGHT_MARKERS,
     EVALUATION_MARKERS,
+    REVIEW_AGENTS_MARKERS,
     EXTERNAL_TRACKING_MARKERS,
     FEEDBACK_MARKERS,
     FROM_PLAN_MARKERS,
@@ -47,6 +53,7 @@ from validate import (  # noqa: E402
     STEERING_MARKERS,
     TASK_TRACKING_MARKERS,
     TEMPLATE_MARKERS,
+    TRIGGERING_MARKERS,
     UPDATE_MARKERS,
     VERTICAL_MARKERS,
     VIEW_MARKERS,
@@ -102,6 +109,13 @@ REQUIRED_MARKERS = {
     "dependency_safety": DEPENDENCY_SAFETY_MARKERS,
     "dependency_introduction": DEPENDENCY_INTRODUCTION_MARKERS,
     "evaluation": EVALUATION_MARKERS,
+    "review_agents": REVIEW_AGENTS_MARKERS,
+    "action_routing": ACTION_ROUTING_MARKERS,
+    "depth_calibration": DEPTH_MARKERS,
+    "environment_preflight": PREFLIGHT_MARKERS,
+    "explore": EXPLORE_MARKERS,
+    "headless": HEADLESS_MARKERS,
+    "triggering": TRIGGERING_MARKERS,
 }
 
 

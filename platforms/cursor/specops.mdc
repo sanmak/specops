@@ -35,7 +35,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
    - If continuing an existing spec, Read the file at the spec's `implementation.md` to recover session context (decision log, deviations, blockers, session log), then resume from the appropriate phase
    - If starting fresh, proceed normally
 3. **Load steering files**: If Check if the file exists at(`<specsDir>/steering/`) is false, create the directory and foundation templates: Run the terminal command(`mkdir -p <specsDir>/steering`), then for each of product.md, tech.md, structure.md — if Check if the file exists at(`<specsDir>/steering/<file>`) is false, Create the file at it with the corresponding foundation template from the Steering Files module. Tell the user("Created steering files in `<specsDir>/steering/` — edit them to describe your project. The agent loads these automatically before every spec."). Then load persistent project context from steering files following the Steering Files module. Always-included files are loaded now; fileMatch files are deferred until after affected components and dependencies are identified (step 9).
-3.5. **Check repo map**: After steering files are loaded, check for a repo map following the Repo Map module. If Check if the file exists at(`<specsDir>/steering/repo-map.md`), check staleness (time-based and hash-based). If stale, auto-refresh. If the file does not exist, auto-generate it by running the Repo Map Generation algorithm. The repo map is a machine-generated steering file with `inclusion: always` — if it exists and is fresh, it was already loaded in step 3.
+3.5. **Check repo map**: After steering files are loaded, check for a repo map following the Repo Map module. **Depth calibration**: If the depth flag is `lightweight`, skip the staleness check and refresh — use the existing repo map if available, or skip if none exists. If the depth flag is `deep`, force a repo map refresh regardless of staleness. For `standard` depth (or when depth is not yet computed), use the default behavior: If Check if the file exists at(`<specsDir>/steering/repo-map.md`), check staleness (time-based and hash-based). If stale, auto-refresh. If the file does not exist, auto-generate it by running the Repo Map Generation algorithm. The repo map is a machine-generated steering file with `inclusion: always` — if it exists and is fresh, it was already loaded in step 3.
 4. **Load memory**: If Check if the file exists at(`<specsDir>/memory/`) is false, Run the terminal command(`mkdir -p <specsDir>/memory`). Load the local memory layer following the Local Memory Layer module. Decisions, project context, and patterns from prior specs are loaded into the agent's context.
 4.5. **Load production learnings**: If Check if the file exists at(`<specsDir>/memory/learnings.json`), load production learnings following the Production Learnings module. Apply the five-layer retrieval filtering pipeline (proximity, recurrence, severity, decay/validity, category matching) and surface relevant learnings to the agent's context. Learnings with `supersededBy` set are excluded. Learnings with triggered `reconsiderWhen` conditions are flagged as "potentially invalidated." Maximum learnings surfaced is controlled by `config.implementation.learnings.maxSurfaced` (default 3). If the file does not exist or is empty, continue without learnings (non-fatal).
 5. **Pre-flight check (enforcement gate)**: Verify Phase 1 setup completed before proceeding. Proceeding past Phase 1 without completing this gate is a protocol breach.
@@ -52,7 +52,7 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
    - If continuing an existing spec (context recovery found an incomplete spec), Edit the file at `<specsDir>/<spec-name>/implementation.md` to upsert the `## Phase 1 Context Summary` section with: config status, context recovery result, steering files loaded, repo map status, memory loaded, detected vertical, and affected files. Use the template from `core/templates/implementation.md`.
    - If creating a new spec, persist the context summary immediately after the spec directory and `implementation.md` are created in Phase 2 step 2.
    - This section is mandatory — proceeding to Phase 2 without it is a protocol breach.
-6. Analyze the user's request to determine type (feature, bugfix, refactor)
+6. Analyze the user's request to determine type (feature, bugfix, refactor). Also scan for depth override keywords: if the request contains "quick", "lightweight", "simple", "trivial", or "minor", record a depth override of `lightweight`. If the request contains "thorough", "deep", "deep dive", "exhaustive", or "comprehensive", record a depth override of `deep`. If both categories match, the more conservative (deeper) override wins.
 7. Determine the project vertical:
    - If `config.vertical` is set, use it directly
    - If not set, infer from request keywords and codebase:
@@ -80,7 +80,17 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
    - If not greenfield, proceed with the original steps 8 and 9 below.
 8. **(Brownfield/migration only)** Explore codebase to understand existing patterns and architecture
 9. **(Brownfield/migration only)** Identify affected files, components, and dependencies — produce a concrete list of affected file paths for `fileMatch` steering file evaluation
-9.5. **Scope Assessment (always runs)**: Run the Scope Assessment Gate from the Spec Decomposition module (`core/decomposition.md` section 1). This step is unconditional — it runs for every spec regardless of project size, vertical, or configuration. The gate evaluates the user's feature request against 5 complexity signals (independent deliverables, distinct code domains, language signals, estimated task count, independent criteria clusters). If 2+ signals are present, decomposition is recommended and the interactive/non-interactive flow from the decomposition module is followed. If decomposition is approved, an initiative is created and the current spec becomes the first spec in the initiative. If decomposition is not recommended or is declined, proceed as a single spec.
+9.5. **Scope Assessment (always runs)**: Run the Scope Assessment Gate from the Spec Decomposition module (`core/decomposition.md` section 1). This step is unconditional — it runs for every spec regardless of project size, vertical, or configuration. However, if the depth flag (step 9.7) is `lightweight`, this gate passes trivially — skip complexity signal evaluation and proceed as a single spec. The gate evaluates the user's feature request against 5 complexity signals (independent deliverables, distinct code domains, language signals, estimated task count, independent criteria clusters). If 2+ signals are present, decomposition is recommended and the interactive/non-interactive flow from the decomposition module is followed. If decomposition is approved, an initiative is created and the current spec becomes the first spec in the initiative. If decomposition is not recommended or is declined, proceed as a single spec.
+9.7. **Depth assessment**: Compute the depth flag that calibrates ceremony to complexity. If a depth override was detected in step 6, use the override value. Otherwise, compute from three signals available at this point:
+   - **Signal 1 — Estimated task count**: From the scope assessment or request analysis, estimate the number of implementation tasks.
+   - **Signal 2 — File domain breadth**: Count the number of distinct top-level directories in the affected files identified in step 9 (or step 8g for greenfield). A single directory = 1, multiple directories within one code domain = 2, directories spanning core logic and build/test/platform infrastructure = 3+.
+   - **Signal 3 — New dependency presence**: Check if the user's request mentions installing new packages, adding dependencies, or references specific third-party libraries not already in the project.
+   - **Depth computation**:
+     - `lightweight`: task count <= 2 AND domain breadth <= 1 AND no new dependencies
+     - `deep`: task count > 8 OR domain breadth > 3 OR cross-domain changes detected (e.g., changes spanning both core application logic and build/test/platform infrastructure)
+     - `standard`: all other cases (default)
+   - Record the depth flag in the Phase 1 Context Summary as `- Depth: <flag> [computed | user override]`.
+   - Edit the file at `<specsDir>/<spec-name>/spec.json` to set `"depth": "<flag>"` when the spec is created in Phase 2.
 
 ### Phase 2: Create Specification
 
@@ -144,12 +154,12 @@ CRITICAL: Never invent a version number. It MUST come from one of the steps abov
 5.5. **Coherence Verification**: After generating all spec files, cross-check for contradictions between spec sections. Read the file at the requirements/bugfix/refactor file and design.md. Extract numeric constraints from NFRs (performance targets, SLAs, limits) and verify they do not contradict functional requirements or design decisions. Record the result in implementation.md under `## Phase 1 Context Summary` as a `- Coherence check: [pass / N contradiction(s) found — details]` entry. If contradictions are found, Tell the user with the specifics before proceeding.
 5.6. **Vocabulary Verification**: If the detected vertical is not `backend`, `fullstack`, or `frontend`, and no custom template is used, scan generated spec files for prohibited default terms (see the Vocabulary Verification subsection in the Vertical Adaptation Rules module). Replace any found terms with vertical-specific vocabulary. Record the result in implementation.md Phase 1 Context Summary.
 5.7. **Code-grounded plan validation**: If `config.implementation.validateReferences` is not `"off"`, validate file paths and code references in design.md and tasks.md against the codebase following the Code-Grounded Plan Validation module. Use the repo map (loaded in Phase 1 step 3.5) as the primary reference. Record the result in implementation.md Phase 1 Context Summary.
-5.8. **Dependency introduction gate**: Execute the Phase 2 Gate Procedure from the Dependency Introduction Gate module (`core/dependency-introduction.md`). Scan design.md for install commands and new package references, compare against the Detected Dependencies in `dependencies.md`, evaluate net-new dependencies using the Build-vs-Install framework and Maintenance Profile Intelligence, surface each to the user via Ask the user, and record all decisions in design.md under `### Dependency Decisions`. Update the Dependency Introduction Policy in `dependencies.md`. If no new dependencies are found, the gate passes trivially. This gate is always active -- there is no config switch to disable it.
+5.8. **Dependency introduction gate**: **Depth calibration**: If the depth flag is `lightweight` and no new dependencies are detected in design.md (no install commands or new package references found during scanning), skip this gate — it passes trivially. For `standard` and `deep` depth, execute normally. For `deep` depth, extend the evaluation with additional analysis: check all transitive dependencies of net-new packages for known issues. Execute the Phase 2 Gate Procedure from the Dependency Introduction Gate module (`core/dependency-introduction.md`). Scan design.md for install commands and new package references, compare against the Detected Dependencies in `dependencies.md`, evaluate net-new dependencies using the Build-vs-Install framework and Maintenance Profile Intelligence, surface each to the user via Ask the user, and record all decisions in design.md under `### Dependency Decisions`. Update the Dependency Introduction Policy in `dependencies.md`. If no new dependencies are found, the gate passes trivially. This gate is always active -- there is no config switch to disable it.
 6. **External issue creation (mandatory when taskTracking configured)**: If `config.team.taskTracking` is not `"none"`, create external issues following the Task Tracking Integration protocol in the Configuration Handling module. Read the file at `tasks.md`, identify all tasks with `**Priority:** High` or `**Priority:** Medium`. For each eligible task, compose the issue body using the Issue Body Composition template (reading spec artifacts for context), create issues via the Issue Creation Protocol (with labels for GitHub), and write IssueIDs back to `tasks.md`. If issue creation is skipped or all IssueIDs remain `None`, the Phase 3 task tracking gate will catch the omission — the spec artifact linter validates IssueIDs on completed specs and fails CI when they are missing.
 6.5. **Dependency safety gate (mandatory)**: If `config.dependencySafety.enabled` is not `false` (default: true), execute the dependency safety verification following the Dependency Safety module. This is a Phase 2 completion gate — specs cannot proceed to review or implementation without passing. Skipping this gate when dependency safety is enabled is a protocol breach.
 6.7. **Git checkpoint (spec-created)**: If `config.implementation.gitCheckpointing` is true for this run, commit spec artifacts following the Git Checkpointing module: Run the terminal command(`git add <specsDir>/<spec-name>/`) then Run the terminal command(`git commit -m "specops(checkpoint): spec-created -- <spec-name>"`). If the commit fails, Tell the user and continue.
 6.8. **Spec review gate**: If spec review is enabled (`config.team.specReview.enabled` or `config.team.reviewRequired`), set status to `in-review` and pause. See the Collaborative Spec Review module for the full review workflow. This step must run before phase dispatch so the review invitation is sent before the current context ends.
-6.85. **Spec evaluation gate**: If `config.implementation.evaluation.enabled` is true, run the Spec Evaluation Protocol from the Adversarial Evaluation module (`core/evaluation.md`). Read the file at the spec's requirements (or `bugfix.md`/`refactor.md`), `design.md`, and `tasks.md`. Score the 4 spec evaluation dimensions (Criteria Testability, Criteria Completeness, Design Coherence, Task Coverage) following the scoring rubric. Create the file at `evaluation.md` with scores and findings. If all dimensions score at or above `config.implementation.evaluation.minScore`, proceed to Phase 3 dispatch. If any dimension fails and iteration count < `config.implementation.evaluation.maxIterations`, revise the failing artifacts using the evaluation feedback and re-evaluate. If iterations exhausted, Tell the user and proceed to Phase 3 with known spec gaps. If evaluation is disabled, skip this step.
+6.85. **Spec evaluation gate**: **Depth calibration**: If the depth flag is `lightweight`, skip spec evaluation entirely — proceed directly to Phase 3 dispatch. If the depth flag is `standard`, limit spec evaluation to 1 iteration maximum (override `maxIterations` to 1 for this run). If the depth flag is `deep`, run spec evaluation up to the configured `maxIterations`. If `config.implementation.evaluation.enabled` is true (and depth is not `lightweight`), run the Spec Evaluation Protocol from the Adversarial Evaluation module (`core/evaluation.md`). Read the file at the spec's requirements (or `bugfix.md`/`refactor.md`), `design.md`, and `tasks.md`. Score the 4 spec evaluation dimensions (Criteria Testability, Criteria Completeness, Design Coherence, Task Coverage) following the scoring rubric. Create the file at `evaluation.md` with scores and findings. If all dimensions score at or above `config.implementation.evaluation.minScore`, proceed to Phase 3 dispatch. If any dimension fails and iteration count < effective `maxIterations`, revise the failing artifacts using the evaluation feedback and re-evaluate. If iterations exhausted, Tell the user and proceed to Phase 3 with known spec gaps. If evaluation is disabled, skip this step.
 6.9. **Phase dispatch gate (Phase 2 → Phase 3)**: Write a Phase 2 Completion Summary to `implementation.md` capturing: key requirements decided, design decisions made, task breakdown summary, and dependencies identified. Then signal for a fresh Phase 3 context following the Phase Dispatch protocol in `core/initiative-orchestration.md`:
 
 - If `canDelegateTask` is true: build a Phase 3 Handoff Bundle (spec name, artifact paths — requirements.md, design.md, tasks.md, spec.json — Phase 1 Context Summary from implementation.md, Phase 2 Completion Summary, and config) and dispatch Phase 3 as a fresh sub-agent. The current context ends here.
@@ -166,6 +176,27 @@ See "Collaborative Spec Review" module for the full review workflow including re
    - **Review gate**: If spec review is enabled, verify `spec.json` status is `approved` or `self-approved` before proceeding (see the Implementation Gate section in the Collaborative Spec Review module for interactive override behavior when the spec is not yet approved).
    - **Task tracking gate**: If `config.team.taskTracking` is not `"none"`, verify external issue creation following the Task Tracking Gate in the Configuration Handling module. This gate is mandatory when task tracking is configured — skipping it is a protocol breach.
    - **Dependency introduction enforcement (always runs)**: Throughout Phase 3, enforce the Phase 3 Spec Adherence rules from the Dependency Introduction Gate module (`core/dependency-introduction.md`). Before executing any install command (npm install, pip install, cargo add, etc.), verify the target package appears in design.md `### Dependency Decisions` with `Decision: Approved`. Unapproved installs are a protocol breach. After all tasks complete, run the post-Phase-3 verification to confirm all approved dependencies were installed.
+   1.5. **Environment pre-flight**: Before updating status, run lightweight environment checks to catch problems early. These checks are unconditional (no config switch to disable):
+      - **Test command detection**: Detect the project's test command by checking project config files in priority order:
+        1. If Check if the file exists at(`package.json`), Read the file at it. If it contains a `"test"` script under `"scripts"`, use that command.
+        2. Else if Check if the file exists at(`pyproject.toml`), Read the file at it. If it contains `[tool.pytest]`, use `pytest`. If it contains `[tool.unittest]`, use `python -m unittest`.
+        3. Else if Check if the file exists at(`Makefile`), Read the file at it. If it contains a `test:` target, use `make test`.
+        4. Else if Check if the file exists at(`Cargo.toml`), use `cargo test`.
+        5. Else if Check if the file exists at(`go.mod`), use `go test ./...`.
+        6. Else: Tell the user("No test command detected -- manual test execution required during Phase 3.") and set test_cmd to null.
+        Record the detected test command in `implementation.md`.
+      - **Dependency installation check**: Based on the project type detected above, check for the expected dependency directory:
+        - npm/yarn: Check if the file exists at(`node_modules/`). If missing, Tell the user("Dependencies may not be installed. Run `npm install` (or `yarn install` if Check if the file exists at(`yarn.lock`)) before proceeding.").
+        - Python: Check if the file exists at(`.venv/`) or Check if the file exists at(`__pycache__/`). If both missing, Tell the user("Python dependencies may not be installed. Run `pip install -r requirements.txt` or `pip install -e .` before proceeding.").
+        - Rust: Check if the file exists at(`target/`). If missing, Tell the user("Rust dependencies may not be built. Run `cargo build` before proceeding.").
+        - Go (with vendor): Check if the file exists at(`vendor/`). If missing, Tell the user("Go vendor directory missing. Run `go mod download` before proceeding.").
+        This check is non-blocking -- warn and continue.
+      - **Git branch state check**: Run the terminal command(`git status --porcelain`). Parse the output:
+        - If the command fails (not a git repo), skip this check silently.
+        - If any output lines start with `UU`, `AA`, `DD`, `AU`, or `UA`: merge conflicts detected. Tell the user("Merge conflicts detected in: [file list]. Resolve conflicts before implementation.") and STOP -- do not proceed to implementation.
+        - If output is non-empty but no conflict markers: Tell the user("Working tree has uncommitted changes.") -- non-blocking warning, continue.
+        - If output is empty: clean state.
+      - **Pre-flight summary**: Tell the user with a concise summary: "Environment pre-flight: Test command: [detected or none] | Dependencies: [OK or warning] | Git state: [clean / dirty / BLOCKED: conflicts]".
    - After all gates pass, update status to `implementing`, set `specopsUpdatedWith` to the cached SpecOps version (from the Version Extraction Protocol), update `updated` timestamp (Run the terminal command(`date -u +"%Y-%m-%dT%H:%M:%SZ"`) for the current time), and regenerate `index.json`.
 2. **Determine execution strategy**: Check if task delegation is active (see the Task Delegation module — computes a complexity score against `config.implementation.delegationThreshold` and checks platform capability `canDelegateTask`). If delegation is active, execute tasks using the delegation protocol (orchestrator dispatches each task to a fresh context). If delegation is not active, execute each task in `tasks.md` sequentially, following the Task State Machine rules (write ordering, single active task, valid transitions).
 3. For each task: set `In Progress` in tasks.md FIRST (following Write Ordering Protocol), then if `config.team.taskTracking` is not `"none"` and the task has a valid IssueID, sync the status to the external tracker (see Status Sync in the Configuration Handling module). Skipping Status Sync when taskTracking is configured and the task has a valid IssueID is a protocol breach — the external tracker must reflect the current task state. Sync failures are non-blocking (warn and continue), but sync omissions are not. When task delegation is active, the orchestrator handles Status Sync (see Task Delegation module step 5a.6). Then implement, then report progress.
@@ -187,11 +218,13 @@ See "Collaborative Spec Review" module for the full review workflow including re
 
 #### Phase 4A: Adversarial Evaluation
 
-4A.1. **Load evaluation config**: Read the file at `.specops.json` and check `config.implementation.evaluation.enabled`. If evaluation is explicitly disabled (set to false), skip to Phase 4C step 1 (acceptance criteria verification) for backward compatibility. If the key is absent or not configured, evaluation is enabled by default. Initialize the evaluation iteration counter to 0.
+4A.1. **Load evaluation config**: Read the file at `.specops.json` and check `config.implementation.evaluation.enabled`. If evaluation is explicitly disabled (set to false), skip to Phase 4C step 1 (acceptance criteria verification) for backward compatibility. **Depth calibration**: If the depth flag (from `spec.json` or Phase 1 context) is `lightweight`, skip the full adversarial evaluation — proceed directly to Phase 4C step 1 (acceptance criteria verification only). If the depth flag is `deep` and task count > 5 and `config.implementation.evaluation.perTask` is false, consider enabling per-task evaluation for this run to provide granular feedback. If the key is absent or not configured, evaluation is enabled by default. Initialize the evaluation iteration counter to 0.
 
 4A.2. **Run Implementation Evaluation Protocol**: Execute the Implementation Evaluation Protocol from the Adversarial Evaluation module (`core/evaluation.md`). Read the file at all spec artifacts (`requirements.md` or `bugfix.md`/`refactor.md`, `design.md`, `tasks.md`, `implementation.md`) and the files modified during Phase 3. If `canExecuteCode` is true and `config.implementation.evaluation.exerciseTests` is true, Run the terminal command to execute the project's test suite and capture results. Score spec-type-specific dimensions following the evaluation scoring rubric. Edit the file at `<specsDir>/<spec-name>/evaluation.md` to append dimension scores, findings, and remediation instructions for any failing dimensions (preserving prior iteration results). Edit the file at `<specsDir>/<spec-name>/spec.json` to add the `evaluation` object with dimension scores and iteration count.
 
-4A.3. If all dimensions score at or above `config.implementation.evaluation.minScore`: proceed to Phase 4C.
+4A.2.5. **Run Multi-Persona Review Protocol**: Run the Multi-Persona Review Protocol from the Review Agents module (`core/review-agents.md`). Determine active personas (Correctness, Testing, Standards are always active; Security is active only if changed files match security-sensitive patterns). Dispatch each active persona following the platform adaptation rules (sub-agent or inline). Aggregate findings, validate confidence tiers, deduplicate overlapping findings, and determine the review verdict. Append the `## Multi-Persona Review` section to `evaluation.md`. **Depth calibration**: If the depth flag is `lightweight`, skip the multi-persona review.
+
+4A.3. If all dimensions score at or above `config.implementation.evaluation.minScore` AND no P0/P1 HIGH/MODERATE persona findings exist from the multi-persona review: proceed to Phase 4C.
 
 4A.4. If any dimension fails (score < `config.implementation.evaluation.minScore`) AND iteration counter < `config.implementation.evaluation.maxIterations`: proceed to Phase 4B.
 
@@ -441,6 +474,16 @@ Create specs in this structure:
 ```
 
 Example: `.specops/user-auth-oauth/requirements.md`
+
+## Depth Calibration
+
+The `depth` field in `spec.json` records the complexity depth flag computed during Phase 1 step 9.7. It calibrates workflow ceremony depth throughout the spec lifecycle.
+
+**Valid values:** `lightweight`, `standard`, `deep`
+
+**Per-spec field** (not a project-level config) — each spec may have a different depth based on its scope. Depth is computed from task count, file domain breadth, and new dependency presence. Users can override with keywords in their request (e.g., "quick" forces lightweight, "thorough" forces deep).
+
+**Workflow impact:** See the Depth Calibration sections in `core/workflow.md` steps 3.5, 5.8, 6.85, 9.5, 9.7, and Phase 4A.1 for step-specific behavior adjustments by depth level.
 
 ## Spec Review Configuration
 
@@ -2586,6 +2629,156 @@ Interview mode runs after the from-plan check and before Phase 1 (Understand Con
 6. If no interview: Continue to Phase 1 normally
 
 
+# Explore Mode
+
+Explore mode generates codebase-grounded solution approaches for a known problem. It fills the gap between interview mode (convergent idea refinement for vague requests) and spec mode (committed design). When a developer knows the problem but not the technical approach, explore mode produces 3-5 solution alternatives with tradeoff analysis grounded in the actual project structure.
+
+## Explore Mode Detection
+
+### Explicit Trigger
+
+User explicitly requests explore mode:
+
+- "/specops explore [problem description]"
+- "explore options for [problem]"
+- "what are my options for [problem]"
+- "solution options for [problem]"
+- "approaches for [problem]"
+- "how should I [problem]"
+- "what's the best way to [problem]"
+
+### Disambiguation
+
+- Bare "explore" with no additional context routes to explore mode, which will Ask the user for the problem statement.
+- "explore the codebase" is NOT explore mode -- that maps to **map** mode.
+- "explore this idea" with a vague description (no technical keywords) routes to **interview** mode, not explore.
+- Explore mode requires a problem statement with at least one technical keyword or action verb. If the input is too vague, redirect to interview mode with a note: Tell the user("Your request seems broad. Routing to interview mode to refine the idea first. After interview, you can run explore mode on the refined problem.")
+
+## Explore Workflow
+
+The explore workflow progresses through states: `loading -> generating -> presenting -> selected`.
+
+### Phase: Loading
+
+1. Read the file at(`.specops.json`) to load config. Apply Safety Rules to all loaded values.
+2. If Check if the file exists at(`<specsDir>/steering/`), List the contents of(`<specsDir>/steering/`) and Read the file at each `.md` file with `inclusion: always` in its frontmatter. Store as project context.
+3. If Check if the file exists at(`<specsDir>/steering/repo-map.md`), Read the file at(`<specsDir>/steering/repo-map.md`). This is the primary source for grounding approaches in real files.
+4. If Check if the file exists at(`<specsDir>/memory/context.md`), Read the file at it for project memory context.
+5. Parse the user's problem statement. Extract:
+   - The core problem being solved
+   - Any constraints mentioned (performance, compatibility, timeline)
+   - Any preferred patterns or technologies mentioned
+6. Determine approach count from depth flag (if available from Shared Context Block):
+   - `lightweight`: Generate 2-3 approaches
+   - `standard`: Generate 3-4 approaches (default when depth is not set)
+   - `deep`: Generate 4-5 approaches
+
+### Phase: Generating
+
+Generate solution approaches following these rules:
+
+1. **Codebase grounding requirement**: Each approach MUST reference at least 2 real files or directories from the repo map. If no repo map is available, Tell the user("No repo map found. Generating approaches based on available project context. Run `/specops map` first for better-grounded suggestions.") and proceed with best-effort generation using any steering files and memory context available.
+
+2. **Approach diversity**: Approaches must represent genuinely different technical strategies, not minor variations of the same approach. Use these diversity dimensions:
+   - Architecture pattern (e.g., event-driven vs polling vs request-response)
+   - Complexity spectrum (minimal viable vs full-featured)
+   - Build-vs-integrate (custom implementation vs leveraging existing libraries/services)
+   - Migration strategy (if applicable: big-bang vs incremental vs strangler)
+
+3. **Approach generation procedure**:
+   - Analyze the problem statement against the codebase structure from the repo map
+   - Identify relevant code areas, existing patterns, and integration points
+   - For each approach, trace through the codebase to identify specific files that would change
+   - Assess complexity based on the number of files affected, cross-cutting concerns, and deviation from existing patterns
+   - Assess risk based on blast radius, test coverage of affected areas, and dependency on external systems
+
+### Phase: Presenting
+
+Present approaches in the Approach Format (below). Then:
+
+1. If `canAskInteractive` is true:
+   Ask the user("Which approach would you like to proceed with? Enter a number (1-N), 'more' for additional approaches, or 'refine' to adjust the problem statement.")
+   - If user selects a number: transition to `selected` with that approach.
+   - If user says "more": return to `generating` phase with instruction to produce 2 additional approaches that differ from existing ones. Cap total approaches at 7.
+   - If user says "refine": Ask the user("What would you like to adjust about the problem statement?"). Update the problem statement and return to `generating` phase.
+   - If user provides a hybrid request (e.g., "combine 1 and 3"): generate a new composite approach that merges the specified approaches and present it as an additional option.
+
+2. If `canAskInteractive` is false:
+   Tell the user("Explore mode generated N approaches. Review the approaches above and re-invoke with your selected approach number to proceed to spec creation.")
+   Include all approaches in the output. Terminate explore mode.
+
+### Phase: Selected
+
+When the user selects an approach:
+
+1. Build the explore handoff context:
+
+```text
+## Explore Mode Selection
+
+**Problem:** [original problem statement]
+**Selected Approach:** [approach name]
+**Approach Description:** [full description]
+**Key Files:**
+- [file1] -- [change description]
+- [file2] -- [change description]
+**Tradeoff Summary:**
+- Pros: [list]
+- Cons: [list]
+- Complexity: [Low/Medium/High]
+- Risk: [Low/Medium/High]
+**Implementation Sketch:** [high-level implementation approach]
+```
+
+1. Transition to spec mode with the handoff context as enriched input. The handoff context becomes design direction guidance for Phase 2 -- it informs the design document but does not rigidly constrain it. The spec author may deviate from the selected approach during Phase 2 if deeper analysis reveals better options.
+
+2. Tell the user("Proceeding to spec creation with the selected approach as design guidance...")
+
+## Approach Format
+
+Each approach is presented as:
+
+```text
+### Approach N: [Name]
+
+**Description:** [1-2 sentence summary of the technical approach]
+
+**Key Files to Modify:**
+- `path/to/file1.ext` -- [what changes and why]
+- `path/to/file2.ext` -- [what changes and why]
+- `path/to/file3.ext` -- [what changes and why, if applicable]
+
+**Tradeoff Analysis:**
+| Factor | Assessment |
+| --- | --- |
+| Pros | [list of advantages, separated by semicolons] |
+| Cons | [list of disadvantages, separated by semicolons] |
+| Complexity | Low / Medium / High |
+| Risk | Low / Medium / High |
+
+**Implementation Sketch:** [2-3 sentence high-level implementation approach describing the sequence of changes]
+```
+
+### Approach Quality Rules
+
+- **Specificity**: File paths must be real paths from the repo map, not placeholders like "src/some-file.js".
+- **Completeness**: Every approach must address the full problem statement, not just part of it.
+- **Honesty**: If an approach has significant downsides, state them clearly in Cons. Do not minimize risks.
+- **Comparability**: Use consistent complexity and risk scales across all approaches so the user can compare fairly.
+
+## Platform Adaptation
+
+- **Interactive platforms** (`canAskInteractive: true`): Full explore flow with selection, refinement, and more-options loop.
+- **Non-interactive platforms** (`canAskInteractive: false`): Generate all approaches as structured output. Include a note at the end: "Re-invoke explore mode with your selected approach number to proceed to spec creation."
+
+## Explore Mode Safety
+
+- Explore mode does NOT create any spec artifacts (no spec.json, no requirements.md). It only produces approach analysis.
+- Explore mode does NOT modify any existing files. It is read-only except for the handoff to spec mode.
+- File paths referenced in approaches must pass the same path validation rules as all other modes: relative paths only, no `../` traversal, contained under repo root.
+- If the repo map is stale (check `generated` timestamp if available), Tell the user("Repo map may be outdated. Consider running `/specops map` for the most accurate file references.")
+
+
 # From Plan Mode
 
 From Plan mode converts an existing AI coding assistant plan (from plan mode, a planning session, or any structured outline) into a persistent SpecOps spec. Instead of starting from scratch, SpecOps faithfully maps the plan's content into the standard spec structure: goals become requirements with EARS acceptance criteria, architectural decisions become design.md, and implementation steps become tasks.md.
@@ -3884,7 +4077,21 @@ An initiative groups related specs created through decomposition (or manually) i
 | `specs` | string[] | Yes | Array of spec IDs belonging to this initiative (maxItems 50) |
 | `order` | string[][] | Yes | Execution waves — array of arrays where each inner array is a wave of spec IDs that can execute in parallel (maxItems 20 waves, inner maxItems 50) |
 | `skeleton` | string | No | Spec ID of the walking skeleton (first wave-1 spec) |
+| `plannedWaves` | object[] | No | Planned wave context for specs not yet created (see below) |
 | `status` | string | Yes | `active` or `completed` — derived from member spec statuses |
+
+**Planned Waves:** When an initiative spans multiple waves and later waves have specs not yet created, `plannedWaves` carries execution context so that a new session can resume the initiative without external plan references. Each entry contains:
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `wave` | integer | Yes | Wave number (1-indexed, corresponds to position in `order`) |
+| `description` | string | Yes | What this wave accomplishes and why (maxLength 2000) |
+| `specs` | object[] | Yes | Per-spec execution context (minItems 1, maxItems 50) |
+| `specs[].id` | string | Yes | Spec ID matching an entry in the initiative's `specs` array |
+| `specs[].description` | string | Yes | What this spec should accomplish (maxLength 2000) |
+| `specs[].context` | string | No | Extended context: implementation details, file targets, constraints (maxLength 5000) |
+
+**Population:** When decomposition creates an initiative with multiple waves (Phase 1.5), populate `plannedWaves` for all waves beyond wave 1. Include enough context per spec that a fresh session can execute the spec without referencing external plan files. When a wave completes, its `plannedWaves` entry may be retained for historical context or removed — the orchestrator does not require it for completed waves.
 
 **Schema:** Validated against `initiative-schema.json` (draft-07, `additionalProperties: false` at all object levels).
 
@@ -4111,6 +4318,23 @@ All quality dimensions use this 1-10 integer scale:
 | 3-4 | Significant problems. Core requirements partially unmet. |
 | 1-2 | Fundamentally broken. Does not address the spec. |
 
+### Confidence Tiers for Findings
+
+Each finding produced during evaluation (spec or implementation) carries a confidence classification that determines its evidence requirements and scoring impact.
+
+| Tier | Range | Evidence Requirements | Scoring Impact |
+| ------ | ------- | ---------------------- | ---------------- |
+| HIGH | >= 0.80 | (1) Specific file path and line reference, (2) quoted or described code passage, (3) concrete consequence or impact statement. All three required. | Counts toward pass/fail scoring |
+| MODERATE | 0.60-0.79 | (1) File path or code pattern reference, (2) likely impact statement. Both required. | Counts toward pass/fail scoring |
+| LOW | < 0.60 | No minimum evidence required | Advisory only -- excluded from pass/fail scoring |
+
+**Evidence validation rules:**
+
+- If a HIGH confidence finding is missing any of the three required evidence elements, downgrade it to MODERATE and append: "Downgraded from HIGH -- missing [element]."
+- LOW confidence findings are prefixed with `[Advisory]` in the evaluation report and do not affect dimension pass/fail determination or trigger remediation instructions.
+- LOW confidence findings satisfy the "mandatory finding per dimension" rule only when no MODERATE or HIGH findings exist for that dimension. If at least one MODERATE or HIGH finding exists, LOW findings are supplementary.
+- Dimension scores are computed from HIGH and MODERATE confidence findings only. LOW findings provide context but do not influence the score.
+
 ### Spec Evaluation Protocol
 
 Spec evaluation runs at the Phase 2 exit boundary — after Phase 2 produces spec artifacts but before Phase 3 dispatch. It verifies that the specification is clear, complete, and implementable.
@@ -4143,6 +4367,13 @@ STRUCTURAL RULES (mandatory, not guidelines):
    a finding, your score for that dimension is capped below the passing threshold.
 3. Score variance: If all your dimension scores are identical, your evaluation auto-fails
    and you must re-evaluate with distinct per-dimension justification.
+4. Confidence classification: For each finding, assign a confidence value (0.00-1.00).
+   - HIGH (>= 0.80): You can point to a specific file:line, quote the code, and describe
+     a concrete consequence. All three must be present.
+   - MODERATE (0.60-0.79): You can reference a file or pattern and describe a likely impact.
+   - LOW (< 0.60): You suspect an issue but cannot point to specific evidence. Mark as
+     [Advisory]. These do not affect the dimension score.
+   If you assign HIGH but cannot provide all three evidence elements, downgrade to MODERATE.
 ```
 
 **Procedure:**
@@ -4151,7 +4382,8 @@ STRUCTURAL RULES (mandatory, not guidelines):
 2. For each spec evaluation dimension:
    a. List specific evidence: quote or reference the artifact section, line, or passage that is relevant to this dimension.
    b. List findings: identify at least one concrete finding (gap, risk, or improvement opportunity) for this dimension. "No issues found" is not acceptable evidence.
-   c. Assign a score (1-10 integer) that follows from the evidence and findings above. If the findings list is empty or contains only "No issues found" or equivalent language, cap the score at (`minScore` - 1) and append: "Score capped below threshold -- no concrete finding identified for this dimension."
+   c. Assign a score (1-10 integer) based on HIGH and MODERATE confidence findings only. LOW confidence findings are excluded from score computation. If the findings list is empty or contains only "No issues found" or equivalent language, cap the score at (`minScore` - 1) and append: "Score capped below threshold -- no concrete finding identified for this dimension."
+   c.5. For each finding listed in step b, assign a confidence tier (HIGH/MODERATE/LOW) with a numeric value (0.00-1.00). Validate evidence requirements per the Confidence Tiers table above. If a finding is classified HIGH but is missing any of the three required evidence elements, downgrade to MODERATE and note the reason. If a finding is classified LOW (< 0.60), prefix it with `[Advisory]` in the evaluation report — it does not affect the dimension score.
    d. If below `config.implementation.evaluation.minScore`: write a concrete remediation instruction (e.g., "Acceptance criterion 3 uses 'works well' -- specify a measurable threshold such as response time < 200ms").
 3. **Score variance check**: After all dimensions are scored, check whether all dimension scores are identical.
    - If all scores are identical on the first attempt, record "Uniform scores detected -- re-evaluate with distinct per-dimension justification" and re-run once from step 2.
@@ -4217,6 +4449,13 @@ STRUCTURAL RULES (mandatory, not guidelines):
    a finding, your score for that dimension is capped below the passing threshold.
 3. Score variance: If all your dimension scores are identical, your evaluation auto-fails
    and you must re-evaluate with distinct per-dimension justification.
+4. Confidence classification: For each finding, assign a confidence value (0.00-1.00).
+   - HIGH (>= 0.80): You can point to a specific file:line, quote the code, and describe
+     a concrete consequence. All three must be present.
+   - MODERATE (0.60-0.79): You can reference a file or pattern and describe a likely impact.
+   - LOW (< 0.60): You suspect an issue but cannot point to specific evidence. Mark as
+     [Advisory]. These do not affect the dimension score.
+   If you assign HIGH but cannot provide all three evidence elements, downgrade to MODERATE.
 ```
 
 **Procedure:**
@@ -4228,7 +4467,8 @@ STRUCTURAL RULES (mandatory, not guidelines):
 5. For each dimension (selected by spec type from the tables above):
    a. List specific evidence: cite file paths, line references, code quotes, or test output that are relevant to this dimension.
    b. List findings: identify at least one concrete finding (gap, risk, or improvement opportunity) for this dimension. "No issues found" is not acceptable evidence.
-   c. Assign a score (1-10 integer) that follows from the evidence and findings above. If the findings list is empty or contains only "No issues found" or equivalent language, cap the score at (`minScore` - 1) and append: "Score capped below threshold -- no concrete finding identified for this dimension."
+   c. Assign a score (1-10 integer) based on HIGH and MODERATE confidence findings only. LOW confidence findings are excluded from score computation. If the findings list is empty or contains only "No issues found" or equivalent language, cap the score at (`minScore` - 1) and append: "Score capped below threshold -- no concrete finding identified for this dimension."
+   c.5. For each finding listed in step b, assign a confidence tier (HIGH/MODERATE/LOW) with a numeric value (0.00-1.00). Validate evidence requirements per the Confidence Tiers table. If a finding is classified HIGH but is missing any required evidence element, downgrade to MODERATE and note the reason. If a finding is classified LOW (< 0.60), prefix it with `[Advisory]` — it does not affect the dimension score.
    d. If below `minScore`: write a concrete remediation instruction scoped to specific tasks and files.
 6. **Score variance check**: After all dimensions are scored, check whether all dimension scores are identical.
    - If all scores are identical on the first attempt, record "Uniform scores detected -- re-evaluate with distinct per-dimension justification" and re-run once from step 5.
@@ -4245,6 +4485,107 @@ STRUCTURAL RULES (mandatory, not guidelines):
 - The evaluator MUST NOT mark the spec as completed. Only Phase 4C can set status to `completed`.
 - The evaluator MUST NOT change acceptance criteria checkboxes. Checkbox verification is a Phase 4C responsibility.
 
+### Multi-Persona Review Integration
+
+After the implementation evaluator completes dimension scoring (step 4A.2), the multi-persona review system runs as step 4A.2.5. The full protocol is defined in `core/review-agents.md`.
+
+**Combined verdict logic:**
+
+- **PASS**: All dimensions score at or above `minScore` AND no P0/P1 findings with HIGH or MODERATE confidence exist from the multi-persona review.
+- **FAIL**: Any dimension scores below `minScore` OR any P0/P1 finding with HIGH or MODERATE confidence exists from the multi-persona review.
+- Persona findings can override a dimension-score pass to fail, but cannot upgrade a fail to pass.
+- LOW confidence findings from persona reviewers are advisory only and never contribute to a fail verdict.
+
+When the multi-persona review triggers remediation (P0/P1 HIGH/MODERATE findings while dimensions pass), the remediation context includes the specific persona findings -- finding IDs, severities, evidence, and remediation instructions -- not just dimension scores.
+
+**Depth calibration**: If the depth flag is `lightweight`, skip the multi-persona review entirely. The existing dimension scoring is sufficient for lightweight specs.
+
+### Action Routing for Findings
+
+After finding aggregation (dimension findings from the adversarial evaluator + persona findings from the multi-persona review), the action router classifies each finding into a fix class that determines how remediation handles it. Action routing is always active when evaluation is enabled -- there is no separate config switch.
+
+**Fix class definitions:**
+
+| Fix Class | Description | Agent Behavior |
+| --- | --- | --- |
+| `auto_fix` | Deterministic, narrow scope, low risk. Agent fixes without asking. | Apply fix immediately during Phase 4B. No developer interaction. |
+| `gated_fix` | Deterministic but wider scope or moderate risk. Agent proposes, developer approves in batch. | Collect all gated fixes and present as a single batch for approval. |
+| `manual` | Non-deterministic, architectural, or high risk. Flagged for developer, no agent fix. | Report finding with full details. Do not attempt a fix. |
+| `advisory` | Informational only. No fix expected. | Include in evaluation report. No action taken. |
+
+Examples by fix class:
+
+- **auto_fix**: Missing import statement, formatting violation, naming convention deviation, missing test assertion, trivial comment typo
+- **gated_fix**: Renaming a function across 3+ files, adding error handling to multiple call sites, updating multiple test files for a new parameter
+- **manual**: Changing architectural patterns, resolving ambiguous requirement interpretation, security vulnerability remediation requiring design judgment
+- **advisory**: LOW confidence findings, P3 style observations, potential future improvements
+
+**Routing signals:**
+
+Each finding is assessed on three signals before applying the Routing Decision Matrix:
+
+1. **Fix Determinism**: Can the agent reliably generate the correct fix?
+   - *Deterministic*: Only one correct fix exists (e.g., "add missing import X to file Y")
+   - *Non-deterministic*: Multiple valid approaches exist (e.g., "refactor error handling strategy")
+
+2. **Fix Scope**: How many files does the fix affect?
+   - *Narrow*: 1-2 files
+   - *Wide*: 3 or more files
+
+3. **Fix Risk**: Could the fix introduce regressions?
+   - *Low*: Isolated change, no callers affected, no behavioral change
+   - *Moderate*: Change affects known callers but behavior is preserved
+   - *High*: Change may alter observable behavior or requires architectural judgment
+
+**Routing Decision Matrix:**
+
+| Fix Determinism | Fix Scope | Fix Risk | Fix Class |
+| --- | --- | --- | --- |
+| Deterministic | Narrow | Low | auto_fix |
+| Deterministic | Narrow | Moderate | gated_fix |
+| Deterministic | Wide | Low | gated_fix |
+| Deterministic | Wide | Moderate | gated_fix |
+| Deterministic | Any | High | manual |
+| Non-deterministic | Any | Any | manual |
+
+**Override rules** (applied after the matrix):
+
+- **LOW confidence override**: Any finding with confidence < 0.60 (LOW tier) is classified as `advisory` regardless of the matrix result. LOW confidence findings lack sufficient evidence for any fix attempt.
+- **P3 severity override**: Any finding with severity P3 is classified as `advisory`, unless the matrix already yielded `auto_fix` (trivial fixes should still be auto-fixed even at P3).
+
+**Routing procedure** (for each finding after aggregation):
+
+1. If the finding has LOW confidence (< 0.60): classify as `advisory`. Done.
+2. Assess Fix Determinism: Read the file at the finding's evidence and remediation instruction. If the remediation specifies a single, unambiguous change (add line X, rename Y to Z, delete line N), classify as deterministic. If the remediation describes a strategy or lists alternatives, classify as non-deterministic.
+3. Assess Fix Scope: count the number of distinct files referenced in the finding's evidence and remediation. If 1-2 files, classify as narrow. If 3+, classify as wide.
+4. Assess Fix Risk: if the fix changes only comments, formatting, imports, or test-only code, classify as low risk. If the fix changes implementation logic but preserves the same API surface, classify as moderate risk. If the fix changes public interfaces, removes functionality, or requires design judgment, classify as high risk.
+5. Apply the Routing Decision Matrix to get the base fix class.
+6. Apply override rules: if severity is P3 and base class is not `auto_fix`, reclassify as `advisory`.
+7. Record the fix class, routing signals, and rationale in the evaluation report.
+
+**Auto-fix execution protocol** (Phase 4B):
+
+1. Collect all findings classified as `auto_fix`.
+2. For each auto_fix finding, in order:
+   a. Edit the file at to apply the fix as specified in the finding's remediation instruction.
+   b. If `canExecuteCode` is true, Run the terminal command the project's test suite. If any test that was previously passing now fails, the auto-fix introduced a regression.
+   c. If the fix succeeds (no edit errors, no test regressions): log the fix in `implementation.md` as "Auto-fixed: [finding ID] -- [description]".
+   d. If the fix fails (edit error or test regression): revert the change, reclassify the finding as `gated_fix`, and log "Auto-fix failed for [finding ID] -- reclassified as gated_fix. Reason: [error/regression details]".
+3. After all auto_fix items are processed, proceed to gated_fix batching.
+
+**Gated fix batching protocol** (Phase 4B, after auto-fix):
+
+1. Collect all findings classified as `gated_fix` (including those reclassified from failed auto-fixes).
+2. If `canAskInteractive` is true: present all gated fixes as a single batch to the developer via Ask the user. For each finding, show: finding ID, description, proposed change (file path + change summary), and risk assessment. The developer can approve all, reject all, or selectively approve individual fixes.
+3. If `canAskInteractive` is false: treat all `gated_fix` items as `auto_fix` and apply them without asking. On non-interactive platforms, the developer reviews changes in the git diff after completion.
+4. Apply approved gated fixes. Log each in `implementation.md`.
+5. Rejected gated fixes are reclassified as `manual` and reported to the developer.
+
+**Manual and advisory reporting** (Phase 4B, after gated fixes):
+
+1. `manual` findings: Tell the user with each manual finding's ID, severity, confidence, evidence, and description. Note that no agent fix is attempted.
+2. `advisory` findings: include in the evaluation report Action Routing Summary section. No notification or action required.
+
 ### Feedback Loop
 
 **Spec evaluation feedback (Phase 2 revision):**
@@ -4257,12 +4598,16 @@ When spec evaluation fails, the evaluator has written specific feedback to `eval
 
 **Implementation evaluation feedback (Phase 4B remediation):**
 
-When implementation evaluation fails, the evaluator has written remediation instructions scoped to specific tasks and files. The remediation step:
+When implementation evaluation fails, the evaluator has written remediation instructions scoped to specific tasks and files. The remediation step uses action routing to classify and handle findings by fix class:
 
-1. Read the file at `<specsDir>/<spec-name>/evaluation.md` to get the failing dimensions and remediation instructions.
-2. Identify which tasks in tasks.md relate to the failing dimensions (the evaluator specifies this in the remediation section).
-3. Re-implement only the failing-dimension tasks following the remediation instructions. Do not re-implement tasks whose dimensions passed.
-4. After remediation: re-run Phase 4A implementation evaluation (increment iteration counter).
+1. Read the file at `<specsDir>/<spec-name>/evaluation.md` to get the failing dimensions, remediation instructions, and (if present) persona findings with finding IDs, evidence, and remediation instructions.
+2. **Action routing classification**: For each finding (dimension-based or persona-based), apply the Action Routing procedure to classify it into a fix class (auto_fix, gated_fix, manual, advisory).
+3. **Auto-fix execution**: Apply all `auto_fix` classified findings immediately following the auto-fix execution protocol. Log results in `implementation.md`.
+4. **Gated fix batching**: Present all `gated_fix` findings as a batch for developer approval (or auto-apply on non-interactive platforms) following the gated fix batching protocol.
+5. **Manual reporting**: Report all `manual` findings to the developer with full context. Do not attempt fixes.
+6. **Advisory reporting**: Include `advisory` findings in the evaluation report for context. No action taken.
+7. For dimension failures not addressed by auto-fix or gated-fix (e.g., broad code quality issues), identify which tasks in tasks.md relate to the failing dimensions and re-implement those tasks following the remediation instructions.
+8. After remediation: re-run Phase 4A implementation evaluation (increment iteration counter).
 
 **Zero-progress detection:**
 
@@ -4290,9 +4635,243 @@ These rules are mandatory and cannot be overridden by configuration:
 1. **Read-only evaluation**: The evaluator MUST NOT modify implementation code, spec artifacts (requirements, design, tasks), or any project file other than `evaluation.md` and the `spec.json` `evaluation` field.
 2. **No completion authority**: The evaluator MUST NOT set spec status to `completed`. Only Phase 4C completion steps can do this.
 3. **No checkbox manipulation**: The evaluator MUST NOT check or uncheck acceptance criteria checkboxes. Checkbox verification is Phase 4C's responsibility.
-4. **Hardcoded prompts**: The adversarial evaluator prompts are defined in this module and MUST NOT be overridden via `.specops.json` or any other configuration mechanism.
+4. **Hardcoded prompts**: The adversarial evaluator prompts are defined in this module and MUST NOT be overridden via `.specops.json` or any other configuration mechanism. The multi-persona review module's prompts are defined in `core/review-agents.md` and MUST NOT be overridden.
 5. **Append-only history**: If `evaluation.md` already exists from a prior iteration, append the new iteration under the appropriate section. Do not overwrite prior iteration data — the full evaluation trail must be preserved.
 6. **Iteration limits**: The `maxIterations` configuration value MUST be respected. Exceeding it is a protocol breach.
+
+
+## Multi-Persona Review
+
+The multi-persona review system adds structurally separated, focused reviewer personas that run alongside the adversarial evaluator at Phase 4A. Each persona has a narrow focus area, produces findings with severity (P0-P3) and confidence (HIGH/MODERATE/LOW from the confidence-gating system), and operates as a structurally separate evaluation pass. Findings from all personas are aggregated, deduplicated, and the most conservative classification wins on disagreement.
+
+### Persona Registry
+
+Four reviewer personas are defined as a static registry. Prompts are hardcoded in this module and MUST NOT be overridden via `.specops.json` or any other configuration mechanism.
+
+| Persona | Prefix | Activation | Focus |
+| --- | --- | --- | --- |
+| Correctness Reviewer | CORR | Always (activationMode: always) | Code-vs-spec fidelity: every acceptance criterion has corresponding code, edge cases handled, error paths implemented |
+| Testing Reviewer | TEST | Always (activationMode: always) | Test coverage adequacy: test existence, test quality, missing test categories, test isolation |
+| Standards Reviewer | STD | Always (activationMode: always) | Convention adherence: naming conventions, architectural patterns, code organization rules, commit conventions |
+| Security Reviewer | SEC | Conditional (activationMode: conditional, filePatterns) | Security concerns: input validation, authentication/authorization, secrets handling, injection vulnerabilities |
+
+### Triggering Conditions
+
+Each persona has triggering conditions that determine when it activates during the multi-persona review. Triggering conditions are hardcoded in this module and MUST NOT be overridden via `.specops.json` or any other configuration mechanism.
+
+**activationMode**: Determines the persona's activation behavior.
+
+- `"always"`: The persona fires on every review regardless of which files changed. Used by Correctness, Testing, and Standards.
+- `"conditional"`: The persona fires only when its trigger patterns match changed files. Used by Security.
+
+**filePatterns**: Array of glob patterns matched against changed file paths. A conditional persona activates if any changed file matches any of its filePatterns. Always-on personas do not need filePatterns (they activate regardless). See the Persona Trigger Patterns section below for the default patterns.
+
+**contentPatterns**: Array of regex patterns matched against changed file content. Content pattern matching is a secondary fallback -- it only runs when no filePattern matched. This avoids unnecessary file reads (Read the file at per changed file). Content patterns exist as an extension point for future conditional personas (e.g., a Data Migration reviewer triggering on SQL migration statements). The existing 4 personas do not use contentPatterns.
+
+**Manual override**: Users can force-activate any persona regardless of its triggering conditions by including `--with-<persona-name>-review` in their request (e.g., `--with-security-review`). The override is detected by checking the user's original request text for the pattern `--with-<name>-review` where name maps to a persona: `security` -> SEC, `correctness` -> CORR, `testing` -> TEST, `standards` -> STD. A force-activated persona shows activation reason "manual override (--with-<name>-review)". Force-activating an always-on persona is valid but a no-op (it would activate anyway).
+
+### Persona Prompts
+
+Each persona prompt includes the structural rules from the adversarial evaluation system (evidence-first, mandatory finding, confidence classification). These prompts are hardcoded and not configurable.
+
+#### Correctness Reviewer
+
+```text
+You are a Correctness Reviewer. Your sole focus is whether the implementation matches
+the specification. For every acceptance criterion, find the corresponding code. If code
+is missing, the criterion is unmet. If code exists but handles only the happy path, the
+criterion is partially met.
+
+STRUCTURAL RULES (mandatory, not guidelines):
+1. Evidence-first: For each criterion, cite the specific file:line where it is implemented.
+   If you cannot find it, that is a finding.
+2. Mandatory finding: You MUST identify at least one gap or risk. If the implementation
+   perfectly matches the spec, identify the weakest point (least robust error handling,
+   most fragile assumption).
+3. Confidence classification: HIGH (>= 0.80) requires file:line + code quote + consequence.
+   MODERATE (0.60-0.79) requires file/pattern + impact. LOW (< 0.60) is [Advisory] only.
+```
+
+#### Testing Reviewer
+
+```text
+You are a Testing Reviewer. Your sole focus is test adequacy. Existence of tests is
+necessary but not sufficient -- tests must exercise meaningful behavior, not just exist
+for coverage metrics.
+
+STRUCTURAL RULES (mandatory, not guidelines):
+1. Evidence-first: For each test file, cite what it tests and what it misses.
+2. Mandatory finding: You MUST identify at least one testing gap. Common gaps: missing
+   edge case tests, missing error path tests, tests that assert on implementation details
+   rather than behavior, tests that pass trivially.
+3. Confidence classification: HIGH (>= 0.80) requires file:line + test code quote +
+   consequence of missing coverage. MODERATE (0.60-0.79) requires test pattern reference
+   + likely impact. LOW (< 0.60) is [Advisory] only.
+```
+
+#### Standards Reviewer
+
+```text
+You are a Standards Reviewer. Your sole focus is adherence to the project's documented
+conventions. Read the steering files and team conventions. Every deviation from a stated
+convention is a finding.
+
+STRUCTURAL RULES (mandatory, not guidelines):
+1. Evidence-first: For each convention violation, cite the convention source (steering
+   file or .specops.json) and the violating code location.
+2. Mandatory finding: You MUST identify at least one convention deviation. If all
+   conventions are followed, identify the convention with the weakest adherence.
+3. Confidence classification: HIGH (>= 0.80) requires convention source + violating
+   file:line + consequence. MODERATE (0.60-0.79) requires convention reference + likely
+   impact. LOW (< 0.60) is [Advisory] only.
+```
+
+#### Security Reviewer
+
+```text
+You are a Security Reviewer. Your sole focus is security concerns in the changed files.
+You are activated only when security-sensitive files are modified. Assume the code has
+vulnerabilities until proven otherwise.
+
+STRUCTURAL RULES (mandatory, not guidelines):
+1. Evidence-first: For each security concern, cite the specific file:line and the
+   vulnerability class (OWASP category or CWE where applicable).
+2. Mandatory finding: You MUST identify at least one security concern. If the code
+   appears secure, identify the weakest security assumption or the most likely attack
+   vector.
+3. Confidence classification: HIGH (>= 0.80) requires file:line + code quote +
+   exploit scenario. MODERATE (0.60-0.79) requires code pattern + likely attack vector.
+   LOW (< 0.60) is [Advisory] only.
+```
+
+### Persona Trigger Patterns
+
+Trigger patterns are per-persona. Always-on personas (Correctness, Testing, Standards) do not have trigger patterns -- they activate on every review regardless of changed files.
+
+**Security Reviewer default filePatterns** (hardcoded):
+
+```text
+**/auth*
+**/security*
+**/crypto*
+**/password*
+**/token*
+**/secret*
+**/permission*
+**/acl*
+**/*.env*
+**/middleware/auth*
+```
+
+**Security Reviewer extended patterns** are loaded at runtime and appended to the default filePatterns:
+
+1. **Steering files**: If Check if the file exists at(`<specsDir>/steering/`), scan steering files for a "Security-Sensitive Files" heading and extract the file list.
+2. **Project documentation**: If Check if the file exists at(`CLAUDE.md`), Read the file at it and extract paths listed under a "Security-Sensitive Files" heading.
+
+The combined pattern set (defaults + extended) is the Security persona's effective filePatterns. If any file modified during Phase 3 (from `implementation.md` session log "Files to Modify" entries) matches any pattern, the Security Reviewer activates.
+
+**Future conditional personas**: New conditional personas added to the registry follow the same pattern -- define their filePatterns and optionally contentPatterns in this section. The activation logic in the Review Execution Protocol handles all conditional personas uniformly.
+
+### Review Execution Protocol
+
+**Step 4A.2.5** (runs after the adversarial evaluator's dimension scoring at step 4A.2):
+
+1. **Determine active personas**: For each persona in the registry, evaluate its triggering conditions to determine activation. Record an activation reason for every persona.
+   a. Collect changed files from `implementation.md` session log "Files to Modify" entries.
+   b. Check for manual overrides: scan the user's original request text for `--with-<persona-name>-review` patterns (e.g., `--with-security-review`).
+   c. For each persona:
+      - If a manual override is present for this persona: activate. Activation reason: "manual override (--with-<name>-review)".
+      - Else if `activationMode` is `"always"`: activate. Activation reason: "always-on".
+      - Else if `activationMode` is `"conditional"`:
+        i. Match each changed file path against the persona's `filePatterns` (see Persona Trigger Patterns above) using glob matching.
+        ii. If any file matches: activate. Activation reason: "matched pattern: <pattern> on file: <file>".
+        iii. If no filePattern matched and the persona has `contentPatterns`: Read the file at each changed file and match content against the `contentPatterns` regex patterns.
+        iv. If any content matches: activate. Activation reason: "content matched pattern: <pattern> in file: <file>".
+        v. If no pattern matches: skip. Activation reason: "no changed files match <persona> trigger patterns".
+   d. Record activation results (persona name, active/skipped, activation reason) for inclusion in the Multi-Persona Review section of the evaluation report.
+
+2. **For each active persona**:
+   a. Build the persona context: persona prompt (from Persona Prompts above) + spec artifacts (requirements, design, tasks) + implementation files (from implementation.md session log) + steering files (for Standards persona) + confidence tier definitions.
+   b. If `canDelegateTask` is true: dispatch as a fresh sub-agent with model diversity instruction ("If your platform supports model selection, use a different model than the one that generated the artifacts being evaluated."). The sub-agent returns structured findings.
+   c. If `canDelegateTask` is false: run the persona prompt inline, sequentially. Each persona operates on the same artifacts but with its own prompt prepended.
+
+3. **Aggregate findings**: Collect all findings from all personas. Each finding must include:
+   - **Finding ID**: `<persona-prefix>-<sequence>` (e.g., CORR-1, TEST-2, STD-3, SEC-1)
+   - **Severity**: P0 (critical, blocks release), P1 (high, should fix before merge), P2 (medium, fix soon), P3 (low, advisory)
+   - **Confidence**: HIGH (>= 0.80), MODERATE (0.60-0.79), or LOW (< 0.60) following confidence tier definitions
+   - **Evidence**: Required per confidence tier (HIGH needs file:line + code + consequence; MODERATE needs file/pattern + impact; LOW has no minimum)
+   - **Description**: Concise finding description
+   - **Remediation**: Specific fix suggestion (for P0-P2 findings)
+
+   For each finding, validate confidence tier evidence requirements. If a HIGH confidence finding is missing any of the three required evidence elements, auto-downgrade to MODERATE and append: "Downgraded from HIGH -- missing [element]."
+
+   LOW confidence findings are prefixed with `[Advisory]` and excluded from pass/fail scoring.
+
+4. **Deduplicate**: Group findings by file path and line range. Within each group:
+   - Merge findings that reference the same code location (overlapping line range within 5 lines).
+   - Use the most conservative severity (lowest P-number wins: P0 > P1 > P2 > P3).
+   - Use the most conservative confidence (highest tier wins: HIGH > MODERATE > LOW).
+   - Preserve all evidence from contributing personas.
+   - Record disagreements: if personas disagree on severity, note "Severity disagreement: [persona-A] classified P[X], [persona-B] classified P[Y]. Using P[min(X,Y)] (conservative)."
+
+5. **Determine review verdict**:
+   - If any deduplicated finding has severity P0 or P1 AND confidence HIGH or MODERATE: verdict is `fail` (triggers remediation).
+   - If all findings are P2/P3 or LOW confidence: verdict is `pass` (findings are advisory).
+   - LOW confidence findings never contribute to a fail verdict regardless of severity.
+
+### Multi-Persona Review Report Template
+
+Append to `evaluation.md` under a new `## Multi-Persona Review` section:
+
+```markdown
+## Multi-Persona Review
+
+### Active Personas
+- Correctness: active (always-on)
+- Testing: active (always-on)
+- Standards: active (always-on)
+- Security: [active (matched pattern: <pattern> on file: <file>) | active (manual override (--with-security-review)) | skipped (no changed files match security-sensitive trigger patterns)]
+
+### Findings
+
+| ID | Persona | Severity | Confidence | File | Description |
+| --- | --- | --- | --- | --- | --- |
+| CORR-1 | Correctness | P1 | HIGH (0.85) | core/foo.md:42 | ... |
+| TEST-1 | Testing | P2 | MODERATE (0.70) | tests/test_foo.py | ... |
+
+### Finding Details
+
+#### CORR-1: [Description]
+- **Severity**: P1
+- **Confidence**: HIGH (0.85)
+- **Evidence**: [file:line, code quote, consequence]
+- **Remediation**: [specific fix]
+
+### Deduplication Notes
+[Any merged findings with disagreement records]
+
+### Review Verdict
+[pass | fail -- N P0/P1 findings with HIGH/MODERATE confidence]
+```
+
+### Interaction with Adversarial Evaluator
+
+The multi-persona review operates independently from the adversarial evaluator's dimension scoring:
+
+- **Dimension scores** (from the adversarial evaluator) determine the evaluation pass/fail for the existing 4 dimensions.
+- **Persona findings** (from multi-persona review) can override a pass verdict to fail if P0/P1 HIGH/MODERATE findings exist.
+- **Persona findings cannot upgrade a fail to pass**. If dimension scores fail, remediation is needed regardless of persona findings.
+- **Combined verdict**: PASS only when dimension scores pass AND persona review passes. FAIL if either fails.
+
+When remediation is triggered by persona findings (not dimension score failures), the remediation context includes the specific persona findings -- not just dimension scores. The failing finding IDs, severities, and remediation instructions are included in the Phase 4B remediation dispatch.
+
+### Platform Adaptation
+
+| Capability | Multi-Persona Review Behavior |
+| --- | --- |
+| `canDelegateTask: true` | Each persona dispatched as a separate sub-agent (up to 4 dispatches). Fresh context per persona. |
+| `canDelegateTask: false`, `canAskInteractive: true` | All personas run sequentially in current context. Each persona prompt prepended before its review pass. |
+| `canDelegateTask: false`, `canAskInteractive: false` | All personas run sequentially in current context. Same as above. |
 
 
 ## Initiative Orchestration
@@ -4376,10 +4955,13 @@ Initiative Handoff Bundle
 
 For completed dependency specs, include key outputs by reading the Summary section from their `implementation.md`.
 
+**Planned wave context enrichment:** If the initiative has a `plannedWaves` array, find the entry matching the current wave number. If found, include the wave-level description in the Initiative Context section and the per-spec description and context (if present) in the Spec Identity section. This provides execution guidance for specs that have not yet been created, enabling cross-session initiative resumption without external plan references.
+
 #### Step 6: Dispatch spec
 
 1. If the spec has `status == "not-created"`:
-   - Dispatch through the normal dispatcher protocol with the request: "Create spec '{spec-id}' — {spec description from initiative context}"
+   - Check if `initiative.plannedWaves` contains an entry for the current wave with a spec entry matching the spec ID. If found, use the spec's `description` and `context` fields to enrich the dispatch request.
+   - Dispatch through the normal dispatcher protocol with the request: "Create spec '{spec-id}' — {spec description from plannedWaves entry if available, otherwise from initiative description}"
    - The dispatcher routes to the `spec` mode, which runs the full Phase 1-4 lifecycle.
 
 2. If the spec has an existing status (`draft`, `in-review`, `approved`, `self-approved`, `implementing`):
@@ -4455,6 +5037,7 @@ The orchestrator is entirely file-based. All state can be reconstructed from dis
 | Dependency outputs | `<specsDir>/<spec-id>/implementation.md` (completed specs) | Step 5 |
 | Initiative log | `<specsDir>/initiatives/<id>-log.md` | Step 8 (append) |
 | Execution waves | `initiative.order` field | Step 3 |
+| Planned wave context | `initiative.plannedWaves` field (optional) | Step 5, Step 6 |
 
 No in-memory state accumulates across iterations. The orchestrator can be interrupted and resumed at any point — it re-reads everything from disk on each iteration.
 
@@ -5038,10 +5621,22 @@ TableName:
 | Design Coherence | | | | | |
 | Task Coverage | | | | | |
 
+#### Findings Detail
+
+<!-- For each dimension, list findings with confidence classification -->
+
+**[Dimension Name]:**
+
+| # | Finding | Confidence | Evidence | Impact |
+| --- | --------- | ---------- | -------- | ------ |
+| 1 | [description] | HIGH (0.85) | [file:line, code quote] | [consequence] |
+| 2 | [description] | MODERATE (0.65) | [file or pattern] | [likely impact] |
+| 3 | [Advisory] [description] | LOW (0.40) | [suspected pattern] | [suspected impact] |
+
 **Verdict:** [PASS / FAIL -- N of M dimensions passed]
 
 **Remediation** (if FAIL):
-<!-- List specific, actionable instructions for each failing dimension. Reference artifact sections by name. -->
+<!-- List specific, actionable instructions for each failing dimension. Reference artifact sections by name. Only HIGH and MODERATE findings trigger remediation. -->
 
 ---
 
@@ -5060,6 +5655,18 @@ TableName:
 | [Dimension 3] | | | | | |
 | [Dimension 4] | | | | | |
 
+#### Findings Detail
+
+<!-- For each dimension, list findings with confidence classification -->
+
+**[Dimension Name]:**
+
+| # | Finding | Confidence | Evidence | Impact |
+| --- | --------- | ---------- | -------- | ------ |
+| 1 | [description] | HIGH (0.85) | [file:line, code quote] | [consequence] |
+| 2 | [description] | MODERATE (0.65) | [file or pattern] | [likely impact] |
+| 3 | [Advisory] [description] | LOW (0.40) | [suspected pattern] | [suspected impact] |
+
 **Test Exercise Results:**
 
 - Tests run: [yes / no / not applicable]
@@ -5071,7 +5678,63 @@ TableName:
 **Verdict:** [PASS / FAIL -- N of M dimensions passed]
 
 **Remediation** (if FAIL):
-<!-- List specific, actionable instructions scoped to tasks and files. -->
+<!-- List specific, actionable instructions scoped to tasks and files. Only HIGH and MODERATE findings trigger remediation. -->
+
+---
+
+## Multi-Persona Review
+
+<!-- This section is additive. Specs evaluated before multi-persona review was introduced will not have this section, and that is valid. -->
+
+### Active Personas
+<!-- Each persona includes an activation reason. Always-on personas show "always-on". Conditional personas show the matched pattern or skip reason. Manual overrides show the override flag. -->
+- Correctness: [active (always-on)]
+- Testing: [active (always-on)]
+- Standards: [active (always-on)]
+- Security: [active (matched pattern: <pattern> on file: <file>) | active (manual override (--with-security-review)) | skipped (no changed files match security-sensitive trigger patterns)]
+
+### Findings
+
+| ID | Persona | Severity | Confidence | Fix Class | File | Description |
+| --- | --- | --- | --- | --- | --- | --- |
+| [PREFIX]-[N] | [Persona Name] | [P0-P3] | [HIGH/MODERATE/LOW (value)] | [auto_fix/gated_fix/manual/advisory] | [file:line] | [description] |
+
+### Finding Details
+
+#### [PREFIX]-[N]: [Description]
+
+- **Severity**: [P0-P3]
+- **Confidence**: [HIGH/MODERATE/LOW (value)]
+- **Evidence**: [file:line, code quote, consequence]
+- **Remediation**: [specific fix]
+
+### Deduplication Notes
+<!-- Any merged findings with disagreement records. Record severity/confidence disagreements between personas. -->
+
+### Review Verdict
+<!-- [pass | fail -- N P0/P1 findings with HIGH/MODERATE confidence] -->
+
+---
+
+## Action Routing Summary
+
+<!-- This section is additive. Specs evaluated before action routing was introduced will not have this section, and that is valid. -->
+
+| Fix Class | Count | Findings |
+| --- | --- | --- |
+| auto_fix | [N] | [finding IDs] |
+| gated_fix | [N] | [finding IDs] |
+| manual | [N] | [finding IDs] |
+| advisory | [N] | [finding IDs] |
+
+### Auto-Fix Results
+<!-- For each auto_fix finding: applied successfully / failed and reclassified as gated_fix -->
+
+### Gated Fix Batch
+<!-- For each gated_fix finding: proposed change summary, approval status -->
+
+### Manual Findings
+<!-- For each manual finding: reported to developer, no fix attempted -->
 ```
 
 ### tasks.md
@@ -5168,6 +5831,7 @@ Detailed description of what needs to be done.
 - Vertical: [detected or configured vertical]
 - Affected files: [list of affected file paths]
 - Project state: [greenfield / brownfield / migration]
+- Depth: [lightweight / standard / deep] [computed / user override]
 
 ## Decision Log
 
@@ -6235,14 +6899,26 @@ while cycle < maxCycles:
     // Git checkpoint: implemented (if gitCheckpointing enabled)
     // Run the terminal command(git add -A && git commit -m "specops(checkpoint): implemented -- <spec-name>")
 
-    // Phase 4 acceptance check — evaluation-aware
+    // Phase 4 acceptance check — evaluation-aware (headless mode)
     if evaluationEnabled:
-        // Run Phase 4A implementation evaluation
-        // Apply adversarial evaluation against the implementation
-        // Create the file at results to <specsDir>/<spec-name>/evaluation.md
-        // Read the file at evaluation.md and extract per-category scores and overall verdict
-        evaluationScores = map of category -> score from evaluation.md
-        overallVerdict = verdict from evaluation.md
+        // Dispatch evaluation with headless: true for structured JSON response
+        // The evaluation sub-agent returns a Headless Response Schema JSON object
+        evaluationResponse = dispatch evaluation with headless: true
+
+        // Parse structured response (with fallback)
+        if evaluationResponse is valid JSON with status, scores, verdict, findings:
+            evaluationScores = evaluationResponse.scores
+            overallVerdict = evaluationResponse.verdict
+            findings = evaluationResponse.findings
+            // Persist evaluation results to evaluation.md for audit trail
+            // Create the file at <specsDir>/<spec-name>/evaluation.md with formatted results
+        else:
+            // Fallback: evaluation did not return valid headless JSON
+            // Read evaluation.md and parse markdown (backward compatibility)
+            // Read the file at <specsDir>/<spec-name>/evaluation.md
+            evaluationScores = map of category -> score from evaluation.md
+            overallVerdict = verdict from evaluation.md
+            findings = extracted findings from evaluation.md
 
         if overallVerdict == "pass":
             // All evaluation criteria pass — finalize
@@ -6260,6 +6936,25 @@ while cycle < maxCycles:
 
         previousEvaluationScores = evaluationScores
         failingCategories = categories where score < passing threshold
+
+        // Action routing: classify findings and apply auto-fixes within cycle
+        // When headless JSON is available, read fix classes directly from findings[].fixClass
+        // When using markdown fallback, apply the Action Routing procedure from core/evaluation.md
+        // to classify into: auto_fix, gated_fix, manual, advisory
+
+        // Execute auto_fix items immediately (no developer interaction)
+        // For each auto_fix finding: Edit the file at to apply fix, verify no test regression
+        // If auto_fix fails: revert, reclassify as gated_fix
+
+        // Handle gated_fix items based on platform capability
+        if canAskInteractive:
+            // Batch all gated_fix items and Ask the user for approval
+            // Apply approved fixes, reclassify rejected as manual
+        else:
+            // Non-interactive: treat gated_fix as auto_fix (apply without asking)
+
+        // Report manual findings to developer via Tell the user (no fix attempted)
+        // Include advisory findings in evaluation report (no action)
 
     else:
         // Evaluation disabled — use existing checkbox verification
@@ -6325,6 +7020,8 @@ Pipeline mode connects to other SpecOps features:
 | **Task delegation** | Within each cycle, task execution uses auto-delegation (complexity score vs `config.implementation.delegationThreshold`). If delegation is active, the pipeline orchestrator delegates tasks the same way Phase 3 does. |
 | **Plan validation** | Runs once in Phase 2 (before pipeline starts). Not repeated per cycle — the spec references don't change between cycles. |
 | **Metrics** | Captured once at final completion (Phase 4 step 2.5), not per cycle. `specDurationMinutes` includes all cycle time. |
+| **Action routing** | Within each cycle, evaluation findings are classified by fix class. Auto-fix items are applied within the cycle without stopping. Gated items are batched for approval (interactive) or auto-applied (non-interactive). Manual and advisory items are reported at cycle end. |
+| **Headless evaluation** | Pipeline dispatches evaluation with headless: true to receive structured JSON (scores, verdict, findings with fix classes). Falls back to markdown parsing if headless response is unavailable. Structured consumption eliminates brittle text parsing for score extraction and verdict determination. |
 | **autoCommit** | Fires per-task within each cycle (Phase 3 step 7). Composes with checkpointing as usual. |
 
 ### Pipeline Safety
@@ -6334,6 +7031,7 @@ Pipeline mode connects to other SpecOps features:
 - **Blocked task handling**: If a task is set to `Blocked` during a cycle and cannot be resolved, the pipeline stops and Tell the user with the blocker details.
 - **Safety inheritance**: Pipeline mode inherits all safety rules from the Safety module (convention sanitization, path containment, no secrets in specs).
 - **No spec artifact modification**: Pipeline mode does not modify requirements.md or design.md — it only re-executes tasks and re-checks acceptance criteria. Spec content is frozen during pipeline execution.
+- **Auto-fix safety**: Auto-fix items applied during action routing follow the same safety rules as manual implementation — path containment, no secrets, convention sanitization. If an auto-fix introduces a test regression, it is reverted and reclassified as gated_fix.
 
 ### Platform Adaptation
 
@@ -6344,6 +7042,37 @@ Pipeline mode connects to other SpecOps features:
 | `canDelegateTask: true` | Task delegation available within each cycle |
 | `canTrackProgress: true` | Cycle progress tracked via Note the completed task in your response |
 | `canTrackProgress: false` | Cycle progress reported in response text |
+
+### Headless Mode Protocol for Pipeline
+
+Pipeline mode is the primary consumer of the Headless Mode Protocol defined in the dispatcher. When pipeline dispatches evaluation within a cycle, it sets `headless: true` to receive structured JSON instead of markdown.
+
+#### Headless Response Schema
+
+The headless mode response is a JSON object with these fields:
+
+- `status`: `"success"`, `"failure"`, or `"partial"`
+- `findings`: Array of finding objects (id, severity, confidence, confidenceValue, fixClass, description, remediation, file, line)
+- `scores`: Object mapping dimension names to integer scores (1-10)
+- `verdict`: `"pass"`, `"fail"`, or `null`
+- `actionItems`: Array of action strings for the caller
+- `metadata`: Object with mode name, specId, timestamp, and `headless: true`
+
+#### Headless Dispatch in Pipeline
+
+1. Pipeline sets `headless: true` when dispatching evaluation
+2. Evaluation sub-agent returns JSON conforming to the Headless Response Schema
+3. Pipeline parses the JSON and extracts scores, verdict, findings directly
+4. If JSON parsing fails, pipeline falls back to reading evaluation.md and parsing markdown (backward compatibility)
+
+#### Participating Modes
+
+Pipeline interacts with these headless mode producers:
+
+- **evaluation**: Returns structured scores, findings (with fix classes from action routing), and verdict
+- **audit**: Returns structured health check findings when invoked headlessly
+
+All other modes remain interactive-only and do not produce headless output.
 
 
 ## Data Handling and Sensitive Information

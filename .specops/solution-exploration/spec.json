@@ -1,0 +1,21 @@
+{
+  "id": "solution-exploration",
+  "type": "feature",
+  "status": "completed",
+  "version": 1,
+  "created": "2026-03-29T19:00:00Z",
+  "updated": "2026-03-29T19:45:00Z",
+  "author": {
+    "name": "sanmak"
+  },
+  "specopsCreatedWith": "1.8.0",
+  "specopsUpdatedWith": "1.8.0",
+  "reviewRounds": 0,
+  "approvals": 0,
+  "requiredApprovals": 0,
+  "depth": "standard",
+  "partOf": "ce-wave1-foundation",
+  "relatedSpecs": [
+    "depth-calibration"
+  ]
+}

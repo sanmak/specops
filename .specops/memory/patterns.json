@@ -40,9 +40,10 @@
         "enforcement-roadmap",
         "project-type-awareness",
         "workflow-automation-suite",
-        "dependency-safety-gate"
+        "dependency-safety-gate",
+        "multi-persona-review"
       ],
-      "count": 6,
+      "count": 7,
       "lesson": "Validator markers are case-sensitive substrings — when adding new marker constants, add to BOTH per-platform validation AND the cross-platform consistency loop in the same commit"
     },
     {
@@ -69,9 +70,10 @@
         "project-type-awareness",
         "proxy-metrics",
         "workflow-automation-suite",
-        "dependency-safety-gate"
+        "dependency-safety-gate",
+        "multi-persona-review"
       ],
-      "count": 12
+      "count": 13
     },
     {
       "file": "generator/validate.py",
@@ -86,9 +88,10 @@
         "project-type-awareness",
         "proxy-metrics",
         "workflow-automation-suite",
-        "dependency-safety-gate"
+        "dependency-safety-gate",
+        "multi-persona-review"
       ],
-      "count": 11
+      "count": 12
     },
     {
       "file": "generator/generate.py",
@@ -99,9 +102,10 @@
         "task-delegation",
         "proxy-metrics",
         "workflow-automation-suite",
-        "dependency-safety-gate"
+        "dependency-safety-gate",
+        "multi-persona-review"
       ],
-      "count": 7
+      "count": 8
     },
     {
       "file": "tests/test_platform_consistency.py",
@@ -112,9 +116,10 @@
         "workflow-enforcement-gates",
         "project-type-awareness",
         "proxy-metrics",
-        "workflow-automation-suite"
+        "workflow-automation-suite",
+        "multi-persona-review"
       ],
-      "count": 7
+      "count": 8
     },
     {
       "file": "core/config-handling.md",
@@ -181,6 +186,24 @@
         "ast-based-repo-map"
       ],
       "count": 2
+    },
+    {
+      "file": "core/evaluation.md",
+      "specs": [
+        "adversarial-evaluation",
+        "confidence-gating",
+        "multi-persona-review"
+      ],
+      "count": 3
+    },
+    {
+      "file": "core/dispatcher.md",
+      "specs": [
+        "context-aware-dispatch",
+        "plan-mode-blocking-enforcement",
+        "multi-persona-review"
+      ],
+      "count": 3
     }
   ],
   "learningPatterns": [

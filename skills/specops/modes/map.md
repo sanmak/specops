@@ -292,6 +292,16 @@ Create specs in this structure:
 
 Example: `.specops/user-auth-oauth/requirements.md`
 
+## Depth Calibration
+
+The `depth` field in `spec.json` records the complexity depth flag computed during Phase 1 step 9.7. It calibrates workflow ceremony depth throughout the spec lifecycle.
+
+**Valid values:** `lightweight`, `standard`, `deep`
+
+**Per-spec field** (not a project-level config) — each spec may have a different depth based on its scope. Depth is computed from task count, file domain breadth, and new dependency presence. Users can override with keywords in their request (e.g., "quick" forces lightweight, "thorough" forces deep).
+
+**Workflow impact:** See the Depth Calibration sections in `core/workflow.md` steps 3.5, 5.8, 6.85, 9.5, 9.7, and Phase 4A.1 for step-specific behavior adjustments by depth level.
+
 ## Spec Review Configuration
 
 If `config.team.specReview` is configured:

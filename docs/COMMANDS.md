@@ -34,6 +34,7 @@ All supported commands across Claude Code, Cursor, OpenAI Codex, GitHub Copilot,
 | View initiative | `/specops view initiative <id>` | `View initiative <id>` |
 | List initiatives | `/specops list initiatives` | `List all initiatives` |
 | Run initiative | `/specops initiative <id>` | `Use specops initiative <id>` |
+| Explore solutions | `/specops explore <problem>` | `Use specops explore <problem>` |
 | Check version | `/specops version` | `Use specops version` |
 | Update SpecOps | `/specops update` | `Use specops update` |
 | Review a spec | `review <spec-name>` | `review <spec-name>` |
@@ -664,6 +665,36 @@ Fixed set of 5 questions, each with conditional follow-ups:
 
 ---
 
+## Explore Solutions
+
+Generate 3-5 codebase-grounded solution approaches when you know the problem but not the technical approach. Fills the gap between interview mode (convergent idea refinement) and spec mode (committed design).
+
+**Claude Code:**
+
+```text
+/specops explore How should we handle real-time notifications
+/specops explore options for caching strategy
+```
+
+**Other platforms:**
+
+```text
+Use specops explore options for migrating the database
+What are my options for implementing search
+```
+
+**Workflow:**
+
+1. Loads codebase context (repo map, steering files, existing patterns)
+2. Generates 3-5 solution approaches, each grounded in the actual project structure
+3. Each approach includes: name, description, key files to modify, tradeoff analysis (pros/cons), complexity estimate, and risk assessment
+4. On interactive platforms, presents approaches and lets you pick one
+5. Selected approach flows into Phase 2 (spec writing) as a pre-populated design direction
+
+**Notes:** Only triggers for solution exploration -- not for product features like "add map component" or "create sitemap". Requires co-occurrence with "explore", "options", or the `/specops` prefix.
+
+---
+
 ## Review a Spec (Team Workflow)
 
 Teammate reviews a spec in `draft` or `in-review` status, provides section-by-section feedback, and approves or requests changes.
@@ -848,6 +879,7 @@ These are the valid states a spec can be in, usable as filters with the status c
 | I want to control how Phase 3 executes tasks | Set `implementation.taskDelegation` in `.specops.json` (`auto`/`always`/`never`) |
 | I want to report a bug or suggest a SpecOps improvement | `/specops feedback` |
 | I want to update SpecOps | `/specops update` |
+| I know the problem but not the approach | `/specops explore <problem>` |
 | I have a large feature that should be split into specs | Start with `/specops Add <description>` — scope assessment triggers automatically |
 | I want to see all multi-spec initiatives | `/specops list initiatives` |
 | I want to view an initiative's status and dependency graph | `/specops view initiative <id>` |

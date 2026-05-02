@@ -13,6 +13,7 @@
 - Vertical: [detected or configured vertical]
 - Affected files: [list of affected file paths]
 - Project state: [greenfield / brownfield / migration]
+- Depth: [lightweight / standard / deep] [computed / user override]
 
 ## Decision Log
 

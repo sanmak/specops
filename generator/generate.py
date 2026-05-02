@@ -366,6 +366,8 @@ def build_common_context(core, platform_config):
         "learnings": core["learnings"],
         "decomposition": core["decomposition"],
         "evaluation": core["evaluation"],
+        "review_agents": core["review-agents"],
+        "explore": core["explore"],
         "initiative_orchestration": core["initiative-orchestration"],
         "templates_section": templates_section,
         "examples": examples,
