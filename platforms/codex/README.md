@@ -2,11 +2,7 @@
 
 ## Installation
 
-### Skills Catalog (Recommended)
-
-Search "specops" in the Codex skills catalog.
-
-### Quick Install (no clone needed)
+### Quick Install (Recommended)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sanmak/specops/main/scripts/remote-install.sh | bash -s -- --platform codex
@@ -29,7 +25,7 @@ cp platforms/codex/SKILL.md /path/to/your/project/.codex/skills/specops/
 
 When using Codex, trigger SpecOps with natural language:
 
-```
+```text
 Use specops to add user authentication with OAuth
 Create a spec for fixing the 500 errors on checkout
 Spec-driven refactor of the API layer to use repository pattern

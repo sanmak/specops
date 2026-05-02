@@ -2,11 +2,7 @@
 
 ## Installation
 
-### Extensions Marketplace (Recommended)
-
-Search "specops" in the Copilot Extensions marketplace.
-
-### Quick Install (no clone needed)
+### Quick Install (Recommended)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sanmak/specops/main/scripts/remote-install.sh | bash -s -- --platform copilot
@@ -29,7 +25,7 @@ cp platforms/copilot/specops.instructions.md /path/to/your/project/.github/instr
 
 When using GitHub Copilot, trigger SpecOps with natural language:
 
-```
+```text
 Use specops to add user authentication with OAuth
 Create a spec for fixing the 500 errors on checkout
 Spec-driven refactor of the API layer to use repository pattern

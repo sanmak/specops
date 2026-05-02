@@ -2,11 +2,7 @@
 
 ## Installation
 
-### Marketplace (Recommended)
-
-Search "specops" in Cursor Settings > Extensions, or visit [cursor.com/marketplace](https://cursor.com/marketplace).
-
-### Quick Install (no clone needed)
+### Quick Install (Recommended)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sanmak/specops/main/scripts/remote-install.sh | bash -s -- --platform cursor
@@ -29,7 +25,7 @@ cp platforms/cursor/specops.mdc /path/to/your/project/.cursor/rules/specops.mdc
 
 In Cursor's AI chat, use natural language to trigger SpecOps:
 
-```
+```text
 Use specops to add user authentication with OAuth
 Create a spec for fixing the 500 errors on checkout
 Spec-driven refactor of the API layer to use repository pattern

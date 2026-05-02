@@ -4,7 +4,7 @@ Get up and running with SpecOps in 5 minutes.
 
 ## Installation (1 minute)
 
-### Option 0: Plugin Marketplace (Recommended)
+### Option 0: Plugin Marketplace (Claude Code)
 
 **Claude Code:**
 
@@ -13,12 +13,6 @@ Get up and running with SpecOps in 5 minutes.
 /plugin install specops@specops-marketplace
 /reload-plugins
 ```
-
-**Cursor:** Search "specops" in Cursor Settings > Extensions, or visit [cursor.com/marketplace](https://cursor.com/marketplace)
-
-**OpenAI Codex:** Search "specops" in the Codex skills catalog
-
-**GitHub Copilot:** Search "specops" in Copilot Extensions marketplace
 
 ### Option 1: One-Line Install (no clone needed)
 
