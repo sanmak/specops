@@ -15,7 +15,7 @@ jobs:
     name: Validate JSON
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Validate all JSON files
         run: |
           python3 -c "import json; json.load(open('schema.json')); print('schema.json: valid')"
@@ -34,7 +34,7 @@ jobs:
     name: Schema Validation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install dependencies
         run: pip install jsonschema
       - name: Validate example configs against schema
@@ -46,7 +46,7 @@ jobs:
     name: Schema Structure Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Validate schema structure
         run: python3 tests/check_schema_sync.py
 
@@ -54,7 +54,7 @@ jobs:
     name: Build & Validate Platforms
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Generate all platform outputs
         run: python3 generator/generate.py --all
       - name: Validate generated outputs
@@ -75,7 +75,7 @@ jobs:
     name: ShellCheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install ShellCheck
         run: sudo apt-get install -y shellcheck
       - name: Lint shell scripts
@@ -85,7 +85,7 @@ jobs:
     name: Markdown Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Lint markdown source files
         run: |
           npx markdownlint-cli2 "core/**/*.md" "docs/**/*.md" \
@@ -96,7 +96,7 @@ jobs:
     name: Verify File Checksums
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Verify SHA256 checksums of critical files
         run: shasum -a 256 -c CHECKSUMS.sha256
 
@@ -104,7 +104,7 @@ jobs:
     name: Run Verification
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Make scripts executable
         run: chmod +x setup.sh verify.sh scripts/*.sh platforms/*/install.sh
       - name: Run verify.sh
